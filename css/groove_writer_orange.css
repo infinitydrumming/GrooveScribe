@@ -1,3 +1,4 @@
+/* Modified by Infinity Drumming, 2026: mid tom and hi-hat foot lines, credits footer. See CHANGES.md. */
 /* this is for debugging layout issues - puts a red border around everything */
 /* body * { border: 1px solid red; }		 */
 DEBUG {
@@ -336,7 +337,8 @@ body {
   cursor: pointer;
   text-align: center;
 }
-#tom1-label {
+#tom1-label,
+#tom2-label {
   display: block;
   white-space: nowrap;
   margin-top: 5px;
@@ -366,12 +368,21 @@ body {
   cursor: pointer;
   text-align: center;
 }
+.hhfoot-label {
+  margin-top: 9px;
+  margin-left: 8px;
+  font-size: 16px;
+  white-space: nowrap;
+  cursor: pointer;
+  text-align: center;
+}
 .stickings-label:hover {
   color: var(--highlight-color);
 }
 .hh-label:hover,
 .snare-label:hover,
-.kick-label:hover {
+.kick-label:hover,
+.hhfoot-label:hover {
   color: var(--highlight-color);
 }
 .music-line-container {
@@ -398,7 +409,7 @@ body {
 }
 .background-highlight-container {
   position: absolute;
-  height: 190px;
+  height: 222px;
   white-space: nowrap;
   border: 1px solid transparent;
 }
@@ -410,7 +421,8 @@ body {
   -webkit-user-select: none;
   -ms-user-select: none;
 }
-#tom1-container {
+#tom1-container,
+#tom2-container {
   height: 28px;
   white-space: nowrap;
   border: 1px solid transparent;
@@ -436,14 +448,16 @@ body {
   -ms-user-select: none;
   visibility: hidden;
 }
-.kick-container {
+.kick-container,
+.hhfoot-container {
   border: 1px solid transparent;
-  height: 56px;
+  height: 28px;
   white-space: nowrap;
   -moz-user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
 }
+/* one line between each pair of rows */
 .staff-line-1 {
   position: absolute;
   top: 42px;
@@ -460,7 +474,7 @@ body {
 }
 .staff-line-3 {
   position: absolute;
-  top: 103px;
+  top: 102px;
   width: 100%;
   height: 0px;
   border-top: 3px solid #cacaca;
@@ -474,7 +488,14 @@ body {
 }
 .staff-line-5 {
   position: absolute;
-  top: 163px;
+  top: 162px;
+  width: 100%;
+  height: 0px;
+  border-top: 3px solid #cacaca;
+}
+.staff-line-6 {
+  position: absolute;
+  top: 192px;
   width: 100%;
   height: 0px;
   border-top: 3px solid #cacaca;
@@ -493,7 +514,7 @@ body {
 .bg-highlight {
   display: inline-block;
   width: 35px;
-  height: 192px;
+  height: 224px;
 }
 .hi-hat {
   display: inline-block;
@@ -525,7 +546,8 @@ body {
   margin-right: 2px;
   margin-left: 2px;
 }
-.kick {
+.kick,
+.hhfoot {
   display: inline-block;
   position: relative;
   border: 1px solid;
@@ -661,7 +683,9 @@ body {
 .unmuteSnareButton,
 .unmuteKickButton,
 .unmuteTom1Button,
-.unmuteTom4Button {
+.unmuteTom2Button,
+.unmuteTom4Button,
+.unmuteHHFootButton {
   display: inline-block;
   display: none;
   position: relative;
@@ -678,7 +702,9 @@ body {
 .unmuteSnareButton:hover,
 .unmuteKickButton:hover,
 .unmuteTom1Button:hover,
-.unmuteTom4Button:hover {
+.unmuteTom2Button:hover,
+.unmuteTom4Button:hover,
+.unmuteHHFootButton:hover {
   opacity: 0.6;
 }
 .unmuteHHStack {
@@ -782,12 +808,13 @@ body {
   cursor: pointer;
 }
 
+/* hi-hat foot: an x in its own row, grey when off like the hi-hat */
 .kick_splash {
   position: absolute;
-  top: 24px;
+  top: -5px;
   left: 3px;
   font-size: 30px;
-  color: transparent;
+  color: #cccccc;
   cursor: pointer;
 }
 .opening_note_space {
@@ -1294,6 +1321,16 @@ input[type='checkbox']:not(:checked) + label {
 .bottomButtonLabel {
   margin-top: 2px;
   display: block;
+}
+#creditsFooter {
+  padding: 8px 10px 12px 10px;
+  background: #393939;
+  color: #aaaaaa;
+  font-size: 13px;
+  text-align: center;
+}
+#creditsFooter a {
+  color: #dddddd;
 }
 .edit-block {
   display: none;

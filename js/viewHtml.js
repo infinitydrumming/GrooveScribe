@@ -1,3 +1,4 @@
+// Modified by Infinity Drumming, 2026: mid tom and hi-hat foot lines. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -96,7 +97,12 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
     baseindex +
     ')" oncontextmenu="event.preventDefault(); myGrooveWriter.noteLabelClick(event, \'tom1\', ' +
     baseindex +
-    ')">Tom</div>\
+    ')">Tom 1</div>\
+									<div class="tom-label" id="tom2-label" onClick="myGrooveWriter.noteLabelClick(event, \'tom2\', ' +
+    baseindex +
+    ')" oncontextmenu="event.preventDefault(); myGrooveWriter.noteLabelClick(event, \'tom2\', ' +
+    baseindex +
+    ')">Tom 2</div>\
 									<div class="snare-label" onClick="myGrooveWriter.noteLabelClick(event, \'snare\', ' +
     baseindex +
     ')" oncontextmenu="event.preventDefault(); myGrooveWriter.noteLabelClick(event, \'snare\', ' +
@@ -106,12 +112,17 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
     baseindex +
     ')" oncontextmenu="event.preventDefault(); myGrooveWriter.noteLabelClick(event, \'tom4\', ' +
     baseindex +
-    ')">Tom</div>\
+    ')">Floor</div>\
 									<div class="kick-label" onClick="myGrooveWriter.noteLabelClick(event, \'kick\', ' +
     baseindex +
     ')" oncontextmenu="event.preventDefault(); myGrooveWriter.noteLabelClick(event, \'kick\', ' +
     baseindex +
     ')">Kick</div>\
+									<div class="hhfoot-label" onClick="myGrooveWriter.noteLabelClick(event, \'hhfoot\', ' +
+    baseindex +
+    ')" oncontextmenu="event.preventDefault(); myGrooveWriter.noteLabelClick(event, \'hhfoot\', ' +
+    baseindex +
+    ')">HH foot</div>\
 								</div>\
 								<div class="music-line-container">\
 									\
@@ -120,7 +131,8 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 									<div class="staff-line-2"></div>\
 									<div class="staff-line-3"></div>\
 									<div class="staff-line-4"></div>\
-									<div class="staff-line-5"></div>\n';
+									<div class="staff-line-5"></div>\
+									<div class="staff-line-6"></div>\n';
 
   // backgrounds for highlighting.  Evenly spaced cols of space
   newHTML +=
@@ -245,6 +257,44 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
     '<span class="unmuteTom1Button" id="unmutetom1Button' +
     baseindex +
     '" onClick=\'myGrooveWriter.muteInstrument("tom1", ' +
+    baseindex +
+    ', false)\'><span class="fa-stack unmuteStack"><i class="fa fa-ban fa-stack-2x" style="color:red"></i><i class="fa fa-volume-down fa-stack-1x"></i></span>';
+  newHTML += '<div class="end_note_space"></div>\n</div>\n';
+
+  // Toms 2 (mid tom)
+  newHTML +=
+    '\
+										<div class="toms-container" id="tom2-container">\
+											<div class="opening_note_space"> </div>';
+  for (i = indexStartForNotes; i < ctx.notesPerMeasure + indexStartForNotes; i++) {
+    newHTML +=
+      '\
+						<div id="tom2-' +
+      i +
+      '" class="tom" onClick="myGrooveWriter.noteLeftClick(event, \'tom2\', ' +
+      i +
+      ')" oncontextmenu="event.preventDefault(); myGrooveWriter.noteRightClick(event, \'tom2\', ' +
+      i +
+      ')" onmouseenter="myGrooveWriter.noteOnMouseEnter(event, \'tom2\', ' +
+      i +
+      ')">\
+							<div class="tom_circle note_part"  id="tom_circle2-' +
+      i +
+      '"></div>\
+						</div>\n\
+						';
+
+    if (
+      (i - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+      i < ctx.notesPerMeasure + indexStartForNotes - 1
+    ) {
+      newHTML += '<div class="space_between_note_groups"> </div> \n';
+    }
+  }
+  newHTML +=
+    '<span class="unmuteTom2Button" id="unmutetom2Button' +
+    baseindex +
+    '" onClick=\'myGrooveWriter.muteInstrument("tom2", ' +
     baseindex +
     ', false)\'><span class="fa-stack unmuteStack"><i class="fa fa-ban fa-stack-2x" style="color:red"></i><i class="fa fa-volume-down fa-stack-1x"></i></span>';
   newHTML += '<div class="end_note_space"></div>\n</div>\n';
@@ -399,9 +449,6 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
       ')" onmouseenter="myGrooveWriter.noteOnMouseEnter(event, \'kick\', ' +
       j +
       ')">\
-														<div class="kick_splash note_part" id="kick_splash' +
-      j +
-      '"><i class="fa fa-times"></i></div>\
 														<div class="kick_circle note_part" id="kick_circle' +
       j +
       '"></div>\
@@ -419,6 +466,45 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
     '<span class="unmuteKickButton" id="unmutekickButton' +
     baseindex +
     '" onClick=\'myGrooveWriter.muteInstrument("kick", ' +
+    baseindex +
+    ', false)\'><span class="fa-stack unmuteStack"><i class="fa fa-ban fa-stack-2x" style="color:red"></i><i class="fa fa-volume-down fa-stack-1x"></i></span>';
+  newHTML += '<div class="end_note_space"></div>\n</div>\n';
+
+  // Hi-hat foot (left foot).  It has its own row, but its state still lives in the
+  // kick voice ("kick_splash"), so URLs keep the classic K=x / K=X encoding.
+  newHTML +=
+    '\
+										<div class="hhfoot-container">\
+											<div class="opening_note_space"> </div> ';
+  for (j = indexStartForNotes; j < ctx.notesPerMeasure + indexStartForNotes; j++) {
+    newHTML +=
+      '\
+														<div id="hhfoot' +
+      j +
+      '" class="hhfoot" onClick="myGrooveWriter.noteLeftClick(event, \'hhfoot\', ' +
+      j +
+      ')" oncontextmenu="event.preventDefault(); myGrooveWriter.noteRightClick(event, \'hhfoot\', ' +
+      j +
+      ')" onmouseenter="myGrooveWriter.noteOnMouseEnter(event, \'hhfoot\', ' +
+      j +
+      ')">\
+														<div class="kick_splash note_part" id="kick_splash' +
+      j +
+      '"><i class="fa fa-times"></i></div>\
+														</div> \n\
+													';
+
+    if (
+      (j - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+      j < ctx.notesPerMeasure + indexStartForNotes - 1
+    ) {
+      newHTML += '<div class="space_between_note_groups"> </div> ';
+    }
+  }
+  newHTML +=
+    '<span class="unmuteHHFootButton" id="unmutehhfootButton' +
+    baseindex +
+    '" onClick=\'myGrooveWriter.muteInstrument("hhfoot", ' +
     baseindex +
     ', false)\'><span class="fa-stack unmuteStack"><i class="fa fa-ban fa-stack-2x" style="color:red"></i><i class="fa fa-volume-down fa-stack-1x"></i></span>';
   newHTML += '<div class="end_note_space"></div>\n</div>\n';

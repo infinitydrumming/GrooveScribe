@@ -1,3 +1,4 @@
+// Modified by Infinity Drumming, 2026: mid tom tab parsing. See CHANGES.md.
 // Note-array / drum-tab conversions and default grooves (Step 2 extraction).
 // Pure module: converts between tab strings and ABC note arrays, builds default
 // grooves, and note-mapping/sticking-count helpers. GrooveUtils delegates here.
@@ -133,6 +134,12 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
         //break;
         case 'T1':
           return constant_ABC_T1_Normal;
+        //break;
+        case 'T2':
+          return constant_ABC_T2_Normal;
+        //break;
+        case 'T3':
+          return constant_ABC_T3_Normal;
         //break;
         case 'T4':
           return constant_ABC_T4_Normal;
@@ -400,6 +407,10 @@ export function GetDefaultHHGroove(notes_per_measure, timeSigTop, timeSigBottom,
 }
 
 export function GetDefaultTom1Groove(notes_per_measure, timeSigTop, timeSigBottom, numMeasures) {
+  return GetEmptyGroove(notes_per_measure, numMeasures);
+}
+
+export function GetDefaultTom2Groove(notes_per_measure, timeSigTop, timeSigBottom, numMeasures) {
   return GetEmptyGroove(notes_per_measure, numMeasures);
 }
 

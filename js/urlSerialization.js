@@ -1,3 +1,4 @@
+// Modified by Infinity Drumming, 2026: mid tom in URLs. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -305,6 +306,21 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
         total_notes,
         myGrooveData.notesPerMeasure
       );
+    // Mid tom (T2): only written when it has notes, so grooves that don't use it
+    // keep exactly the same URL as before the mid tom existed.
+    var Tom2 = '';
+    var midTom = myGrooveData.toms_array[1];
+    if (midTom && midTom.slice(0, total_notes).some(Boolean))
+      Tom2 =
+        '&T2=|' +
+        tabLineFromAbcNoteArray(
+          'T2',
+          midTom,
+          true,
+          true,
+          total_notes,
+          myGrooveData.notesPerMeasure
+        );
     var Tom4 =
       '&T4=|' +
       tabLineFromAbcNoteArray(
@@ -315,7 +331,7 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
         total_notes,
         myGrooveData.notesPerMeasure
       );
-    fullURL += Tom1 + Tom4;
+    fullURL += Tom1 + Tom2 + Tom4;
   }
 
   // only add if we need them.  // they are long and ugly. :)

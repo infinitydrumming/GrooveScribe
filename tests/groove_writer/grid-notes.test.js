@@ -103,15 +103,19 @@ function addExtraFixtures() {
     'stickingContextMenu',
     'hhContextMenu',
     'tom1ContextMenu',
+    'tom2ContextMenu',
     'tom4ContextMenu',
     'snareContextMenu',
     'kickContextMenu',
+    'hhfootContextMenu',
     'stickingsLabelContextMenu',
     'hhLabelContextMenu',
     'tom1LabelContextMenu',
+    'tom2LabelContextMenu',
     'tom4LabelContextMenu',
     'snareLabelContextMenu',
     'kickLabelContextMenu',
+    'hhfootLabelContextMenu',
   ];
   menuIds.forEach((id) => {
     const ul = document.createElement('ul');
@@ -148,15 +152,14 @@ describe('GrooveWriter clickable grid: grooveDataFromClickableUI', () => {
     expect(gd.kick_array.every((v) => v === false)).toBe(true);
   });
 
-  it('toms_array is a 4-slot array but only index 0 (tom1) and 3 (tom4) are ever populated', () => {
-    // Quirk: toms_array is declared as [[],[],[],[]] (one slot per rack/floor
-    // tom) but the writer only ever reads/writes tom1 and tom4 (see
-    // set_tom1_state/set_tom4_state) -- indices 1 and 2 are permanently empty.
+  it('toms_array is a 4-slot array; index 0 (tom1), 1 (mid tom) and 3 (floor) are populated', () => {
+    // toms_array is declared as [[],[],[],[]] (T1..T4). The writer reads/writes
+    // tom1, tom2 (mid tom) and tom4 -- index 2 (T3) has no line and stays empty.
     const gd = gw.grooveDataFromClickableUI();
     expect(gd.toms_array).toHaveLength(4);
-    expect(gd.toms_array[1]).toEqual([]);
     expect(gd.toms_array[2]).toEqual([]);
     expect(gd.toms_array[0]).toHaveLength(gw.notesPerMeasure() * gw.numberOfMeasures());
+    expect(gd.toms_array[1]).toHaveLength(gw.notesPerMeasure() * gw.numberOfMeasures());
     expect(gd.toms_array[3]).toHaveLength(gw.notesPerMeasure() * gw.numberOfMeasures());
   });
 
@@ -222,6 +225,30 @@ describe('GrooveWriter clickable grid: noteLeftClick', () => {
     gd = gw.grooveDataFromClickableUI();
     expect(gd.toms_array[0][3]).toBe(false);
     expect(gd.toms_array[3][4]).toBe(false);
+  });
+
+  it('toggles the mid tom (tom2) on as T2 ("d") then back off', () => {
+    gw.showHideToms(true, true, true);
+    gw.noteLeftClick(ev, 'tom2', 5);
+    expect(gw.grooveDataFromClickableUI().toms_array[1][5]).toBe('d'); // constant_ABC_T2_Normal
+    expect(globalThis.MIDI.WebAudio.noteOn).toHaveBeenLastCalledWith(9, 47, expect.any(Number), 0);
+    gw.noteLeftClick(ev, 'tom2', 5);
+    expect(gw.grooveDataFromClickableUI().toms_array[1][5]).toBe(false);
+  });
+
+  it('kick and hi-hat foot lines toggle independently but share the kick voice', () => {
+    const kickAt = (i) => gw.grooveDataFromClickableUI().kick_array[i];
+    gw.noteLeftClick(ev, 'hhfoot', 2);
+    expect(kickAt(2)).toBe('^d,'); // constant_ABC_KI_Splash: foot only
+    gw.noteLeftClick(ev, 'kick', 2);
+    expect(kickAt(2)).toBe('[F^d,]'); // constant_ABC_KI_SandK: kick + foot
+    gw.noteLeftClick(ev, 'hhfoot', 2);
+    expect(kickAt(2)).toBe('F'); // foot removed, kick kept
+    gw.noteLeftClick(ev, 'hhfoot', 2);
+    gw.noteLeftClick(ev, 'kick', 2);
+    expect(kickAt(2)).toBe('^d,'); // kick removed, foot kept
+    gw.noteLeftClick(ev, 'hhfoot', 2);
+    expect(kickAt(2)).toBe(false);
   });
 
   it('rotates sticking state off -> right -> left -> both -> count -> off on repeated clicks', () => {
@@ -388,6 +415,28 @@ describe('GrooveWriter clickable grid: noteLabelClick / noteLabelPopupClick', ()
     expect(gd.snare_array.every((v) => v === '!(.!!).!c')).toBe(true); // constant_ABC_SN_Ghost
   });
 
+  it('HH foot "#\'s On" puts the foot on the counts and keeps existing kicks', () => {
+    const ev = { target: {}, preventDefault() {}, stopPropagation() {} };
+    gw.noteLeftClick(ev, 'kick', 0);
+    gw.noteLeftClick(ev, 'kick', 6);
+    gw.noteLabelClick(evAt(1, 1), 'hhfoot', 1);
+    gw.noteLabelPopupClick('hhfoot', 'hh_foot_nums_on');
+    const kick = gw.grooveDataFromClickableUI().kick_array;
+    // 16ths in 4/4: counts are every 4th note
+    expect(kick.slice(0, 8)).toEqual(['[F^d,]', false, false, false, '^d,', false, 'F', false]);
+  });
+
+  it('kick "all_off" clears kicks but keeps the hi-hat foot', () => {
+    const ev = { target: {}, preventDefault() {}, stopPropagation() {} };
+    gw.noteLeftClick(ev, 'kick', 0);
+    gw.noteLeftClick(ev, 'hhfoot', 0);
+    gw.noteLeftClick(ev, 'hhfoot', 2);
+    gw.noteLabelClick(evAt(1, 1), 'kick', 1);
+    gw.noteLabelPopupClick('kick', 'all_off');
+    const kick = gw.grooveDataFromClickableUI().kick_array;
+    expect(kick.slice(0, 3)).toEqual(['^d,', false, '^d,']);
+  });
+
   it('"mute" action delegates to muteInstrument for the clicked measure/instrument', () => {
     gw.noteLabelClick(evAt(1, 1), 'hh', 1);
     gw.noteLabelPopupClick('hh', 'mute');
@@ -418,7 +467,9 @@ describe('GrooveWriter clickable grid: clearAllNotes', () => {
     gw.noteLeftClick(ev, 'snare', 1);
     gw.noteLeftClick(ev, 'kick', 2);
     gw.noteLeftClick(ev, 'tom1', 3);
+    gw.noteLeftClick(ev, 'tom2', 5);
     gw.noteLeftClick(ev, 'tom4', 4);
+    gw.noteLeftClick(ev, 'hhfoot', 6);
     gw.noteLeftClick(ev, 'sticking', 0);
 
     // sanity: notes are actually on before clearing
@@ -433,6 +484,7 @@ describe('GrooveWriter clickable grid: clearAllNotes', () => {
     expect(gd.snare_array.every((v) => v === false)).toBe(true);
     expect(gd.kick_array.every((v) => v === false)).toBe(true);
     expect(gd.toms_array[0].every((v) => v === false)).toBe(true);
+    expect(gd.toms_array[1].every((v) => v === false)).toBe(true);
     expect(gd.toms_array[3].every((v) => v === false)).toBe(true);
     // Sticking's "off" is the ABC_STICK_OFF string, not boolean false (same
     // quirk as the baseline-grid test above).

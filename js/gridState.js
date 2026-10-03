@@ -1,3 +1,4 @@
+// Modified by Infinity Drumming, 2026: mid tom line, separate kick / hi-hat foot muting. See CHANGES.md.
 // Clickable-grid note state (Step 4 extraction from groove_writer.js).
 //
 // Read side of the note grid: given a cell id, report whether a voice is on and
@@ -39,6 +40,7 @@ import {
   constant_ABC_STICK_OFF,
   constant_ABC_STICK_R,
   constant_ABC_T1_Normal,
+  constant_ABC_T2_Normal,
   constant_ABC_T4_Normal,
   constant_note_on_color_rgb,
   constant_snare_accent_on_color_rgb,
@@ -130,6 +132,8 @@ export function get_tom_state(id, tom_num, returnType) {
       switch (tom_num) {
         case 1:
           return constant_ABC_T1_Normal; // normal
+        case 2:
+          return constant_ABC_T2_Normal; // normal
         case 4:
           return constant_ABC_T4_Normal; // normal
         default:
@@ -144,12 +148,15 @@ export function get_tom_state(id, tom_num, returnType) {
   else if (returnType == 'URL') return '-'; // off (rest)
 }
 
-export function is_kick_on(id) {
+// The kick voice holds both feet; these report each foot on its own.
+export function is_kick_part_on(id) {
   var state = get_kick_state(id, 'ABC');
+  return state == constant_ABC_KI_Normal || state == constant_ABC_KI_SandK;
+}
 
-  if (state !== false) return true;
-
-  return false;
+export function is_hhfoot_on(id) {
+  var state = get_kick_state(id, 'ABC');
+  return state == constant_ABC_KI_Splash || state == constant_ABC_KI_SandK;
 }
 
 export function get_kick_state(id, returnType) {
@@ -335,6 +342,7 @@ export function get32NoteArrayFromClickableUI(
 
     if (ctx.tomsVisible) {
       Toms_Array[0][array_index] = get_tom_state(i + startIndexForClickableUI, 1, 'ABC');
+      Toms_Array[1][array_index] = get_tom_state(i + startIndexForClickableUI, 2, 'ABC');
       Toms_Array[3][array_index] = get_tom_state(i + startIndexForClickableUI, 4, 'ABC');
     }
 
@@ -362,8 +370,21 @@ export function muteArrayFromClickableUI(
     fill_array_with_value_false(HH_Array, HH_Array.length);
   if (isInstrumentMuted('snare', measureIndex + 1))
     fill_array_with_value_false(Snare_Array, Snare_Array.length);
-  if (isInstrumentMuted('kick', measureIndex + 1))
-    fill_array_with_value_false(Kick_Array, Kick_Array.length);
+  // The kick array carries both feet (kick and hi-hat foot), but each foot has its
+  // own row and mute button, so muting one keeps the other.
+  var kickMuted = isInstrumentMuted('kick', measureIndex + 1);
+  var hhFootMuted = isInstrumentMuted('hhfoot', measureIndex + 1);
+  if (kickMuted && hhFootMuted) fill_array_with_value_false(Kick_Array, Kick_Array.length);
+  else if (kickMuted || hhFootMuted) {
+    for (var k = 0; k < Kick_Array.length; k++) {
+      var kickOn =
+        Kick_Array[k] == constant_ABC_KI_Normal || Kick_Array[k] == constant_ABC_KI_SandK;
+      var footOn =
+        Kick_Array[k] == constant_ABC_KI_Splash || Kick_Array[k] == constant_ABC_KI_SandK;
+      if (kickMuted) Kick_Array[k] = footOn ? constant_ABC_KI_Splash : false;
+      else Kick_Array[k] = kickOn ? constant_ABC_KI_Normal : false;
+    }
+  }
 
   for (var i = 0; i < Toms_Array.length; i++) {
     if (isInstrumentMuted('tom' + (i + 1), measureIndex + 1))

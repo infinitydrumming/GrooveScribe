@@ -94,13 +94,13 @@ describe('GrooveWriter url-export (js/groove_writer.js)', () => {
       expect(document.title).toBe('Groove by Neil');
     });
 
-    it('falls back to the app title ("Groove Scribe") when title and author are both empty', async () => {
+    it('falls back to the app title ("Groove Scribe | Infinity Drumming") when title and author are both empty', async () => {
       const gw = await newGrooveWriter();
       buildGridDOM(gw, 1);
 
       gw.updateCurrentURL();
 
-      expect(document.title).toBe('Groove Scribe');
+      expect(document.title).toBe('Groove Scribe | Infinity Drumming');
     });
   });
 
@@ -523,8 +523,10 @@ describe('GrooveWriter url-export (js/groove_writer.js)', () => {
 
       gw.printMusic();
 
-      expect(openSpy).toHaveBeenCalledWith('', 'Groove Scribe Print');
-      expect(fakeWin.document.body.innerHTML).toContain('<title>Groove Scribe</title>');
+      expect(openSpy).toHaveBeenCalledWith('', 'Groove Scribe | Infinity Drumming Print');
+      expect(fakeWin.document.body.innerHTML).toContain(
+        '<title>Groove Scribe | Infinity Drumming</title>'
+      );
       expect(fakeWin.document.body.innerHTML).toContain('<svg>MYSVG</svg>');
       expect(fakeWin.print).toHaveBeenCalledTimes(1);
     });

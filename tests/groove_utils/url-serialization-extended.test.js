@@ -260,18 +260,32 @@ describe('GrooveUtils URL serialization (extended)', () => {
       }
     });
 
-    // Quirk: only T1 and T4 are ever re-serialized by getUrlStringFromGrooveData,
-    // even if showToms became true because of a T2/T3 param. T2/T3 data is
-    // effectively unrecoverable from a round trip today.
-    it('re-serializes only T1 and T4, never T2/T3, even when showToms is true', () => {
+    // T1, T2 (mid tom) and T4 are re-serialized; T3 has no line in the editor and
+    // is still dropped on a round trip.
+    it('re-serializes T1, T2 and T4 (in that order), never T3, when showToms is true', () => {
       const gd = gu.getGrooveDataFromUrlString(
         '?TimeSig=4/4&Div=16&T1=|o---------------|&T2=|o---------------|&T3=|o---------------|&T4=|o---------------|'
       );
       const out = gu.getUrlStringFromGrooveData(gd);
-      expect(out).toContain('T1=|o---------------|');
-      expect(out).toContain('T4=|o---------------|');
-      expect(out).not.toContain('T2=');
+      expect(out).toContain('&T1=|o---------------|&T2=|o---------------|&T4=|o---------------|');
       expect(out).not.toContain('T3=');
+    });
+
+    it('leaves T2 out of the URL when the mid tom has no notes, so older URLs are unchanged', () => {
+      const qs =
+        '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&H=|xxxxxxxxxxxxxxxx|&S=|----O-------O---|&K=|o-------o-------|&T1=|o---------------|&T4=|--------o-------|';
+      const gd = gu.getGrooveDataFromUrlString(qs);
+      gd.viewMode = false;
+      const out = gu.getUrlStringFromGrooveData(gd);
+      expect(out).not.toContain('T2=');
+      expect(out.slice(out.indexOf('?'))).toBe(qs);
+    });
+
+    it('round-trips a mid-tom-only groove (shows toms, keeps T2)', () => {
+      const gd = gu.getGrooveDataFromUrlString('?TimeSig=4/4&Div=16&T2=|----o-------o---|');
+      const out = gu.getUrlStringFromGrooveData(gd);
+      expect(out).toContain('&T2=|----o-------o---|');
+      expect(gu.getGrooveDataFromUrlString(out).toms_array[1]).toEqual(gd.toms_array[1]);
     });
 
     it('is not written to the URL at all when showToms is false', () => {
@@ -281,12 +295,19 @@ describe('GrooveUtils URL serialization (extended)', () => {
       expect(out).not.toContain('T4=');
     });
 
+    it('accepts "x" as a normal hit on every tom, like T1/T4 always did', () => {
+      const gd = gu.getGrooveDataFromUrlString(
+        '?TimeSig=4/4&Div=16&T1=|x---------------|&T2=|x---------------|&T3=|x---------------|&T4=|x---------------|'
+      );
+      expect(gd.toms_array.map((tom) => tom[0])).toEqual(['e', 'd', 'B', 'A']);
+    });
+
     it('degrades an unsupported tab character to a rest (false) instead of throwing', () => {
-      // "x" is not a valid T2 tablature character (only "o" is; see
+      // "q" is not a valid tom tablature character (see
       // tablatureToABCNotationPerNote), so it silently becomes `false`
       // (a console.log warning fires, but no exception).
       expect(() => {
-        const gd = gu.getGrooveDataFromUrlString('?TimeSig=4/4&Div=16&T2=|x---------------|');
+        const gd = gu.getGrooveDataFromUrlString('?TimeSig=4/4&Div=16&T2=|q---------------|');
         expect(gd.toms_array[1][0]).toBe(false);
       }).not.toThrow();
     });

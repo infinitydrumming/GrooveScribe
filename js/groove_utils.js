@@ -5,6 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
+//  Modified by Infinity Drumming, 2026: mid tom default groove. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -93,6 +94,7 @@ import {
   GetDefaultStickingsGroove as _GetDefaultStickingsGroove,
   GetDefaultHHGroove as _GetDefaultHHGroove,
   GetDefaultTom1Groove as _GetDefaultTom1Groove,
+  GetDefaultTom2Groove as _GetDefaultTom2Groove,
   GetDefaultTom4Groove as _GetDefaultTom4Groove,
   GetDefaultSnareGroove as _GetDefaultSnareGroove,
   GetDefaultKickGroove as _GetDefaultKickGroove,
@@ -353,6 +355,10 @@ function GrooveUtils() {
 
   root.GetDefaultTom1Groove = function (notes_per_measure, timeSigTop, timeSigBottom, numMeasures) {
     return _GetDefaultTom1Groove(notes_per_measure, timeSigTop, timeSigBottom, numMeasures);
+  };
+
+  root.GetDefaultTom2Groove = function (notes_per_measure, timeSigTop, timeSigBottom, numMeasures) {
+    return _GetDefaultTom2Groove(notes_per_measure, timeSigTop, timeSigBottom, numMeasures);
   };
 
   root.GetDefaultTom4Groove = function (notes_per_measure, timeSigTop, timeSigBottom, numMeasures) {

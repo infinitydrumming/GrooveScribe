@@ -2,6 +2,13 @@
 
 Readme for Groove Scribe
 
+> **Infinity Drumming fork.** This is a modified version of
+> [Groove Scribe by Lou Montulli and Mike Johnston](https://github.com/montulli/GrooveScribe),
+> hosted at https://groove.infinitydrumming.com. It adds a mid tom line, a separate
+> hi-hat foot line and Infinity Drumming branding. All changes are listed in
+> [CHANGES.md](CHANGES.md). Like the original, it is licensed under the GNU GPL
+> v2 or later (see [LICENSE.txt](LICENSE.txt)).
+
 ### What is this repository for?
 
 - Groove Scribe is an HTML application for drummers. Groove Scribe is a point and click authoring system to create drum sheet music as well as a practice tool for learning and practicing grooves and exercises.
@@ -32,7 +39,7 @@ Serve the app over HTTP — do **not** open `index.html` directly with a
 `XMLHttpRequest`, and browsers block that for `file://` pages (a CORS / null-origin
 restriction), so the sound will not load.
 
-Start a local server (requires Python 3, which ships with most systems):
+Start a local server (uses Node.js, no other software needed):
 
 ```bash
 npm run serve

@@ -8,6 +8,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
+//  Modified by Infinity Drumming, 2026: mid tom in GrooveDB tabs. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -192,6 +193,13 @@ if (typeof GrooveDisplay === 'undefined') {
         myGrooveData.toms_array[0] = myGrooveUtils.noteArraysFromURLData(
           'T1',
           GrooveDBTabIn.tom1Tab,
+          GrooveDBTabIn.notesPerTabMeasure,
+          GrooveDBTabIn.measures
+        );
+      if (GrooveDBTabIn.tom2Tab !== undefined)
+        myGrooveData.toms_array[1] = myGrooveUtils.noteArraysFromURLData(
+          'T2',
+          GrooveDBTabIn.tom2Tab,
           GrooveDBTabIn.notesPerTabMeasure,
           GrooveDBTabIn.measures
         );
