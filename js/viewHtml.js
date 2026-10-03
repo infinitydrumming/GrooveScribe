@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom and hi-hat foot lines. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -88,6 +88,16 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
     '\
 							<span class="notes-row-container">\
 								<div class="line-labels">\
+									<div class="cymbals-label" id="crash-label" onClick="myGrooveWriter.noteLabelClick(event, \'crash\', ' +
+    baseindex +
+    ')" oncontextmenu="event.preventDefault(); myGrooveWriter.noteLabelClick(event, \'crash\', ' +
+    baseindex +
+    ')">Crash</div>\
+									<div class="cymbals-label" id="ride-label" onClick="myGrooveWriter.noteLabelClick(event, \'ride\', ' +
+    baseindex +
+    ')" oncontextmenu="event.preventDefault(); myGrooveWriter.noteLabelClick(event, \'ride\', ' +
+    baseindex +
+    ')">Ride</div>\
 									<div class="hh-label" onClick="myGrooveWriter.noteLabelClick(event, \'hh\', ' +
     baseindex +
     ')" oncontextmenu="event.preventDefault(); myGrooveWriter.noteLabelClick(event, \'hh\', ' +
@@ -126,13 +136,7 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 								</div>\
 								<div class="music-line-container">\
 									\
-									<div class="notes-container">\
-									<div class="staff-line-1"></div>\
-									<div class="staff-line-2"></div>\
-									<div class="staff-line-3"></div>\
-									<div class="staff-line-4"></div>\
-									<div class="staff-line-5"></div>\
-									<div class="staff-line-6"></div>\n';
+									<div class="notes-container">\n';
 
   // backgrounds for highlighting.  Evenly spaced cols of space
   newHTML +=
@@ -154,6 +158,79 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
     }
   }
   newHTML += '<div class="end_note_space"></div>\n</div>\n';
+
+  // Crash line (crash 1 / crash 2 / splash) and ride line (ride / bell / cow bell / stacker).
+  // Shown with the CYMBALS button.  The first note part of each is the grey
+  // "click here" mark when the note is off.
+  var cymbalRows = [
+    {
+      name: 'crash',
+      parts:
+        '<div class="crash_c1 note_part" id="crash_c1' +
+        '#"><i class="fa fa-asterisk"></i></div>' +
+        '<div class="crash_c2 note_part" id="crash_c2' +
+        '#"><i class="fa fa-asterisk"></i><sup>2</sup></div>' +
+        '<div class="crash_splash note_part" id="crash_splash' +
+        '#"><i class="fa fa-asterisk"></i><sub>s</sub></div>',
+    },
+    {
+      name: 'ride',
+      parts:
+        '<div class="ride_ride note_part" id="ride_ride' +
+        '#"><i class="fa fa-dot-circle-o"></i></div>' +
+        '<div class="ride_bell note_part" id="ride_bell' +
+        '#"><i class="fa fa-bell-o"></i></div>' +
+        '<div class="ride_cowbell note_part" id="ride_cowbell' +
+        '#"><i class="fa fa-plus-square-o"></i></div>' +
+        '<div class="ride_stacker note_part" id="ride_stacker' +
+        '#"><i class="fa fa-bars"></i></div>',
+    },
+  ];
+  cymbalRows.forEach(function (row) {
+    newHTML +=
+      '<div class="cymbals-container" id="' +
+      row.name +
+      '-container"><div class="opening_note_space"> </div>';
+    for (var c = indexStartForNotes; c < ctx.notesPerMeasure + indexStartForNotes; c++) {
+      newHTML +=
+        '<div id="' +
+        row.name +
+        c +
+        '" class="cymbal" onClick="myGrooveWriter.noteLeftClick(event, \'' +
+        row.name +
+        "', " +
+        c +
+        ')" oncontextmenu="event.preventDefault(); myGrooveWriter.noteRightClick(event, \'' +
+        row.name +
+        "', " +
+        c +
+        ')" onmouseenter="myGrooveWriter.noteOnMouseEnter(event, \'' +
+        row.name +
+        "', " +
+        c +
+        ')">' +
+        row.parts.replace(/#"/g, c + '"') +
+        '</div>\n';
+
+      if (
+        (c - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+        c < ctx.notesPerMeasure + indexStartForNotes - 1
+      ) {
+        newHTML += '<div class="space_between_note_groups"> </div> \n';
+      }
+    }
+    newHTML +=
+      '<span class="unmuteCymbalButton" id="unmute' +
+      row.name +
+      'Button' +
+      baseindex +
+      '" onClick=\'myGrooveWriter.muteInstrument("' +
+      row.name +
+      '", ' +
+      baseindex +
+      ', false)\'><span class="fa-stack unmuteStack"><i class="fa fa-ban fa-stack-2x" style="color:red"></i><i class="fa fa-volume-down fa-stack-1x"></i></span></span>';
+    newHTML += '<div class="end_note_space"></div>\n</div>\n';
+  });
 
   // Hi-hats
   newHTML +=
@@ -515,6 +592,7 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 							</div>\
 						</span>\n';
 
+  newHTML += '<span class="measureTools">';
   if (ctx.numberOfMeasures > 1)
     newHTML +=
       '<span title="Remove Measure" id="closeMeasureButton' +
@@ -523,6 +601,18 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
       baseindex +
       ')" class="closeMeasureButton"><i class="fa fa-times-circle"></i></span>';
   else newHTML += '<span class="closeMeasureButton"><i class="fa">&nbsp;&nbsp;&nbsp;</i></span>';
+  newHTML +=
+    '<span title="Copy this bar" id="copyMeasureButton' +
+    baseindex +
+    '" onClick="myGrooveWriter.copyMeasureButtonClick(' +
+    baseindex +
+    ')" class="copyMeasureButton"><i class="fa fa-copy"></i></span>' +
+    '<span title="Paste the copied bar here" id="pasteMeasureButton' +
+    baseindex +
+    '" onClick="myGrooveWriter.pasteMeasureButtonClick(' +
+    baseindex +
+    ')" class="pasteMeasureButton"><i class="fa fa-paste"></i></span>';
+  newHTML += '</span>';
 
   if (baseindex == ctx.numberOfMeasures)
     // add new measure button

@@ -1,3 +1,4 @@
+// Modified by Infinity Drumming, 2026: crash 2, splash and cymbal voice indexes. See CHANGES.md.
 // Drum-notation and MIDI constants shared across the app.
 // Extracted from groove_utils.js (Step 2 of the refactor). Both groove_utils.js
 // and groove_writer.js import what they need from here.
@@ -34,7 +35,15 @@ export const constant_ABC_T1_Normal = 'e';
 export const constant_ABC_T2_Normal = 'd';
 export const constant_ABC_T3_Normal = 'B';
 export const constant_ABC_T4_Normal = 'A';
+// Crash line extras (crash 1 is constant_ABC_HH_Crash; the ride line uses the
+// existing ride / ride bell / cow bell tokens)
+export const constant_ABC_CR_Crash2 = "^a'";
+export const constant_ABC_CR_Splash = "^g'";
 export const constant_NUMBER_OF_TOMS = 4;
+// The editor carries the crash and ride lines after the four toms in its
+// "toms" voice arrays (the ABC and MIDI builders treat those as extra voices).
+export const constant_CRASH_VOICE_INDEX = 4;
+export const constant_RIDE_VOICE_INDEX = 5;
 export const constant_ABC_OFF = false;
 export const constant_OUR_MIDI_VELOCITY_NORMAL = 85;
 export const constant_OUR_MIDI_VELOCITY_ACCENT = 120;
@@ -45,6 +54,8 @@ export const constant_OUR_MIDI_HIHAT_NORMAL = 42;
 export const constant_OUR_MIDI_HIHAT_OPEN = 46;
 export const constant_OUR_MIDI_HIHAT_ACCENT = 108;
 export const constant_OUR_MIDI_HIHAT_CRASH = 49;
+export const constant_OUR_MIDI_CRASH_2 = 57; // General MIDI "Crash Cymbal 2"
+export const constant_OUR_MIDI_SPLASH = 55; // General MIDI "Splash Cymbal"
 export const constant_OUR_MIDI_HIHAT_STACKER = 52;
 export const constant_OUR_MIDI_HIHAT_METRONOME_NORMAL = 77;
 export const constant_OUR_MIDI_HIHAT_METRONOME_ACCENT = 76;

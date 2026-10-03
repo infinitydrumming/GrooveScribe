@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom line, separate kick / hi-hat foot muting. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines, separate kick / hi-hat foot muting. See CHANGES.md.
 // Clickable-grid note state (Step 4 extraction from groove_writer.js).
 //
 // Read side of the note grid: given a cell id, report whether a voice is on and
@@ -24,6 +24,10 @@ import {
   constant_ABC_HH_Ride,
   constant_ABC_HH_Ride_Bell,
   constant_ABC_HH_Stacker,
+  constant_ABC_CR_Crash2,
+  constant_ABC_CR_Splash,
+  constant_CRASH_VOICE_INDEX,
+  constant_RIDE_VOICE_INDEX,
   constant_ABC_KI_Normal,
   constant_ABC_KI_SandK,
   constant_ABC_KI_Splash,
@@ -268,6 +272,30 @@ export function get_hh_state(id, returnType) {
   else if (returnType == 'URL') return '-'; // off (rest)
 }
 
+// Crash line: crash 1 / crash 2 / splash.  Same ABC tokens and URL characters
+// as the crash line's "C" tab (c / C / s).
+export function get_crash_state(id, returnType) {
+  var on = function (part) {
+    return document.getElementById(part + id).style.color == constant_note_on_color_rgb;
+  };
+  if (on('crash_c2')) return returnType == 'URL' ? 'C' : constant_ABC_CR_Crash2;
+  if (on('crash_splash')) return returnType == 'URL' ? 's' : constant_ABC_CR_Splash;
+  if (on('crash_c1')) return returnType == 'URL' ? 'c' : constant_ABC_HH_Crash;
+  return returnType == 'URL' ? '-' : false;
+}
+
+// Ride line: ride / ride bell / cow bell / stacker (URL characters r / b / m / s).
+export function get_ride_state(id, returnType) {
+  var on = function (part) {
+    return document.getElementById(part + id).style.color == constant_note_on_color_rgb;
+  };
+  if (on('ride_bell')) return returnType == 'URL' ? 'b' : constant_ABC_HH_Ride_Bell;
+  if (on('ride_cowbell')) return returnType == 'URL' ? 'm' : constant_ABC_HH_Cow_Bell;
+  if (on('ride_stacker')) return returnType == 'URL' ? 's' : constant_ABC_HH_Stacker;
+  if (on('ride_ride')) return returnType == 'URL' ? 'r' : constant_ABC_HH_Ride;
+  return returnType == 'URL' ? '-' : false;
+}
+
 export function get_sticking_state(id, returnType) {
   if (returnType != 'ABC' && returnType != 'URL') {
     console.log('bad returnType in get_kick_state()');
@@ -346,6 +374,18 @@ export function get32NoteArrayFromClickableUI(
       Toms_Array[3][array_index] = get_tom_state(i + startIndexForClickableUI, 4, 'ABC');
     }
 
+    // the crash and ride lines ride along after the toms (see constants.js)
+    if (ctx.cymbalsVisible && Toms_Array.length > constant_RIDE_VOICE_INDEX) {
+      Toms_Array[constant_CRASH_VOICE_INDEX][array_index] = get_crash_state(
+        i + startIndexForClickableUI,
+        'ABC'
+      );
+      Toms_Array[constant_RIDE_VOICE_INDEX][array_index] = get_ride_state(
+        i + startIndexForClickableUI,
+        'ABC'
+      );
+    }
+
     Snare_Array[array_index] = get_snare_state(i + startIndexForClickableUI, 'ABC');
 
     Kick_Array[array_index] = get_kick_state(i + startIndexForClickableUI, 'ABC');
@@ -387,7 +427,10 @@ export function muteArrayFromClickableUI(
   }
 
   for (var i = 0; i < Toms_Array.length; i++) {
-    if (isInstrumentMuted('tom' + (i + 1), measureIndex + 1))
+    var voiceName = 'tom' + (i + 1);
+    if (i == constant_CRASH_VOICE_INDEX) voiceName = 'crash';
+    else if (i == constant_RIDE_VOICE_INDEX) voiceName = 'ride';
+    if (isInstrumentMuted(voiceName, measureIndex + 1))
       fill_array_with_value_false(Toms_Array[i], Toms_Array[i].length);
   }
 }

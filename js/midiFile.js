@@ -1,3 +1,4 @@
+// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -15,6 +16,8 @@ import {
   constant_ABC_HH_Ride,
   constant_ABC_HH_Ride_Bell,
   constant_ABC_HH_Stacker,
+  constant_ABC_CR_Crash2,
+  constant_ABC_CR_Splash,
   constant_ABC_KI_Normal,
   constant_ABC_KI_SandK,
   constant_ABC_KI_Splash,
@@ -33,6 +36,8 @@ import {
   constant_OUR_MIDI_HIHAT_ACCENT,
   constant_OUR_MIDI_HIHAT_COW_BELL,
   constant_OUR_MIDI_HIHAT_CRASH,
+  constant_OUR_MIDI_CRASH_2,
+  constant_OUR_MIDI_SPLASH,
   constant_OUR_MIDI_HIHAT_FOOT,
   constant_OUR_MIDI_HIHAT_METRONOME_ACCENT,
   constant_OUR_MIDI_HIHAT_METRONOME_NORMAL,
@@ -164,6 +169,7 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
     }
 
     // Metronome sounds.
+    /** @type {number | false} */
     var metronome_note = false;
     var metronome_velocity = constant_OUR_MIDI_VELOCITY_ACCENT;
     if (metronome_frequency > 0) {
@@ -232,6 +238,10 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
             metronome_velocity = 25; // not as loud as the normal click
           }
         }
+
+        // one click per bar: keep only the "1"
+        if (metronome_frequency == 1 && metronome_note !== constant_OUR_MIDI_METRONOME_1)
+          metronome_note = false;
       }
 
       if (metronome_note !== false) {
@@ -416,11 +426,35 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
         //prev_kick_splash_note = kick_splash_note;
       }
 
+      // Toms, plus any extra voices passed after the four toms (the crash and
+      // ride lines).  Cymbals here don't cut off an open hi-hat.
       if (Toms_Array) {
-        for (var which_array = 0; which_array < constant_NUMBER_OF_TOMS; which_array++) {
+        for (var which_array = 0; which_array < Toms_Array.length; which_array++) {
+          /** @type {number | false} */
           var tom_note = false;
-          if (Toms_Array[which_array][i] !== undefined) {
+          if (Toms_Array[which_array] && Toms_Array[which_array][i] !== undefined) {
             switch (Toms_Array[which_array][i]) {
+              case constant_ABC_HH_Crash:
+                tom_note = constant_OUR_MIDI_HIHAT_CRASH;
+                break;
+              case constant_ABC_CR_Crash2:
+                tom_note = constant_OUR_MIDI_CRASH_2;
+                break;
+              case constant_ABC_CR_Splash:
+                tom_note = constant_OUR_MIDI_SPLASH;
+                break;
+              case constant_ABC_HH_Ride:
+                tom_note = constant_OUR_MIDI_HIHAT_RIDE;
+                break;
+              case constant_ABC_HH_Ride_Bell:
+                tom_note = constant_OUR_MIDI_HIHAT_RIDE_BELL;
+                break;
+              case constant_ABC_HH_Cow_Bell:
+                tom_note = constant_OUR_MIDI_HIHAT_COW_BELL;
+                break;
+              case constant_ABC_HH_Stacker:
+                tom_note = constant_OUR_MIDI_HIHAT_STACKER;
+                break;
               case constant_ABC_T1_Normal: // Tom 1
                 tom_note = constant_OUR_MIDI_TOM1_NORMAL; // midi code High tom 2
                 break;
@@ -519,6 +553,22 @@ export function create_MIDIURLFromGrooveData(gu, myGrooveData, MIDI_type) {
         myGrooveData.noteValue
       );
     }
+    // crash and ride lines play after the toms
+    [myGrooveData.crash_array, myGrooveData.ride_array].forEach(function (cymbal_array) {
+      if (!cymbal_array) return;
+      FullNoteTomsArray.push(
+        scaleNoteArrayToFullSize(
+          cymbal_array.slice(
+            myGrooveData.notesPerMeasure * measureIndex,
+            myGrooveData.notesPerMeasure * (measureIndex + 1)
+          ),
+          1,
+          myGrooveData.notesPerMeasure,
+          myGrooveData.numBeats,
+          myGrooveData.noteValue
+        )
+      );
+    });
 
     gu.MIDI_from_HH_Snare_Kick_Arrays(
       midiTrack,

@@ -1,3 +1,4 @@
+// Modified by Infinity Drumming, 2026: crash and ride lines. See CHANGES.md.
 // grooveData — the central data contract for Groove Scribe.
 //
 // A GrooveData describes a single groove: its time signature, subdivision and
@@ -63,6 +64,9 @@ const EMPTY_NOTE_ARRAY = [
  * @property {Array<string|boolean>} snare_array   Snare lane; each slot is an ABC token or false.
  * @property {Array<string|boolean>} kick_array    Kick lane; each slot is an ABC token or false.
  * @property {Array<Array<string|boolean>>} toms_array  Four tom lanes (T1–T4), index 0-based.
+ * @property {Array<string|boolean>} crash_array   Crash line (crash 1, crash 2, splash); URL "C".
+ * @property {Array<string|boolean>} ride_array    Ride line (ride, ride bell, cow bell); URL "R".
+ *   Older URLs keep crashes and rides in hh_array; both forms render the same.
  * @property {boolean} showToms        Whether the tom lanes are displayed.
  * @property {boolean} showStickings   Whether the sticking lane is displayed.
  * @property {string} title            Groove title.
@@ -105,6 +109,8 @@ export function createGrooveData(config = {}) {
       EMPTY_NOTE_ARRAY.slice(0),
       EMPTY_NOTE_ARRAY.slice(0),
     ],
+    crash_array: EMPTY_NOTE_ARRAY.slice(0), // copy by value
+    ride_array: EMPTY_NOTE_ARRAY.slice(0), // copy by value
     showToms: false,
     showStickings: false,
     title: '',

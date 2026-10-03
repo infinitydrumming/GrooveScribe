@@ -108,6 +108,8 @@ function addExtraFixtures() {
     'snareContextMenu',
     'kickContextMenu',
     'hhfootContextMenu',
+    'crashContextMenu',
+    'rideContextMenu',
     'stickingsLabelContextMenu',
     'hhLabelContextMenu',
     'tom1LabelContextMenu',
@@ -292,8 +294,41 @@ describe('GrooveWriter clickable grid: noteRightClick / notePopupClick', () => {
   it('notePopupClick applies the chosen articulation to the note last opened via noteRightClick', () => {
     const ev = { clientX: 10, clientY: 20, preventDefault() {}, stopPropagation() {} };
     gw.noteRightClick(ev, 'hh', 4); // records class_which_index_last_clicked = 4
-    gw.notePopupClick('hh', 'ride');
-    expect(gw.grooveDataFromClickableUI().hh_array[4]).toBe("^A'"); // constant_ABC_HH_Ride
+    gw.notePopupClick('hh', 'open');
+    expect(gw.grooveDataFromClickableUI().hh_array[4]).toBe('!open!^g'); // constant_ABC_HH_Open
+  });
+
+  it('crash and ride go on their own lines (shown with the CYMBALS button)', () => {
+    const ev = { clientX: 10, clientY: 20, preventDefault() {}, stopPropagation() {} };
+    gw.showHideCymbals(true, true, true);
+    gw.noteRightClick(ev, 'crash', 0);
+    gw.notePopupClick('crash', 'crash2');
+    gw.noteRightClick(ev, 'ride', 2);
+    gw.notePopupClick('ride', 'ride_bell');
+    gw.noteLeftClick(ev, 'crash', 4); // left click = crash 1
+    gw.noteLeftClick(ev, 'ride', 6); // left click = ride
+    const gd = gw.grooveDataFromClickableUI();
+    expect(gd.crash_array.slice(0, 5)).toEqual(["^a'", false, false, false, "^c'"]);
+    expect(gd.ride_array.slice(0, 7)).toEqual([false, false, "^B'", false, false, false, "^A'"]);
+    expect(gd.hh_array.slice(0, 7).every((v) => v === false)).toBe(true);
+  });
+
+  it('a crash or ride sent to the hi-hat line (older grooves) moves onto the cymbal lines', () => {
+    gw.showHideCymbals(true, true, true);
+    gw.notePopupClick('hh', 'ride'); // index 0
+    gw.noteRightClick({ clientX: 1, clientY: 1 }, 'hh', 1);
+    gw.notePopupClick('hh', 'stacker'); // the stacker lives on the ride line too
+    const gd = gw.grooveDataFromClickableUI();
+    expect(gd.ride_array.slice(0, 2)).toEqual(["^A'", "^d'"]);
+    expect(gd.hh_array.slice(0, 2)).toEqual([false, false]);
+  });
+
+  it('cymbal notes are left out of the groove while the CYMBALS lines are hidden', () => {
+    const ev = { target: {}, preventDefault() {}, stopPropagation() {} };
+    gw.showHideCymbals(true, true, true);
+    gw.noteLeftClick(ev, 'ride', 0);
+    gw.showHideCymbals(true, false, true);
+    expect(gw.grooveDataFromClickableUI().ride_array[0]).toBe(false);
   });
 
   it('notePopupClick works for tom1/tom4 via the set_tom1_state/set_tom4_state indirection', () => {

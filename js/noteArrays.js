@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom tab parsing. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride tabs, bar scaling for paste. See CHANGES.md.
 // Note-array / drum-tab conversions and default grooves (Step 2 extraction).
 // Pure module: converts between tab strings and ABC note arrays, builds default
 // grooves, and note-mapping/sticking-count helpers. GrooveUtils delegates here.
@@ -15,6 +15,8 @@ import {
   constant_ABC_HH_Ride,
   constant_ABC_HH_Ride_Bell,
   constant_ABC_HH_Stacker,
+  constant_ABC_CR_Crash2,
+  constant_ABC_CR_Splash,
   constant_ABC_KI_Normal,
   constant_ABC_KI_SandK,
   constant_ABC_KI_Splash,
@@ -35,7 +37,6 @@ import {
   constant_ABC_T2_Normal,
   constant_ABC_T3_Normal,
   constant_ABC_T4_Normal,
-  constant_NUMBER_OF_TOMS,
 } from './constants.js';
 import { calc_notes_per_measure, isTripletDivision } from './musicMath.js';
 
@@ -44,12 +45,15 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
     case 'b':
     case 'B':
       if (drumType == 'Stickings') return constant_ABC_STICK_BOTH;
-      else if (drumType == 'H') return constant_ABC_HH_Ride_Bell;
+      else if (drumType == 'H' || drumType == 'R') return constant_ABC_HH_Ride_Bell;
       else if (drumType == 'S') return constant_ABC_SN_Buzz;
       break;
     case 'c':
       if (drumType == 'Stickings') return constant_ABC_STICK_COUNT;
-      else if (drumType == 'H') return constant_ABC_HH_Crash;
+      else if (drumType == 'H' || drumType == 'C') return constant_ABC_HH_Crash;
+      break;
+    case 'C': // crash 2 (crash line only)
+      if (drumType == 'C') return constant_ABC_CR_Crash2;
       break;
     case 'd':
       if (drumType == 'S') return constant_ABC_SN_Drag;
@@ -65,7 +69,7 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
       if (drumType == 'Stickings') return constant_ABC_STICK_L;
       break;
     case 'm': // (more) cow bell
-      if (drumType == 'H') return constant_ABC_HH_Cow_Bell;
+      if (drumType == 'H' || drumType == 'R') return constant_ABC_HH_Cow_Bell;
       break;
     case 'n': // (more) cow bell
       if (drumType == 'H') return constant_ABC_HH_Metronome_Normal;
@@ -108,6 +112,7 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
     case 'R':
       switch (drumType) {
         case 'H':
+        case 'R':
           return constant_ABC_HH_Ride;
         //break;
         case 'Stickings':
@@ -118,7 +123,8 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
       }
       break;
     case 's':
-      if (drumType == 'H') return constant_ABC_HH_Stacker;
+      if (drumType == 'H' || drumType == 'R') return constant_ABC_HH_Stacker;
+      else if (drumType == 'C') return constant_ABC_CR_Splash;
       break;
     case 'x':
       switch (drumType) {
@@ -213,7 +219,11 @@ function abcNotationToTablaturePerNote(drumType, abcChar) {
       tabChar = 'c';
       break;
     case constant_ABC_HH_Stacker:
+    case constant_ABC_CR_Splash:
       tabChar = 's';
+      break;
+    case constant_ABC_CR_Crash2:
+      tabChar = 'C';
       break;
     case constant_ABC_HH_Metronome_Normal:
       tabChar = 'n';
@@ -368,6 +378,30 @@ export function mergeDrumTabLines(dominateLine, subordinateLine) {
   return newLine;
 }
 
+// Fit one measure of tab characters (no "|") into `targetLength` notes, using
+// the same scaling rule as loading a URL: a line at least twice as long is
+// thinned out, one at least twice as short is spread out, anything else is
+// copied note for note (padded with rests or cut to length).
+export function scaleTabMeasure(tab, targetLength) {
+  var noteStringScaler = 1;
+  var displayScaler = 1;
+  if (tab.length > targetLength && tab.length / targetLength >= 2)
+    noteStringScaler = Math.ceil(tab.length / targetLength);
+  else if (tab.length < targetLength && targetLength / tab.length >= 2)
+    displayScaler = Math.ceil(targetLength / tab.length);
+
+  var out = [];
+  for (var i = 0; i < targetLength; i++) out.push('-');
+  for (
+    var j = 0, k = 0;
+    j < tab.length && k < targetLength;
+    j += noteStringScaler, k += displayScaler
+  ) {
+    out[k] = tab.charAt(j);
+  }
+  return out.join('');
+}
+
 export function GetEmptyGroove(notes_per_measure, numMeasures) {
   var retString = '';
   var oneMeasureString = '|';
@@ -477,9 +511,9 @@ export function create_note_mapping_array_for_highlighting(
     } else {
       mapping_array[i] = false;
 
-      // check toms as well with for loop
+      // check toms (and any extra voices after them, e.g. the cymbal lines) as well
       if (toms_array) {
-        for (var j = 0; j < constant_NUMBER_OF_TOMS; j++) {
+        for (var j = 0; j < toms_array.length; j++) {
           if (toms_array[j][i] !== undefined && toms_array[j][i] !== false) mapping_array[i] = true;
         }
       }

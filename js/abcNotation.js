@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom in the legend. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -688,6 +688,8 @@ export function get_top_ABC_BoilerPlate(
     "%%map drum ^e' heads=Xhead print=e'   % Metronome click\n" +
     "%%map drum ^f' heads=Xhead print=f'   % Metronome beep\n" +
     "%%map drum ^A' heads=Xhead print=A'   % Ride\n" +
+    "%%map drum ^a' heads=Xhead print=b    % Crash 2\n" +
+    "%%map drum ^g' heads=Xhead print=e'   % Splash\n" +
     "%%map drum ^B' heads=Trihead print=A' % Ride Bell\n" +
     "%%map drum ^D' heads=Trihead print=g   % Cow Bell\n" +
     '%%map drum ^c heads=Xhead print=c  % Cross Stick\n' +
@@ -714,7 +716,7 @@ export function get_top_ABC_BoilerPlate(
       'V:Hands stem=up \n' +
       '%%voicemap drum\n' +
       '"^Hi-Hat"^g4 "^Open"!open!^g4 ' +
-      '"^Crash"^c\'4 "^Stacker"^d\'4 "^Ride"^A\'4 "^Ride Bell"^B\'4 x2 "^Tom 1"e4 "^Tom 2"d4 "^Floor"A4 "^Snare"c4 "^Buzz"!///!c4 "^Cross"^c4 "^Ghost  "!(.!!).!c4 "^Flam"{/c}c4  x6 ||\n' +
+      '"^Crash"^c\'4 "^Crash 2"^a\'4 "^Splash"^g\'4 "^Stacker"^d\'4 "^Ride"^A\'4 "^Ride Bell"^B\'4 "^Tom 1"e4 "^Tom 2"d4 "^Floor"A4 "^Snare"c4 "^Buzz"!///!c4 "^Cross"^c4 "^Ghost  "!(.!!).!c4 "^Flam"{/c}c4 ||\n' +
       'V:Feet stem=down \n' +
       '%%voicemap drum\n' +
       'x50 "^Kick"F4 "^HH foot"^d,4 x6 ||\n' +
@@ -841,6 +843,20 @@ export function createABCFromGrooveData(gu, myGrooveData, renderWidth) {
       myGrooveData.noteValue
     );
   }
+
+  // the crash and ride lines are drawn in the hands voice, after the toms
+  [myGrooveData.crash_array, myGrooveData.ride_array].forEach(function (cymbal_array) {
+    if (cymbal_array)
+      FullNoteTomsArray.push(
+        scaleNoteArrayToFullSize(
+          cymbal_array,
+          myGrooveData.numberOfMeasures,
+          myGrooveData.notesPerMeasure,
+          myGrooveData.numBeats,
+          myGrooveData.noteValue
+        )
+      );
+  });
 
   var is_triplet_division = isTripletDivisionFromNotesPerMeasure(
     myGrooveData.notesPerMeasure,

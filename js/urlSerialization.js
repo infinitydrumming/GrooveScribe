@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom in URLs. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -6,7 +6,11 @@
 // its instance flags through the parse function's `config` argument.
 
 import { createGrooveData } from './grooveData.js';
-import { constant_DEFAULT_TEMPO, constant_MAX_MEASURES } from './constants.js';
+import {
+  constant_ABC_HH_Crash,
+  constant_DEFAULT_TEMPO,
+  constant_MAX_MEASURES,
+} from './constants.js';
 import { parseTimeSigString, calc_notes_per_measure } from './musicMath.js';
 import {
   noteArraysFromURLData,
@@ -16,6 +20,7 @@ import {
   GetDefaultSnareGroove,
   GetDefaultKickGroove,
   GetDefaultTomGroove,
+  GetEmptyGroove,
 } from './noteArrays.js';
 
 export function getQueryVariableFromString(variable, def_value, my_string) {
@@ -149,6 +154,22 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
     );
   }
 
+  // Crash line (C) and ride line (R).  Older URLs carry crashes and rides in the
+  // hi-hat line instead; those stay in hh_array and render the same way.
+  var emptyGroove = GetEmptyGroove(myGrooveData.notesPerMeasure, myGrooveData.numberOfMeasures);
+  myGrooveData.crash_array = noteArraysFromURLData(
+    'C',
+    getQueryVariableFromString('C', false, encodedURLData) || emptyGroove,
+    myGrooveData.notesPerMeasure,
+    myGrooveData.numberOfMeasures
+  );
+  myGrooveData.ride_array = noteArraysFromURLData(
+    'R',
+    getQueryVariableFromString('R', false, encodedURLData) || emptyGroove,
+    myGrooveData.notesPerMeasure,
+    myGrooveData.numberOfMeasures
+  );
+
   myGrooveData.sticking_array = noteArraysFromURLData(
     'Stickings',
     Stickings_string,
@@ -261,16 +282,27 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
 
   // notes
   var total_notes = myGrooveData.notesPerMeasure * myGrooveData.numberOfMeasures;
+
+  // Cymbal lines: wherever the hi-hat is silent, a ride (or else a crash 1)
+  // is written into the H line exactly as older versions did, so the link still
+  // plays everywhere.  Only what doesn't fit there goes into C= and R=.
+  var hhLine = myGrooveData.hh_array.slice(0, total_notes);
+  var crashLine = (myGrooveData.crash_array || []).slice(0, total_notes);
+  var rideLine = (myGrooveData.ride_array || []).slice(0, total_notes);
+  for (var n = 0; n < total_notes; n++) {
+    if (hhLine[n]) continue;
+    if (rideLine[n]) {
+      hhLine[n] = rideLine[n];
+      rideLine[n] = false;
+    } else if (crashLine[n] == constant_ABC_HH_Crash) {
+      hhLine[n] = crashLine[n];
+      crashLine[n] = false;
+    }
+  }
+
   var HH =
     '&H=|' +
-    tabLineFromAbcNoteArray(
-      'H',
-      myGrooveData.hh_array,
-      true,
-      true,
-      total_notes,
-      myGrooveData.notesPerMeasure
-    );
+    tabLineFromAbcNoteArray('H', hhLine, true, true, total_notes, myGrooveData.notesPerMeasure);
   var Snare =
     '&S=|' +
     tabLineFromAbcNoteArray(
@@ -333,6 +365,22 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
       );
     fullURL += Tom1 + Tom2 + Tom4;
   }
+
+  if (crashLine.some(Boolean))
+    fullURL +=
+      '&C=|' +
+      tabLineFromAbcNoteArray(
+        'C',
+        crashLine,
+        true,
+        true,
+        total_notes,
+        myGrooveData.notesPerMeasure
+      );
+  if (rideLine.some(Boolean))
+    fullURL +=
+      '&R=|' +
+      tabLineFromAbcNoteArray('R', rideLine, true, true, total_notes, myGrooveData.notesPerMeasure);
 
   // only add if we need them.  // they are long and ugly. :)
   if (myGrooveData.showStickings) {

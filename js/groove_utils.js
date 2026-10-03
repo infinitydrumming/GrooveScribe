@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -37,6 +37,8 @@ import {
   constant_OUR_MIDI_HIHAT_OPEN,
   constant_OUR_MIDI_HIHAT_ACCENT,
   constant_OUR_MIDI_HIHAT_CRASH,
+  constant_OUR_MIDI_CRASH_2,
+  constant_OUR_MIDI_SPLASH,
   constant_OUR_MIDI_HIHAT_STACKER,
   constant_OUR_MIDI_HIHAT_METRONOME_NORMAL,
   constant_OUR_MIDI_HIHAT_RIDE,
@@ -1297,6 +1299,8 @@ function GrooveUtils() {
         data.note == constant_OUR_MIDI_HIHAT_OPEN ||
         data.note == constant_OUR_MIDI_HIHAT_ACCENT ||
         data.note == constant_OUR_MIDI_HIHAT_CRASH ||
+        data.note == constant_OUR_MIDI_CRASH_2 ||
+        data.note == constant_OUR_MIDI_SPLASH ||
         data.note == constant_OUR_MIDI_HIHAT_RIDE ||
         data.note == constant_OUR_MIDI_HIHAT_STACKER ||
         data.note == constant_OUR_MIDI_HIHAT_RIDE_BELL ||

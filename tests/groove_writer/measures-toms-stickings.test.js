@@ -147,6 +147,67 @@ describe('addMeasureButtonClick / closeMeasureButtonClick', () => {
   });
 });
 
+describe('copyMeasureButtonClick / pasteMeasureButtonClick', () => {
+  beforeEach(async () => {
+    document.body.innerHTML = '';
+    window.localStorage.clear();
+    gw = await newGrooveWriter();
+    buildMeasureFixture(gw, 1);
+    gw.updateCurrentURL = vi.fn();
+    gw.displayNewSVG = vi.fn();
+    gw.addMeasureButtonClick({}); // two measures to copy between
+    gw.clearAllNotes();
+  });
+
+  it('renders copy and paste buttons for every measure', () => {
+    expect(document.getElementById('copyMeasureButton1')).not.toBeNull();
+    expect(document.getElementById('pasteMeasureButton2')).not.toBeNull();
+  });
+
+  it('pastes every line of the copied measure, including the hi-hat foot, and nothing else', () => {
+    gw.noteLeftClick(null, 'kick', 0);
+    gw.noteLeftClick(null, 'hhfoot', 2);
+    gw.noteLeftClick(null, 'snare', 4);
+
+    gw.copyMeasureButtonClick(1);
+    gw.pasteMeasureButtonClick(2);
+
+    const n = gw.notesPerMeasure();
+    const gd = gw.grooveDataFromClickableUI();
+    expect(gd.kick_array.slice(n, n + 3)).toEqual(['F', false, '^d,']);
+    expect(gd.snare_array[n + 4]).toBe('!accent!c');
+    expect(gd.kick_array.slice(0, n)).toEqual(gd.kick_array.slice(n));
+  });
+
+  it('turns the toms on when the pasted measure uses them', () => {
+    gw.showHideToms(true, true, true);
+    gw.noteLeftClick(null, 'tom2', 1);
+    gw.copyMeasureButtonClick(1);
+    gw.showHideToms(true, false, true);
+
+    gw.pasteMeasureButtonClick(2);
+
+    const gd = gw.grooveDataFromClickableUI();
+    expect(gd.showToms).toBe(true);
+    expect(gd.toms_array[1][gw.notesPerMeasure() + 1]).toBe('d');
+  });
+
+  it('keeps the copied measure in localStorage so another groove can paste it', () => {
+    gw.noteLeftClick(null, 'kick', 3);
+    gw.copyMeasureButtonClick(1);
+    const stored = JSON.parse(window.localStorage.getItem('grooveScribeMeasureClipboard'));
+    expect(stored.lines.Kick.charAt(3)).toBe('o');
+    expect(stored.triplets).toBe(false);
+  });
+
+  it('asks the user to copy first when nothing has been copied', () => {
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    gw.pasteMeasureButtonClick(2);
+    expect(alertSpy).toHaveBeenCalled();
+    alertSpy.mockRestore();
+  });
+});
+
 describe('showHideToms', () => {
   beforeEach(async () => {
     document.body.innerHTML = '';
@@ -162,13 +223,16 @@ describe('showHideToms', () => {
   });
 
   it('toggles visibility when called without force, and updates grooveDataFromClickableUI().showToms', () => {
+    // hidden tom lines are taken out of the layout (display), so the grid closes up
     gw.showHideToms(false, false, true); // dontRefreshScreen=true, avoid the render cascade
     expect(gw.grooveDataFromClickableUI().showToms).toBe(true);
-    expect(document.querySelector('.toms-container').style.visibility).toBe('visible');
+    expect(document.querySelector('.toms-container').style.display).toBe('block');
+    expect(document.querySelector('.tom-label').style.display).toBe('block');
 
     gw.showHideToms(false, false, true);
     expect(gw.grooveDataFromClickableUI().showToms).toBe(false);
-    expect(document.querySelector('.toms-container').style.visibility).toBe('hidden');
+    expect(document.querySelector('.toms-container').style.display).toBe('none');
+    expect(document.querySelector('.tom-label').style.display).toBe('none');
   });
 
   it('forces show/hide when force=true', () => {
@@ -179,21 +243,19 @@ describe('showHideToms', () => {
     expect(gw.grooveDataFromClickableUI().showToms).toBe(false);
   });
 
-  // BUG (observed): showHideCSS_ClassVisibility (the helper showHideToms uses
-  // for the ".toms-container"/".tom-label" classes) has no `return` statement,
-  // so it always yields `undefined`. showHideToms treats that as falsy, so it
-  // always takes the "hide" branch when updating the button's class list --
-  // the button's "ClickToHide" class is never added, regardless of whether
-  // toms are actually shown or hidden. This does not affect the toms rows
-  // themselves (their visibility is set directly inside the loop before the
-  // missing return), only the button's own CSS-class bookkeeping.
-  it('never adds "ClickToHide" to showHideTomsButton, even when toms are shown (missing return in showHideCSS_ClassVisibility)', () => {
+  // showHideToms used showHideCSS_ClassVisibility, which returns nothing, so the
+  // button's "ClickToHide" class was never added. It now uses
+  // showHideCSS_ClassDisplay (which returns the new state), so it tracks the toms.
+  it('adds "ClickToHide" to showHideTomsButton while the toms are shown', () => {
     const btn = document.getElementById('showHideTomsButton');
     expect(btn.className).not.toContain('ClickToHide');
 
     gw.showHideToms(true, true, true); // force show
-    expect(gw.grooveDataFromClickableUI().showToms).toBe(true); // toms are genuinely shown...
-    expect(btn.className).not.toContain('ClickToHide'); // ...but the button class never updates
+    expect(gw.grooveDataFromClickableUI().showToms).toBe(true);
+    expect(btn.className).toContain('ClickToHide');
+
+    gw.showHideToms(true, false, true); // force hide
+    expect(btn.className).not.toContain('ClickToHide');
   });
 });
 

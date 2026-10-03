@@ -5,7 +5,8 @@ Readme for Groove Scribe
 > **Infinity Drumming fork.** This is a modified version of
 > [Groove Scribe by Lou Montulli and Mike Johnston](https://github.com/montulli/GrooveScribe),
 > hosted at https://groove.infinitydrumming.com. It adds a mid tom line, a separate
-> hi-hat foot line and Infinity Drumming branding. All changes are listed in
+> hi-hat foot line, crash and ride lines, copy / paste of bars and Infinity
+> Drumming branding. All changes are listed in
 > [CHANGES.md](CHANGES.md). Like the original, it is licensed under the GNU GPL
 > v2 or later (see [LICENSE.txt](LICENSE.txt)).
 

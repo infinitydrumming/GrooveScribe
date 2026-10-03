@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom and hi-hat foot lines, page title. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, page title. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -38,6 +38,8 @@ import {
   constant_ABC_HH_Ride,
   constant_ABC_HH_Ride_Bell,
   constant_ABC_HH_Stacker,
+  constant_ABC_CR_Crash2,
+  constant_ABC_CR_Splash,
   constant_ABC_KI_Normal,
   constant_ABC_KI_SandK,
   constant_ABC_KI_Splash,
@@ -56,9 +58,12 @@ import {
   constant_ABC_T1_Normal,
   constant_ABC_T2_Normal,
   constant_ABC_T4_Normal,
+  constant_RIDE_VOICE_INDEX,
   constant_OUR_MIDI_HIHAT_ACCENT,
   constant_OUR_MIDI_HIHAT_COW_BELL,
   constant_OUR_MIDI_HIHAT_CRASH,
+  constant_OUR_MIDI_CRASH_2,
+  constant_OUR_MIDI_SPLASH,
   constant_OUR_MIDI_HIHAT_FOOT,
   constant_OUR_MIDI_HIHAT_METRONOME_ACCENT,
   constant_OUR_MIDI_HIHAT_METRONOME_NORMAL,
@@ -87,6 +92,7 @@ import {
 import * as _perm from './permutations.js';
 import * as _view from './viewHtml.js';
 import * as _grid from './gridState.js';
+import { scaleTabMeasure } from './noteArrays.js';
 
 // GrooveWriter class.   The only one in this file.
 
@@ -114,6 +120,13 @@ function GrooveWriter() {
   var class_metronome_auto_speed_up_active = false;
   var class_metronome_count_in_active = false;
   var class_metronome_count_in_is_playing = false;
+  // "Groove / click bars" metronome option: play the groove for some bars, then
+  // only the click for some bars, and repeat
+  var class_groove_click_active = false;
+  var class_groove_click_groove_bars = 4;
+  var class_groove_click_click_bars = 4;
+  var class_groove_click_in_click_phase = false;
+  var class_groove_click_bars_played = 0;
 
   // set debugMode immediately so we can use it in index.html
   root.myGrooveUtils.debugMode = parseInt(
@@ -235,6 +248,12 @@ function GrooveWriter() {
   }
   function get_sticking_state(id, returnType) {
     return _grid.get_sticking_state(id, returnType);
+  }
+  function get_crash_state(id, returnType) {
+    return _grid.get_crash_state(id, returnType);
+  }
+  function get_ride_state(id, returnType) {
+    return _grid.get_ride_state(id, returnType);
   }
 
   function play_single_note_for_note_setting(note_val) {
@@ -478,25 +497,18 @@ function GrooveWriter() {
         document.getElementById('hh_cross' + id).style.color = constant_note_on_color_hex;
         if (make_sound) play_single_note_for_note_setting(constant_OUR_MIDI_HIHAT_NORMAL);
         break;
+      // Crashes and rides have their own lines now.  Older grooves carry them
+      // in the hi-hat line, so move them across and leave the hi-hat empty.
       case 'ride':
-        document.getElementById('hh_ride' + id).style.color = constant_note_on_color_hex;
-        if (make_sound) play_single_note_for_note_setting(constant_OUR_MIDI_HIHAT_RIDE);
-        break;
       case 'ride_bell':
-        document.getElementById('hh_ride_bell' + id).style.color = constant_note_on_color_hex;
-        if (make_sound) play_single_note_for_note_setting(constant_OUR_MIDI_HIHAT_RIDE_BELL);
-        break;
       case 'cow_bell':
-        document.getElementById('hh_cow_bell' + id).style.color = constant_note_on_color_hex;
-        if (make_sound) play_single_note_for_note_setting(constant_OUR_MIDI_HIHAT_COW_BELL);
+      case 'stacker':
+        document.getElementById('hh_cross' + id).style.color = constant_hihat_note_off_color_hex;
+        set_ride_state(id, mode, make_sound);
         break;
       case 'crash':
-        document.getElementById('hh_crash' + id).style.color = constant_note_on_color_hex;
-        if (make_sound) play_single_note_for_note_setting(constant_OUR_MIDI_HIHAT_CRASH);
-        break;
-      case 'stacker':
-        document.getElementById('hh_stacker' + id).style.color = constant_note_on_color_hex;
-        if (make_sound) play_single_note_for_note_setting(constant_OUR_MIDI_HIHAT_STACKER);
+        document.getElementById('hh_cross' + id).style.color = constant_hihat_note_off_color_hex;
+        set_crash_state(id, 'crash', make_sound);
         break;
       case 'metronome_normal':
         document.getElementById('hh_metronome_normal' + id).style.color =
@@ -526,6 +538,52 @@ function GrooveWriter() {
       default:
         console.log('bad switch in set_hh_state');
         break;
+    }
+  }
+
+  // Crash line.  mode: 'off', 'normal' / 'crash' (crash 1), 'crash2', 'splash'
+  function set_crash_state(id, mode, make_sound) {
+    var parts = { crash: 'crash_c1', crash2: 'crash_c2', splash: 'crash_splash' };
+    var sounds = {
+      crash: constant_OUR_MIDI_HIHAT_CRASH,
+      crash2: constant_OUR_MIDI_CRASH_2,
+      splash: constant_OUR_MIDI_SPLASH,
+    };
+    if (mode == 'normal') mode = 'crash';
+    set_cymbal_line_state(id, mode, make_sound, parts, sounds, 'crash_c1');
+  }
+
+  // Ride line.  mode: 'off', 'normal' / 'ride', 'ride_bell', 'cow_bell', 'stacker'
+  function set_ride_state(id, mode, make_sound) {
+    var parts = {
+      ride: 'ride_ride',
+      ride_bell: 'ride_bell',
+      cow_bell: 'ride_cowbell',
+      stacker: 'ride_stacker',
+    };
+    var sounds = {
+      ride: constant_OUR_MIDI_HIHAT_RIDE,
+      ride_bell: constant_OUR_MIDI_HIHAT_RIDE_BELL,
+      cow_bell: constant_OUR_MIDI_HIHAT_COW_BELL,
+      stacker: constant_OUR_MIDI_HIHAT_STACKER,
+    };
+    if (mode == 'normal') mode = 'ride';
+    set_cymbal_line_state(id, mode, make_sound, parts, sounds, 'ride_ride');
+  }
+
+  // Shared by the crash and ride lines: hide every note part, then show the one
+  // for `mode` (or the grey off-mark for 'off').
+  function set_cymbal_line_state(id, mode, make_sound, parts, sounds, offPart) {
+    for (var name in parts)
+      document.getElementById(parts[name] + id).style.color = constant_note_hidden_color_rgb;
+
+    if (mode == 'off') {
+      document.getElementById(offPart + id).style.color = constant_hihat_note_off_color_hex;
+    } else if (parts[mode]) {
+      document.getElementById(parts[mode] + id).style.color = constant_note_on_color_hex;
+      if (make_sound) play_single_note_for_note_setting(sounds[mode]);
+    } else {
+      console.log('bad mode in set_cymbal_line_state: ' + mode);
     }
   }
 
@@ -731,6 +789,9 @@ function GrooveWriter() {
   root.setMetronomeButton = function (metronomeInterval) {
     var id = '';
     switch (metronomeInterval) {
+      case 1:
+        id = 'metronome1Bar'; // one click per bar
+        break;
       case 4:
         id = 'metronome4ths';
         break;
@@ -879,6 +940,7 @@ function GrooveWriter() {
     if (
       root.myGrooveUtils.getMetronomeSolo() ||
       class_metronome_auto_speed_up_active ||
+      class_groove_click_active ||
       root.myGrooveUtils.getMetronomeOffsetClickStart() != '1'
     ) {
       // make menu look active
@@ -921,6 +983,28 @@ function GrooveWriter() {
             true
           );
           root.show_MetronomeAutoSpeedupConfiguration();
+        }
+        break;
+
+      case 'GrooveClick':
+        if (class_groove_click_active) {
+          // just turn it off if it is on, don't show the configurator
+          class_groove_click_active = false;
+          resetGrooveClickPhase();
+          addOrRemoveKeywordFromClassById(
+            'metronomeOptionsContextMenuGrooveClick',
+            'menuChecked',
+            false
+          );
+          root.myGrooveUtils.midiNoteHasChanged(); // back to the plain groove
+        } else {
+          class_groove_click_active = true;
+          addOrRemoveKeywordFromClassById(
+            'metronomeOptionsContextMenuGrooveClick',
+            'menuChecked',
+            true
+          );
+          root.show_GrooveClickConfiguration();
         }
         break;
 
@@ -1140,6 +1224,12 @@ function GrooveWriter() {
       case 'hh':
         contextMenu = document.getElementById('hhLabelContextMenu');
         break;
+      case 'crash':
+        contextMenu = document.getElementById('crashLabelContextMenu');
+        break;
+      case 'ride':
+        contextMenu = document.getElementById('rideLabelContextMenu');
+        break;
       case 'tom1':
         contextMenu = document.getElementById('tom1LabelContextMenu');
         break;
@@ -1185,6 +1275,12 @@ function GrooveWriter() {
         break;
       case 'hh':
         setFunction = set_hh_state;
+        break;
+      case 'crash':
+        setFunction = set_crash_state;
+        break;
+      case 'ride':
+        setFunction = set_ride_state;
         break;
       case 'tom1':
         setFunction = set_tom1_state;
@@ -1239,10 +1335,10 @@ function GrooveWriter() {
             console.log('Bad sticking case in noteLabelPopupClick');
             break;
         }
-      } else if (instrument == 'hh' && action == 'downbeats') {
-        set_hh_state(i, i % 2 === 0 ? 'normal' : 'off', i == startIndex);
-      } else if (instrument == 'hh' && action == 'upbeats') {
-        set_hh_state(i, i % 2 === 0 ? 'off' : 'normal', i == startIndex + 1);
+      } else if ((instrument == 'hh' || instrument == 'ride') && action == 'downbeats') {
+        setFunction(i, i % 2 === 0 ? 'normal' : 'off', i == startIndex);
+      } else if ((instrument == 'hh' || instrument == 'ride') && action == 'upbeats') {
+        setFunction(i, i % 2 === 0 ? 'off' : 'normal', i == startIndex + 1);
       } else if (instrument == 'snare' && action == 'all_on') {
         set_snare_state(i, 'accent', i == startIndex);
       } else if (instrument == 'snare' && action == 'all_on_normal') {
@@ -1288,6 +1384,12 @@ function GrooveWriter() {
         break;
       case 'hh':
         contextMenu = document.getElementById('hhContextMenu');
+        break;
+      case 'crash':
+        contextMenu = document.getElementById('crashContextMenu');
+        break;
+      case 'ride':
+        contextMenu = document.getElementById('rideContextMenu');
         break;
       case 'tom1':
         contextMenu = document.getElementById('tom1ContextMenu');
@@ -1336,6 +1438,12 @@ function GrooveWriter() {
         case 'hh':
           set_hh_state(id, is_hh_on(id) ? 'off' : 'normal', true);
           break;
+        case 'crash':
+          set_crash_state(id, get_crash_state(id, 'ABC') ? 'off' : 'crash', true);
+          break;
+        case 'ride':
+          set_ride_state(id, get_ride_state(id, 'ABC') ? 'off' : 'ride', true);
+          break;
         case 'snare':
           set_snare_state(id, is_snare_on(id) ? 'off' : 'accent', true);
           break;
@@ -1375,6 +1483,12 @@ function GrooveWriter() {
         break;
       case 'hh':
         set_hh_state(id, new_setting, true);
+        break;
+      case 'crash':
+        set_crash_state(id, new_setting, true);
+        break;
+      case 'ride':
+        set_ride_state(id, new_setting, true);
         break;
       case 'tom1':
         set_tom1_state(id, new_setting, true);
@@ -1419,6 +1533,12 @@ function GrooveWriter() {
       switch (instrument) {
         case 'hh':
           set_hh_state(id, action == 'off' ? 'off' : 'normal', true);
+          break;
+        case 'crash':
+          set_crash_state(id, action == 'off' ? 'off' : 'crash', true);
+          break;
+        case 'ride':
+          set_ride_state(id, action == 'off' ? 'off' : 'ride', true);
           break;
         case 'snare':
           set_snare_state(id, action == 'off' ? 'off' : 'accent', true);
@@ -1501,6 +1621,15 @@ function GrooveWriter() {
       (class_num_beats_per_measure * notes_per_4_beats) / class_note_value_per_measure;
 
     return _grid.get_empty_note_array(num_notes);
+  }
+
+  // The four tom voices plus the crash and ride lines (constant_CRASH_VOICE_INDEX /
+  // constant_RIDE_VOICE_INDEX), which the ABC and MIDI builders treat as extra voices.
+  function get_empty_voice_arrays_in_32nds() {
+    var arrays = [];
+    for (var v = 0; v <= constant_RIDE_VOICE_INDEX; v++)
+      arrays.push(get_empty_note_array_in_32nds());
+    return arrays;
   }
 
   // snare permutation
@@ -1688,6 +1817,7 @@ function GrooveWriter() {
         noteValuePerMeasure: class_note_value_per_measure,
         stickingsVisible: isStickingsVisible(),
         tomsVisible: isTomsVisible(),
+        cymbalsVisible: isCymbalsVisible(),
       }
     );
   }
@@ -1718,12 +1848,7 @@ function GrooveWriter() {
     var HH_Array = get_empty_note_array_in_32nds();
     var Snare_Array = get_empty_note_array_in_32nds();
     var Kick_Array = get_empty_note_array_in_32nds();
-    var Toms_Array = [
-      get_empty_note_array_in_32nds(),
-      get_empty_note_array_in_32nds(),
-      get_empty_note_array_in_32nds(),
-      get_empty_note_array_in_32nds(),
-    ];
+    var Toms_Array = get_empty_voice_arrays_in_32nds();
 
     var i,
       new_snare_array,
@@ -1855,12 +1980,7 @@ function GrooveWriter() {
           HH_Array = get_empty_note_array_in_32nds();
           Snare_Array = get_empty_note_array_in_32nds();
           Kick_Array = get_empty_note_array_in_32nds();
-          Toms_Array = [
-            get_empty_note_array_in_32nds(),
-            get_empty_note_array_in_32nds(),
-            get_empty_note_array_in_32nds(),
-            get_empty_note_array_in_32nds(),
-          ];
+          Toms_Array = get_empty_voice_arrays_in_32nds();
 
           // get another measure
           get32NoteArrayFromClickableUI(
@@ -1938,6 +2058,8 @@ function GrooveWriter() {
       myGrooveData.snare_array = [];
       myGrooveData.kick_array = [];
       myGrooveData.toms_array = [[], [], [], []];
+      myGrooveData.crash_array = [];
+      myGrooveData.ride_array = [];
 
       // query the clickable UI and generate a arrays representing the notes of all measures
       for (i = 0; i < total_notes; i++) {
@@ -1947,6 +2069,11 @@ function GrooveWriter() {
         myGrooveData.hh_array.push(get_hh_state(i, 'ABC'));
         myGrooveData.snare_array.push(get_snare_state(i, 'ABC'));
         myGrooveData.kick_array.push(get_kick_state(i, 'ABC'));
+
+        // like the toms, the cymbal lines only count while they are shown
+        var cymbalsShown = isCymbalsVisible();
+        myGrooveData.crash_array.push(cymbalsShown ? get_crash_state(i, 'ABC') : false);
+        myGrooveData.ride_array.push(cymbalsShown ? get_ride_state(i, 'ABC') : false);
 
         if (isTomsVisible()) {
           myGrooveData.toms_array[0].push(get_tom_state(i, 1, 'ABC'));
@@ -2218,12 +2345,7 @@ function GrooveWriter() {
     var HH_Array = get_empty_note_array_in_32nds();
     var Snare_Array = get_empty_note_array_in_32nds();
     var Kick_Array = get_empty_note_array_in_32nds();
-    var Toms_Array = [
-      get_empty_note_array_in_32nds(),
-      get_empty_note_array_in_32nds(),
-      get_empty_note_array_in_32nds(),
-      get_empty_note_array_in_32nds(),
-    ];
+    var Toms_Array = get_empty_voice_arrays_in_32nds();
     var numSections = get_numSectionsFor_permutation_array();
     var i, new_snare_array, post_abc;
     var num_notes = get32NoteArrayFromClickableUI(
@@ -2562,6 +2684,8 @@ function GrooveWriter() {
     var uiTom1 = '';
     var uiTom2 = '';
     var uiTom4 = '';
+    var uiCrash = '';
+    var uiRide = '';
     var uiSnare = '';
     var uiKick = '';
 
@@ -2579,6 +2703,8 @@ function GrooveWriter() {
         uiTom1 += get_tom_state(i, 1, 'URL');
         uiTom2 += get_tom_state(i, 2, 'URL');
         uiTom4 += get_tom_state(i, 4, 'URL');
+        uiCrash += get_crash_state(i, 'URL');
+        uiRide += get_ride_state(i, 'URL');
         uiSnare += get_snare_state(i, 'URL');
         uiKick += get_kick_state(i, 'URL');
       }
@@ -2596,7 +2722,9 @@ function GrooveWriter() {
       uiTom2,
       uiTom4,
       uiSnare,
-      uiKick
+      uiKick,
+      uiCrash,
+      uiRide
     );
 
     updateSheetMusic();
@@ -2611,6 +2739,8 @@ function GrooveWriter() {
     var uiTom1 = '';
     var uiTom2 = '';
     var uiTom4 = '';
+    var uiCrash = '';
+    var uiRide = '';
     var uiSnare = '';
     var uiKick = '';
     var i;
@@ -2623,6 +2753,8 @@ function GrooveWriter() {
       uiTom1 += get_tom_state(i, 1, 'URL');
       uiTom2 += get_tom_state(i, 2, 'URL');
       uiTom4 += get_tom_state(i, 4, 'URL');
+      uiCrash += get_crash_state(i, 'URL');
+      uiRide += get_ride_state(i, 'URL');
       uiSnare += get_snare_state(i, 'URL');
       uiKick += get_kick_state(i, 'URL');
     }
@@ -2634,6 +2766,8 @@ function GrooveWriter() {
       uiTom1 += get_tom_state(i, 1, 'URL');
       uiTom2 += get_tom_state(i, 2, 'URL');
       uiTom4 += get_tom_state(i, 4, 'URL');
+      uiCrash += get_crash_state(i, 'URL');
+      uiRide += get_ride_state(i, 'URL');
       uiSnare += get_snare_state(i, 'URL');
       uiKick += get_kick_state(i, 'URL');
     }
@@ -2650,7 +2784,9 @@ function GrooveWriter() {
       uiTom2,
       uiTom4,
       uiSnare,
-      uiKick
+      uiKick,
+      uiCrash,
+      uiRide
     );
 
     // reference the button and scroll it into view
@@ -2666,6 +2802,126 @@ function GrooveWriter() {
           'You can create as many measures as you want, but your browser may slow down as more measures are added.\n' +
           'There are also many notation features that would be useful for score writing that are not part of Groove Scribe'
       );
+  };
+
+  // --- Copy / paste one measure ---------------------------------------------
+  // Every line of the grid as URL tab characters (no "|"), all measures.
+  function getTabLinesFromClickableUI() {
+    var lines = {
+      Stickings: '',
+      HH: '',
+      Tom1: '',
+      Tom2: '',
+      Tom4: '',
+      Snare: '',
+      Kick: '',
+      Crash: '',
+      Ride: '',
+    };
+    var topIndex = class_notes_per_measure * class_number_of_measures;
+    for (var i = 0; i < topIndex; i++) {
+      lines.Stickings += get_sticking_state(i, 'URL');
+      lines.HH += get_hh_state(i, 'URL');
+      lines.Tom1 += get_tom_state(i, 1, 'URL');
+      lines.Tom2 += get_tom_state(i, 2, 'URL');
+      lines.Tom4 += get_tom_state(i, 4, 'URL');
+      lines.Snare += get_snare_state(i, 'URL');
+      lines.Kick += get_kick_state(i, 'URL');
+      lines.Crash += get_crash_state(i, 'URL');
+      lines.Ride += get_ride_state(i, 'URL');
+    }
+    return lines;
+  }
+
+  // Kept in localStorage as well, so a bar can be pasted into another groove
+  // (another tab, or after loading a different groove).
+  var constant_measure_clipboard_key = 'grooveScribeMeasureClipboard';
+  var class_measure_clipboard = null;
+
+  // measureNum is indexed starting at 1, not 0
+  root.copyMeasureButtonClick = function (measureNum) {
+    var lines = getTabLinesFromClickableUI();
+    var start = (measureNum - 1) * class_notes_per_measure;
+    var copied = { triplets: usingTriplets(), lines: {} };
+    for (var name in lines) {
+      copied.lines[name] = lines[name].slice(start, start + class_notes_per_measure);
+    }
+    class_measure_clipboard = copied;
+    try {
+      window.localStorage.setItem(constant_measure_clipboard_key, JSON.stringify(copied));
+    } catch (err) {
+      /* storage unavailable: the in-page copy still works */
+    }
+
+    // brief green flash so the click visibly did something
+    var button = document.getElementById('copyMeasureButton' + measureNum);
+    if (button) {
+      button.style.color = '#2a9d2a';
+      window.setTimeout(function () {
+        button.style.color = '';
+      }, 800);
+    }
+  };
+
+  function getMeasureClipboard() {
+    try {
+      var stored = window.localStorage.getItem(constant_measure_clipboard_key);
+      if (stored) return JSON.parse(stored);
+    } catch (err) {
+      /* fall back to the in-page copy */
+    }
+    return class_measure_clipboard;
+  }
+
+  // measureNum is indexed starting at 1, not 0
+  root.pasteMeasureButtonClick = function (measureNum) {
+    var copied = getMeasureClipboard();
+    if (!copied || !copied.lines) {
+      window.alert('Copy a bar first: use the copy button under the bar you want.');
+      return;
+    }
+    if (copied.triplets !== usingTriplets()) {
+      window.alert(
+        'That bar was copied from a ' +
+          (copied.triplets ? 'triplet' : 'non-triplet') +
+          ' groove and can only be pasted into one too.'
+      );
+      return;
+    }
+
+    var lines = getTabLinesFromClickableUI();
+    var start = (measureNum - 1) * class_notes_per_measure;
+    var end = start + class_notes_per_measure;
+    for (var name in lines) {
+      if (copied.lines[name] === undefined) continue;
+      var bar = scaleTabMeasure(copied.lines[name], class_notes_per_measure);
+      lines[name] = lines[name].slice(0, start) + bar + lines[name].slice(end);
+    }
+
+    changeDivisionWithNotes(
+      class_time_division,
+      lines.Stickings,
+      lines.HH,
+      lines.Tom1,
+      lines.Tom2,
+      lines.Tom4,
+      lines.Snare,
+      lines.Kick,
+      lines.Crash,
+      lines.Ride
+    );
+
+    // make sure pasted toms, cymbals and stickings are visible
+    var hasNotes = function (tab) {
+      return /[^-]/.test(tab);
+    };
+    if (hasNotes(copied.lines.Tom1 + copied.lines.Tom2 + copied.lines.Tom4))
+      root.showHideToms(true, true, true);
+    if (hasNotes((copied.lines.Crash || '') + (copied.lines.Ride || '')))
+      root.showHideCymbals(true, true, true);
+    if (hasNotes(copied.lines.Stickings)) root.stickingsShowHide(true, true, true);
+
+    updateSheetMusic();
   };
 
   function showHideCSS_ClassDisplay(className, force, showElseHide, showState) {
@@ -2713,6 +2969,8 @@ function GrooveWriter() {
       set_hh_state(i, 'off');
       set_tom1_state(i, 'off');
       set_tom2_state(i, 'off');
+      set_crash_state(i, 'off');
+      set_ride_state(i, 'off');
       set_tom4_state(i, 'off');
       set_snare_state(i, 'off');
       set_kick_state(i, 'off');
@@ -2723,17 +2981,42 @@ function GrooveWriter() {
   function isTomsVisible() {
     var myElements = document.querySelectorAll('.toms-container');
     for (var i = 0; i < myElements.length; i++) {
-      if (myElements[i].style.visibility == 'visible') return true;
+      if (myElements[i].style.display == 'block') return true;
     }
 
     return false;
   }
 
+  // hidden tom lines are removed from the layout (not just made invisible), so
+  // the grid closes up, like the cymbal lines
   root.showHideToms = function (force, showElseHide, dontRefreshScreen) {
-    var OnElseOff = showHideCSS_ClassVisibility('.toms-container', force, showElseHide);
-    showHideCSS_ClassVisibility('.tom-label', force, showElseHide);
+    var OnElseOff = showHideCSS_ClassDisplay('.toms-container', force, showElseHide, 'block');
+    showHideCSS_ClassDisplay('.tom-label', true, OnElseOff, 'block');
     if (OnElseOff) addOrRemoveKeywordFromClassById('showHideTomsButton', 'ClickToHide', true);
     else addOrRemoveKeywordFromClassById('showHideTomsButton', 'ClickToHide', false);
+
+    if (!dontRefreshScreen) updateSheetMusic();
+
+    return false; // don't follow the link
+  };
+
+  function isCymbalsVisible() {
+    var myElements = /** @type {NodeListOf<HTMLElement>} */ (
+      document.querySelectorAll('.cymbals-container')
+    );
+    for (var i = 0; i < myElements.length; i++) {
+      if (myElements[i].style.display == 'block') return true;
+    }
+
+    return false;
+  }
+
+  // the crash and ride lines (CYMBALS button)
+  root.showHideCymbals = function (force, showElseHide, dontRefreshScreen) {
+    var OnElseOff = showHideCSS_ClassDisplay('.cymbals-container', force, showElseHide, 'block');
+    showHideCSS_ClassDisplay('.cymbals-label', true, OnElseOff, 'block');
+    if (document.getElementById('showHideCymbalsButton'))
+      addOrRemoveKeywordFromClassById('showHideCymbalsButton', 'ClickToHide', OnElseOff);
 
     if (!dontRefreshScreen) updateSheetMusic();
 
@@ -2898,6 +3181,8 @@ function GrooveWriter() {
     root.myGrooveUtils.midiEventCallbacks.loadMidiDataEvent = function (myroot, playStarting) {
       var midiURL;
 
+      if (playStarting) resetGrooveClickPhase(); // always start with the groove
+
       if (playStarting && class_metronome_count_in_active) {
         midiURL = root.myGrooveUtils.MIDI_build_midi_url_count_in_track(
           class_num_beats_per_measure,
@@ -2911,7 +3196,9 @@ function GrooveWriter() {
           class_metronome_count_in_is_playing = false;
           root.myGrooveUtils.resetMetronomeOptionsOffsetClickStartRotation();
         }
-        midiURL = createMidiUrlFromClickableUI('our_MIDI');
+        if (class_groove_click_active && class_groove_click_in_click_phase)
+          midiURL = createClickOnlyMidiUrl(class_groove_click_click_bars);
+        else midiURL = createMidiUrlFromClickableUI('our_MIDI');
         root.myGrooveUtils.midiResetNoteHasChanged();
       }
       root.myGrooveUtils.loadMIDIFromURL(midiURL);
@@ -2929,7 +3216,17 @@ function GrooveWriter() {
         root.metronomeAutoSpeedUpTempoUpdate();
       }
 
-      hilight_note(note_type, percent_complete);
+      // the count-in track doesn't count towards the groove bars
+      if (
+        note_type == 'complete' &&
+        class_groove_click_active &&
+        !class_metronome_count_in_is_playing
+      )
+        advanceGrooveClickPhase();
+
+      // nothing to follow on the grid while only the click is playing
+      var clickOnly = class_groove_click_active && class_groove_click_in_click_phase;
+      hilight_note(note_type, clickOnly ? -1 : percent_complete);
     };
 
     root.myGrooveUtils.oneTimeInitializeMidi();
@@ -3112,7 +3409,17 @@ function GrooveWriter() {
       setFunction = set_snare_state;
     } else if (drumType == 'K') {
       setFunction = set_kick_state;
+    } else if (drumType == 'C') {
+      setFunction = set_crash_state;
+    } else if (drumType == 'R') {
+      setFunction = set_ride_state;
     }
+    // the crash (C) and ride (R) lines have their own small tab alphabets
+    var cymbalModes =
+      drumType == 'C'
+        ? { c: 'crash', C: 'crash2', s: 'splash' }
+        : { r: 'ride', b: 'ride_bell', m: 'cow_bell', s: 'stacker' };
+    var isCymbalLine = drumType == 'C' || drumType == 'R';
 
     // decode the %7C url encoding types
     noteString = decodeURIComponent(noteString);
@@ -3141,6 +3448,10 @@ function GrooveWriter() {
       i < notes.length && displayIndex < topDisplay;
       i += noteStringScaler, displayIndex += displayScaler
     ) {
+      if (isCymbalLine) {
+        setFunction(displayIndex, cymbalModes[notes[i]] || 'off', false);
+        continue;
+      }
       switch (notes[i]) {
         case '$':
           setFunction(displayIndex, 'and', false);
@@ -3254,6 +3565,10 @@ function GrooveWriter() {
       setFunction = set_snare_state;
     } else if (drumType == 'K') {
       setFunction = set_kick_state;
+    } else if (drumType == 'C') {
+      setFunction = set_crash_state;
+    } else if (drumType == 'R') {
+      setFunction = set_ride_state;
     }
 
     //  DisplayIndex is the index into the notes on the HTML page  starts at 1/32\n%%flatbeams
@@ -3265,6 +3580,12 @@ function GrooveWriter() {
       i += noteStringScaler, displayIndex += displayScaler
     ) {
       switch (abcArray[i]) {
+        case constant_ABC_CR_Crash2:
+          setFunction(displayIndex, 'crash2', false);
+          break;
+        case constant_ABC_CR_Splash:
+          setFunction(displayIndex, 'splash', false);
+          break;
         case constant_ABC_STICK_R:
           setFunction(displayIndex, 'right', false);
           break;
@@ -3368,6 +3689,80 @@ function GrooveWriter() {
   function get_FullURLForPage(url_destination) {
     var myGrooveData = root.grooveDataFromClickableUI();
     return root.myGrooveUtils.getUrlStringFromGrooveData(myGrooveData, url_destination);
+  }
+
+  // --- "Groove / click bars" metronome option --------------------------------
+  root.show_GrooveClickConfiguration = function () {
+    document.getElementById('grooveClickGrooveBars').value = class_groove_click_groove_bars;
+    document.getElementById('grooveClickClickBars').value = class_groove_click_click_bars;
+    document.getElementById('grooveClickConfiguration').style.display = 'block';
+  };
+
+  root.close_GrooveClickConfiguration = function () {
+    var readBars = function (id, fallback) {
+      var bars = parseInt(document.getElementById(id).value, 10);
+      if (isNaN(bars)) return fallback;
+      return Math.min(Math.max(bars, 1), 32);
+    };
+    class_groove_click_groove_bars = readBars(
+      'grooveClickGrooveBars',
+      class_groove_click_groove_bars
+    );
+    class_groove_click_click_bars = readBars('grooveClickClickBars', class_groove_click_click_bars);
+    document.getElementById('grooveClickConfiguration').style.display = 'none';
+    resetGrooveClickPhase();
+    root.myGrooveUtils.midiNoteHasChanged(); // start over with the new numbers
+  };
+
+  function resetGrooveClickPhase() {
+    class_groove_click_in_click_phase = false;
+    class_groove_click_bars_played = 0;
+  }
+
+  // Called each time the groove (or the click-only part) finishes playing through.
+  // The groove part always plays whole times through the groove, so with a
+  // 2-bar groove and 3 groove bars it plays 4 bars before the click part.
+  function advanceGrooveClickPhase() {
+    if (class_groove_click_in_click_phase) {
+      resetGrooveClickPhase(); // the click part is a single pass of N bars
+    } else {
+      class_groove_click_bars_played +=
+        class_permutation_type == 'none'
+          ? class_number_of_measures
+          : get_numberOfActivePermutationSections();
+      if (class_groove_click_bars_played < class_groove_click_groove_bars) return;
+      class_groove_click_in_click_phase = true;
+      class_groove_click_bars_played = 0;
+    }
+    root.myGrooveUtils.midiNoteHasChanged(); // load the other part next
+  }
+
+  // `bars` measures of just the metronome (quarter notes if it is off)
+  function createClickOnlyMidiUrl(bars) {
+    var midiFile = new Midi.File();
+    var midiTrack = new Midi.Track();
+    midiFile.addTrack(midiTrack);
+    midiTrack.setTempo(root.myGrooveUtils.getTempo());
+    midiTrack.setInstrument(0, 0x13);
+
+    var empty = get_empty_note_array_in_32nds();
+    for (var bar = 0; bar < bars; bar++) {
+      root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
+        midiTrack,
+        empty,
+        empty,
+        empty,
+        get_empty_voice_arrays_in_32nds(),
+        'our_MIDI',
+        root.getMetronomeFrequency() || 4,
+        empty.length,
+        16,
+        0,
+        class_num_beats_per_measure,
+        class_note_value_per_measure
+      );
+    }
+    return 'data:audio/midi;base64,' + btoa(midiFile.toBytes());
   }
 
   root.show_MetronomeAutoSpeedupConfiguration = function () {
@@ -3652,6 +4047,9 @@ function GrooveWriter() {
     root.expandAuthoringViewWhenNecessary(class_notes_per_measure, class_number_of_measures);
 
     setNotesFromABCArray('Stickings', myGrooveData.sticking_array, class_number_of_measures);
+    // the cymbal lines first: crashes and rides in an older H line move onto them
+    setNotesFromABCArray('C', myGrooveData.crash_array, class_number_of_measures);
+    setNotesFromABCArray('R', myGrooveData.ride_array, class_number_of_measures);
     setNotesFromABCArray('H', myGrooveData.hh_array, class_number_of_measures);
     setNotesFromABCArray('T1', myGrooveData.toms_array[0], class_number_of_measures);
     setNotesFromABCArray('T2', myGrooveData.toms_array[1], class_number_of_measures);
@@ -3660,6 +4058,15 @@ function GrooveWriter() {
     setNotesFromABCArray('K', myGrooveData.kick_array, class_number_of_measures);
 
     if (myGrooveData.showToms) root.showHideToms(true, true, true);
+
+    // open the cymbal lines when the groove uses them (whether they came from
+    // the C / R lines or from an older H line), like the toms
+    for (var n = 0; n < class_notes_per_measure * class_number_of_measures; n++) {
+      if (get_crash_state(n, 'ABC') || get_ride_state(n, 'ABC')) {
+        root.showHideCymbals(true, true, true);
+        break;
+      }
+    }
 
     if (myGrooveData.showStickings) root.stickingsShowHide(true, true, true);
 
@@ -3706,10 +4113,22 @@ function GrooveWriter() {
   //
   // OMG this needs to be refactored really bad.   There is a GrooveData struct from groove utils that
   //      would make this whole thing much easier.  :(
-  function changeDivisionWithNotes(newDivision, Stickings, HH, Tom1, Tom2, Tom4, Snare, Kick) {
+  function changeDivisionWithNotes(
+    newDivision,
+    Stickings,
+    HH,
+    Tom1,
+    Tom2,
+    Tom4,
+    Snare,
+    Kick,
+    Crash,
+    Ride
+  ) {
     var oldDivision = class_time_division;
     var wasStickingsVisable = isStickingsVisible();
     var wasTomsVisable = isTomsVisible();
+    var wasCymbalsVisible = isCymbalsVisible();
 
     class_time_division = newDivision;
     class_notes_per_measure = root.myGrooveUtils.calc_notes_per_measure(
@@ -3737,7 +4156,12 @@ function GrooveWriter() {
 
     if (wasTomsVisable) root.showHideToms(true, true, true);
 
+    if (wasCymbalsVisible) root.showHideCymbals(true, true, true);
+
     // now set the right notes on and off
+    // (the cymbal lines first: a crash or ride found in the H line moves onto them)
+    if (Crash) setNotesFromURLData('C', Crash, class_number_of_measures);
+    if (Ride) setNotesFromURLData('R', Ride, class_number_of_measures);
     if (Stickings && HH && Tom1 && Tom2 && Tom4 && Snare && Kick) {
       setNotesFromURLData('Stickings', Stickings, class_number_of_measures);
       setNotesFromURLData('H', HH, class_number_of_measures);
@@ -3790,6 +4214,8 @@ function GrooveWriter() {
     var uiTom1 = '|';
     var uiTom2 = '|';
     var uiTom4 = '|';
+    var uiCrash = '|';
+    var uiRide = '|';
     var uiSnare = '|';
     var uiKick = '|';
 
@@ -3841,6 +4267,8 @@ function GrooveWriter() {
         uiTom1 += get_tom_state(i, 1, 'URL');
         uiTom2 += get_tom_state(i, 2, 'URL');
         uiTom4 += get_tom_state(i, 4, 'URL');
+        uiCrash += get_crash_state(i, 'URL');
+        uiRide += get_ride_state(i, 'URL');
         uiSnare += get_snare_state(i, 'URL');
         uiKick += get_kick_state(i, 'URL');
       }
@@ -3909,7 +4337,9 @@ function GrooveWriter() {
       uiTom2,
       uiTom4,
       uiSnare,
-      uiKick
+      uiKick,
+      uiCrash,
+      uiRide
     );
 
     updateSheetMusic();

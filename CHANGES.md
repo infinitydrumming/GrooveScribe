@@ -11,6 +11,60 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-04 (second update) — Infinity Drumming
+
+### Crash and ride lines
+
+- A **CYMBALS** button (next to TOMS) shows two new lines above the hi-hat:
+  - **Crash:** Crash 1 (left click), Crash 2 and Splash (right-click menu).
+  - **Ride:** Ride (left click), Ride Bell, Cow Bell and Stacker (right-click
+    menu); the label menu also has downbeats / upbeats.
+  - Each has its own mute button. The metronome clicks stay on the hi-hat line. The lines open automatically for grooves that use them.
+- Crashes and rides can now sound together with the hi-hat (e.g. a crash on
+  beat 1 over a hi-hat pattern), and with each other.
+- Links: wherever the hi-hat is silent, a ride or Crash 1 is still written in
+  the `H=` line exactly as before (likewise a stacker), so typical ride and crash grooves still open
+  fully in other copies of Groove Scribe. Only what can't go there (a cymbal on
+  top of a hi-hat note, Crash 2, Splash, a crash together with a ride) goes in
+  the new `C=` and `R=` lines, which other copies ignore.
+  - `C=`: `c` Crash 1, `C` Crash 2, `s` Splash. `R=`: `r` Ride, `b` Ride Bell,
+    `m` Cow Bell, `s` Stacker.
+- Older links with crash / ride / bell / cow bell / stacker in the hi-hat line
+  open with those notes on the new lines.
+- Notation: Crash 2 is an x on the B above the staff, Splash an x on the high E;
+  both are in the legend. Sounds: Crash 2 is General MIDI note 57 and uses the
+  previously unused "22 Vintage Crash" recording; Splash is note 55, made from
+  the Crash 1 recording played 1.6x faster (no splash recording exists yet).
+  Both are stored as uncompressed WAV rather than MP3, because MP3 encoding adds
+  about 25 ms of silence at the start and made them sound late.
+  `scripts/make-cymbal-samples.mjs` rebuilds both and can take a real splash
+  recording later.
+
+### Hidden lines close up
+
+- Hiding the toms (TOMS button) now removes their lines from the editor instead
+  of leaving empty rows, the same as the CYMBALS lines. The grey separators are
+  now drawn under each row, so they move with the rows.
+
+### Metronome
+
+- **Bar**: a new metronome setting (next to OFF / 4th / 8th / 16th) that clicks
+  once per bar, on the 1. Saved in links as `MetronomeFreq=1`; older versions
+  treat it as quarter notes.
+- **Groove / click bars** (metronome Options): play the groove for a number of
+  bars, then only the click for a number of bars, and repeat. The groove part
+  always plays whole times through the groove; the click part uses the metronome
+  setting (quarter notes if the metronome is off). A count-in doesn't count.
+- The play-along highlight now also follows Crash 2 and Splash notes.
+
+### Copy and paste a bar
+
+- Every bar has copy and paste buttons under its remove button. Copy takes
+  every line of the bar (including toms, cymbals, hi-hat foot and stickings);
+  paste replaces another bar with it. The copy is kept in the browser, so it can
+  be pasted into a different groove, and it is fitted to the other groove's note
+  division (e.g. 16ths into 8ths). Undo works as usual.
+
 ## 2026-10-04 — Infinity Drumming
 
 ### Mid tom line

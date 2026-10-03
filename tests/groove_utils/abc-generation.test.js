@@ -128,6 +128,8 @@ describe('GrooveUtils ABC notation generation', () => {
           "%%map drum ^e' heads=Xhead print=e'   % Metronome click\n" +
           "%%map drum ^f' heads=Xhead print=f'   % Metronome beep\n" +
           "%%map drum ^A' heads=Xhead print=A'   % Ride\n" +
+          "%%map drum ^a' heads=Xhead print=b    % Crash 2\n" +
+          "%%map drum ^g' heads=Xhead print=e'   % Splash\n" +
           "%%map drum ^B' heads=Trihead print=A' % Ride Bell\n" +
           "%%map drum ^D' heads=Trihead print=g   % Cow Bell\n" +
           '%%map drum ^c heads=Xhead print=c  % Cross Stick\n' +
@@ -339,6 +341,8 @@ describe('GrooveUtils ABC notation generation', () => {
           "%%map drum ^e' heads=Xhead print=e'   % Metronome click\n" +
           "%%map drum ^f' heads=Xhead print=f'   % Metronome beep\n" +
           "%%map drum ^A' heads=Xhead print=A'   % Ride\n" +
+          "%%map drum ^a' heads=Xhead print=b    % Crash 2\n" +
+          "%%map drum ^g' heads=Xhead print=e'   % Splash\n" +
           "%%map drum ^B' heads=Trihead print=A' % Ride Bell\n" +
           "%%map drum ^D' heads=Trihead print=g   % Cow Bell\n" +
           '%%map drum ^c heads=Xhead print=c  % Cross Stick\n' +

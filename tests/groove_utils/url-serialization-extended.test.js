@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { newGrooveUtils } from '../helpers/legacyLoader.js';
+import { newGrooveUtils, installMidiGlobal } from '../helpers/legacyLoader.js';
 
 // Deep regression coverage for GrooveUtils' URL <-> grooveData serialization
 // (`getGrooveDataFromUrlString` and `getUrlStringFromGrooveData` in
@@ -310,6 +310,81 @@ describe('GrooveUtils URL serialization (extended)', () => {
         const gd = gu.getGrooveDataFromUrlString('?TimeSig=4/4&Div=16&T2=|q---------------|');
         expect(gd.toms_array[1][0]).toBe(false);
       }).not.toThrow();
+    });
+  });
+
+  describe('Crash (C) and ride (R) lines', () => {
+    const base =
+      '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&S=|----O-------O---|&K=|o-------o-------|';
+    const urlOf = (gd) => {
+      gd.viewMode = false;
+      const out = gu.getUrlStringFromGrooveData(gd);
+      return out.slice(out.indexOf('?'));
+    };
+
+    it('leaves older links with crashes and rides in the H line unchanged', () => {
+      const qs =
+        '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&H=|c-x-r-r-b-r-m-x-|' +
+        base.slice(base.indexOf('&S'));
+      const gd = gu.getGrooveDataFromUrlString(qs);
+      expect(gd.crash_array.every((n) => n === false)).toBe(true);
+      expect(gd.ride_array.every((n) => n === false)).toBe(true);
+      expect(urlOf(gd)).toBe(qs.replace('&Measures=1&H=', '&Measures=1&H='));
+    });
+
+    it('reads "s" as splash on the crash line and stacker on the ride line', () => {
+      const gd = gu.getGrooveDataFromUrlString(
+        base + '&H=|x---------------|&C=|s---------------|&R=|-s--------------|'
+      );
+      expect(gd.crash_array[0]).toBe("^g'"); // splash
+      expect(gd.ride_array[1]).toBe("^d'"); // stacker
+      // a stacker where the hi-hat is silent is written the classic way, in H
+      const out = gu.getUrlStringFromGrooveData(gd);
+      expect(out).toContain('&H=|xs--------------|');
+      expect(out).not.toContain('&R=');
+    });
+
+    it('parses the C and R lines', () => {
+      const gd = gu.getGrooveDataFromUrlString(base + '&C=|cCs-------------|&R=|r-b-m-----------|');
+      expect(gd.crash_array.slice(0, 4)).toEqual(["^c'", "^a'", "^g'", false]);
+      expect(gd.ride_array.slice(0, 6)).toEqual(["^A'", false, "^B'", false, "^D'", false]);
+    });
+
+    it('writes cymbals into the H line where the hi-hat is silent, so older versions can play them', () => {
+      const gd = gu.getGrooveDataFromUrlString(base + '&H=|----------------|');
+      gd.ride_array = gd.ride_array.map((n, i) => (i % 2 === 0 ? "^A'" : false));
+      gd.crash_array[0] = "^c'";
+      const out = urlOf(gd);
+      expect(out).toContain('&H=|r-r-r-r-r-r-r-r-|');
+      expect(out).toContain('&C=|c---------------|'); // the ride took the H slot on beat 1
+      expect(out).not.toContain('&R=');
+    });
+
+    it('uses C= / R= only for what cannot share the H line', () => {
+      const gd = gu.getGrooveDataFromUrlString(base + '&H=|x-x-x-x-x-x-x-x-|');
+      gd.crash_array[0] = "^c'"; // crash on top of a hi-hat
+      gd.crash_array[1] = "^a'"; // crash 2 never fits in H
+      gd.crash_array[3] = "^g'"; // nor does splash
+      const out = urlOf(gd);
+      expect(out).toContain('&H=|x-x-x-x-x-x-x-x-|');
+      expect(out).toContain('&C=|cC-s------------|');
+      // and it reads back the same
+      const back = gu.getGrooveDataFromUrlString(out);
+      expect(back.crash_array.slice(0, 4)).toEqual(["^c'", "^a'", false, "^g'"]);
+    });
+
+    it('draws and plays the cymbal lines', async () => {
+      await installMidiGlobal();
+      const plain = gu.getGrooveDataFromUrlString(base);
+      const withCymbals = gu.getGrooveDataFromUrlString(
+        base + '&C=|C---------------|&R=|r---------------|'
+      );
+      const abc = gu.createABCFromGrooveData(withCymbals, 1000);
+      expect(abc).toContain("^a'"); // crash 2
+      expect(abc).toContain("^A'"); // ride
+      expect(gu.create_MIDIURLFromGrooveData(withCymbals)).not.toBe(
+        gu.create_MIDIURLFromGrooveData(plain)
+      );
     });
   });
 
