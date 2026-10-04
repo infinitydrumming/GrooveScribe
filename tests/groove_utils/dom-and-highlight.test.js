@@ -586,7 +586,7 @@ describe('GrooveUtils.loadFullScreenGrooveScribe', () => {
 
     expect(openSpy).toHaveBeenCalledTimes(1);
     const [url, target] = openSpy.mock.calls[0];
-    expect(url).toContain('https://www.mikeslessons.com/gscribe');
+    expect(url).toContain('https://groove.infinitydrumming.com/');
     expect(target).toBe('_blank');
     expect(focusSpy).toHaveBeenCalledTimes(1);
   });

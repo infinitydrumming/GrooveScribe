@@ -583,7 +583,7 @@ describe('GrooveUtils URL serialization (extended)', () => {
     it('"fullGrooveScribe" replaces the whole origin+path with the hardcoded external URL', () => {
       const gd = gu.getGrooveDataFromUrlString('?TimeSig=4/4&Div=16');
       const out = gu.getUrlStringFromGrooveData(gd, 'fullGrooveScribe');
-      expect(out.startsWith('https://www.mikeslessons.com/gscribe?')).toBe(true);
+      expect(out.startsWith('https://groove.infinitydrumming.com/?')).toBe(true);
     });
 
     it('an unrecognized destination string falls through unchanged, same as no destination', () => {

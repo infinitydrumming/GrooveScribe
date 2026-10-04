@@ -11,6 +11,12 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-04 (third update) — Infinity Drumming
+
+- The "full Groove Scribe" share link and the "open in Groove Scribe" link on
+  embedded grooves now go to https://groove.infinitydrumming.com/ instead of
+  mikeslessons.com.
+
 ## 2026-10-04 (second update) — Infinity Drumming
 
 ### Crash and ride lines

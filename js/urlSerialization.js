@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -245,7 +245,7 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
     else fullURL += 'GrooveEmbed.html';
   } else if (url_destination == 'fullGrooveScribe') {
     // asking for the full GrooveScribe link
-    fullURL = 'https://www.mikeslessons.com/gscribe';
+    fullURL = 'https://groove.infinitydrumming.com/';
   }
 
   fullURL += '?';

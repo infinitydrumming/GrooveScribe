@@ -8,7 +8,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom in GrooveDB tabs. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom in GrooveDB tabs, editor link points to groove.infinitydrumming.com. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -310,7 +310,7 @@ if (typeof GrooveDisplay === 'undefined') {
 
         if (linkToEditor)
           svgTarget.innerHTML =
-            '<a style="text-decoration: none" href="http://mikeslessons.com/gscribe/' +
+            '<a style="text-decoration: none" href="https://groove.infinitydrumming.com/' +
             GrooveDefinition +
             '">' +
             svgReturn.svg +

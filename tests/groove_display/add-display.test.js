@@ -46,7 +46,7 @@ describe('AddGrooveDisplayToElementId', () => {
     GD.AddGrooveDisplayToElementId('host', DEF, false, true, false);
     const anchor = host.querySelector('.svgTarget a');
     expect(anchor).toBeTruthy();
-    expect(anchor.getAttribute('href')).toBe('http://mikeslessons.com/gscribe/' + DEF);
+    expect(anchor.getAttribute('href')).toBe('https://groove.infinitydrumming.com/' + DEF);
   });
 
   it('renders a bare SVG (no link) when linkToEditor is false', () => {
