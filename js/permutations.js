@@ -1,3 +1,4 @@
+// Modified by Infinity Drumming, 2026: permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, alternating kick / snare, repeats. See CHANGES.md.
 // Permutation engine (Step 4 extraction from groove_writer.js).
 //
 // Pure combinatorial generators for the "permutation" practice modes: they build
@@ -17,130 +18,368 @@ import {
   constant_ABC_KI_Splash,
 } from './constants.js';
 
-export function get_permutation_pre_ABC(section) {
-  var abc = '';
+// --- Permutation figures (Infinity Drumming, 2026) ----------------------------
+//
+// Each note setting has its own ordered list of figure groups (Singles, Doubles,
+// ...). A group is one checkbox in the Permutation Options menu, with optional
+// sub-checkboxes, one per figure. A figure is one bar of the permutation: a list
+// of hits over the full-size bar (32 slots, or 48 for triplets).
+//
+//   1/16 notes       a 4-note pattern per beat (1 e & a)
+//   1/8 notes        the same 4-note pattern stretched over 2 beats (1 & 2 &)
+//   1/8 triplets     a 3-note pattern per beat (1 & a), plus cross-rhythms
+//   1/16 triplets    the 1/8 triplet figures, each lasting an 8th note, plus per-beat figures
+//   1/32 notes       the 1/16 figures, each lasting an 8th note, plus per-beat figures
 
-  switch (section) {
-    case 0:
-      abc += 'P:Ostinato\n%\n%\n%Just the Ositnato\n';
-      break;
-    case 1:
-      abc += 'T: \nP: Singles\n%\n%\n% singles on the "1"\n%\n';
-      break;
-    case 2:
-      abc += '%\n%\n% singles on the "e"\n%\n';
-      break;
-    case 3:
-      abc += '%\n%\n% singles on the "&"\n%\n';
-      break;
-    case 4:
-      abc += '%\n%\n% singles on the "a"\n%\n';
-      break;
-    case 5:
-      abc += 'T: \nP: Doubles\n%\n%\n% doubles on the "1"\n%\n';
-      break;
-    case 6:
-      abc += '%\n%\n% doubles on the "e"\n%\n';
-      break;
-    case 7:
-      abc += '%\n%\n% doubles on the "&"\n%\n';
-      break;
-    case 8:
-      abc += '%\n%\n% doubles on the "a"\n%\n';
-      break;
-    case 9:
-      abc += 'T: \nP: Down/Up Beats\n%\n%\n% upbeats on the "1"\n%\n';
-      break;
-    case 10:
-      abc += '%\n%\n% downbeats on the "e"\n%\n';
-      break;
-    case 11:
-      abc += 'T: \nP: Triples\n%\n%\n% triples on the "1"\n%\n';
-      break;
-    case 12:
-      abc += '%\n%\n% triples on the "e"\n%\n';
-      break;
-    case 13:
-      abc += '%\n%\n% triples on the "&"\n%\n';
-      break;
-    case 14:
-      abc += '%\n%\n% triples on the "a"\n%\n';
-      break;
-    case 15:
-      abc += 'T: \nP: Quads\n%\n%\n% quads\n%\n';
-      break;
-    default:
-      abc += '\nT: Error: No index passed\n';
-      break;
-  }
-
-  return abc;
+// a full-size bar of hits: isHit(slot) -> boolean
+function hitsArray(slots, isHit) {
+  var hits = [];
+  for (var slot = 0; slot < slots; slot++) hits.push(!!isHit(slot));
+  return hits;
 }
 
-export function get_permutation_post_ABC(section, usingTriplets) {
-  var abc = '';
-
-  switch (section) {
-    case 0:
-      abc += '|\n';
-      break;
-    case 1:
-      abc += '\\\n';
-      break;
-    case 2:
-      abc += '\n';
-      break;
-    case 3:
-      if (usingTriplets) abc += '|\n';
-      else abc += '\\\n';
-      break;
-    case 4:
-      abc += '|\n';
-      break;
-    case 5:
-      abc += '\\\n';
-      break;
-    case 6:
-      abc += '\n';
-      break;
-    case 7:
-      if (usingTriplets) abc += '|\n';
-      else abc += '\\\n';
-      break;
-    case 8:
-      abc += '|\n';
-      break;
-    case 9:
-      abc += '\\\n';
-      break;
-    case 10:
-      abc += '|\n';
-      break;
-    case 11:
-      if (usingTriplets) abc += '|\n';
-      else abc += '\\\n';
-      break;
-    case 12:
-      abc += '\n';
-      break;
-    case 13:
-      abc += '\\\n';
-      break;
-    case 14:
-      abc += '|\n';
-      break;
-    case 15:
-      abc += '|\n';
-      break;
-    default:
-      abc += '\nT: Error: No index passed\n';
-      break;
-  }
-
-  return abc;
+// "Per beat" groups: Singles / Doubles / Triples lasting a whole beat, starting
+// on each of the `notesPerBeat` grid notes of the beat (1/16 triplets: 6, the
+// 8th-triplet notes and the off-beats between them; 1/32 notes: 8). Unticked by
+// default to keep the list short.
+function perBeatGroups(slots, unit, notesPerBeat) {
+  var beat = notesPerBeat * unit;
+  var labels = [];
+  for (var l = 1; l <= notesPerBeat; l++) labels.push(String(l));
+  var inBeat = function (notes) {
+    return function (slot) {
+      return notes.some(function (note) {
+        return slot % beat == (note % notesPerBeat) * unit;
+      });
+    };
+  };
+  return [
+    { id: 'PermuationOptionsSinglesBeat', name: 'Singles (per beat)', length: 1 },
+    { id: 'PermuationOptionsDoublesBeat', name: 'Doubles (per beat)', length: 2 },
+    { id: 'PermuationOptionsTriplesBeat', name: 'Triples (per beat)', length: 3 },
+  ].map(function (spec) {
+    return {
+      id: spec.id,
+      name: spec.name,
+      defaultOn: false,
+      subLabels: labels,
+      figures: labels.map(function (label, start) {
+        var notes = [];
+        for (var n = 0; n < spec.length; n++) notes.push(start + n);
+        return { hits: hitsArray(slots, inBeat(notes)) };
+      }),
+    };
+  });
 }
 
-// Module-private generators — reached only via the two get_kick16th_* dispatchers.
+// Straight figures: `unit` slots per grid note, 4 grid notes per pattern.
+// `labels` names the 4 positions. Only the 16ths layout keeps a link to the
+// original section numbers, for the hand-written "Simplify multiple kicks" bars.
+function straightLayout(mode, unit, labels, pairName, pairLabels, extraGroups) {
+  var slots = 32;
+  var group = 4 * unit;
+  var at = function (position) {
+    return function (slot) {
+      return slot % group == position * unit;
+    };
+  };
+  var any = function (positions) {
+    return function (slot) {
+      return positions.some(function (position) {
+        return at(position % 4)(slot);
+      });
+    };
+  };
+  var legacy = function (section) {
+    return mode == 'sixteenths' ? section : undefined;
+  };
+  var figure = function (isHit, legacySection) {
+    return { hits: hitsArray(slots, isHit), legacy16th: legacy(legacySection) };
+  };
+  var positions = [0, 1, 2, 3];
+
+  return {
+    mode: mode,
+    slots: slots,
+    unit: unit,
+    simplifyAllowed: mode == 'sixteenths',
+    groups: [
+      {
+        id: 'PermuationOptionsOstinato',
+        name: 'Ostinato',
+        defaultOn: false,
+        subLabels: [],
+        figures: [figure(() => false, 0)],
+      },
+      {
+        id: 'PermuationOptionsSingles',
+        name: 'Singles',
+        defaultOn: true,
+        subLabels: labels,
+        figures: positions.map((p) => figure(at(p), 1 + p)),
+      },
+      {
+        // was "Downbeats/Upbeats": every other grid note, on and off the beat
+        id: 'PermuationOptionsUpsDowns',
+        name: pairName,
+        defaultOn: true,
+        subLabels: pairLabels,
+        figures: [figure(any([0, 2]), 9), figure(any([1, 3]), 10)],
+      },
+      {
+        id: 'PermuationOptionsDoubles',
+        name: 'Doubles',
+        defaultOn: true,
+        subLabels: labels,
+        figures: positions.map((p) => figure(any([p, p + 1]), 5 + p)),
+      },
+      {
+        id: 'PermuationOptionsTriples',
+        name: 'Triples',
+        defaultOn: true,
+        subLabels: labels,
+        figures: positions.map((p) => figure(any([p, p + 1, p + 2]), 11 + p)),
+      },
+      {
+        id: 'PermuationOptionsQuads',
+        name: 'Quads',
+        defaultOn: false,
+        subLabels: [],
+        figures: [figure(any([0, 1, 2, 3]), 15)],
+      },
+      ...(extraGroups || []),
+    ],
+  };
+}
+
+// Triplet figures: `unit` slots per triplet note, 3 notes per pattern, then
+// cross-rhythms that run across the bar: every 2nd note (2 starting points)
+// and every 4th note (4 starting points).
+function tripletLayout(mode, unit, labels, every2Labels, every4Labels) {
+  var slots = 48;
+  var group = 3 * unit;
+  var at = function (position) {
+    return function (slot) {
+      return slot % group == position * unit;
+    };
+  };
+  var any = function (positions) {
+    return function (slot) {
+      return positions.some(function (position) {
+        return at(position % 3)(slot);
+      });
+    };
+  };
+  var everyNth = function (n, start) {
+    return function (slot) {
+      return slot % unit == 0 && (slot / unit) % n == start;
+    };
+  };
+  var figure = function (isHit) {
+    return { hits: hitsArray(slots, isHit) };
+  };
+  var positions = [0, 1, 2];
+
+  // 1/16 triplets only: the per-beat figures on all 6 notes of the beat
+  var perBeat = mode == 'triplets16' ? perBeatGroups(slots, unit, 6) : [];
+
+  return {
+    mode: mode,
+    slots: slots,
+    unit: unit,
+    simplifyAllowed: false,
+    groups: [
+      {
+        id: 'PermuationOptionsOstinato',
+        name: 'Ostinato',
+        defaultOn: false,
+        subLabels: [],
+        figures: [figure(() => false)],
+      },
+      {
+        id: 'PermuationOptionsSingles',
+        name: 'Singles',
+        defaultOn: true,
+        subLabels: labels,
+        figures: positions.map((p) => figure(at(p))),
+      },
+      {
+        id: 'PermuationOptionsDoubles',
+        name: 'Doubles',
+        defaultOn: true,
+        subLabels: labels,
+        figures: positions.map((p) => figure(any([p, p + 1]))),
+      },
+      ...perBeat,
+      {
+        id: 'PermuationOptionsEvery2nd',
+        name: 'Cross-rhythm: every 2nd note',
+        defaultOn: true,
+        subLabels: every2Labels,
+        figures: [0, 1].map((start) => figure(everyNth(2, start))),
+      },
+      {
+        id: 'PermuationOptionsEvery4th',
+        name: 'Cross-rhythm: every 4th note',
+        defaultOn: true,
+        subLabels: every4Labels,
+        figures: [0, 1, 2, 3].map((start) => figure(everyNth(4, start))),
+      },
+    ],
+  };
+}
+
+/**
+ * The permutation figure groups for a note setting (time division).
+ *
+ * @param {number} timeDivision  4, 8, 16, 32, or triplet forms 12, 24, 48.
+ */
+export function getPermutationLayout(timeDivision) {
+  switch (timeDivision) {
+    case 12:
+    case 48:
+      return tripletLayout('triplets8', 4, ['1', '&', 'a'], ['1', '&'], ['1', '&', 'a', '2']);
+    case 24:
+      return tripletLayout(
+        'triplets16',
+        2,
+        ['1', '&', 'a'],
+        ['1st', '2nd'],
+        ['1st', '2nd', '3rd', '4th']
+      );
+    case 32:
+      return straightLayout(
+        'thirtyseconds',
+        1,
+        ['1st', '2nd', '3rd', '4th'],
+        '16ths / Off-beat 32nds',
+        ['16ths', 'off 32nds'],
+        perBeatGroups(32, 1, 8)
+      );
+    case 4:
+    case 8:
+      return straightLayout('eighths', 4, ['1', '&', '2', '&'], 'Quarter notes / Off-beat 8ths', [
+        '4ths',
+        'off 8ths',
+      ]);
+    default:
+      return straightLayout('sixteenths', 2, ['1', 'e', '&', 'a'], '8th notes / Off-beat 16ths', [
+        '8ths',
+        'off 16ths',
+      ]);
+  }
+}
+
+/**
+ * Every figure of a layout in playing order, with the group it belongs to and
+ * its sub-checkbox number (1-based; 0 when the group has no sub-checkboxes).
+ */
+export function getPermutationSections(layout) {
+  var sections = [];
+  layout.groups.forEach(function (group, groupIndex) {
+    group.figures.forEach(function (figure, figureIndex) {
+      sections.push({
+        group: group,
+        groupIndex: groupIndex,
+        sub: group.subLabels.length ? figureIndex + 1 : 0,
+        label: group.subLabels[figureIndex] || '',
+        figure: figure,
+      });
+    });
+  });
+  return sections;
+}
+
+// ABC that goes before / after one bar of a permutation. `shownIndex` is the
+// bar's position among the shown bars of its group; `lastInGroup` marks the last
+// one. Two bars per line; the group name is printed over its first bar.
+export function getPermutationSectionABC(section, shownIndex, lastInGroup, repeats) {
+  var pre = '';
+  if (shownIndex === 0) {
+    if (section.groupIndex === 0) pre += 'P:Ostinato\n';
+    else
+      pre +=
+        'T: \nP: ' +
+        section.group.name +
+        (repeats > 1 ? '   (play each ×' + repeats + ')' : '') +
+        '\n';
+  }
+  pre +=
+    '%\n% ' + section.group.name + (section.label ? ' on "' + section.label + '"' : '') + '\n%\n';
+
+  var post;
+  if (lastInGroup) post = '|\n';
+  else if (shownIndex % 2 == 1) post = '\n';
+  else post = '\\\n';
+
+  return { pre: pre, post: post };
+}
+
+// One bar of kicks for a figure. "Simplify multiple kicks" (1/16 notes only)
+// uses the original hand-written bars, which leave out some kicks.
+export function getPermutationKickArray(section, simplify) {
+  if (simplify && section.figure.legacy16th !== undefined)
+    return get_kick16th_minus_some_strait_permutation_array(section.figure.legacy16th);
+  return section.figure.hits.map((hit) => (hit ? constant_ABC_KI_Normal : false));
+}
+
+/**
+ * One bar of alternating kick and snare for a figure: the figure's hits, in
+ * order, go lead drum, other drum, lead drum, ... across the bar.
+ *
+ * @param {object} section
+ * @param {boolean} kickLead  true: the first hit is a kick; false: a snare
+ * @returns {{kick: Array<string|false>, snare: Array<string|false>}}
+ */
+export function getPermutationAlternatingBar(section, kickLead) {
+  var kick = [];
+  var snare = [];
+  var count = 0;
+  section.figure.hits.forEach(function (hit) {
+    var isKick = hit && (count % 2 === 0) === kickLead;
+    kick.push(hit && isKick ? constant_ABC_KI_Normal : false);
+    snare.push(hit && !isKick ? constant_ABC_SN_Normal : false);
+    if (hit) count++;
+  });
+  return { kick: kick, snare: snare };
+}
+
+/**
+ * One bar of snare for a figure.
+ *
+ * @param {object} section
+ * @param {'normal'|'accent'|'diddle'} style  plain hits; accents with ghost notes on
+ *   every other grid note ("Use Accent Grid"); or buzzed accents with diddled ghosts
+ * @param {number} unit  slots per grid note (from the layout)
+ */
+export function getPermutationSnareArray(section, style, unit) {
+  var hits = section.figure.hits;
+  if (style == 'normal' || section.groupIndex === 0)
+    return hits.map((hit) => (hit ? constant_ABC_SN_Normal : false));
+
+  var snare = [];
+  if (style == 'accent') {
+    for (var i = 0; i < hits.length; i++) {
+      if (hits[i]) snare.push(constant_ABC_SN_Accent);
+      else if (i % unit === 0) snare.push(constant_ABC_SN_Ghost);
+      else snare.push(false);
+    }
+    return snare;
+  }
+
+  // diddle: each accent is a buzz followed by a rest, every other slot a ghost
+  for (var j = 0; j < hits.length; j++) {
+    if (hits[j]) {
+      snare.push(constant_ABC_SN_Buzz);
+      if (j + 1 < hits.length) snare.push(false);
+      j++;
+    } else snare.push(constant_ABC_SN_Ghost);
+  }
+  return snare;
+}
+
+// The original hand-written 1/16 kick bars for "Simplify multiple kicks", by original
+// section number (1-4 singles, 5-8 doubles, 9-10 8ths / off 16ths, 11-14 triples, 15 quads).
 function get_kick16th_minus_some_strait_permutation_array(section) {
   var kick_array;
 
@@ -726,360 +965,6 @@ function get_kick16th_minus_some_strait_permutation_array(section) {
   }
 
   return kick_array;
-}
-
-function get_kick16th_strait_permutation_array(section) {
-  var kick_array = [];
-  for (var index = 0; index < 32; index++) {
-    switch (section) {
-      case 0:
-        // no notes on
-        kick_array.push(false);
-        break;
-      case 1:
-        // every 0th note of 8
-        kick_array.push(index % 8 ? false : 'F');
-        break;
-      case 2:
-        // every 2nd note of 8
-        kick_array.push((index - 2) % 8 ? false : 'F');
-        break;
-      case 3:
-        // every 4nd note of 8
-        kick_array.push((index - 4) % 8 ? false : 'F');
-        break;
-      case 4:
-        // every 6nd note of 8
-        kick_array.push((index - 6) % 8 ? false : 'F');
-        break;
-      case 5:
-        // every 0th and 2nd
-        if (index % 8 == 0) kick_array.push('F');
-        else if ((index - 2) % 8 == 0) kick_array.push('F');
-        else kick_array.push(false);
-        break;
-      case 6:
-        // every 2nd & 4th
-        if ((index - 2) % 8 == 0) kick_array.push('F');
-        else if ((index - 4) % 8 == 0) kick_array.push('F');
-        else kick_array.push(false);
-        break;
-      case 7:
-        // every 4th & 6th
-        if ((index - 4) % 8 == 0) kick_array.push('F');
-        else if ((index - 6) % 8 == 0) kick_array.push('F');
-        else kick_array.push(false);
-        break;
-      case 8:
-        // every 0th & 6th
-        if ((index - 0) % 8 == 0) kick_array.push('F');
-        else if ((index - 6) % 8 == 0) kick_array.push('F');
-        else kick_array.push(false);
-        break;
-      case 9: // downbeats
-        // every 0th note of 4
-        kick_array.push(index % 4 ? false : 'F');
-        break;
-      case 10: // upbeats
-        // every 2nd note of 4
-        kick_array.push((index - 2) % 4 ? false : 'F');
-        break;
-      case 11:
-        return (kick_array = [
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-        ]);
-      case 12:
-        return (kick_array = [
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-        ]);
-      case 13:
-        return (kick_array = [
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-        ]);
-      case 14:
-        return (kick_array = [
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          'F',
-          false,
-          false,
-          false,
-          'F',
-          false,
-        ]);
-      case 15:
-      /* falls through */
-      default:
-        // every 0th note of 2  (quads)
-        kick_array.push(index % 2 ? false : 'F');
-        break;
-    }
-  }
-
-  console.log(kick_array);
-  return kick_array;
-}
-
-function get_kick16th_triplets_permutation_array(section) {
-  var kick_array = [];
-  for (var index = 0; index < 48; index++) {
-    switch (section) {
-      case 0:
-        // no notes on
-        kick_array.push(false);
-        break;
-      case 1:
-        // every 0th note of 12
-        kick_array.push(index % 12 ? false : 'F');
-        break;
-      case 2:
-        // every 4th note of 12
-        kick_array.push((index - 4) % 12 ? false : 'F');
-        break;
-      case 3:
-        // every 8th note of 12
-        kick_array.push((index - 8) % 12 ? false : 'F');
-        break;
-
-      case 5:
-        // every 0th and 4th
-        if (index % 12 == 0) kick_array.push('F');
-        else if ((index - 4) % 12 == 0) kick_array.push('F');
-        else kick_array.push(false);
-        break;
-      case 6:
-        // every 4th && 8th
-        if ((index - 4) % 12 == 0) kick_array.push('F');
-        else if ((index - 8) % 12 == 0) kick_array.push('F');
-        else kick_array.push(false);
-        break;
-      case 7:
-        // every 0th and 8th
-        if (index % 12 == 0) kick_array.push('F');
-        else if ((index - 8) % 12 == 0) kick_array.push('F');
-        else kick_array.push(false);
-        break;
-
-      // these cases should not be called
-      case 4: // 4th single
-      case 8: // 4th double
-      case 9: // 1st up/down
-      case 10: // 2nd up/down
-      case 12: // 2nd triplet
-      case 13: // 3nd triplet
-      case 14: // 4nd triplet
-      case 15: // 1st Quad
-        console.log('bad case in get_kick16th_triplets_permutation_array_for_16ths()');
-        break;
-
-      case 11: // first triplet
-      /* falls through */
-      default:
-        // use default
-        // every 4th note
-        if (index % 4 == 0) kick_array.push('F');
-        else kick_array.push(false);
-        break;
-    }
-  }
-  return kick_array;
-}
-
-export function get_kick16th_permutation_array(section, usingTriplets) {
-  if (usingTriplets) {
-    return get_kick16th_triplets_permutation_array(section);
-  }
-
-  return get_kick16th_strait_permutation_array(section);
-}
-
-export function get_kick16th_permutation_array_minus_some(section, usingTriplets) {
-  if (usingTriplets) {
-    // triplets never skip any: delegate
-    return get_kick16th_permutation_array(section, usingTriplets);
-  }
-
-  return get_kick16th_minus_some_strait_permutation_array(section);
-}
-
-export function get_snare_permutation_array(section, usingTriplets) {
-  // its the same as the 16th kick permutation, but with different notes
-  var snare_array = get_kick16th_permutation_array(section, usingTriplets);
-
-  // turn the kicks into snares
-  for (var i = 0; i < snare_array.length; i++) {
-    if (snare_array[i] !== false) snare_array[i] = constant_ABC_SN_Normal;
-  }
-
-  return snare_array;
-}
-
-export function get_snare_accent_permutation_array(section, usingTriplets) {
-  // its the same as the 16th kick permutation, but with different notes
-  var snare_array = get_kick16th_permutation_array(section, usingTriplets);
-
-  if (section > 0) {
-    // Don't convert notes for the first measure since it is the ostinado
-    for (var i = 0; i < snare_array.length; i++) {
-      if (snare_array[i] !== false) snare_array[i] = constant_ABC_SN_Accent;
-      else if (i % 2 === 0)
-        // all other even notes are ghosted snares
-        snare_array[i] = constant_ABC_SN_Ghost;
-    }
-  }
-
-  return snare_array;
-}
-
-export function get_snare_accent_with_diddle_permutation_array(section, usingTriplets) {
-  // its the same as the 16th kick permutation, but with different notes
-  var snare_array = get_kick16th_permutation_array(section, usingTriplets);
-
-  if (section > 0) {
-    // Don't convert notes for the first measure since it is the ostinado
-    for (var i = 0; i < snare_array.length; i++) {
-      if (snare_array[i] !== false) {
-        snare_array[i] = constant_ABC_SN_Buzz;
-        i++; // the next one is not diddled  (leave it false)
-      } else {
-        // all other even notes are diddled, which means 32nd notes
-        snare_array[i] = constant_ABC_SN_Ghost;
-      }
-    }
-  }
-
-  return snare_array;
-}
-
-export function get_numSectionsFor_permutation_array() {
-  var numSections = 16;
-
-  /*)
-		if(usingTriplets()) {
-		numSections = 8;
-		} else {
-		numSections = 16;
-		}
-		 */
-
-  return numSections;
 }
 
 // Reduce a kick array to just its splash notes (used when merging a permutation

@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash 2, splash and cymbal voice indexes. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash 2, splash, cymbal voice indexes, tom ghosts and accents, ride accent. See CHANGES.md.
 // Drum-notation and MIDI constants shared across the app.
 // Extracted from groove_utils.js (Step 2 of the refactor). Both groove_utils.js
 // and groove_writer.js import what they need from here.
@@ -35,10 +35,21 @@ export const constant_ABC_T1_Normal = 'e';
 export const constant_ABC_T2_Normal = 'd';
 export const constant_ABC_T3_Normal = 'B';
 export const constant_ABC_T4_Normal = 'A';
+// Tom ghost notes and accents, written like the snare's (Infinity Drumming)
+export const constant_ABC_T1_Ghost = '!(.!!).!e';
+export const constant_ABC_T2_Ghost = '!(.!!).!d';
+export const constant_ABC_T3_Ghost = '!(.!!).!B';
+export const constant_ABC_T4_Ghost = '!(.!!).!A';
+export const constant_ABC_T1_Accent = '!accent!e';
+export const constant_ABC_T2_Accent = '!accent!d';
+export const constant_ABC_T3_Accent = '!accent!B';
+export const constant_ABC_T4_Accent = '!accent!A';
 // Crash line extras (crash 1 is constant_ABC_HH_Crash; the ride line uses the
 // existing ride / ride bell / cow bell tokens)
 export const constant_ABC_CR_Crash2 = "^a'";
 export const constant_ABC_CR_Splash = "^g'";
+// Ride accent (ride line only)
+export const constant_ABC_RD_Accent = "!accent!^A'";
 export const constant_NUMBER_OF_TOMS = 4;
 // The editor carries the crash and ride lines after the four toms in its
 // "toms" voice arrays (the ABC and MIDI builders treat those as extra voices).
@@ -48,6 +59,8 @@ export const constant_ABC_OFF = false;
 export const constant_OUR_MIDI_VELOCITY_NORMAL = 85;
 export const constant_OUR_MIDI_VELOCITY_ACCENT = 120;
 export const constant_OUR_MIDI_VELOCITY_GHOST = 50;
+// Tom ghost notes: about 30% of a normal hit (MIDI.js volume is proportional to velocity)
+export const constant_OUR_MIDI_VELOCITY_TOM_GHOST = 25;
 export const constant_OUR_MIDI_METRONOME_1 = 76;
 export const constant_OUR_MIDI_METRONOME_NORMAL = 77;
 export const constant_OUR_MIDI_HIHAT_NORMAL = 42;

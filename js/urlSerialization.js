@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -8,6 +8,7 @@
 import { createGrooveData } from './grooveData.js';
 import {
   constant_ABC_HH_Crash,
+  constant_ABC_RD_Accent,
   constant_DEFAULT_TEMPO,
   constant_MAX_MEASURES,
 } from './constants.js';
@@ -77,6 +78,20 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
     getQueryVariableFromString('MetronomeFreq', '0', encodedURLData),
     10
   );
+
+  // "Groove / click bars" practice option (Infinity Drumming): on when GrooveBars
+  // is present; each count is 1-32 bars, 4 if missing or not a number.
+  var grooveBars = getQueryVariableFromString('GrooveBars', false, encodedURLData);
+  if (grooveBars !== false) {
+    var practiceBars = function (value) {
+      var bars = parseInt(value, 10);
+      return isNaN(bars) ? 4 : Math.min(Math.max(bars, 1), 32);
+    };
+    myGrooveData.grooveClickGrooveBars = practiceBars(grooveBars);
+    myGrooveData.grooveClickClickBars = practiceBars(
+      getQueryVariableFromString('ClickBars', '4', encodedURLData)
+    );
+  }
 
   myGrooveData.numberOfMeasures = parseInt(
     getQueryVariableFromString('measures', 1, encodedURLData),
@@ -280,6 +295,15 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
     fullURL += '&MetronomeFreq=' + myGrooveData.metronomeFrequency;
   }
 
+  // "Groove / click bars" practice option, only when it is on
+  if (myGrooveData.grooveClickGrooveBars > 0) {
+    fullURL +=
+      '&GrooveBars=' +
+      myGrooveData.grooveClickGrooveBars +
+      '&ClickBars=' +
+      myGrooveData.grooveClickClickBars;
+  }
+
   // notes
   var total_notes = myGrooveData.notesPerMeasure * myGrooveData.numberOfMeasures;
 
@@ -291,7 +315,8 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
   var rideLine = (myGrooveData.ride_array || []).slice(0, total_notes);
   for (var n = 0; n < total_notes; n++) {
     if (hhLine[n]) continue;
-    if (rideLine[n]) {
+    // (an accented ride stays in R=: older versions read "R" in H as a plain ride)
+    if (rideLine[n] && rideLine[n] != constant_ABC_RD_Accent) {
       hhLine[n] = rideLine[n];
       rideLine[n] = false;
     } else if (crashLine[n] == constant_ABC_HH_Crash) {

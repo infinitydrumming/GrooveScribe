@@ -1,4 +1,4 @@
-/* Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, credits footer. See CHANGES.md. */
+/* Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, tom ghost / accent marks, credits footer. See CHANGES.md. */
 /* this is for debugging layout issues - puts a red border around everything */
 /* body * { border: 1px solid red; }		 */
 DEBUG {
@@ -446,6 +446,15 @@ body {
 .ride_ride {
   color: #cccccc; /* grey "click here" mark when off */
 }
+/* ride accent: a small ">" above right of the ride mark */
+.ride_accent {
+  position: absolute;
+  top: -9px;
+  left: 19px;
+  font-size: 16px;
+  color: transparent;
+  cursor: pointer;
+}
 .crash_c2 sup,
 .crash_splash sub {
   font-size: 11px;
@@ -763,6 +772,28 @@ body {
   border: 2px solid;
   border-color: #999;
   border-radius: 30px;
+  cursor: pointer;
+}
+/* tom ghost note "(•)" and accent ">" (inside the black circle), like the snare */
+.tom_ghost {
+  position: absolute;
+  top: -5px;
+  left: 0px;
+  font-size: 24px;
+  line-height: 30px;
+  color: transparent;
+  cursor: pointer;
+}
+.tom_ghost .dot_in_snare_ghost_note {
+  font-size: 12px;
+}
+.tom_accent {
+  position: absolute;
+  top: 5px;
+  left: 10px;
+  line-height: 13px;
+  font-size: 13px;
+  color: transparent;
   cursor: pointer;
 }
 .dot_in_snare_ghost_note {

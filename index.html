@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, logo, credits.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, credits.  See CHANGES.md -->
 
     <head>
 		<title>Groove Scribe | Infinity Drumming</title>
@@ -208,6 +208,7 @@
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuSolo"      onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("Solo");'  title="Just hear the metronome." >Solo</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuSpeedUp"   onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("SpeedUp");' title="Increase the tempo automatically" >Auto speed up</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuGrooveClick" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("GrooveClick");' title="Play the groove for some bars, then just the click for some bars">Groove / click bars</li>
+				<li class="metronomeOptionsContextMenuItem menuChecked" id="metronomeOptionsContextMenuAutoScroll" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("AutoScroll");' title="While playing, scroll the page to follow the playing bar of the music">Auto-scroll</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuCountIn"   onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("CountIn");' title="One measure of metronome count in at the start" >Count it in</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuOffTheOne" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("OffTheOne");' title="Click on the e, &, or a">Offset click</li>
 				<!--
@@ -264,6 +265,7 @@
 			<ul id="rideContextMenu" class="list">
 				<li onclick='myGrooveWriter.notePopupClick("ride", "off");'>Off</li>
 				<li onclick='myGrooveWriter.notePopupClick("ride", "ride");'>Ride</li>
+				<li onclick='myGrooveWriter.notePopupClick("ride", "ride_accent");'>Ride Accent</li>
 				<li onclick='myGrooveWriter.notePopupClick("ride", "ride_bell");'>Ride Bell</li>
 				<li onclick='myGrooveWriter.notePopupClick("ride", "cow_bell");'>Cow Bell</li>
 				<li onclick='myGrooveWriter.notePopupClick("ride", "stacker");'>Stacker</li>
@@ -273,18 +275,24 @@
 			<ul id="tom1ContextMenu" class="list">
 				<li onclick='myGrooveWriter.notePopupClick("tom1", "off");'>Off</li>
 				<li onclick='myGrooveWriter.notePopupClick("tom1", "normal");'>Tom Normal</li>
+				<li onclick='myGrooveWriter.notePopupClick("tom1", "accent");'>Tom Accent</li>
+				<li onclick='myGrooveWriter.notePopupClick("tom1", "ghost");'>Ghost Note</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
 			<ul id="tom2ContextMenu" class="list">
 				<li onclick='myGrooveWriter.notePopupClick("tom2", "off");'>Off</li>
 				<li onclick='myGrooveWriter.notePopupClick("tom2", "normal");'>Tom Normal</li>
+				<li onclick='myGrooveWriter.notePopupClick("tom2", "accent");'>Tom Accent</li>
+				<li onclick='myGrooveWriter.notePopupClick("tom2", "ghost");'>Ghost Note</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
 			<ul id="tom4ContextMenu" class="list">
 				<li onclick='myGrooveWriter.notePopupClick("tom4", "off");'>Off</li>
 				<li onclick='myGrooveWriter.notePopupClick("tom4", "normal");'>Tom Normal</li>
+				<li onclick='myGrooveWriter.notePopupClick("tom4", "accent");'>Tom Accent</li>
+				<li onclick='myGrooveWriter.notePopupClick("tom4", "ghost");'>Ghost Note</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -405,6 +413,8 @@
 				<li onclick='myGrooveWriter.permutationPopupClick("none");'><b>None</b></li>
 				<li onclick='myGrooveWriter.permutationPopupClick("kick_16ths");'><b>Kick</b> Permutation</li>
 				<li onclick='myGrooveWriter.permutationPopupClick("snare_16ths");'><b>Snare</b> Permutation</li>
+				<li onclick='myGrooveWriter.permutationPopupClick("kick_snare_kick_lead");'><b>Kick &amp; Snare</b> (kick lead)</li>
+				<li onclick='myGrooveWriter.permutationPopupClick("kick_snare_snare_lead");'><b>Kick &amp; Snare</b> (snare lead)</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">

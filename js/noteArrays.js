@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride tabs, bar scaling for paste. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride tabs, bar scaling for paste, tom ghosts and accents, ride accent. See CHANGES.md.
 // Note-array / drum-tab conversions and default grooves (Step 2 extraction).
 // Pure module: converts between tab strings and ABC note arrays, builds default
 // grooves, and note-mapping/sticking-count helpers. GrooveUtils delegates here.
@@ -17,6 +17,7 @@ import {
   constant_ABC_HH_Stacker,
   constant_ABC_CR_Crash2,
   constant_ABC_CR_Splash,
+  constant_ABC_RD_Accent,
   constant_ABC_KI_Normal,
   constant_ABC_KI_SandK,
   constant_ABC_KI_Splash,
@@ -37,7 +38,29 @@ import {
   constant_ABC_T2_Normal,
   constant_ABC_T3_Normal,
   constant_ABC_T4_Normal,
+  constant_ABC_T1_Ghost,
+  constant_ABC_T2_Ghost,
+  constant_ABC_T3_Ghost,
+  constant_ABC_T4_Ghost,
+  constant_ABC_T1_Accent,
+  constant_ABC_T2_Accent,
+  constant_ABC_T3_Accent,
+  constant_ABC_T4_Accent,
 } from './constants.js';
+
+// tom ghost / accent tokens by tom line (T1-T4)
+var TOM_GHOST = {
+  T1: constant_ABC_T1_Ghost,
+  T2: constant_ABC_T2_Ghost,
+  T3: constant_ABC_T3_Ghost,
+  T4: constant_ABC_T4_Ghost,
+};
+var TOM_ACCENT = {
+  T1: constant_ABC_T1_Accent,
+  T2: constant_ABC_T2_Accent,
+  T3: constant_ABC_T3_Accent,
+  T4: constant_ABC_T4_Accent,
+};
 import { calc_notes_per_measure, isTripletDivision } from './musicMath.js';
 
 function tablatureToABCNotationPerNote(drumType, tablatureChar) {
@@ -63,6 +86,7 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
       break;
     case 'g':
       if (drumType == 'S') return constant_ABC_SN_Ghost;
+      else if (TOM_GHOST[drumType]) return TOM_GHOST[drumType];
       break;
     case 'l':
     case 'L':
@@ -79,6 +103,7 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
       break;
     case 'O':
       if (drumType == 'S') return constant_ABC_SN_Accent;
+      else if (TOM_ACCENT[drumType]) return TOM_ACCENT[drumType];
       break;
     case 'o':
       switch (drumType) {
@@ -110,6 +135,8 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
       break;
     case 'r':
     case 'R':
+      // "R" on the ride line is an accented ride (on the H line it stays a plain ride)
+      if (drumType == 'R' && tablatureChar == 'R') return constant_ABC_RD_Accent;
       switch (drumType) {
         case 'H':
         case 'R':
@@ -225,6 +252,9 @@ function abcNotationToTablaturePerNote(drumType, abcChar) {
     case constant_ABC_CR_Crash2:
       tabChar = 'C';
       break;
+    case constant_ABC_RD_Accent:
+      tabChar = 'R';
+      break;
     case constant_ABC_HH_Metronome_Normal:
       tabChar = 'n';
       break;
@@ -238,6 +268,10 @@ function abcNotationToTablaturePerNote(drumType, abcChar) {
       tabChar = '+';
       break;
     case constant_ABC_SN_Accent:
+    case constant_ABC_T1_Accent:
+    case constant_ABC_T2_Accent:
+    case constant_ABC_T3_Accent:
+    case constant_ABC_T4_Accent:
       tabChar = 'O';
       break;
     case constant_ABC_SN_Buzz:
@@ -248,6 +282,10 @@ function abcNotationToTablaturePerNote(drumType, abcChar) {
       tabChar = 'x';
       break;
     case constant_ABC_SN_Ghost:
+    case constant_ABC_T1_Ghost:
+    case constant_ABC_T2_Ghost:
+    case constant_ABC_T3_Ghost:
+    case constant_ABC_T4_Ghost:
       tabChar = 'g';
       break;
     case constant_ABC_SN_Normal:

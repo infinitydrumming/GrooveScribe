@@ -344,6 +344,18 @@ describe('GrooveUtils URL serialization (extended)', () => {
       expect(out).not.toContain('&R=');
     });
 
+    it('reads and writes ride accents (R) on the ride line, never in H', () => {
+      const gd = gu.getGrooveDataFromUrlString(base + '&H=|----------------|&R=|R-r-------------|');
+      expect(gd.ride_array.slice(0, 3)).toEqual(["!accent!^A'", false, "^A'"]);
+      const out = gu.getUrlStringFromGrooveData(gd);
+      // the plain ride moves into H as before; the accented one stays in R
+      expect(out).toContain('&H=|--r-------------|');
+      expect(out).toContain('&R=|R---------------|');
+      // "R" in an older H line is still a plain ride
+      const old = gu.getGrooveDataFromUrlString(base + '&H=|R---------------|');
+      expect(old.hh_array[0]).toBe("^A'");
+    });
+
     it('parses the C and R lines', () => {
       const gd = gu.getGrooveDataFromUrlString(base + '&C=|cCs-------------|&R=|r-b-m-----------|');
       expect(gd.crash_array.slice(0, 4)).toEqual(["^c'", "^a'", "^g'", false]);
@@ -385,6 +397,39 @@ describe('GrooveUtils URL serialization (extended)', () => {
       expect(gu.create_MIDIURLFromGrooveData(withCymbals)).not.toBe(
         gu.create_MIDIURLFromGrooveData(plain)
       );
+    });
+  });
+
+  describe('"Groove / click bars" practice option (GrooveBars / ClickBars)', () => {
+    const qs = '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&MetronomeFreq=1';
+    const urlOf = (gd) => {
+      gd.viewMode = false;
+      const out = gu.getUrlStringFromGrooveData(gd);
+      return out.slice(out.indexOf('?'));
+    };
+
+    it('is off by default and not written to the URL', () => {
+      const gd = gu.getGrooveDataFromUrlString(qs);
+      expect(gd.grooveClickGrooveBars).toBe(0);
+      expect(urlOf(gd)).not.toContain('GrooveBars');
+      expect(urlOf(gd)).not.toContain('ClickBars');
+    });
+
+    it('reads and writes the bar counts', () => {
+      const gd = gu.getGrooveDataFromUrlString(qs + '&GrooveBars=2&ClickBars=6');
+      expect(gd.grooveClickGrooveBars).toBe(2);
+      expect(gd.grooveClickClickBars).toBe(6);
+      expect(urlOf(gd)).toContain('&MetronomeFreq=1&GrooveBars=2&ClickBars=6');
+    });
+
+    it('defaults a missing or bad count to 4 and clamps to 1-32', () => {
+      const missing = gu.getGrooveDataFromUrlString(qs + '&GrooveBars=3');
+      expect(missing.grooveClickClickBars).toBe(4);
+      const bad = gu.getGrooveDataFromUrlString(qs + '&GrooveBars=abc&ClickBars=99');
+      expect(bad.grooveClickGrooveBars).toBe(4);
+      expect(bad.grooveClickClickBars).toBe(32);
+      const zero = gu.getGrooveDataFromUrlString(qs + '&GrooveBars=0&ClickBars=1');
+      expect(zero.grooveClickGrooveBars).toBe(1);
     });
   });
 

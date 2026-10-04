@@ -175,7 +175,7 @@ describe('copyMeasureButtonClick / pasteMeasureButtonClick', () => {
     const n = gw.notesPerMeasure();
     const gd = gw.grooveDataFromClickableUI();
     expect(gd.kick_array.slice(n, n + 3)).toEqual(['F', false, '^d,']);
-    expect(gd.snare_array[n + 4]).toBe('!accent!c');
+    expect(gd.snare_array[n + 4]).toBe('c');
     expect(gd.kick_array.slice(0, n)).toEqual(gd.kick_array.slice(n));
   });
 

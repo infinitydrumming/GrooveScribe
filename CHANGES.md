@@ -11,6 +11,87 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## Fourth update — Infinity Drumming
+
+### Permutations
+
+- The figures now depend on the note setting:
+  - **1/16 notes:** Ostinato, Singles (1 e & a), **8th notes / Off-beat 16ths**
+    (formerly "Downbeats/Upbeats", now straight after Singles and ticked by
+    default), Doubles, Triples, Quads. The patterns themselves are unchanged.
+  - **1/8 notes (new):** the same structure stretched over 2 beats: Singles on
+    1 / & / 2 / &, Quarter notes / Off-beat 8ths, Doubles, Triples, Quads (all 8ths).
+  - **1/8 triplets:** Ostinato, Singles (1 & a), Doubles, then cross-rhythms instead
+    of Triples: every 2nd note (starting on 1 or &) and every 4th note (all four
+    starting points: 1, &, a, 2).
+  - **1/16 triplets:** the 1/8-triplet figures, each lasting an 8th note instead of
+    a beat; the cross-rhythms count in 16th triplets. Plus **Singles / Doubles /
+    Triples (per beat)**: figures lasting a whole beat on all 6 notes of the beat
+    (the 8th-triplet notes 1, 3, 5 and the off-beats 2, 4, 6). They start unticked;
+    tick a group, or single figures, to add them.
+  - **1/32 notes:** the 1/16 figures, each lasting an 8th note (Singles,
+    16ths / Off-beat 32nds, Doubles, Triples, Quads, with 4 starting points in the
+    8th note), so the 32nd notes between the 16ths are covered; plus **Singles /
+    Doubles / Triples (per beat)** on all 8 32nd notes of the beat, unticked by
+    default.
+- **Kick & Snare (kick lead)** and **Kick & Snare (snare lead)** in the
+  Permutations menu, for every note setting: the same figures, with the hits
+  alternating kick and snare starting on the lead drum (e.g. kick lead, singles on
+  "1": kick on 1, snare on 2, kick on 3, snare on 4; doubles: kick then snare). The
+  alternation runs through the whole bar, so triples go K S K, S K S. The hi-hat
+  (and hi-hat foot notes) stay from the groove; the permutation replaces the kick
+  and snare.
+- **Play each ×** (1, 2, 3, 4, 6 or 8) in Permutation Options repeats every figure
+  before the next one. The sheet music prints each figure once, with "play each ×N"
+  next to the group name, and the play-along highlight follows the printed bar.
+- Code: js/permutations.js builds the figure lists (getPermutationLayout); the
+  menu, sheet music and playback all read from them. A check confirmed every
+  existing 1/16 figure, "Simplify multiple kicks" bar and triplet single / double
+  is identical to before.
+
+### Auto-scroll
+
+- While playing, the page scrolls to keep the playing bar of the sheet music in
+  view (about a third of the way down the screen). It only follows while some of
+  the sheet music is on screen, so it won't pull the page away from the note grid.
+  On by default; **Auto-scroll** in metronome Options switches it off, and the
+  browser remembers the choice.
+
+### Tom ghost notes and accents
+
+- Every tom line (Tom 1, Tom 2, Floor) now has **Tom Accent** and **Ghost Note** in
+  its right-click menu, like the snare. Left click still adds a normal hit (and clears
+  any tom note).
+- Grid: an accent is a white `>` on the black circle; a ghost note is a bracketed dot.
+  Notation: accents with `>`, ghost notes in brackets. Playback: same tom sound, ghost
+  notes quieter (velocity 50) and accents louder (120).
+- Links use the snare's letters in the tom lines: `g` ghost note, `O` accent (`o` /
+  `x` are still a normal hit, so existing links open unchanged). Other copies of Groove
+  Scribe don't know these letters and leave those notes out.
+
+- Tom ghost notes play at velocity 25 (about 30% of a normal tom hit; MIDI.js volume
+  is proportional to velocity). The snare keeps its own ghost-note recording.
+
+### Ride accents
+
+- The ride line's right-click menu has **Ride Accent**: the ride mark with a small `>`,
+  a `>` over the note in the notation, and a louder ride (velocity 120).
+- Links: `R` in the `R=` line. Accented rides always stay in `R=` (plain rides still go
+  into `H=` where the hi-hat is silent), because older versions read `R` in `H=` as a
+  plain ride; other copies of Groove Scribe leave accented rides out.
+
+### Snare click
+
+- Left-clicking (or ctrl-dragging over) the snare line now adds a normal snare hit
+  instead of an accent. Accents are in the right-click menu and the label's
+  "all Accented".
+
+### "Groove / click bars" in links
+
+- When the metronome option "Groove / click bars" is on, it is saved in the link as
+  `&GrooveBars=4&ClickBars=4` (with your numbers), so a shared link opens with it
+  already on. Links without it are unchanged; other copies of Groove Scribe ignore it.
+
 ## 2026-10-04 (third update) — Infinity Drumming
 
 - The "full Groove Scribe" share link and the "open in Groove Scribe" link on

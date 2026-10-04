@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -18,6 +18,7 @@ import {
   constant_ABC_HH_Stacker,
   constant_ABC_CR_Crash2,
   constant_ABC_CR_Splash,
+  constant_ABC_RD_Accent,
   constant_ABC_KI_Normal,
   constant_ABC_KI_SandK,
   constant_ABC_KI_Splash,
@@ -32,6 +33,14 @@ import {
   constant_ABC_T2_Normal,
   constant_ABC_T3_Normal,
   constant_ABC_T4_Normal,
+  constant_ABC_T1_Ghost,
+  constant_ABC_T2_Ghost,
+  constant_ABC_T3_Ghost,
+  constant_ABC_T4_Ghost,
+  constant_ABC_T1_Accent,
+  constant_ABC_T2_Accent,
+  constant_ABC_T3_Accent,
+  constant_ABC_T4_Accent,
   constant_NUMBER_OF_TOMS,
   constant_OUR_MIDI_HIHAT_ACCENT,
   constant_OUR_MIDI_HIHAT_COW_BELL,
@@ -62,6 +71,7 @@ import {
   constant_OUR_MIDI_TOM4_NORMAL,
   constant_OUR_MIDI_VELOCITY_ACCENT,
   constant_OUR_MIDI_VELOCITY_GHOST,
+  constant_OUR_MIDI_VELOCITY_TOM_GHOST,
   constant_OUR_MIDI_VELOCITY_NORMAL,
 } from './constants.js';
 import { isTripletDivisionFromNotesPerMeasure, scaleNoteArrayToFullSize } from './musicMath.js';
@@ -432,6 +442,7 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
         for (var which_array = 0; which_array < Toms_Array.length; which_array++) {
           /** @type {number | false} */
           var tom_note = false;
+          var tom_velocity = constant_OUR_MIDI_VELOCITY_NORMAL;
           if (Toms_Array[which_array] && Toms_Array[which_array][i] !== undefined) {
             switch (Toms_Array[which_array][i]) {
               case constant_ABC_HH_Crash:
@@ -445,6 +456,10 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
                 break;
               case constant_ABC_HH_Ride:
                 tom_note = constant_OUR_MIDI_HIHAT_RIDE;
+                break;
+              case constant_ABC_RD_Accent:
+                tom_note = constant_OUR_MIDI_HIHAT_RIDE;
+                tom_velocity = constant_OUR_MIDI_VELOCITY_ACCENT;
                 break;
               case constant_ABC_HH_Ride_Bell:
                 tom_note = constant_OUR_MIDI_HIHAT_RIDE_BELL;
@@ -467,6 +482,39 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
               case constant_ABC_T4_Normal: // Midi code Low Tom 1
                 tom_note = constant_OUR_MIDI_TOM4_NORMAL;
                 break;
+              // tom ghost notes and accents: same tom, quieter / louder
+              case constant_ABC_T1_Ghost:
+                tom_note = constant_OUR_MIDI_TOM1_NORMAL;
+                tom_velocity = constant_OUR_MIDI_VELOCITY_TOM_GHOST;
+                break;
+              case constant_ABC_T1_Accent:
+                tom_note = constant_OUR_MIDI_TOM1_NORMAL;
+                tom_velocity = constant_OUR_MIDI_VELOCITY_ACCENT;
+                break;
+              case constant_ABC_T2_Ghost:
+                tom_note = constant_OUR_MIDI_TOM2_NORMAL;
+                tom_velocity = constant_OUR_MIDI_VELOCITY_TOM_GHOST;
+                break;
+              case constant_ABC_T2_Accent:
+                tom_note = constant_OUR_MIDI_TOM2_NORMAL;
+                tom_velocity = constant_OUR_MIDI_VELOCITY_ACCENT;
+                break;
+              case constant_ABC_T3_Ghost:
+                tom_note = constant_OUR_MIDI_TOM3_NORMAL;
+                tom_velocity = constant_OUR_MIDI_VELOCITY_TOM_GHOST;
+                break;
+              case constant_ABC_T3_Accent:
+                tom_note = constant_OUR_MIDI_TOM3_NORMAL;
+                tom_velocity = constant_OUR_MIDI_VELOCITY_ACCENT;
+                break;
+              case constant_ABC_T4_Ghost:
+                tom_note = constant_OUR_MIDI_TOM4_NORMAL;
+                tom_velocity = constant_OUR_MIDI_VELOCITY_TOM_GHOST;
+                break;
+              case constant_ABC_T4_Accent:
+                tom_note = constant_OUR_MIDI_TOM4_NORMAL;
+                tom_velocity = constant_OUR_MIDI_VELOCITY_ACCENT;
+                break;
               case false:
                 break;
               default:
@@ -475,12 +523,7 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
             }
           }
           if (tom_note !== false) {
-            midiTrack.addNoteOn(
-              midi_channel,
-              tom_note,
-              delay_for_next_note,
-              constant_OUR_MIDI_VELOCITY_NORMAL
-            );
+            midiTrack.addNoteOn(midi_channel, tom_note, delay_for_next_note, tom_velocity);
             delay_for_next_note = 0; // zero the delay
           }
         }

@@ -337,7 +337,7 @@ describe('HTMLforPermutationOptions', () => {
   });
 
   describe('"kick_16ths" permutation type (straight 4/4, default 16th division)', () => {
-    it('renders the Skip-first-notes, Ostinato, Singles, Doubles, Downbeats/Upbeats, Triples and Quads groups', async () => {
+    it('renders Simplify, Ostinato, Singles, 8th notes / off-beat 16ths, Doubles, Triples and Quads, plus Play each', async () => {
       document.body.innerHTML = '';
       gw = await newGrooveWriter();
       scaffoldForStateMutatingCalls(gw);
@@ -347,31 +347,36 @@ describe('HTMLforPermutationOptions', () => {
       expect(html).toMatchSnapshot();
 
       const groupIds = permutationGroupIds(html);
+      // 8th notes / off-beat 16ths (formerly "Downbeats/Upbeats") come straight
+      // after Singles
       expect(groupIds).toEqual([
         'PermuationOptionsSkipSomeFirstNotes',
         'PermuationOptionsOstinato',
         'PermuationOptionsSingles',
-        'PermuationOptionsDoubles',
         'PermuationOptionsUpsDowns',
+        'PermuationOptionsDoubles',
         'PermuationOptionsTriples',
         'PermuationOptionsQuads',
       ]);
 
       expect(html).toContain('>Simplify multiple kicks</label>');
-      expect(html).toContain('>Downbeats/Upbeats</label>');
+      expect(html).toContain('>8th notes / Off-beat 16ths</label>');
+      expect(html).toMatch(/<select id="PermutationRepeat"[^>]*>/);
+      expect(html).toContain('<option value="1" selected>\u00d71</option>');
       expect(html).toContain('>Quads</label>');
       // Kick permutation does NOT add the snare-only "Use Accent Grid" option.
       expect(html).not.toContain('Use Accent Grid');
-      // Singles/Doubles/Triples default on (checked), Ostinato/UpsDowns/Quads/
+      // Singles/8ths/Doubles/Triples default on (checked), Ostinato/Quads/
       // SkipSomeFirstNotes default off.
       expect(html).toMatch(/checked type="checkbox"[^>]*id="PermuationOptionsSingles"/);
+      expect(html).toMatch(/checked type="checkbox"[^>]*id="PermuationOptionsUpsDowns"/);
       expect(html).toMatch(/checked type="checkbox"[^>]*id="PermuationOptionsDoubles"/);
       expect(html).toMatch(/checked type="checkbox"[^>]*id="PermuationOptionsTriples"/);
       expect(html).not.toMatch(/checked type="checkbox"[^>]*id="PermuationOptionsOstinato"/);
       expect(html).not.toMatch(/checked type="checkbox"[^>]*id="PermuationOptionsQuads"/);
     });
 
-    it('drops SkipSomeFirstNotes/Downbeats-Upbeats/Quads and uses 3-way (not 4-way) sub-options when the division is triplet-based', async () => {
+    it('1/16 triplets: Singles and Doubles (3-way), per-beat groups (6-way), then the cross-rhythms', async () => {
       window.history.pushState({}, '', '/?Div=24');
       document.body.innerHTML = '';
       gw = await newGrooveWriter();
@@ -380,14 +385,17 @@ describe('HTMLforPermutationOptions', () => {
 
       const html = gw.HTMLforPermutationOptions();
       const groupIds = permutationGroupIds(html);
-      // Triplets only support 4/4 (2/4), so noteGroupingSize's "e"/upbeat
-      // subdivisions and the odd-count-specific groups don't apply.
       expect(groupIds).toEqual([
         'PermuationOptionsOstinato',
         'PermuationOptionsSingles',
         'PermuationOptionsDoubles',
-        'PermuationOptionsTriples',
+        'PermuationOptionsSinglesBeat',
+        'PermuationOptionsDoublesBeat',
+        'PermuationOptionsTriplesBeat',
+        'PermuationOptionsEvery2nd',
+        'PermuationOptionsEvery4th',
       ]);
+      expect(html).toContain('>Cross-rhythm: every 4th note</label>');
       // Sub-options fall back to the 3-item ["1","&","a"] set (no "e") for triplets.
       expect(html).toContain('>1</label>');
       expect(html).toContain('>&</label>');
@@ -409,8 +417,8 @@ describe('HTMLforPermutationOptions', () => {
         'PermuationOptionsAccentGrid',
         'PermuationOptionsOstinato',
         'PermuationOptionsSingles',
-        'PermuationOptionsDoubles',
         'PermuationOptionsUpsDowns',
+        'PermuationOptionsDoubles',
         'PermuationOptionsTriples',
         'PermuationOptionsQuads',
       ]);

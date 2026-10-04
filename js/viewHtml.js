@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each". See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -183,7 +183,9 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
         '<div class="ride_cowbell note_part" id="ride_cowbell' +
         '#"><i class="fa fa-plus-square-o"></i></div>' +
         '<div class="ride_stacker note_part" id="ride_stacker' +
-        '#"><i class="fa fa-bars"></i></div>',
+        '#"><i class="fa fa-bars"></i></div>' +
+        '<div class="ride_accent note_part" id="ride_accent' +
+        '#"><i class="fa fa-angle-right"></i></div>',
     },
   ];
   cymbalRows.forEach(function (row) {
@@ -320,6 +322,12 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 							<div class="tom_circle note_part"  id="tom_circle1-' +
       i +
       '"></div>\
+							<div class="tom_ghost note_part"  id="tom_ghost1-' +
+      i +
+      '">(<i class="fa fa-circle dot_in_snare_ghost_note"></i>)</div>\
+							<div class="tom_accent note_part"  id="tom_accent1-' +
+      i +
+      '"><i class="fa fa-chevron-right"></i></div>\
 						</div>\n\
 						';
 
@@ -358,6 +366,12 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 							<div class="tom_circle note_part"  id="tom_circle2-' +
       i +
       '"></div>\
+							<div class="tom_ghost note_part"  id="tom_ghost2-' +
+      i +
+      '">(<i class="fa fa-circle dot_in_snare_ghost_note"></i>)</div>\
+							<div class="tom_accent note_part"  id="tom_accent2-' +
+      i +
+      '"><i class="fa fa-chevron-right"></i></div>\
 						</div>\n\
 						';
 
@@ -491,6 +505,12 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 							<div class="tom_circle note_part"  id="tom_circle4-' +
       i +
       '"></div>\
+							<div class="tom_ghost note_part"  id="tom_ghost4-' +
+      i +
+      '">(<i class="fa fa-circle dot_in_snare_ghost_note"></i>)</div>\
+							<div class="tom_accent note_part"  id="tom_accent4-' +
+      i +
+      '"><i class="fa fa-chevron-right"></i></div>\
 						</div>\n\
 						';
 
@@ -624,63 +644,20 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
   return newHTML;
 } // end function buildStaffContainerHTML
 
-export function buildPermutationOptionsHTML(permutationType, usingTriplets) {
+// `layout` is permutations.getPermutationLayout(...) for the current note
+// setting; `repeats` is the current "Play each ×" value.
+export function buildPermutationOptionsHTML(permutationType, layout, repeats) {
   if (permutationType == 'none') return '';
 
-  var optionTypeArray = [
-    {
-      id: 'PermuationOptionsOstinato',
-      subid: 'PermuationOptionsOstinato_sub',
-      name: 'Ostinato',
-      SubOptions: [],
-      defaultOn: false,
-    },
-    {
-      id: 'PermuationOptionsSingles',
-      subid: 'PermuationOptionsSingles_sub',
-      name: 'Singles',
-      SubOptions: ['1', '&', 'a'],
-      defaultOn: true,
-    },
-    {
-      id: 'PermuationOptionsDoubles',
-      subid: 'PermuationOptionsDoubles_sub',
-      name: 'Doubles',
-      SubOptions: ['1', '&', 'a'],
-      defaultOn: true,
-    },
-    {
-      id: 'PermuationOptionsTriples',
-      subid: 'PermuationOptionsTriples_sub',
-      name: 'Triples',
-      SubOptions: [],
-      defaultOn: true,
-    },
-  ];
-
-  // change and add other options for non triplet based ostinatos
-  // Most of the types have 4 sub options
-  // add up beats and down beats
-  // add quads
-  if (!usingTriplets) {
-    optionTypeArray[1].SubOptions = ['1', 'e', '&', 'a']; // singles
-    optionTypeArray[2].SubOptions = ['1', 'e', '&', 'a']; // doubles
-    optionTypeArray[3].SubOptions = ['1', 'e', '&', 'a']; // triples
-    optionTypeArray.splice(3, 0, {
-      id: 'PermuationOptionsUpsDowns',
-      subid: 'PermuationOptionsUpsDowns_sub',
-      name: 'Downbeats/Upbeats',
-      SubOptions: ['downs', 'ups'],
-      defaultOn: false,
-    });
-    optionTypeArray.splice(5, 0, {
-      id: 'PermuationOptionsQuads',
-      subid: 'PermuationOptionsQuads_sub',
-      name: 'Quads',
-      SubOptions: [],
-      defaultOn: false,
-    });
-  }
+  var optionTypeArray = layout.groups.map(function (group) {
+    return {
+      id: group.id,
+      subid: group.id + '_sub',
+      name: group.name,
+      SubOptions: group.subLabels,
+      defaultOn: group.defaultOn,
+    };
+  });
 
   switch (permutationType) {
     case 'snare_16ths':
@@ -693,7 +670,7 @@ export function buildPermutationOptionsHTML(permutationType, usingTriplets) {
       });
       break;
     case 'kick_16ths':
-      if (!usingTriplets)
+      if (layout.simplifyAllowed)
         optionTypeArray.splice(0, 0, {
           id: 'PermuationOptionsSkipSomeFirstNotes',
           subid: '',
@@ -702,12 +679,31 @@ export function buildPermutationOptionsHTML(permutationType, usingTriplets) {
           defaultOn: false,
         });
       break;
+    case 'kick_snare_kick_lead':
+    case 'kick_snare_snare_lead':
+      break; // no extra options
     default:
       console.log('Bad case in buildPermutationOptionsHTML()');
       break;
   }
 
   var newHTML = '<span id="PermutationOptionsHeader">Permutation Options</span>\n';
+
+  // how many times each figure plays before the next one
+  newHTML += '<span id="PermutationRepeatOption"><label for="PermutationRepeat">Play each</label> ';
+  newHTML +=
+    '<select id="PermutationRepeat" onchange="myGrooveWriter.permutationRepeatChange(event)">';
+  [1, 2, 3, 4, 6, 8].forEach(function (times) {
+    newHTML +=
+      '<option value="' +
+      times +
+      '"' +
+      (times == repeats ? ' selected' : '') +
+      '>\u00d7' +
+      times +
+      '</option>';
+  });
+  newHTML += '</select></span>\n';
 
   newHTML += '<span class="PermutationOptionWrapper">';
 

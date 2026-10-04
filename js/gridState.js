@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines, separate kick / hi-hat foot muting. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines, separate kick / hi-hat foot muting, tom ghosts and accents, ride accent. See CHANGES.md.
 // Clickable-grid note state (Step 4 extraction from groove_writer.js).
 //
 // Read side of the note grid: given a cell id, report whether a voice is on and
@@ -26,6 +26,7 @@ import {
   constant_ABC_HH_Stacker,
   constant_ABC_CR_Crash2,
   constant_ABC_CR_Splash,
+  constant_ABC_RD_Accent,
   constant_CRASH_VOICE_INDEX,
   constant_RIDE_VOICE_INDEX,
   constant_ABC_KI_Normal,
@@ -46,6 +47,12 @@ import {
   constant_ABC_T1_Normal,
   constant_ABC_T2_Normal,
   constant_ABC_T4_Normal,
+  constant_ABC_T1_Ghost,
+  constant_ABC_T2_Ghost,
+  constant_ABC_T4_Ghost,
+  constant_ABC_T1_Accent,
+  constant_ABC_T2_Accent,
+  constant_ABC_T4_Accent,
   constant_note_on_color_rgb,
   constant_snare_accent_on_color_rgb,
   constant_sticking_both_on_color_rgb,
@@ -121,35 +128,41 @@ export function is_tom_on(id, tom_num) {
   return false;
 }
 
+// Tom tokens by tom number: [normal, ghost, accent]
+var TOM_TOKENS = {
+  1: [constant_ABC_T1_Normal, constant_ABC_T1_Ghost, constant_ABC_T1_Accent],
+  2: [constant_ABC_T2_Normal, constant_ABC_T2_Ghost, constant_ABC_T2_Accent],
+  4: [constant_ABC_T4_Normal, constant_ABC_T4_Ghost, constant_ABC_T4_Accent],
+};
+
 export function get_tom_state(id, tom_num, returnType) {
-  var tomOn =
-    document.getElementById('tom_circle' + tom_num + '-' + id).style.backgroundColor ==
-    constant_note_on_color_rgb;
+  var part = function (name) {
+    return document.getElementById(name + tom_num + '-' + id);
+  };
+  var tomOn = part('tom_circle').style.backgroundColor == constant_note_on_color_rgb;
+  // ghost: the bracketed dot is shown; accent: the white ">" is shown on the black circle
+  var ghostOn = part('tom_ghost') && part('tom_ghost').style.color == constant_note_on_color_rgb;
+  var accentOn =
+    part('tom_accent') && part('tom_accent').style.color == constant_snare_accent_on_color_rgb;
 
   if (returnType != 'ABC' && returnType != 'URL') {
     console.log('bad returnType in get_kick_state()');
     returnType = 'ABC';
   }
 
-  if (tomOn) {
-    if (returnType == 'ABC')
-      switch (tom_num) {
-        case 1:
-          return constant_ABC_T1_Normal; // normal
-        case 2:
-          return constant_ABC_T2_Normal; // normal
-        case 4:
-          return constant_ABC_T4_Normal; // normal
-        default:
-          console.log('bad switch in get_tom_state. bad tom num:' + tom_num);
-          break;
-      }
-    else if (returnType == 'URL') return 'x'; // normal
+  var tokens = TOM_TOKENS[tom_num];
+  if (!tokens) {
+    console.log('bad switch in get_tom_state. bad tom num:' + tom_num);
+    return returnType == 'URL' ? '-' : false;
   }
+
+  if (ghostOn) return returnType == 'URL' ? 'g' : tokens[1];
+  if (accentOn) return returnType == 'URL' ? 'O' : tokens[2];
+  if (tomOn) return returnType == 'URL' ? 'x' : tokens[0];
 
   if (returnType == 'ABC')
     return false; // off (rest)
-  else if (returnType == 'URL') return '-'; // off (rest)
+  else return '-'; // off (rest)
 }
 
 // The kick voice holds both feet; these report each foot on its own.
@@ -284,11 +297,12 @@ export function get_crash_state(id, returnType) {
   return returnType == 'URL' ? '-' : false;
 }
 
-// Ride line: ride / ride bell / cow bell / stacker (URL characters r / b / m / s).
+// Ride line: ride / ride accent / ride bell / cow bell / stacker (URL characters r / R / b / m / s).
 export function get_ride_state(id, returnType) {
   var on = function (part) {
     return document.getElementById(part + id).style.color == constant_note_on_color_rgb;
   };
+  if (on('ride_accent')) return returnType == 'URL' ? 'R' : constant_ABC_RD_Accent;
   if (on('ride_bell')) return returnType == 'URL' ? 'b' : constant_ABC_HH_Ride_Bell;
   if (on('ride_cowbell')) return returnType == 'URL' ? 'm' : constant_ABC_HH_Cow_Bell;
   if (on('ride_stacker')) return returnType == 'URL' ? 's' : constant_ABC_HH_Stacker;

@@ -76,7 +76,10 @@ const EMPTY_NOTE_ARRAY = [
  * @property {number} swingPercent     Swing amount, 0–100.
  * @property {number} tempo            Tempo in BPM.
  * @property {boolean} kickStemsUp     Kick note stem direction.
- * @property {number} metronomeFrequency  Metronome click subdivision (0, 4, 8, 16).
+ * @property {number} metronomeFrequency  Metronome click subdivision (0, 1 = once per bar, 4, 8, 16).
+ * @property {number} grooveClickGrooveBars  "Groove / click bars" practice option: bars of groove
+ *   before the click-only bars; 0 = option off. URL "GrooveBars".
+ * @property {number} grooveClickClickBars   Click-only bars for that option. URL "ClickBars".
  * @property {(boolean|number)} debugMode  Debug flag inherited from the owning GrooveUtils.
  * @property {boolean} grooveDBAuthoring   GrooveDB authoring mode flag.
  * @property {boolean} viewMode        View (vs. edit) mode flag.
@@ -120,7 +123,9 @@ export function createGrooveData(config = {}) {
     swingPercent: 0,
     tempo: constant_DEFAULT_TEMPO,
     kickStemsUp: true,
-    metronomeFrequency: 0, // 0, 4, 8, 16
+    metronomeFrequency: 0, // 0, 1, 4, 8, 16
+    grooveClickGrooveBars: 0, // 0 = "Groove / click bars" off
+    grooveClickClickBars: 0,
     debugMode: config.debugMode ?? false,
     grooveDBAuthoring: config.grooveDBAuthoring ?? false,
     viewMode: config.viewMode ?? true,

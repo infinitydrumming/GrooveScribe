@@ -312,6 +312,75 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
       expect(() => loadMidi(false)).not.toThrow();
     });
 
+    it.each(['kick_snare_kick_lead', 'kick_snare_snare_lead'])(
+      '"%s" alternates kick and snare in playback, replacing both lines',
+      (permType) => {
+        const noteOns = (note) => {
+          const url = String(globalThis.MIDI.Player.loadFile.mock.calls.at(-1)[0]);
+          const bytes = atob(url.slice('data:audio/midi;base64,'.length));
+          let count = 0;
+          for (let i = 0; i < bytes.length - 1; i++)
+            if (bytes.charCodeAt(i) === 0x99 && bytes.charCodeAt(i + 1) === note) count++;
+          return count;
+        };
+        gw.permutationPopupClick(permType);
+        expect(document.getElementById('PermutationOptions').innerHTML).toContain(
+          'PermuationOptionsSingles'
+        );
+        loadMidi(false);
+        const kicks = noteOns(35);
+        const snares = noteOns(38);
+        // the default figures have an even number of hits, so it splits evenly
+        expect(kicks).toBeGreaterThan(0);
+        expect(kicks).toBe(snares);
+      }
+    );
+
+    it('Auto-scroll is on by default and its Options switch is remembered', () => {
+      expect(gw.myGrooveUtils.autoScrollEnabled).toBe(true);
+      gw.metronomeOptionsMenuPopupClick('AutoScroll');
+      expect(gw.myGrooveUtils.autoScrollEnabled).toBe(false);
+      expect(window.localStorage.getItem('grooveScribeAutoScroll')).toBe('off');
+      gw.metronomeOptionsMenuPopupClick('AutoScroll');
+      expect(gw.myGrooveUtils.autoScrollEnabled).toBe(true);
+      expect(window.localStorage.getItem('grooveScribeAutoScroll')).toBe('on');
+    });
+
+    it('a group tick turns on all 6 per-beat figures in 1/16 triplets', () => {
+      gw.loadNewGroove(
+        '?TimeSig=4/4&Div=24&Tempo=90&Measures=1&H=|------------------------|&S=|------O-----------O-----|&K=|o-----------o-----------|'
+      );
+      gw.permutationPopupClick('kick_16ths');
+      const group = document.getElementById('PermuationOptionsTriplesBeat');
+      expect(group.checked).toBe(false); // starts unticked
+      group.checked = true;
+      gw.permutationOptionClick({ target: group });
+      for (let n = 1; n <= 6; n++)
+        expect(document.getElementById('PermuationOptionsTriplesBeat_sub' + n).checked).toBe(true);
+    });
+
+    it('"Play each ×2" plays every permutation bar twice', () => {
+      // count kick note-ons (channel 10 = 0x99, kick = 35) in the loaded MIDI
+      const kicksInLoadedMidi = () => {
+        const url = String(globalThis.MIDI.Player.loadFile.mock.calls.at(-1)[0]);
+        const bytes = atob(url.slice('data:audio/midi;base64,'.length));
+        let count = 0;
+        for (let i = 0; i < bytes.length - 1; i++)
+          if (bytes.charCodeAt(i) === 0x99 && bytes.charCodeAt(i + 1) === 35) count++;
+        return count;
+      };
+      gw.permutationPopupClick('kick_16ths');
+      loadMidi(false);
+      const once = kicksInLoadedMidi();
+      expect(once).toBeGreaterThan(0);
+
+      gw.permutationRepeatChange({ target: { value: '2' } });
+      loadMidi(false);
+      expect(kicksInLoadedMidi()).toBe(2 * once);
+      // the menu keeps the chosen value when it is rebuilt
+      expect(gw.HTMLforPermutationOptions()).toContain('<option value="2" selected>');
+    });
+
     it('builds MIDI across snare-permutation sections when active', () => {
       gw.permutationPopupClick('snare_16ths');
       checkAll();

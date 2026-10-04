@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -887,11 +887,59 @@ function GrooveUtils() {
       myElements[i].setAttribute('class', myElements[i].getAttribute('class') + ' highlighted');
       root.abcNoteNumCurrentlyHighlighted = noteToHighlight;
     }
+    if (root.autoScrollEnabled && myElements.length) scrollNoteIntoView(myElements[0]);
   };
+
+  // Auto-scroll (Infinity Drumming): while playing, keep the highlighted note of
+  // the sheet music in view. It only acts while some of the sheet music is on
+  // screen, so it doesn't pull the page away from the note grid. The editor has
+  // an on/off switch in the metronome Options menu.
+  root.autoScrollEnabled = true;
+
+  function scrollNoteIntoView(note) {
+    // the nearest scrolling box around the note (the editor's content pane), or the page
+    var scroller = note.parentElement;
+    while (scroller && scroller !== document.body && scroller !== document.documentElement) {
+      var overflowY = window.getComputedStyle(scroller).overflowY;
+      if (
+        (overflowY == 'auto' || overflowY == 'scroll') &&
+        scroller.scrollHeight > scroller.clientHeight
+      )
+        break;
+      scroller = scroller.parentElement;
+    }
+    var usePage = !scroller || scroller === document.body || scroller === document.documentElement;
+    var target = usePage ? window : scroller;
+    if (typeof target.scrollBy !== 'function') return;
+
+    var view = usePage ? { top: 0, bottom: window.innerHeight } : scroller.getBoundingClientRect();
+    if (view.bottom - view.top < 50) return;
+
+    // leave the page alone while the sheet music is scrolled out of sight
+    var music = note.closest ? note.closest('svg') : null;
+    if (music) {
+      var musicBox = music.getBoundingClientRect();
+      if (musicBox.bottom < view.top || musicBox.top > view.bottom) return;
+    }
+
+    var box = note.getBoundingClientRect();
+    var margin = 60;
+    if (box.top >= view.top + margin && box.bottom <= view.bottom - margin) return;
+    // bring the playing line to about a third of the way down
+    target.scrollBy({
+      top: box.top - view.top - (view.bottom - view.top) / 3,
+      behavior: 'smooth',
+    });
+  }
 
   // cross index the percent complete with the myGrooveData note arrays to find the nth note
   // Then highlight the note
+  // Optional (set by the editor): maps the playback position onto the printed
+  // music, e.g. when permutation bars are played more than once but printed once.
+  root.percentForSheetMusic = null;
+
   root.highlightNoteInABCSVGFromPercentComplete = function (percentComplete) {
+    if (root.percentForSheetMusic) percentComplete = root.percentForSheetMusic(percentComplete);
     if (root.note_mapping_array !== null) {
       // convert percentComplete to an index
       var curNoteIndex = percentComplete * root.note_mapping_array.length;

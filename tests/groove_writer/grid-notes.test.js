@@ -198,11 +198,9 @@ describe('GrooveWriter clickable grid: noteLeftClick', () => {
     expect(gw.grooveDataFromClickableUI().hh_array[0]).toBe(false);
   });
 
-  it('toggles a snare note on -- note: left-click turns snare on as an ACCENT, not "normal"', () => {
-    // is_snare_on(id) ? "off" : "accent" -- confirmed by reading noteLeftClick's
-    // switch statement; unlike hh/kick/tom (which turn on as "normal").
+  it('toggles a snare note on as a normal hit (accents are in the right-click menu)', () => {
     gw.noteLeftClick(ev, 'snare', 1);
-    expect(gw.grooveDataFromClickableUI().snare_array[1]).toBe('!accent!c'); // constant_ABC_SN_Accent
+    expect(gw.grooveDataFromClickableUI().snare_array[1]).toBe('c'); // constant_ABC_SN_Normal
     gw.noteLeftClick(ev, 'snare', 1);
     expect(gw.grooveDataFromClickableUI().snare_array[1]).toBe(false);
   });
@@ -227,6 +225,25 @@ describe('GrooveWriter clickable grid: noteLeftClick', () => {
     gd = gw.grooveDataFromClickableUI();
     expect(gd.toms_array[0][3]).toBe(false);
     expect(gd.toms_array[3][4]).toBe(false);
+  });
+
+  it('tom right-click menu sets accents and ghost notes; left click turns them off', () => {
+    gw.showHideToms(true, true, true);
+    gw.noteRightClick({ clientX: 1, clientY: 1 }, 'tom1', 0);
+    gw.notePopupClick('tom1', 'accent');
+    gw.noteRightClick({ clientX: 1, clientY: 1 }, 'tom4', 1);
+    gw.notePopupClick('tom4', 'ghost');
+    expect(globalThis.MIDI.WebAudio.noteOn).toHaveBeenLastCalledWith(9, 43, 25, 0); // quiet
+    let gd = gw.grooveDataFromClickableUI();
+    expect(gd.toms_array[0][0]).toBe('!accent!e');
+    expect(gd.toms_array[3][1]).toBe('!(.!!).!A');
+
+    gw.noteLeftClick(ev, 'tom4', 1); // a ghost counts as "on", so this clears it
+    gw.noteRightClick({ clientX: 1, clientY: 1 }, 'tom1', 0);
+    gw.notePopupClick('tom1', 'normal');
+    gd = gw.grooveDataFromClickableUI();
+    expect(gd.toms_array[3][1]).toBe(false);
+    expect(gd.toms_array[0][0]).toBe('e');
   });
 
   it('toggles the mid tom (tom2) on as T2 ("d") then back off', () => {
@@ -313,6 +330,19 @@ describe('GrooveWriter clickable grid: noteRightClick / notePopupClick', () => {
     expect(gd.hh_array.slice(0, 7).every((v) => v === false)).toBe(true);
   });
 
+  it('ride accent: right-click menu, ">" mark, louder sound; left click clears it', () => {
+    gw.showHideCymbals(true, true, true);
+    gw.noteRightClick({ clientX: 1, clientY: 1 }, 'ride', 0);
+    gw.notePopupClick('ride', 'ride_accent');
+    expect(globalThis.MIDI.WebAudio.noteOn).toHaveBeenLastCalledWith(9, 51, 120, 0);
+    expect(gw.grooveDataFromClickableUI().ride_array[0]).toBe("!accent!^A'");
+    gw.notePopupClick('ride', 'ride'); // back to a plain ride: the accent mark goes
+    expect(gw.grooveDataFromClickableUI().ride_array[0]).toBe("^A'");
+    gw.notePopupClick('ride', 'ride_accent');
+    gw.noteLeftClick({ target: {}, preventDefault() {}, stopPropagation() {} }, 'ride', 0);
+    expect(gw.grooveDataFromClickableUI().ride_array[0]).toBe(false);
+  });
+
   it('a crash or ride sent to the hi-hat line (older grooves) moves onto the cymbal lines', () => {
     gw.showHideCymbals(true, true, true);
     gw.notePopupClick('hh', 'ride'); // index 0
@@ -357,11 +387,11 @@ describe('GrooveWriter clickable grid: noteOnMouseEnter', () => {
     expect(gw.grooveDataFromClickableUI().hh_array[5]).toBe(false);
   });
 
-  it('also drives snare (as accent) and kick (as normal)', () => {
+  it('also drives snare and kick (both as normal hits)', () => {
     gw.noteOnMouseEnter({ ctrlKey: true, altKey: false }, 'snare', 7);
     gw.noteOnMouseEnter({ ctrlKey: true, altKey: false }, 'kick', 8);
     const gd = gw.grooveDataFromClickableUI();
-    expect(gd.snare_array[7]).toBe('!accent!c');
+    expect(gd.snare_array[7]).toBe('c');
     expect(gd.kick_array[8]).toBe('F');
   });
 
