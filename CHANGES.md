@@ -11,7 +11,18 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
-## Fourth update — Infinity Drumming
+## 2026-10-04 (fifth update) — Infinity Scribe
+
+- The app is now called **Infinity Scribe**: an INFINITY / SCRIBE wordmark
+  (`images/InfinityScribe_Logo_word_stack.svg`) sits at the top left, where the
+  Groove Scribe wordmark used to be. The page title is "Infinity Scribe | Infinity
+  Drumming" and the link previews, footer, About page and README use the new name.
+- The credits are unchanged: the footer and About page still say it is based on
+  Groove Scribe by Lou Montulli and Mike Johnston, linked to the original project.
+- Under the credits, the footer lists a few of the new features in Infinity Scribe,
+  with the date of this update (4 October 2026).
+
+## 2026-10-04 (fourth update) — Infinity Drumming
 
 ### Permutations
 

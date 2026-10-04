@@ -1451,6 +1451,11 @@ input[type='checkbox']:not(:checked) + label {
 #creditsFooter a {
   color: #dddddd;
 }
+#creditsFeatures {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #8f8f8f;
+}
 .edit-block {
   display: none;
 }
