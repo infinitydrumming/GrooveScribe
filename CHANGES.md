@@ -11,6 +11,19 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-05 (seventh update) — playback cursor timing
+
+- Fixed: the blue playback cursor could run ahead of the sound, typically by one
+  subdivision on phones and Bluetooth speakers. It moved when each note was handed
+  to the audio system, but the sound leaves the speaker later (the device's audio
+  output latency). The cursor, on the grid and the sheet music, now waits for the
+  latency the browser reports.
+- New **Cursor timing** item in the metronome Options menu: a slider to nudge the
+  cursor later or earlier until it lines up with what you hear on this device (for
+  speakers whose latency the browser doesn't report). Each device remembers it.
+- Fixed: with Brazilian swing, the early "a" of each beat was highlighted on the
+  "&". The cursor now snaps to the note as written.
+
 ## 2026-10-05 (sixth update) — groove / click bars counted bar by bar
 
 - Fixed: the "Groove / click bars" option always played the whole groove before

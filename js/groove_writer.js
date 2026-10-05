@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -113,6 +113,7 @@ function GrooveWriter() {
 
   root.myGrooveUtils = new GrooveUtils();
   root.myGrooveUtils.percentForSheetMusic = function (percent) {
+    percent = snapToSwungGrid(percent);
     if (class_permutation_type == 'none' || get_permutation_repeats() < 2) return percent;
     var shown = get_numberOfActivePermutationSections();
     var bars = shown * get_permutation_repeats();
@@ -150,6 +151,8 @@ function GrooveWriter() {
   // the click bars, so it comes back in where it would have been.
   var class_groove_click_cycle_start_bar = 0; // groove bar the next cycle starts on
   var class_groove_click_playing_start_bar = 0; // ... and the cycle now playing
+  // for each bar of the MIDI now playing: true when it plays straight (for the cursor)
+  var class_loaded_midi_straight_bars = [];
   // per bar (index 0 = bar 1): true plays that bar straight when the groove is swung
   var class_straight_bars = [];
 
@@ -1063,6 +1066,10 @@ function GrooveWriter() {
 
       case 'AutoScroll':
         setAutoScroll(!root.myGrooveUtils.autoScrollEnabled);
+        break;
+
+      case 'CursorTiming':
+        root.show_CursorTimingConfiguration();
         break;
 
       case 'CountIn':
@@ -3121,6 +3128,7 @@ function GrooveWriter() {
         else if (class_groove_click_active && class_groove_click_in_click_phase)
           midiURL = createClickOnlyMidiUrl(class_groove_click_click_bars);
         else midiURL = createMidiUrlFromClickableUI('our_MIDI');
+        class_loaded_midi_straight_bars = loadedMidiStraightBars();
         root.myGrooveUtils.midiResetNoteHasChanged();
       }
       root.myGrooveUtils.loadMIDIFromURL(midiURL);
@@ -3137,6 +3145,9 @@ function GrooveWriter() {
         root.myGrooveUtils.midiNoteHasChanged();
         root.metronomeAutoSpeedUpTempoUpdate();
       }
+
+      if (note_type != 'complete' && note_type != 'clear')
+        percent_complete = snapToSwungGrid(percent_complete);
 
       var grooveClickCycle =
         class_groove_click_active &&
@@ -3657,6 +3668,50 @@ function GrooveWriter() {
   }
 
   // --- "Groove / click bars" metronome option --------------------------------
+  // --- "Cursor timing": line the playback cursor up with the sound -----------
+  function cursorTimingSlider() {
+    return /** @type {HTMLInputElement} */ (document.getElementById('cursorTimingAdjust'));
+  }
+
+  function showCursorTiming() {
+    var gu = root.myGrooveUtils;
+    var adjust = gu.getCursorAdjustMs();
+    var reported = gu.getReportedAudioLatencyMs();
+    var sign = adjust > 0 ? '+' : '';
+    var reportedText = reported ? ' (plus ' + reported + ' ms this device reports)' : '';
+    document.getElementById('cursorTimingOutput').innerHTML =
+      'Adjustment ' +
+      sign +
+      adjust +
+      ' ms' +
+      reportedText +
+      ': the cursor waits ' +
+      gu.getCursorDelayMs() +
+      ' ms after each note is sent.';
+  }
+
+  root.show_CursorTimingConfiguration = function () {
+    cursorTimingSlider().value = String(root.myGrooveUtils.getCursorAdjustMs());
+    showCursorTiming();
+    document.getElementById('cursorTimingConfiguration').style.display = 'block';
+  };
+
+  root.cursorTimingChange = function (event) {
+    var ms = parseInt(event.target.value, 10);
+    root.myGrooveUtils.setCursorAdjustMs(isNaN(ms) ? 0 : ms);
+    showCursorTiming();
+  };
+
+  root.cursorTimingReset = function () {
+    root.myGrooveUtils.setCursorAdjustMs(0);
+    cursorTimingSlider().value = '0';
+    showCursorTiming();
+  };
+
+  root.close_CursorTimingConfiguration = function () {
+    document.getElementById('cursorTimingConfiguration').style.display = 'none';
+  };
+
   root.show_GrooveClickConfiguration = function () {
     document.getElementById('grooveClickGrooveBars').value = class_groove_click_groove_bars;
     document.getElementById('grooveClickClickBars').value = class_groove_click_click_bars;
@@ -3726,6 +3781,71 @@ function GrooveWriter() {
     if (barInCycle >= class_groove_click_groove_bars) return -1;
     var grooveBar = (class_groove_click_playing_start_bar + barInCycle) % class_number_of_measures;
     return (grooveBar + (position - barInCycle)) / class_number_of_measures;
+  }
+
+  // Which bars of the MIDI just built play straight, in playing order.
+  function loadedMidiStraightBars() {
+    var repeat = function (count, straight) {
+      var bars = [];
+      for (var bar = 0; bar < count; bar++) bars.push(straight);
+      return bars;
+    };
+    if (class_groove_click_active && class_permutation_type == 'none') {
+      var grooveBars = [];
+      for (var bar = 0; bar < class_groove_click_groove_bars; bar++)
+        grooveBars.push(
+          !!class_straight_bars[
+            (class_groove_click_playing_start_bar + bar) % class_number_of_measures
+          ]
+        );
+      return grooveBars.concat(repeat(class_groove_click_click_bars, false));
+    }
+    if (class_groove_click_active && class_groove_click_in_click_phase)
+      return repeat(class_groove_click_click_bars, false);
+    if (class_permutation_type != 'none')
+      return repeat(get_numberOfPermutationBars(), !!class_straight_bars[0]);
+    return class_straight_bars
+      .slice(0, class_number_of_measures)
+      .map(Boolean)
+      .concat(repeat(Math.max(0, class_number_of_measures - class_straight_bars.length), false));
+  }
+
+  // When a 1/32 slot of the MIDI now playing starts, in slots, with Brazilian swing
+  // (as midiFile.js spaces it: long-short-short-long; straight bars evenly).
+  function brazilianSlotTime(slot, slotsPerBar, swing) {
+    var bar = Math.floor(slot / slotsPerBar);
+    var time = bar * slotsPerBar;
+    if (class_loaded_midi_straight_bars[bar]) return time + (slot % slotsPerBar);
+    var slotsPerSwingNote = slotsPerBar / get_num_notes_for_swing();
+    for (var i = 0; i < slot % slotsPerBar; i++) {
+      var region = Math.floor((i % (4 * slotsPerSwingNote)) / slotsPerSwingNote);
+      time += region === 0 || region === 3 ? 1 + swing : 1 - swing;
+    }
+    return time;
+  }
+
+  // With Brazilian swing the "a" of each beat plays early, so its time falls in the
+  // "&"'s part of the grid; snap the cursor to the nearest note as it was placed
+  // (straight time, regular swing and triplets need no snapping).
+  function snapToSwungGrid(percent) {
+    var gu = root.myGrooveUtils;
+    var swing = gu.getSwing() / 100;
+    var bars = class_loaded_midi_straight_bars.length;
+    if (percent < 0 || !bars || swing <= 0 || gu.getSwingStyle() != 'brazilian' || usingTriplets())
+      return percent;
+    var slotsPerBar = gu.calc_notes_per_measure(
+      32,
+      class_num_beats_per_measure,
+      class_note_value_per_measure
+    );
+    var timeOf = function (slot) {
+      return brazilianSlotTime(slot, slotsPerBar, swing);
+    };
+    var total = bars * slotsPerBar;
+    var position = percent * total;
+    var slot = Math.min(Math.floor(position), total - 1);
+    if (slot + 1 < total && timeOf(slot + 1) - position < position - timeOf(slot)) slot++;
+    return (slot + 0.5) / total;
   }
 
   // One groove bar (bar is 0-based) of the clickable grid, played into midiTrack.

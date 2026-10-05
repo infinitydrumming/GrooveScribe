@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -1140,6 +1140,7 @@ function GrooveUtils() {
       root.isMIDIPaused = true;
       root.midiEventCallbacks.pauseEvent(root.midiEventCallbacks.classRoot);
       MIDI.Player.pause();
+      root.cancelPendingCursorUpdates();
       root.midiEventCallbacks.notePlaying(root.midiEventCallbacks.classRoot, 'clear', -1);
       root.clearHighlightNoteInABCSVG();
     }
@@ -1175,6 +1176,7 @@ function GrooveUtils() {
       root.isMIDIPaused = false;
       MIDI.Player.stop();
       root.midiEventCallbacks.stopEvent(root.midiEventCallbacks.classRoot);
+      root.cancelPendingCursorUpdates();
       root.midiEventCallbacks.notePlaying(root.midiEventCallbacks.classRoot, 'clear', -1);
       root.clearHighlightNoteInABCSVG();
       root.resetMetronomeOptionsOffsetClickStartRotation();
@@ -1390,12 +1392,15 @@ function GrooveUtils() {
       }
       if (note_type) {
         global_total_midi_notes++;
-        root.midiEventCallbacks.notePlaying(
-          root.midiEventCallbacks.classRoot,
-          note_type,
-          percentComplete
-        );
-        root.highlightNoteInABCSVGFromPercentComplete(percentComplete);
+        // the cursor (grid and sheet music) waits until the note is actually heard
+        root.whenNoteIsHeard(function () {
+          root.midiEventCallbacks.notePlaying(
+            root.midiEventCallbacks.classRoot,
+            note_type,
+            percentComplete
+          );
+          root.highlightNoteInABCSVGFromPercentComplete(percentComplete);
+        });
         if (root.noteCallback) {
           root.noteCallback(note_type);
         }
@@ -1428,6 +1433,71 @@ function GrooveUtils() {
 		}
 		 */
   }
+
+  // --- Playback cursor timing (Infinity Drumming, 2026) ------------------------
+  // The player tells us about a note when it hands it to the audio system, but the
+  // sound leaves the speaker later: the device's audio output latency (often
+  // 50-150 ms on phones, more over Bluetooth). Moving the cursor straight away puts
+  // it ahead of the sound, so it waits for that latency (as the browser reports it)
+  // plus an adjustment the player can set per device ("Cursor timing").
+  var constant_cursor_adjust_key = 'infinityScribeCursorAdjustMs';
+  var pendingCursorUpdates = [];
+
+  // the audio latency the browser reports, in ms (0 if it doesn't)
+  root.getReportedAudioLatencyMs = function () {
+    var ctx = typeof MIDI !== 'undefined' && MIDI.Player && MIDI.Player.ctx;
+    if (!ctx) return 0;
+    var seconds = (ctx.outputLatency || 0) + (ctx.baseLatency || 0);
+    return isFinite(seconds) && seconds > 0 ? Math.round(seconds * 1000) : 0;
+  };
+
+  // the player's own adjustment, in ms (remembered on this device)
+  // (kept here as well, for when the browser won't store it)
+  var cursorAdjustMs = null;
+  root.getCursorAdjustMs = function () {
+    if (cursorAdjustMs === null) {
+      var stored = NaN;
+      try {
+        stored = parseInt(window.localStorage.getItem(constant_cursor_adjust_key), 10);
+      } catch (err) {
+        console.log('Cursor timing setting could not be read: ' + err);
+      }
+      cursorAdjustMs = isNaN(stored) ? 0 : stored;
+    }
+    return cursorAdjustMs;
+  };
+
+  root.setCursorAdjustMs = function (ms) {
+    cursorAdjustMs = ms;
+    try {
+      window.localStorage.setItem(constant_cursor_adjust_key, String(ms));
+    } catch (err) {
+      console.log('Cursor timing setting kept for this page only: ' + err);
+    }
+  };
+
+  root.getCursorDelayMs = function () {
+    return Math.max(0, root.getReportedAudioLatencyMs() + root.getCursorAdjustMs());
+  };
+
+  // run update once the note being played can be heard
+  root.whenNoteIsHeard = function (update) {
+    var delay = root.getCursorDelayMs();
+    if (delay <= 0) {
+      update();
+      return;
+    }
+    var timer = window.setTimeout(function () {
+      pendingCursorUpdates.splice(pendingCursorUpdates.indexOf(timer), 1);
+      update();
+    }, delay);
+    pendingCursorUpdates.push(timer);
+  };
+
+  // stop or pause: drop cursor moves that haven't happened yet
+  root.cancelPendingCursorUpdates = function () {
+    while (pendingCursorUpdates.length) window.clearTimeout(pendingCursorUpdates.pop());
+  };
 
   function midiLoaderCallback() {
     MIDI.Player.addListener(ourMIDICallback);
