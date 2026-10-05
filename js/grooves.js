@@ -1,4 +1,4 @@
-/* Modified by Infinity Drumming, 2026: Blues Shuffle groove. See CHANGES.md.
+/* Modified by Infinity Drumming, 2026: Blues Shuffle groove; Train Beat in 8th notes over 2 bars. See CHANGES.md.
  *
  * Grooves class.   Contains some common grooves that is used to populate the grooves menu
  *
@@ -23,7 +23,7 @@ if (typeof grooves === 'undefined') var grooves = {};
     'Syncopated Hi-hats #2':
       '?TimeSig=4/4&Div=16&Title=Syncopated%20hi-hats%202&Tempo=80&Measures=1&H=|xxx-xxx-xxx-xxx-|&S=|----O-------O---|&K=|o-------o-------|',
     'Train Beat':
-      '?TimeSig=4/4&Div=16&Swing=0&Title=Train%20Beat&Tempo=95&Measures=1&H=|----------------|&S=|ggOgggOgggOggOOg|&K=|o-x-o-x-o-x-o-x-|',
+      '?TimeSig=4/4&Div=8&Swing=0&Title=Train%20Beat&Tempo=190&Measures=2&H=|--------|--------|&S=|ggOgggOg|ggOggOOg|&K=|o-x-o-x-|o-x-o-x-|',
   };
 
   root.Triplet_Grooves = {
