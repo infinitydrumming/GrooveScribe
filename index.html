@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
@@ -211,6 +211,7 @@
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuSpeedUp"   onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("SpeedUp");' title="Increase the tempo automatically" >Auto speed up</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuGrooveClick" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("GrooveClick");' title="Play the groove for some bars, then just the click for some bars">Groove / click bars</li>
 				<li class="metronomeOptionsContextMenuItem menuChecked" id="metronomeOptionsContextMenuAutoScroll" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("AutoScroll");' title="While playing, scroll the page to follow the playing bar of the music">Auto-scroll</li>
+				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuCursorTiming" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("CursorTiming");' title="Line the blue playback cursor up with the sound on this device">Cursor timing</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuCountIn"   onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("CountIn");' title="One measure of metronome count in at the start" >Count it in</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuOffTheOne" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("OffTheOne");' title="Click on the e, &, or a">Offset click</li>
 				<!--
@@ -501,8 +502,17 @@
 			<div id="grooveClickTitle">Groove / click bars</div>
 			<div class="grooveClickRow">Play the groove for <input type="number" id="grooveClickGrooveBars" min="1" max="32" value="4"> bars,</div>
 			<div class="grooveClickRow">then just the click for <input type="number" id="grooveClickClickBars" min="1" max="32" value="4"> bars, and repeat.</div>
-			<div class="grooveClickNote">Uses the metronome setting; if the metronome is off, the click bars click on quarter notes.</div>
+			<div class="grooveClickNote">Counted bar by bar: the groove keeps its place through the click bars and comes back in where it would be. Uses the metronome setting; if the metronome is off, the click bars click on quarter notes.</div>
 			<div id="grooveClickCloseButtonDiv"><button id="grooveClickCloseButton" onclick="myGrooveWriter.close_GrooveClickConfiguration();">Done</button></div>
+		</div>
+
+		<!-- metronome option "Cursor timing" (Infinity Drumming, 2026), hidden by default -->
+		<div id="cursorTimingConfiguration">
+			<div id="cursorTimingTitle">Cursor timing</div>
+			<div class="cursorTimingText">Play a groove and watch the blue cursor. If it runs <b>ahead</b> of the sound, move the slider right; if it runs <b>behind</b>, move it left. This device remembers the setting.</div>
+			<input type="range" min="-200" max="400" step="10" value="0" id="cursorTimingAdjust" oninput="myGrooveWriter.cursorTimingChange(event);">
+			<div id="cursorTimingOutput"></div>
+			<div id="cursorTimingButtons"><button onclick="myGrooveWriter.cursorTimingReset();">Reset</button> <button onclick="myGrooveWriter.close_CursorTimingConfiguration();">Done</button></div>
 		</div>
 
 		<!-- this is used by the metronome auto speed up option menu, and is hidden by default -->

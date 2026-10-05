@@ -11,6 +11,47 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-05 (eighth update) — permutations with groove / click bars, count-in cursor
+
+- Fixed: "Groove / click bars" didn't work with permutations: the whole
+  permutation played before any click bars. Permutations now use the same
+  bar-by-bar cycle as a normal groove (N permutation bars, M click-only bars,
+  then on through the permutation).
+- Fixed: during the count-in the cursor ran through the whole sheet music, so
+  auto-scroll took the page to the bottom (and with a long permutation it stayed
+  there). There is now no cursor and no scrolling during the count-in; it starts
+  on the first note of the groove.
+- The sheet-music cursor now also follows the groove / click cycle (it showed the
+  wrong place when the cycle length differed from the groove's), and shows nothing
+  during the click-only bars, like the grid.
+- Fixed: choosing "Count it in" in the metronome Options raised an error (a
+  call to a function that never existed, in the original Groove Scribe too), so
+  the Options button didn't update.
+
+## 2026-10-05 (seventh update) — playback cursor timing
+
+- Fixed: the blue playback cursor could run ahead of the sound, typically by one
+  subdivision on phones and Bluetooth speakers. It moved when each note was handed
+  to the audio system, but the sound leaves the speaker later (the device's audio
+  output latency). The cursor, on the grid and the sheet music, now waits for the
+  latency the browser reports.
+- New **Cursor timing** item in the metronome Options menu: a slider to nudge the
+  cursor later or earlier until it lines up with what you hear on this device (for
+  speakers whose latency the browser doesn't report). Each device remembers it.
+- Fixed: with Brazilian swing, the early "a" of each beat was highlighted on the
+  "&". The cursor now snaps to the note as written.
+
+## 2026-10-05 (sixth update) — groove / click bars counted bar by bar
+
+- Fixed: the "Groove / click bars" option always played the whole groove before
+  the click bars, so a 4-bar groove with 3 groove bars + 1 click bar played all 4
+  bars and then added a click bar (a 5-bar cycle). It now counts bar by bar: 3 + 1
+  plays bars 1-3 and then the click bar in place of bar 4, every time round.
+- The groove keeps its place through the click bars and comes back in on the bar
+  it would have reached (a 2-bar groove with 3 + 2 plays 1 2 1, two click bars,
+  then 2 1 2, ...). Straight bars stay straight, and the playing bar is still
+  highlighted, with no highlight during the click bars. Permutations are unchanged.
+
 ## 2026-10-05 (fifth update) — speed-up target tempo
 
 - **Target tempo for the metronome's Auto Speed Up:** tick "Stop at" and enter a

@@ -1,4 +1,4 @@
-/* Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar, speed-up target tempo. See CHANGES.md. */
+/* Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar, speed-up target tempo, cursor timing popup. See CHANGES.md. */
 /* this is for debugging layout issues - puts a red border around everything */
 /* body * { border: 1px solid red; }		 */
 DEBUG {
@@ -1141,6 +1141,7 @@ hr {
 }
 #fullURLPopup,
 #metronomeAutoSpeedupConfiguration,
+#cursorTimingConfiguration,
 #grooveClickConfiguration,
 #timeSigPopup {
   /visibility: hidden;
@@ -1302,6 +1303,28 @@ hr {
 #metronomeAutoSpeedupConfigurationAmountLable,
 #metronomeAutoSpeedupConfigurationIntervalLable {
   font-size: 12px;
+}
+/* Infinity Drumming, 2026: cursor timing popup */
+#cursorTimingTitle {
+  font-size: 22px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.cursorTimingText,
+#cursorTimingOutput {
+  font-size: 13px;
+  margin: 6px 0;
+}
+#cursorTimingAdjust {
+  width: 100%;
+  background: var(--highlight-color);
+}
+#cursorTimingOutput {
+  color: var(--highlight-color);
+  text-align: center;
+}
+#cursorTimingButtons {
+  text-align: center;
 }
 /* Infinity Drumming, 2026: speed-up target tempo */
 #metronomeAutoSpeedupConfigurationTarget {
