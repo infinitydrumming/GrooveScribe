@@ -392,3 +392,40 @@ describe('ShowHideABCResults', () => {
     expect(panel.style.display).toBe('block');
   });
 });
+
+describe('straightBarButtonClick (straight bars in a swung groove)', () => {
+  beforeEach(async () => {
+    document.body.innerHTML = '';
+    window.localStorage.clear();
+    gw = await newGrooveWriter();
+    buildMeasureFixture(gw, 1);
+    gw.updateCurrentURL = vi.fn();
+    gw.displayNewSVG = vi.fn();
+    gw.addMeasureButtonClick({}); // two bars
+  });
+
+  const switchText = (bar) => document.getElementById('straightBarButton' + bar).textContent;
+
+  it('switches a bar between swing and straight and keeps it in the groove data', () => {
+    expect(switchText(2)).toBe('swing');
+    gw.straightBarButtonClick(2);
+    expect(switchText(2)).toBe('straight');
+    expect(switchText(1)).toBe('swing');
+    expect(gw.grooveDataFromClickableUI().straightBars).toEqual([false, true]);
+
+    gw.straightBarButtonClick(2);
+    expect(switchText(2)).toBe('swing');
+    expect(gw.grooveDataFromClickableUI().straightBars).toEqual([false, false]);
+  });
+
+  it("a new bar copies the last bar's setting; removing a bar moves the others along", () => {
+    gw.straightBarButtonClick(2);
+    gw.addMeasureButtonClick({}); // bar 3 copies bar 2: straight
+    expect(gw.grooveDataFromClickableUI().straightBars).toEqual([false, true, true]);
+
+    gw.straightBarButtonClick(3); // bar 3 back to swing
+    gw.closeMeasureButtonClick(2);
+    expect(gw.grooveDataFromClickableUI().straightBars).toEqual([false, false]);
+    expect(switchText(2)).toBe('swing');
+  });
+});

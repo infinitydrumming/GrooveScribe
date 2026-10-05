@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -101,6 +101,7 @@ import {
 import * as _perm from './permutations.js';
 import * as _view from './viewHtml.js';
 import * as _grid from './gridState.js';
+import { getFeelMarkings, addFeelMarking } from './abcNotation.js';
 import { scaleTabMeasure } from './noteArrays.js';
 
 // GrooveWriter class.   The only one in this file.
@@ -144,6 +145,8 @@ function GrooveWriter() {
   var class_groove_click_click_bars = 4;
   var class_groove_click_in_click_phase = false;
   var class_groove_click_bars_played = 0;
+  // per bar (index 0 = bar 1): true plays that bar straight when the groove is swung
+  var class_straight_bars = [];
 
   // set debugMode immediately so we can use it in index.html
   root.myGrooveUtils.debugMode = parseInt(
@@ -1843,6 +1846,10 @@ function GrooveWriter() {
     midiTrack.setInstrument(0, 0x13);
 
     var swing_percentage = root.myGrooveUtils.getSwing() / 100;
+    // a straight bar plays without swing
+    var swingForBar = function (bar) {
+      return class_straight_bars[bar] ? 0 : swing_percentage;
+    };
 
     // all of the permutations use just the first measure
     switch (class_permutation_type) {
@@ -1864,7 +1871,7 @@ function GrooveWriter() {
               metronomeFrequency,
               num_notes,
               num_notes_for_swing,
-              swing_percentage,
+              swingForBar(0),
               class_num_beats_per_measure,
               class_note_value_per_measure
             );
@@ -1886,7 +1893,7 @@ function GrooveWriter() {
           metronomeFrequency,
           num_notes,
           num_notes_for_swing,
-          swing_percentage,
+          swingForBar(0),
           class_num_beats_per_measure,
           class_note_value_per_measure
         );
@@ -1927,7 +1934,7 @@ function GrooveWriter() {
             metronomeFrequency,
             num_notes,
             num_notes_for_swing,
-            swing_percentage,
+            swingForBar(i),
             class_num_beats_per_measure,
             class_note_value_per_measure
           );
@@ -1965,6 +1972,9 @@ function GrooveWriter() {
     myGrooveData.showLegend = document.getElementById('showLegend').checked;
     myGrooveData.swingPercent = root.myGrooveUtils.getSwing();
     myGrooveData.swingStyle = root.myGrooveUtils.getSwingStyle();
+    myGrooveData.straightBars = [];
+    for (var bar = 0; bar < class_number_of_measures; bar++)
+      myGrooveData.straightBars.push(!!class_straight_bars[bar]);
     myGrooveData.tempo = root.myGrooveUtils.getTempo();
     myGrooveData.metronomeFrequency = root.getMetronomeFrequency();
     myGrooveData.grooveClickGrooveBars = class_groove_click_active
@@ -2363,6 +2373,15 @@ function GrooveWriter() {
           numberOfMeasuresPerLine = 1;
         }
 
+        // "Straight" / "Swing" over the bars where the feel changes
+        var feelMarkings = getFeelMarkings(
+          class_straight_bars,
+          class_number_of_measures,
+          root.myGrooveUtils.getSwing(),
+          root.myGrooveUtils.getSwingStyle(),
+          usingTriplets()
+        );
+
         for (i = 0; i < class_number_of_measures; i++) {
           // we already go the array states above, don't get it again.
           if (i > 0) {
@@ -2392,19 +2411,22 @@ function GrooveWriter() {
             // continuation measure
             addon_abc = '\\\n';
           }
-          fullABC += root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
-            Sticking_Array,
-            HH_Array,
-            Snare_Array,
-            Kick_Array,
-            Toms_Array,
-            addon_abc,
-            num_notes,
-            class_time_division,
-            num_notes,
-            true,
-            class_num_beats_per_measure,
-            class_note_value_per_measure
+          fullABC += addFeelMarking(
+            root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
+              Sticking_Array,
+              HH_Array,
+              Snare_Array,
+              Kick_Array,
+              Toms_Array,
+              addon_abc,
+              num_notes,
+              class_time_division,
+              num_notes,
+              true,
+              class_num_beats_per_measure,
+              class_note_value_per_measure
+            ),
+            feelMarkings[i]
           );
           root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
             root.myGrooveUtils.create_note_mapping_array_for_highlighting(
@@ -2557,6 +2579,7 @@ function GrooveWriter() {
     }
 
     class_number_of_measures--;
+    class_straight_bars.splice(measureNum - 1, 1);
 
     root.expandAuthoringViewWhenNecessary(class_notes_per_measure, class_number_of_measures);
 
@@ -2619,6 +2642,9 @@ function GrooveWriter() {
     }
 
     class_number_of_measures++;
+    // the new bar copies the last one, its straight / swung setting too
+    class_straight_bars[class_number_of_measures - 1] =
+      !!class_straight_bars[class_number_of_measures - 2];
 
     root.expandAuthoringViewWhenNecessary(class_notes_per_measure, class_number_of_measures);
 
@@ -2648,6 +2674,29 @@ function GrooveWriter() {
           'You can create as many measures as you want, but your browser may slow down as more measures are added.\n' +
           'There are also many notation features that would be useful for score writing that are not part of Groove Scribe'
       );
+  };
+
+  // --- Straight bars in a swung groove ----------------------------------------
+  // Each bar has a switch under its copy / paste buttons: swung bars use the swing
+  // slider (amount and style), straight bars play straight.
+  function refreshStraightBarButtons() {
+    for (var bar = 1; bar <= class_number_of_measures; bar++) {
+      var button = document.getElementById('straightBarButton' + bar);
+      if (button)
+        button.outerHTML = _view.straightBarButtonHTML(bar, !!class_straight_bars[bar - 1]);
+    }
+  }
+
+  // measureNum is indexed starting at 1, not 0
+  root.straightBarButtonClick = function (measureNum) {
+    class_straight_bars[measureNum - 1] = !class_straight_bars[measureNum - 1];
+    refreshStraightBarButtons();
+    updateSheetMusic(); // markings, playback and the link
+  };
+
+  // the "Straight" / "Swing" markings depend on the swing slider too
+  root.myGrooveUtils.swingChangedCallback = function () {
+    if (class_straight_bars.indexOf(true) >= 0) updateSheetMusic();
   };
 
   // --- Copy / paste one measure ---------------------------------------------
@@ -3975,6 +4024,8 @@ function GrooveWriter() {
 
     root.myGrooveUtils.setTempo(myGrooveData.tempo);
 
+    class_straight_bars = (myGrooveData.straightBars || []).slice();
+    refreshStraightBarButtons();
     root.myGrooveUtils.setSwing(myGrooveData.swingPercent);
     root.myGrooveUtils.setSwingStyle(myGrooveData.swingStyle);
 
@@ -4254,6 +4305,7 @@ function GrooveWriter() {
       numBeatsPerMeasure: class_num_beats_per_measure,
       noteValuePerMeasure: class_note_value_per_measure,
       numberOfMeasures: class_number_of_measures,
+      straightBar: !!class_straight_bars[baseindex - 1],
       noteGrouping: root.myGrooveUtils.noteGroupingSize(
         class_notes_per_measure,
         class_num_beats_per_measure,

@@ -1,4 +1,4 @@
-/* Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, tom ghost / accent marks, credits footer. See CHANGES.md. */
+/* Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar. See CHANGES.md. */
 /* this is for debugging layout issues - puts a red border around everything */
 /* body * { border: 1px solid red; }		 */
 DEBUG {
@@ -943,6 +943,23 @@ body {
 .copyMeasureButton:hover,
 .pasteMeasureButton:hover {
   color: #000;
+}
+/* Infinity Drumming, 2026: swing / straight switch for each bar */
+.straightBarButton {
+  margin-top: 10px;
+  padding: 1px 3px;
+  font-size: 10px;
+  line-height: 14px;
+  border: 1px solid var(--highlight-color-on-white);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--highlight-color-on-white);
+  user-select: none;
+}
+.straightBarButton.straight {
+  color: #fff;
+  background-color: #777;
+  border-color: #777;
 }
 #permutationAnchor {
   color: #555;

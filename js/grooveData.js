@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars. See CHANGES.md.
 // grooveData — the central data contract for Groove Scribe.
 //
 // A GrooveData describes a single groove: its time signature, subdivision and
@@ -82,6 +82,8 @@ const EMPTY_NOTE_ARRAY = [
  * @property {number} grooveClickGrooveBars  "Groove / click bars" practice option: bars of groove
  *   before the click-only bars; 0 = option off. URL "GrooveBars".
  * @property {number} grooveClickClickBars   Click-only bars for that option. URL "ClickBars".
+ * @property {boolean[]} straightBars  Per bar (index 0 = bar 1): true plays that bar straight
+ *                                     even when the groove is swung. URL "StraightBars" (1-based list).
  * @property {(boolean|number)} debugMode  Debug flag inherited from the owning GrooveUtils.
  * @property {boolean} grooveDBAuthoring   GrooveDB authoring mode flag.
  * @property {boolean} viewMode        View (vs. edit) mode flag.
@@ -129,6 +131,7 @@ export function createGrooveData(config = {}) {
     metronomeFrequency: 0, // 0, 1, 4, 8, 16
     grooveClickGrooveBars: 0, // 0 = "Groove / click bars" off
     grooveClickClickBars: 0,
+    straightBars: [],
     debugMode: config.debugMode ?? false,
     grooveDBAuthoring: config.grooveDBAuthoring ?? false,
     viewMode: config.viewMode ?? true,

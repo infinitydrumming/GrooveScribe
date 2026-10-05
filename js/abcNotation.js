@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -806,6 +806,42 @@ export function create_ABC_from_snare_HH_kick_arrays(
 }
 
 /**
+ * The "Straight" / "Swing" text to print over each bar of a swung groove that has
+ * straight bars: over bar 1 and wherever the feel changes ('' for the others).
+ * All '' when the groove is not swung, has no straight bars, or is in triplets.
+ *
+ * @param {boolean[]} straightBars  Per bar, true = straight.
+ * @param {number} numberOfMeasures
+ * @param {number} swingPercent
+ * @param {string} swingStyle  'swing' or 'brazilian'.
+ * @param {boolean} isTriplets
+ * @returns {string[]}
+ */
+export function getFeelMarkings(
+  straightBars,
+  numberOfMeasures,
+  swingPercent,
+  swingStyle,
+  isTriplets
+) {
+  var straight = [];
+  for (var bar = 0; bar < numberOfMeasures; bar++)
+    straight.push(!!(straightBars && straightBars[bar]));
+  var marked = !isTriplets && swingPercent > 0 && straight.indexOf(true) >= 0;
+  var swungText = swingStyle == 'brazilian' ? 'Brazilian swing' : 'Swing';
+  return straight.map(function (isStraight, index) {
+    if (!marked || (index > 0 && isStraight === straight[index - 1])) return '';
+    return isStraight ? 'Straight' : swungText;
+  });
+}
+
+// Print `text` over the first note of one bar's ABC (the start of its hands voice).
+export function addFeelMarking(measureABC, text) {
+  if (!text) return measureABC;
+  return measureABC.replace('%%voicemap drum\n', '%%voicemap drum\n"^' + text + '"');
+}
+
+/**
  * Build the complete ABC-notation source for a groove.
  *
  * @param {Object} gu  The owning GrooveUtils instance (for note/tab helpers).
@@ -887,6 +923,29 @@ export function createABCFromGrooveData(gu, myGrooveData, renderWidth) {
     renderWidth
   );
 
+  var feelMarkings = getFeelMarkings(
+    myGrooveData.straightBars,
+    myGrooveData.numberOfMeasures,
+    myGrooveData.swingPercent,
+    myGrooveData.swingStyle,
+    is_triplet_division
+  );
+  if (feelMarkings.some(Boolean)) {
+    // bar by bar (like the editor), so each bar can carry its "Straight" / "Swing"
+    fullABC += createMeasureByMeasureABC(
+      gu,
+      myGrooveData,
+      feelMarkings,
+      is_triplet_division,
+      FullNoteStickingArray,
+      FullNoteHHArray,
+      FullNoteSnareArray,
+      FullNoteKickArray,
+      FullNoteTomsArray
+    );
+    return fullABC;
+  }
+
   fullABC += gu.create_ABC_from_snare_HH_kick_arrays(
     FullNoteStickingArray,
     FullNoteHHArray,
@@ -916,4 +975,65 @@ export function createABCFromGrooveData(gu, myGrooveData, renderWidth) {
 
   // console.log(fullABC);
   return fullABC;
+}
+
+// The ABC for every bar of a groove, one bar at a time (two bars per line, or one
+// for 1/32 notes, as in the editor), with each bar's "Straight" / "Swing" marking.
+function createMeasureByMeasureABC(
+  gu,
+  myGrooveData,
+  feelMarkings,
+  is_triplet_division,
+  stickingArray,
+  hhArray,
+  snareArray,
+  kickArray,
+  tomsArrays
+) {
+  var notesPerMeasure = notesPerMeasureInFullSizeArray(
+    is_triplet_division,
+    myGrooveData.numBeats,
+    myGrooveData.noteValue
+  );
+  var measuresPerLine = myGrooveData.notesPerMeasure >= 32 ? 1 : 2;
+  var abc = '';
+  gu.note_mapping_array = [];
+  for (var measure = 0; measure < myGrooveData.numberOfMeasures; measure++) {
+    var start = measure * notesPerMeasure;
+    var end = start + notesPerMeasure;
+    var toms = tomsArrays.map(function (tomArray) {
+      return tomArray.slice(start, end);
+    });
+    var addon_abc;
+    if (measure + 1 == myGrooveData.numberOfMeasures) addon_abc = '|\n';
+    else if ((measure + 1) % measuresPerLine === 0) addon_abc = '\n';
+    else addon_abc = '\\\n';
+    abc += addFeelMarking(
+      gu.create_ABC_from_snare_HH_kick_arrays(
+        stickingArray.slice(start, end),
+        hhArray.slice(start, end),
+        snareArray.slice(start, end),
+        kickArray.slice(start, end),
+        toms,
+        addon_abc,
+        notesPerMeasure,
+        myGrooveData.timeDivision,
+        notesPerMeasure,
+        myGrooveData.kickStemsUp,
+        myGrooveData.numBeats,
+        myGrooveData.noteValue
+      ),
+      feelMarkings[measure]
+    );
+    gu.note_mapping_array = gu.note_mapping_array.concat(
+      create_note_mapping_array_for_highlighting(
+        hhArray.slice(start, end),
+        snareArray.slice(start, end),
+        kickArray.slice(start, end),
+        toms,
+        notesPerMeasure
+      )
+    );
+  }
+  return abc;
 }
