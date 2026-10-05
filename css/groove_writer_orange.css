@@ -1,4 +1,4 @@
-/* Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar. See CHANGES.md. */
+/* Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar, speed-up target tempo. See CHANGES.md. */
 /* this is for debugging layout issues - puts a red border around everything */
 /* body * { border: 1px solid red; }		 */
 DEBUG {
@@ -1302,6 +1302,21 @@ hr {
 #metronomeAutoSpeedupConfigurationAmountLable,
 #metronomeAutoSpeedupConfigurationIntervalLable {
   font-size: 12px;
+}
+/* Infinity Drumming, 2026: speed-up target tempo */
+#metronomeAutoSpeedupConfigurationTarget {
+  font-size: 12px;
+  color: var(--highlight-color);
+  text-align: center;
+  margin-top: 4px;
+}
+#metronomeAutoSpeedUpTargetTempo {
+  width: 52px;
+  font-size: 13px;
+}
+#metronomeAutoSpeedupTargetNote {
+  display: block;
+  color: #999;
 }
 #metronomeAutoSpeedupConfigurationKeepIncreasing {
   font-size: 12px;

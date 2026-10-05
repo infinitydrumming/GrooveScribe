@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -3231,6 +3231,10 @@ function GrooveWriter() {
         'metronomeAutoSpeedUpKeepGoingForever'
       ).checked;
 
+    // "Stop at" target tempo: keep increasing until it is reached, then hold there
+    var targetTempo = getAutoSpeedUpTargetTempo();
+    if (targetTempo) keepIncreasingForever = true;
+
     var curTempo = root.myGrooveUtils.getTempo();
 
     var midiStartTime = root.myGrooveUtils.getMidiStartTime();
@@ -3265,8 +3269,23 @@ function GrooveWriter() {
       }
     }
 
+    if (targetTempo && curTempo + tempoDiffInt > targetTempo) tempoDiffInt = targetTempo - curTempo; // never past the target (none if already there)
+
     if (tempoDiffInt > 0) root.myGrooveUtils.setTempo(root.myGrooveUtils.getTempo() + tempoDiffInt);
   };
+
+  // the speed-up's "Stop at" tempo, or 0 when that box isn't ticked
+  function getAutoSpeedUpTargetTempo() {
+    var useTarget = /** @type {HTMLInputElement | null} */ (
+      document.getElementById('metronomeAutoSpeedUpUseTarget')
+    );
+    var target = /** @type {HTMLInputElement | null} */ (
+      document.getElementById('metronomeAutoSpeedUpTargetTempo')
+    );
+    if (!useTarget || !useTarget.checked || !target) return 0;
+    var tempo = parseInt(target.value, 10);
+    return isNaN(tempo) ? 0 : tempo;
+  }
 
   // takes a string of notes encoded in a serialized string and sets the notes on or off
   // uses drum tab format adapted from wikipedia: http://en.wikipedia.org/wiki/Drum_tablature
