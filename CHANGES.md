@@ -11,6 +11,15 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-06 — cursor through the silent bars
+
+- With "Groove / click bars", the cursor now keeps moving through the groove (or
+  the permutation) during the click-only bars, note by note at the same speed, so
+  players can see exactly where they are while they play on without the groove.
+  It is driven by silent marker notes (MIDI note 20, which has no sound) on every
+  note of the grid in the click-only bars.
+- A click-only bar is swung or straight like the bar it stands in for.
+
 ## 2026-10-05 (eighth update) — permutations with groove / click bars, count-in cursor
 
 - Fixed: "Groove / click bars" didn't work with permutations: the whole

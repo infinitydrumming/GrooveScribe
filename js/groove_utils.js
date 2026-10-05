@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -32,6 +32,7 @@
 import {
   constant_DEFAULT_TEMPO,
   constant_OUR_MIDI_METRONOME_1,
+  constant_OUR_MIDI_CURSOR_MARKER,
   constant_OUR_MIDI_METRONOME_NORMAL,
   constant_OUR_MIDI_HIHAT_NORMAL,
   constant_OUR_MIDI_HIHAT_OPEN,
@@ -1104,7 +1105,8 @@ function GrooveUtils() {
     swing_percentage,
     timeSigTop,
     timeSigBottom,
-    swing_style
+    swing_style,
+    cursor_markers
   ) {
     return _MIDI_from_HH_Snare_Kick_Arrays(
       root,
@@ -1120,7 +1122,8 @@ function GrooveUtils() {
       swing_percentage,
       timeSigTop,
       timeSigBottom,
-      swing_style
+      swing_style,
+      cursor_markers
     );
   };
 
@@ -1350,9 +1353,12 @@ function GrooveUtils() {
     }
 
     // note on
+    /** @type {string | false} */
     var note_type = false;
     if (data.message == 144) {
-      if (
+      if (data.note == constant_OUR_MIDI_CURSOR_MARKER) {
+        note_type = 'cursor'; // silent: only moves the cursor
+      } else if (
         data.note == constant_OUR_MIDI_METRONOME_1 ||
         data.note == constant_OUR_MIDI_METRONOME_NORMAL
       ) {

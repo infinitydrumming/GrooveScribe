@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -57,6 +57,7 @@ import {
   constant_OUR_MIDI_HIHAT_STACKER,
   constant_OUR_MIDI_KICK_NORMAL,
   constant_OUR_MIDI_METRONOME_1,
+  constant_OUR_MIDI_CURSOR_MARKER,
   constant_OUR_MIDI_METRONOME_NORMAL,
   constant_OUR_MIDI_SNARE_ACCENT,
   constant_OUR_MIDI_SNARE_BUZZ,
@@ -126,8 +127,11 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   swing_percentage,
   timeSigTop,
   timeSigBottom,
-  swing_style
+  swing_style,
+  cursor_markers
 ) {
+  // cursor_markers (optional): per slot, true adds a silent note that only moves
+  // the playback cursor
   // 'swing' (default) or 'brazilian'; callers that don't say use the player's setting
   if (swing_style === undefined) swing_style = gu.swingStyle;
   var prev_hh_note = 46; // default to open hi-hat so that the first hi-hat note also mutes any previous hh open.
@@ -268,6 +272,11 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
         delay_for_next_note = 0; // zero the delay
         //prev_metronome_note = metronome_note;
       }
+    }
+
+    if (cursor_markers && cursor_markers[i]) {
+      midiTrack.addNoteOn(midi_channel, constant_OUR_MIDI_CURSOR_MARKER, delay_for_next_note, 1);
+      delay_for_next_note = 0; // zero the delay
     }
 
     if (!gu.metronomeSolo) {
