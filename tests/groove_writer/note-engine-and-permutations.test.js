@@ -461,6 +461,41 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
         expect(playCycle(false)).toEqual([1, 2, 1, 0, 0]);
       });
 
+      it('works with permutations: N permutation bars, then M click bars, and on', () => {
+        gw.loadNewGroove(groove(1, '&GrooveBars=2&ClickBars=2'));
+        const pm = document.getElementById('PermutationOptions') || document.body;
+        pm.id = 'PermutationOptions';
+        gw.permutationPopupClick('kick_16ths');
+        const first = playCycle(true);
+        const second = playCycle(false);
+        expect(first).toHaveLength(4);
+        expect(first.slice(2)).toEqual([0, 0]); // the click bars
+        expect(first[0]).toBeGreaterThan(0);
+        expect(first[1]).toBeGreaterThan(0);
+        expect(second.slice(2)).toEqual([0, 0]);
+        // the second cycle carries on to the next permutation bars
+        expect(second.slice(0, 2)).not.toEqual(first.slice(0, 2));
+      });
+
+      it('shows no cursor during the count-in', () => {
+        gw.loadNewGroove(groove(2, ''));
+        gw.metronomeOptionsMenuPopupClick('CountIn');
+        loadMidi(true); // the count-in bar
+        const litNotes = () =>
+          [...document.querySelectorAll('[id^="bg-highlight"]')].filter(
+            (el) => el.style.background && !el.style.background.includes('transparent')
+          ).length;
+        fireNote('metronome', 0.5);
+        expect(litNotes()).toBe(0);
+        expect(gw.myGrooveUtils.percentForSheetMusic(0.5)).toBeLessThan(0);
+
+        fireNote('complete', 1); // the count-in has played: the groove starts
+        loadMidi(false);
+        fireNote('hi-hat', 0.01);
+        expect(litNotes()).toBe(1);
+        expect(gw.myGrooveUtils.percentForSheetMusic(0.01)).toBeGreaterThanOrEqual(0);
+      });
+
       it('plays straight bars straight, and keeps the swing on the click in click bars', () => {
         gw.loadNewGroove(
           groove(2, '&StraightBars=2&GrooveBars=2&ClickBars=1').replace(

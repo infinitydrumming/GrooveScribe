@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -945,6 +945,11 @@ function GrooveUtils() {
 
   root.highlightNoteInABCSVGFromPercentComplete = function (percentComplete) {
     if (root.percentForSheetMusic) percentComplete = root.percentForSheetMusic(percentComplete);
+    if (percentComplete < 0) {
+      // nothing to follow (e.g. the count-in): no highlight, and no auto-scroll
+      root.clearHighlightNoteInABCSVG();
+      return;
+    }
     if (root.note_mapping_array !== null) {
       // convert percentComplete to an index
       var curNoteIndex = percentComplete * root.note_mapping_array.length;

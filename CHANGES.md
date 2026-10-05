@@ -11,6 +11,23 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-05 (eighth update) — permutations with groove / click bars, count-in cursor
+
+- Fixed: "Groove / click bars" didn't work with permutations: the whole
+  permutation played before any click bars. Permutations now use the same
+  bar-by-bar cycle as a normal groove (N permutation bars, M click-only bars,
+  then on through the permutation).
+- Fixed: during the count-in the cursor ran through the whole sheet music, so
+  auto-scroll took the page to the bottom (and with a long permutation it stayed
+  there). There is now no cursor and no scrolling during the count-in; it starts
+  on the first note of the groove.
+- The sheet-music cursor now also follows the groove / click cycle (it showed the
+  wrong place when the cycle length differed from the groove's), and shows nothing
+  during the click-only bars, like the grid.
+- Fixed: choosing "Count it in" in the metronome Options raised an error (a
+  call to a function that never existed, in the original Groove Scribe too), so
+  the Options button didn't update.
+
 ## 2026-10-05 (seventh update) — playback cursor timing
 
 - Fixed: the blue playback cursor could run ahead of the sound, typically by one
