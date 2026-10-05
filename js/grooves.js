@@ -1,4 +1,4 @@
-/* Modified by Infinity Drumming, 2026: Blues Shuffle groove; Train Beat in 8th notes over 2 bars. See CHANGES.md.
+/* Modified by Infinity Drumming, 2026: Blues Shuffle groove; Train Beat in 8th notes over 2 bars; Brazilian grooves with Brazilian swing. See CHANGES.md.
  *
  * Grooves class.   Contains some common grooves that is used to populate the grooves menu
  *
@@ -50,6 +50,16 @@ if (typeof grooves === 'undefined') var grooves = {};
       '?TimeSig=4/4&Div=16&Title=Songo&Tempo=80&Measures=1&&H=|x---x---x---x---|&S=|--O--g-O-gg--g-g|&K=|---o--o----o--o-|',
   };
 
+  // Infinity Drumming, 2026: samba in 2/4, played with Brazilian swing (SwingStyle=brazilian)
+  root.Brazilian_Grooves = {
+    'Samba (hi-hat & bass drum)':
+      '?TimeSig=2/4&Div=16&Tempo=100&Swing=10&SwingStyle=brazilian&Measures=2&Title=Samba%20(hi-hat%20%26%20bass%20drum)&H=|xxxXxxxX|xxxXxxxX|&S=|--------|--------|&K=|o--oo--o|o--oo--o|',
+    'Samba (snare)':
+      '?TimeSig=2/4&Div=16&Tempo=100&Swing=10&SwingStyle=brazilian&Measures=2&Title=Samba%20(snare)&H=|--------|--------|&S=|gggOgggO|gggOgggO|&K=|o-xoo-xo|o-xoo-xo|',
+    'Samba (ride & cross-stick)':
+      '?TimeSig=2/4&Div=16&Tempo=100&Swing=10&SwingStyle=brazilian&Measures=2&Title=Samba%20(ride%20%26%20cross-stick)&H=|r-rrr-rr|r-rrr-rr|&S=|x-x--x-x|-x-xx-x-|&K=|o-xoo-xo|o-xoo-xo|',
+  };
+
   root.Foot_Ostinatos = {
     Samba:
       '?TimeSig=4/4&Div=16&Title=Samba Ostinato&Tempo=60&Swing=0&measures=1&H=|----------------|&S=|----------------|&K=|o-xoo-xoo-xoo-xo|',
@@ -63,6 +73,7 @@ if (typeof grooves === 'undefined') var grooves = {};
     'Rock grooves': root.Rock_Grooves,
     'Triplet grooves': root.Triplet_Grooves,
     'World grooves': root.World_Grooves,
+    'Brazilian grooves': root.Brazilian_Grooves,
     'Foot Ostinatos': root.Foot_Ostinatos,
   };
 

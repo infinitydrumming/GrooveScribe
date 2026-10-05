@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -1960,6 +1960,7 @@ function GrooveWriter() {
     myGrooveData.comments = document.getElementById('tuneComments').value;
     myGrooveData.showLegend = document.getElementById('showLegend').checked;
     myGrooveData.swingPercent = root.myGrooveUtils.getSwing();
+    myGrooveData.swingStyle = root.myGrooveUtils.getSwingStyle();
     myGrooveData.tempo = root.myGrooveUtils.getTempo();
     myGrooveData.metronomeFrequency = root.getMetronomeFrequency();
     myGrooveData.grooveClickGrooveBars = class_groove_click_active
@@ -3968,6 +3969,7 @@ function GrooveWriter() {
     root.myGrooveUtils.setTempo(myGrooveData.tempo);
 
     root.myGrooveUtils.setSwing(myGrooveData.swingPercent);
+    root.myGrooveUtils.setSwingStyle(myGrooveData.swingStyle);
 
     setGrooveClickFromLink(myGrooveData.grooveClickGrooveBars, myGrooveData.grooveClickClickBars);
     root.setMetronomeFrequency(myGrooveData.metronomeFrequency);

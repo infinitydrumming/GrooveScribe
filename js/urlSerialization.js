@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -237,6 +237,10 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
   )
     myGrooveData.swingPercent = 0;
 
+  // SwingStyle=brazilian: the e is late and the a early (long-short-short-long)
+  var swingStyle = String(getQueryVariableFromString('swingstyle', '', encodedURLData));
+  myGrooveData.swingStyle = swingStyle.toLowerCase() == 'brazilian' ? 'brazilian' : 'swing';
+
   return myGrooveData;
 }
 
@@ -286,6 +290,7 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
   fullURL += '&Tempo=' + myGrooveData.tempo;
 
   if (myGrooveData.swingPercent > 0) fullURL += '&Swing=' + myGrooveData.swingPercent;
+  if (myGrooveData.swingStyle == 'brazilian') fullURL += '&SwingStyle=brazilian';
 
   // # of measures
   fullURL += '&Measures=' + myGrooveData.numberOfMeasures;

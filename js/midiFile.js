@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -125,8 +125,11 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   num_notes_for_swing,
   swing_percentage,
   timeSigTop,
-  timeSigBottom
+  timeSigBottom,
+  swing_style
 ) {
+  // 'swing' (default) or 'brazilian'; callers that don't say use the player's setting
+  if (swing_style === undefined) swing_style = gu.swingStyle;
   var prev_hh_note = 46; // default to open hi-hat so that the first hi-hat note also mutes any previous hh open.
   var midi_channel = 9; // percussion
 
@@ -171,10 +174,14 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
         duration -= duration * swing_percentage;
       } else if (val < scaler * 3) {
         // this is the &, increase the distance between this note and the a
-        duration += duration * swing_percentage;
+        // (Brazilian swing: shorten it, so the a comes early)
+        if (swing_style == 'brazilian') duration -= duration * swing_percentage;
+        else duration += duration * swing_percentage;
       } else if (val < scaler * 4) {
         // this is the a, shorten the distance between this note and the 2
-        duration -= duration * swing_percentage;
+        // (Brazilian swing: lengthen it, so the beat lands on time: 1-e&-a2-e&-a)
+        if (swing_style == 'brazilian') duration += duration * swing_percentage;
+        else duration -= duration * swing_percentage;
       }
     }
 
@@ -622,10 +629,13 @@ export function create_MIDIURLFromGrooveData(gu, myGrooveData, MIDI_type) {
       MIDI_type,
       myGrooveData.metronomeFrequency,
       measure_notes,
-      myGrooveData.timeDivision,
+      // notes per measure at the note setting (the editor does the same), so
+      // swing groups each beat in any time signature, not only 4/4
+      (myGrooveData.timeDivision * myGrooveData.numBeats) / myGrooveData.noteValue,
       swing_percentage,
       myGrooveData.numBeats,
-      myGrooveData.noteValue
+      myGrooveData.noteValue,
+      myGrooveData.swingStyle || 'swing'
     );
   }
 
