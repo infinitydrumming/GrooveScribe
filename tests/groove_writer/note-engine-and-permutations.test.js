@@ -381,12 +381,13 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
       expect(gw.HTMLforPermutationOptions()).toContain('<option value="2" selected>');
     });
 
-    it('keeps the groove\'s swing on the click in "groove / click" click-only bars', () => {
-      // gaps between the first five note-ons of the loaded MIDI
-      const firstGaps = () => {
+    describe('"groove / click" bars, counted bar by bar', () => {
+      // the loaded MIDI split into bars (each starts with the accented bar click,
+      // note 76): per bar, the kick count and the gaps between its note-ons
+      const loadedBars = () => {
         const url = String(globalThis.MIDI.Player.loadFile.mock.calls.at(-1)[0]);
         const bytes = Uint8Array.from(atob(url.split(',')[1]), (c) => c.charCodeAt(0));
-        const times = [];
+        const events = [];
         let p = 22; // after the file and track headers
         let tick = 0;
         let status = 0;
@@ -407,25 +408,73 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
             p += vlq();
           } else if ((status & 0xf0) == 0xc0) p++;
           else {
-            const velocity = bytes[p + 1];
+            const [key, velocity] = [bytes[p], bytes[p + 1]];
             p += 2;
-            if ((status & 0xf0) == 0x90 && velocity > 0 && times.at(-1) !== tick) times.push(tick);
+            if ((status & 0xf0) == 0x90 && velocity > 0) events.push({ tick, key });
           }
         }
-        return times.slice(1, 5).map((t, i) => t - times[i]);
+        const starts = events.filter((e) => e.key == 76).map((e) => e.tick);
+        return starts.map((start, i) => {
+          const inBar = events.filter(
+            (e) => e.tick >= start && e.tick < (starts[i + 1] ?? Infinity)
+          );
+          const times = [...new Set(inBar.map((e) => e.tick))];
+          return {
+            kicks: inBar.filter((e) => e.key == 35).length,
+            gaps: times.slice(1, 5).map((t, j) => t - times[j]),
+          };
+        });
       };
-      // an empty swung groove with the 16th-note click, 1 groove bar then 1 click bar
-      gw.loadNewGroove(
-        '?TimeSig=4/4&Div=16&Tempo=80&Swing=30&MetronomeFreq=16&GrooveBars=1&ClickBars=1' +
-          '&Measures=1&H=|----------------|&S=|----------------|&K=|----------------|'
-      );
-      loadMidi(false);
-      const grooveBar = firstGaps();
-      expect(grooveBar[0]).toBeGreaterThan(grooveBar[1]); // swung, not straight
+      // bar n of the groove has n kicks, so each bar can be recognised
+      const groove = (measures, options) =>
+        '?TimeSig=4/4&Div=16&Tempo=80&Swing=30&MetronomeFreq=4' +
+        options +
+        '&Measures=' +
+        measures +
+        '&H=|' +
+        Array(measures).fill('xxxxxxxxxxxxxxxx').join('|') +
+        '|&S=|' +
+        Array(measures).fill('----------------').join('|') +
+        '|&K=|' +
+        ['o---------------', 'o---o-----------', 'o---o---o-------', 'o---o---o---o---']
+          .slice(0, measures)
+          .join('|') +
+        '|';
+      const playCycle = (first) => {
+        loadMidi(first);
+        const bars = loadedBars();
+        fireNote('complete', 1); // the cycle has played through
+        return bars.map((bar) => bar.kicks);
+      };
 
-      fireNote('complete', 1); // the groove bar has played: the click-only bar is next
-      loadMidi(false);
-      expect(firstGaps()).toEqual(grooveBar);
+      it('3 groove bars + 1 click bar over a 4-bar groove: bar 4 is the click bar', () => {
+        gw.loadNewGroove(groove(4, '&StraightBars=4&GrooveBars=3&ClickBars=1'));
+        expect(playCycle(true)).toEqual([1, 2, 3, 0]);
+        expect(playCycle(false)).toEqual([1, 2, 3, 0]);
+      });
+
+      it('the groove keeps counting through the click bars', () => {
+        // 2-bar groove, 3 + 2: 1 2 1 (click click) 2 1 2 (click click) ...
+        gw.loadNewGroove(groove(2, '&GrooveBars=3&ClickBars=2'));
+        expect(playCycle(true)).toEqual([1, 2, 1, 0, 0]);
+        expect(playCycle(false)).toEqual([2, 1, 2, 0, 0]);
+        expect(playCycle(false)).toEqual([1, 2, 1, 0, 0]);
+      });
+
+      it('plays straight bars straight, and keeps the swing on the click in click bars', () => {
+        gw.loadNewGroove(
+          groove(2, '&StraightBars=2&GrooveBars=2&ClickBars=1').replace(
+            'MetronomeFreq=4',
+            'MetronomeFreq=16'
+          )
+        );
+        loadMidi(true);
+        const [swung, straight, click] = loadedBars();
+        expect(swung.gaps[0]).toBeGreaterThan(swung.gaps[1]);
+        expect(straight.gaps).toEqual([32, 32, 32, 32]);
+        expect(click.kicks).toBe(0);
+        expect(click.gaps).toEqual(swung.gaps);
+      });
     });
 
     it('builds MIDI across snare-permutation sections when active', () => {

@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-05 (sixth update) — groove / click bars counted bar by bar
+
+- Fixed: the "Groove / click bars" option always played the whole groove before
+  the click bars, so a 4-bar groove with 3 groove bars + 1 click bar played all 4
+  bars and then added a click bar (a 5-bar cycle). It now counts bar by bar: 3 + 1
+  plays bars 1-3 and then the click bar in place of bar 4, every time round.
+- The groove keeps its place through the click bars and comes back in on the bar
+  it would have reached (a 2-bar groove with 3 + 2 plays 1 2 1, two click bars,
+  then 2 1 2, ...). Straight bars stay straight, and the playing bar is still
+  highlighted, with no highlight during the click bars. Permutations are unchanged.
+
 ## 2026-10-05 (fifth update) — speed-up target tempo
 
 - **Target tempo for the metronome's Auto Speed Up:** tick "Stop at" and enter a

@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
@@ -501,7 +501,7 @@
 			<div id="grooveClickTitle">Groove / click bars</div>
 			<div class="grooveClickRow">Play the groove for <input type="number" id="grooveClickGrooveBars" min="1" max="32" value="4"> bars,</div>
 			<div class="grooveClickRow">then just the click for <input type="number" id="grooveClickClickBars" min="1" max="32" value="4"> bars, and repeat.</div>
-			<div class="grooveClickNote">Uses the metronome setting; if the metronome is off, the click bars click on quarter notes.</div>
+			<div class="grooveClickNote">Counted bar by bar: the groove keeps its place through the click bars and comes back in where it would be. Uses the metronome setting; if the metronome is off, the click bars click on quarter notes.</div>
 			<div id="grooveClickCloseButtonDiv"><button id="grooveClickCloseButton" onclick="myGrooveWriter.close_GrooveClickConfiguration();">Done</button></div>
 		</div>
 

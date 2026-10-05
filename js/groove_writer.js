@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -145,6 +145,11 @@ function GrooveWriter() {
   var class_groove_click_click_bars = 4;
   var class_groove_click_in_click_phase = false;
   var class_groove_click_bars_played = 0;
+  // Without a permutation the groove / click option plays one cycle at a time:
+  // N groove bars then M click-only bars. The groove's bars keep counting through
+  // the click bars, so it comes back in where it would have been.
+  var class_groove_click_cycle_start_bar = 0; // groove bar the next cycle starts on
+  var class_groove_click_playing_start_bar = 0; // ... and the cycle now playing
   // per bar (index 0 = bar 1): true plays that bar straight when the groove is swung
   var class_straight_bars = [];
 
@@ -3111,7 +3116,9 @@ function GrooveWriter() {
           class_metronome_count_in_is_playing = false;
           root.myGrooveUtils.resetMetronomeOptionsOffsetClickStartRotation();
         }
-        if (class_groove_click_active && class_groove_click_in_click_phase)
+        if (class_groove_click_active && class_permutation_type == 'none')
+          midiURL = createGrooveClickCycleMidiUrl(class_groove_click_cycle_start_bar);
+        else if (class_groove_click_active && class_groove_click_in_click_phase)
           midiURL = createClickOnlyMidiUrl(class_groove_click_click_bars);
         else midiURL = createMidiUrlFromClickableUI('our_MIDI');
         root.myGrooveUtils.midiResetNoteHasChanged();
@@ -3131,15 +3138,26 @@ function GrooveWriter() {
         root.metronomeAutoSpeedUpTempoUpdate();
       }
 
+      var grooveClickCycle =
+        class_groove_click_active &&
+        class_permutation_type == 'none' &&
+        !class_metronome_count_in_is_playing;
+
       // the count-in track doesn't count towards the groove bars
       if (
         note_type == 'complete' &&
         class_groove_click_active &&
         !class_metronome_count_in_is_playing
-      )
-        advanceGrooveClickPhase();
+      ) {
+        if (class_permutation_type == 'none') advanceGrooveClickCycle();
+        else advanceGrooveClickPhase();
+      }
 
       // nothing to follow on the grid while only the click is playing
+      if (grooveClickCycle) {
+        hilight_note(note_type, grooveClickCycleGridPercent(percent_complete));
+        return;
+      }
       var clickOnly = class_groove_click_active && class_groove_click_in_click_phase;
       hilight_note(note_type, clickOnly ? -1 : percent_complete);
     };
@@ -3681,6 +3699,106 @@ function GrooveWriter() {
   function resetGrooveClickPhase() {
     class_groove_click_in_click_phase = false;
     class_groove_click_bars_played = 0;
+    class_groove_click_cycle_start_bar = 0;
+    class_groove_click_playing_start_bar = 0;
+  }
+
+  // One cycle has played: the next one starts that many groove bars later.
+  function advanceGrooveClickCycle() {
+    class_groove_click_cycle_start_bar =
+      (class_groove_click_cycle_start_bar +
+        class_groove_click_groove_bars +
+        class_groove_click_click_bars) %
+      class_number_of_measures;
+    root.myGrooveUtils.midiNoteHasChanged(); // build the next cycle
+  }
+
+  // Where playback is in the groove's bars, as a fraction of the whole groove
+  // (what hilight_note expects), or -1 during the click-only bars.
+  function grooveClickCycleGridPercent(percent_complete) {
+    if (percent_complete < 0) return percent_complete;
+    var position =
+      percent_complete * (class_groove_click_groove_bars + class_groove_click_click_bars);
+    var barInCycle = Math.min(
+      Math.floor(position),
+      class_groove_click_groove_bars + class_groove_click_click_bars - 1
+    );
+    if (barInCycle >= class_groove_click_groove_bars) return -1;
+    var grooveBar = (class_groove_click_playing_start_bar + barInCycle) % class_number_of_measures;
+    return (grooveBar + (position - barInCycle)) / class_number_of_measures;
+  }
+
+  // One groove bar (bar is 0-based) of the clickable grid, played into midiTrack.
+  function addGrooveBarToMidiTrack(midiTrack, bar, MIDI_type) {
+    var Sticking_Array = get_empty_note_array_in_32nds();
+    var HH_Array = get_empty_note_array_in_32nds();
+    var Snare_Array = get_empty_note_array_in_32nds();
+    var Kick_Array = get_empty_note_array_in_32nds();
+    var Toms_Array = get_empty_voice_arrays_in_32nds();
+    var num_notes = get32NoteArrayFromClickableUI(
+      Sticking_Array,
+      HH_Array,
+      Snare_Array,
+      Kick_Array,
+      Toms_Array,
+      class_notes_per_measure * bar
+    );
+    muteArrayFromClickableUI(Sticking_Array, HH_Array, Snare_Array, Kick_Array, Toms_Array, bar);
+    root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
+      midiTrack,
+      HH_Array,
+      Snare_Array,
+      Kick_Array,
+      Toms_Array,
+      MIDI_type,
+      root.getMetronomeFrequency(),
+      num_notes,
+      get_num_notes_for_swing(),
+      class_straight_bars[bar] ? 0 : root.myGrooveUtils.getSwing() / 100, // a straight bar plays straight
+      class_num_beats_per_measure,
+      class_note_value_per_measure
+    );
+  }
+
+  // One click-only bar: the metronome (the 1/4 click if it is off), with the
+  // groove's swing so the click doesn't straighten out.
+  function addClickBarToMidiTrack(midiTrack) {
+    var empty = get_empty_note_array_in_32nds();
+    root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
+      midiTrack,
+      empty,
+      empty,
+      empty,
+      get_empty_voice_arrays_in_32nds(),
+      'our_MIDI',
+      root.getMetronomeFrequency() || 4,
+      empty.length,
+      get_num_notes_for_swing(),
+      root.myGrooveUtils.getSwing() / 100,
+      class_num_beats_per_measure,
+      class_note_value_per_measure
+    );
+  }
+
+  // One cycle of the groove / click option, counted bar by bar: the groove bars
+  // (from startBar, wrapping round the groove), then the click-only bars.
+  function createGrooveClickCycleMidiUrl(startBar) {
+    var midiFile = new Midi.File();
+    var midiTrack = new Midi.Track();
+    midiFile.addTrack(midiTrack);
+    midiTrack.setTempo(root.myGrooveUtils.getTempo());
+    midiTrack.setInstrument(0, 0x13);
+
+    class_groove_click_playing_start_bar = startBar;
+    for (var grooveBar = 0; grooveBar < class_groove_click_groove_bars; grooveBar++)
+      addGrooveBarToMidiTrack(
+        midiTrack,
+        (startBar + grooveBar) % class_number_of_measures,
+        'our_MIDI'
+      );
+    for (var clickBar = 0; clickBar < class_groove_click_click_bars; clickBar++)
+      addClickBarToMidiTrack(midiTrack);
+    return 'data:audio/midi;base64,' + btoa(midiFile.toBytes());
   }
 
   // Called each time the groove (or the click-only part) finishes playing through.
@@ -3707,26 +3825,7 @@ function GrooveWriter() {
     midiTrack.setTempo(root.myGrooveUtils.getTempo());
     midiTrack.setInstrument(0, 0x13);
 
-    var empty = get_empty_note_array_in_32nds();
-    // the click keeps the groove's swing (amount and style), so it doesn't
-    // straighten out in the click-only bars
-    var swing_percentage = root.myGrooveUtils.getSwing() / 100;
-    for (var bar = 0; bar < bars; bar++) {
-      root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
-        midiTrack,
-        empty,
-        empty,
-        empty,
-        get_empty_voice_arrays_in_32nds(),
-        'our_MIDI',
-        root.getMetronomeFrequency() || 4,
-        empty.length,
-        get_num_notes_for_swing(),
-        swing_percentage,
-        class_num_beats_per_measure,
-        class_note_value_per_measure
-      );
-    }
+    for (var bar = 0; bar < bars; bar++) addClickBarToMidiTrack(midiTrack);
     return 'data:audio/midi;base64,' + btoa(midiFile.toBytes());
   }
 
