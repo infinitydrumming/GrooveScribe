@@ -11,6 +11,23 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-05 (second update) — Brazilian swing
+
+- **Brazilian swing:** click the word SWING in front of the swing slider to switch
+  it to BRAZIL. The e of each beat is played a little late and the a a little early,
+  so the four 16ths are spaced long-short-short-long (1 – e & – a), the samba /
+  partido alto feel; the regular swing is long-short-long-short. The slider sets
+  how strong it is (about 10% is a typical samba feel). In grooves written in 8th
+  notes the same spacing covers each pair of beats. It only changes playback, and
+  it is saved in links as `SwingStyle=brazilian` (older links are unchanged).
+- New **Brazilian grooves** section in the Grooves menu, in 2/4 with Brazilian
+  swing at 10%: Samba (hi-hat & bass drum), Samba (snare) and Samba (ride &
+  cross-stick).
+- Fixed: in shared links and embedded grooves, swing in time signatures other than
+  4/4 (2/4, 3/4, ...) was spaced per 8th note instead of per beat. It now matches
+  the editor. Grooves in 4/4 play exactly as before.
+- The help page explains Brazilian swing.
+
 ## 2026-10-05 — Blues Shuffle, Train Beat in 8ths and a triplet notation fix
 
 - New groove in the Grooves menu under triplet grooves: **Blues Shuffle**. The ride

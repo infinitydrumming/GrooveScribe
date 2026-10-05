@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing. See CHANGES.md.
 // grooveData — the central data contract for Groove Scribe.
 //
 // A GrooveData describes a single groove: its time signature, subdivision and
@@ -74,6 +74,8 @@ const EMPTY_NOTE_ARRAY = [
  * @property {string} comments         Free-text comments.
  * @property {boolean} showLegend      Whether the notation legend is displayed.
  * @property {number} swingPercent     Swing amount, 0–100.
+ * @property {'swing' | 'brazilian'} swingStyle  How swing spaces each group of four notes: 'swing'
+ *                                     (long-short-long-short) or 'brazilian' (long-short-short-long).
  * @property {number} tempo            Tempo in BPM.
  * @property {boolean} kickStemsUp     Kick note stem direction.
  * @property {number} metronomeFrequency  Metronome click subdivision (0, 1 = once per bar, 4, 8, 16).
@@ -121,6 +123,7 @@ export function createGrooveData(config = {}) {
     comments: '',
     showLegend: false,
     swingPercent: 0,
+    swingStyle: 'swing',
     tempo: constant_DEFAULT_TEMPO,
     kickStemsUp: true,
     metronomeFrequency: 0, // 0, 1, 4, 8, 16

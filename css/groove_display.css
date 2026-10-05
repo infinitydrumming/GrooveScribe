@@ -378,3 +378,13 @@ input[type='range']:active::-webkit-slider-thumb {
     display: none !important;
   }
 }
+
+/* Infinity Drumming, 2026: click the SWING label to switch to Brazilian swing (BRAZIL) */
+.swingStyleToggle {
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.swingStyleToggle.brazilian {
+  color: #62c04c;
+}

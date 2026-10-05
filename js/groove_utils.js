@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -151,6 +151,8 @@ function GrooveUtils() {
   root.isMIDIPaused = false;
   root.shouldMIDIRepeat = true;
   root.swingIsEnabled = false;
+  // 'swing' (long-short-long-short) or 'brazilian' (long-short-short-long)
+  root.swingStyle = 'swing';
   root.grooveUtilsUniqueIndex = global_num_GrooveUtilsCreated;
 
   // metronome options
@@ -1007,6 +1009,7 @@ function GrooveUtils() {
       if (root.myGrooveData) {
         root.myGrooveData.tempo = root.getTempo();
         root.myGrooveData.swingPercent = root.getSwing();
+        root.myGrooveData.swingStyle = root.getSwingStyle();
         var midiURL = root.create_MIDIURLFromGrooveData(root.myGrooveData);
         root.loadMIDIFromURL(midiURL);
         root.midiEventCallbacks.noteHasChangedSinceLastDataLoad = false;
@@ -1092,7 +1095,8 @@ function GrooveUtils() {
     num_notes_for_swing,
     swing_percentage,
     timeSigTop,
-    timeSigBottom
+    timeSigBottom,
+    swing_style
   ) {
     return _MIDI_from_HH_Snare_Kick_Arrays(
       root,
@@ -1107,7 +1111,8 @@ function GrooveUtils() {
       num_notes_for_swing,
       swing_percentage,
       timeSigTop,
-      timeSigBottom
+      timeSigBottom,
+      swing_style
     );
   };
 
@@ -1594,6 +1599,27 @@ function GrooveUtils() {
     root.swingUpdateText(swingAmount); // update the output
   };
 
+  root.getSwingStyle = function () {
+    return root.swingStyle;
+  };
+
+  // 'swing' or 'brazilian'; the label in front of the swing slider shows which
+  root.setSwingStyle = function (style) {
+    root.swingStyle = style == 'brazilian' ? 'brazilian' : 'swing';
+    var label = document.getElementById('swingLabel' + root.grooveUtilsUniqueIndex);
+    if (label) {
+      label.innerHTML = root.swingStyle == 'brazilian' ? 'BRAZIL' : 'SWING';
+      label.className =
+        'swingLabel swingStyleToggle' + (root.swingStyle == 'brazilian' ? ' brazilian' : '');
+    }
+    root.midiNoteHasChanged();
+  };
+
+  // click on the label to switch between swing and Brazilian swing
+  root.swingStyleToggle = function () {
+    root.setSwingStyle(root.swingStyle == 'brazilian' ? 'swing' : 'brazilian');
+  };
+
   root.swingUpdateEvent = function (event) {
     if (root.swingIsEnabled === false) {
       root.setSwingSlider(0);
@@ -1772,7 +1798,9 @@ function GrooveUtils() {
       '" list="tempoSettings">' +
       '			</div>' +
       '			<div class="swingRow">' +
-      '				<span class="swingLabel">SWING</span>' +
+      '				<span class="swingLabel swingStyleToggle" id="swingLabel' +
+      root.grooveUtilsUniqueIndex +
+      '" title="Click to switch between swing and Brazilian swing">SWING</span>' +
       '				<span for="swingAmount" class="swingOutput" id="swingOutput' +
       root.grooveUtilsUniqueIndex +
       '">0% swing</span>' +
@@ -1826,6 +1854,11 @@ function GrooveUtils() {
     if (html_element) {
       if (isIE10) html_element.addEventListener('click', root.swingUpdateEvent, false);
       else html_element.addEventListener('input', root.swingUpdateEvent, false);
+    }
+
+    html_element = document.getElementById('swingLabel' + root.grooveUtilsUniqueIndex);
+    if (html_element) {
+      html_element.addEventListener('click', root.swingStyleToggle, false);
     }
 
     html_element = document.getElementById('midiRepeatImage' + root.grooveUtilsUniqueIndex);

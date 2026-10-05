@@ -8,7 +8,7 @@ import { grooves } from '../js/grooves.js';
 //     / swing / metronome / multi-measure combination) reused from the unit suite.
 // Every entry becomes an index.html?<query> URL that renders one groove.
 
-const CATEGORIES = ['Rock_Grooves', 'Triplet_Grooves', 'World_Grooves', 'Foot_Ostinatos'];
+const CATEGORIES = ['Rock_Grooves', 'Triplet_Grooves', 'World_Grooves', 'Brazilian_Grooves', 'Foot_Ostinatos'];
 
 const builtIn = CATEGORIES.flatMap((cat) =>
   Object.entries(grooves[cat]).map(([name, url]) => ({ name: `builtin/${cat}/${name}`, url }))

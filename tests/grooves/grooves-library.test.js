@@ -9,7 +9,13 @@ describe('Built-in groove library', () => {
   let grooves;
   let gu;
 
-  const CATEGORIES = ['Rock_Grooves', 'Triplet_Grooves', 'World_Grooves', 'Foot_Ostinatos'];
+  const CATEGORIES = [
+    'Rock_Grooves',
+    'Triplet_Grooves',
+    'World_Grooves',
+    'Brazilian_Grooves',
+    'Foot_Ostinatos',
+  ];
 
   beforeEach(async () => {
     grooves = await loadGrooves();
@@ -70,11 +76,12 @@ describe('groove library HTML helpers', () => {
   });
 
   describe('FullArray', () => {
-    it('groups all four categories under display names', () => {
+    it('groups all five categories under display names', () => {
       expect(Object.keys(grooves.FullArray)).toEqual([
         'Rock grooves',
         'Triplet grooves',
         'World grooves',
+        'Brazilian grooves',
         'Foot Ostinatos',
       ]);
     });
@@ -93,7 +100,13 @@ describe('groove library HTML helpers', () => {
 
     it('emits one clickable item per shipped groove plus one header per category', () => {
       const html = grooves.getGroovesAsHTML();
-      const CATEGORIES = ['Rock_Grooves', 'Triplet_Grooves', 'World_Grooves', 'Foot_Ostinatos'];
+      const CATEGORIES = [
+        'Rock_Grooves',
+        'Triplet_Grooves',
+        'World_Grooves',
+        'Brazilian_Grooves',
+        'Foot_Ostinatos',
+      ];
       const grooveCount = CATEGORIES.reduce((n, c) => n + Object.keys(grooves[c]).length, 0);
       const leafItems = (html.match(/class="grooveListLI"/g) || []).length;
       const headerItems = (html.match(/class="grooveListHeaderLI"/g) || []).length;
