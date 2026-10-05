@@ -299,6 +299,32 @@ describe('GrooveUtils ABC notation generation', () => {
       expect(out).toContain('(3:3:3');
       expect(out).toContain('V:Hands stem=up\n%%voicemap drum\n');
     });
+
+    it('keeps the full length of a kick & hi-hat foot chorded with other notes', () => {
+      // regression: "[F^d,]4" chorded with the snare lost its brackets and the
+      // kick fell back to the default 1/32 length ("F^d,4"), drawn as a 32nd
+      const gd = gu.getGrooveDataFromUrlString(
+        '?TimeSig=4/4&Div=12&Tempo=90&Measures=1&H=|------------|&S=|---O--------|&K=|---X--------|'
+      );
+      const { sticking, hh, snare, kick, toms } = buildFullSizeArrays(gd);
+      const out = gu.create_ABC_from_snare_HH_kick_arrays(
+        sticking,
+        hh,
+        snare,
+        kick,
+        toms,
+        '|\n',
+        hh.length,
+        gd.timeDivision,
+        gu.notesPerMeasureInFullSizeArray(true, gd.numBeats, gd.noteValue),
+        true, // kick in the Hands voice, chorded with the snare
+        gd.numBeats,
+        gd.noteValue
+      );
+
+      expect(out).toContain('!accent![c8F8^d,8]');
+      expect(out).not.toMatch(/F\^d,/);
+    });
   });
 
   describe('createABCFromGrooveData (full pipeline: boilerplate + note body)', () => {

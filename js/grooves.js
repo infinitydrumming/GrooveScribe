@@ -1,4 +1,5 @@
-/*
+/* Modified by Infinity Drumming, 2026: Blues Shuffle groove. See CHANGES.md.
+ *
  * Grooves class.   Contains some common grooves that is used to populate the grooves menu
  *
  *
@@ -28,6 +29,8 @@ if (typeof grooves === 'undefined') var grooves = {};
   root.Triplet_Grooves = {
     'Jazz Shuffle':
       '?TimeSig=4/4&Div=12&Title=Jazz%20Shuffle&Tempo=100&Measures=1&H=|r--r-rr--r-r|&S=|g-gO-gg-gO-g|&K=|o--X--o--X--|',
+    'Blues Shuffle':
+      '?TimeSig=4/4&Div=12&Title=Blues%20Shuffle&Tempo=100&Measures=1&H=|------------|&R=|R-rR-rR-rR-r|&S=|g-gO-gg-gO-g|&K=|o--X--o--X--|',
     'Half Time Shuffle in 8th notes':
       '?TimeSig=4/4&Div=12&Title=Half%20Time%20Shuffle&Swing=0&measures=1&H=|x-xx-xx-xx-x|&S=|-g--g-Og--g-|&K=|------------|',
     'Half Time Shuffle in 16th notes':
