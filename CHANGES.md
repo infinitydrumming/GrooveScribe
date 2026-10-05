@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-05 — Blues Shuffle and a triplet notation fix
+
+- New groove in the Grooves menu under triplet grooves: **Blues Shuffle**. The ride
+  plays swung 8ths with the quarter notes accented, the snare ghosts every swung
+  8th apart from the backbeat on 2 and 4, the kick plays all four quarter notes and
+  the hi-hat foot closes on 2 and 4.
+- Fixed: where a kick and the hi-hat foot land together with another note (for
+  example on 2 and 4 of the Jazz Shuffle), the kick was written as a 32nd note (it
+  showed up as 32nd-note triplets in the 1/8-triplet permutations). It now keeps
+  its full length.
+
 ## 2026-10-04 (fifth update) — Infinity Scribe
 
 - The app is now called **Infinity Scribe**: an INFINITY / SCRIBE wordmark

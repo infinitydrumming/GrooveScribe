@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -92,6 +92,16 @@ function getABCforNote(note_array_of_arrays, start_index, end_of_group, scaler) 
     ABC_String += moveAccentsOrOtherModifiersOutsideOfGroup(abcNoteStrings, '!plus!');
     ABC_String += moveAccentsOrOtherModifiersOutsideOfGroup(abcNoteStrings, '!open!');
     ABC_String += moveAccentsOrOtherModifiersOutsideOfGroup(abcNoteStrings, '!///!');
+
+    // A sub-chord such as the kick & hi-hat foot "[F^d,]4" carries its length after the ']'. Give every
+    // note inside it that length before the brackets are dropped below, or all but the last note would
+    // fall back to the default length (a 32nd).
+    abcNoteStrings.notes1 = abcNoteStrings.notes1.replace(
+      /\[([^\]]*)\]([\d./]+)/g,
+      function (match, chordNotes, length) {
+        return chordNotes.replace(/[_=^]*[A-Ga-g][,']*/g, '$&' + length);
+      }
+    );
 
     // Look for '[' and ']'.   They are added on to the the kick and splash and could be added to other notes
     // in the future.   They imply that the notes are on the same beat.   Since we are already putting multiple
