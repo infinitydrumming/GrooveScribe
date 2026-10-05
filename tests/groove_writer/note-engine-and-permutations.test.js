@@ -477,6 +477,26 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
         expect(second.slice(0, 2)).not.toEqual(first.slice(0, 2));
       });
 
+      it('keeps the cursor moving through the groove during the click bars', () => {
+        // 2-bar groove of 16ths, 1 groove bar + 1 click bar: bar 2 is silent
+        gw.loadNewGroove(groove(2, '&GrooveBars=1&ClickBars=1'));
+        loadMidi(true);
+        // one silent cursor marker (note 20) on every 16th of the click bar
+        const url = String(globalThis.MIDI.Player.loadFile.mock.calls.at(-1)[0]);
+        const bytes = atob(url.split(',')[1]);
+        let markers = 0;
+        for (let i = 0; i < bytes.length - 2; i++)
+          if (bytes.charCodeAt(i) === 0x99 && bytes.charCodeAt(i + 1) === 20) markers++;
+        expect(markers).toBe(16);
+        // three quarters of the way through the cycle is half way through bar 2
+        const litCell = () =>
+          [...document.querySelectorAll('[id^="bg-highlight"]')].findIndex(
+            (el) => el.style.background && !el.style.background.includes('transparent')
+          );
+        fireNote('cursor', 0.76);
+        expect(litCell()).toBe(24);
+      });
+
       it('shows no cursor during the count-in', () => {
         gw.loadNewGroove(groove(2, ''));
         gw.metronomeOptionsMenuPopupClick('CountIn');

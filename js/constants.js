@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash 2, splash, cymbal voice indexes, tom ghosts and accents, ride accent. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash 2, splash, cymbal voice indexes, tom ghosts and accents, ride accent, silent cursor marker. See CHANGES.md.
 // Drum-notation and MIDI constants shared across the app.
 // Extracted from groove_utils.js (Step 2 of the refactor). Both groove_utils.js
 // and groove_writer.js import what they need from here.
@@ -62,6 +62,9 @@ export const constant_OUR_MIDI_VELOCITY_GHOST = 50;
 // Tom ghost notes: about 30% of a normal hit (MIDI.js volume is proportional to velocity)
 export const constant_OUR_MIDI_VELOCITY_TOM_GHOST = 25;
 export const constant_OUR_MIDI_METRONOME_1 = 76;
+// a silent note (none of the loaded sounds is note 20) that only moves the playback
+// cursor, e.g. through the groove during groove / click click-only bars
+export const constant_OUR_MIDI_CURSOR_MARKER = 20;
 export const constant_OUR_MIDI_METRONOME_NORMAL = 77;
 export const constant_OUR_MIDI_HIHAT_NORMAL = 42;
 export const constant_OUR_MIDI_HIHAT_OPEN = 46;

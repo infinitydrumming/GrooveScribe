@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -3745,6 +3745,11 @@ function GrooveWriter() {
       : get_numberOfPermutationBars();
   }
 
+  // Does bar `bar` of that sequence play straight? (Permutations play bar 1.)
+  function isSequenceBarStraight(bar) {
+    return !!class_straight_bars[class_permutation_type == 'none' ? bar : 0];
+  }
+
   // One cycle has played: the next one starts that many groove bars later.
   function advanceGrooveClickCycle() {
     var length = grooveClickSequenceLength();
@@ -3758,20 +3763,21 @@ function GrooveWriter() {
   }
 
   // Where playback is in the groove / click cycle, as a fraction of the groove's
-  // bars (what playing the plain groove would give), or -1 in the click-only bars.
+  // bars (what playing the plain groove would give). In the click-only bars the
+  // cursor carries on through the groove, so players see where they are while
+  // they play on without it.
   function grooveClickCycleGroovePercent(percent_complete) {
     var length = grooveClickSequenceLength();
     var cycleBars = class_groove_click_groove_bars + class_groove_click_click_bars;
     var position = percent_complete * cycleBars;
     var barInCycle = Math.min(Math.floor(position), cycleBars - 1);
-    if (barInCycle >= class_groove_click_groove_bars || length < 1) return -1;
+    if (length < 1) return -1;
     var grooveBar = (class_groove_click_playing_start_bar + barInCycle) % length;
     return (grooveBar + (position - barInCycle)) / length;
   }
 
   // The playback position (a fraction of the MIDI now playing) as a position in the
-  // groove for the cursor, or -1 when there is nothing to follow: during the
-  // count-in, and in groove / click click-only bars.
+  // groove for the cursor, or -1 when there is nothing to follow (the count-in).
   function playingPercentToGroovePercent(percent) {
     if (percent < 0) return percent;
     if (class_metronome_count_in_is_playing) return -1;
@@ -3788,15 +3794,15 @@ function GrooveWriter() {
       return bars;
     };
     if (class_groove_click_active && grooveClickSequenceLength() > 0) {
-      var grooveBars = [];
-      for (var bar = 0; bar < class_groove_click_groove_bars; bar++) {
-        var grooveBar =
-          class_permutation_type == 'none'
-            ? (class_groove_click_playing_start_bar + bar) % class_number_of_measures
-            : 0; // permutations play bar 1
-        grooveBars.push(!!class_straight_bars[grooveBar]);
-      }
-      return grooveBars.concat(repeat(class_groove_click_click_bars, false));
+      var cycleBars = [];
+      var cycleLength = class_groove_click_groove_bars + class_groove_click_click_bars;
+      for (var bar = 0; bar < cycleLength; bar++)
+        cycleBars.push(
+          isSequenceBarStraight(
+            (class_groove_click_playing_start_bar + bar) % grooveClickSequenceLength()
+          )
+        );
+      return cycleBars;
     }
     if (class_permutation_type != 'none')
       return repeat(get_numberOfPermutationBars(), !!class_straight_bars[0]);
@@ -3876,10 +3882,15 @@ function GrooveWriter() {
     );
   }
 
-  // One click-only bar: the metronome (the 1/4 click if it is off), with the
-  // groove's swing so the click doesn't straighten out.
-  function addClickBarToMidiTrack(midiTrack) {
+  // One click-only bar: the metronome (the 1/4 click if it is off), swung or
+  // straight like the groove bar it stands in for, plus a silent cursor marker on
+  // every note of the grid so the cursor carries on through the groove.
+  function addClickBarToMidiTrack(midiTrack, straight) {
     var empty = get_empty_note_array_in_32nds();
+    var slotsPerNote = empty.length / class_notes_per_measure;
+    var markers = empty.map(function (unused, slot) {
+      return slot % slotsPerNote === 0;
+    });
     root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
       midiTrack,
       empty,
@@ -3890,9 +3901,11 @@ function GrooveWriter() {
       root.getMetronomeFrequency() || 4,
       empty.length,
       get_num_notes_for_swing(),
-      root.myGrooveUtils.getSwing() / 100,
+      straight ? 0 : root.myGrooveUtils.getSwing() / 100,
       class_num_beats_per_measure,
-      class_note_value_per_measure
+      class_note_value_per_measure,
+      undefined, // the player's swing style
+      markers
     );
   }
 
@@ -3950,7 +3963,10 @@ function GrooveWriter() {
       else addGrooveBarToMidiTrack(midiTrack, bar, 'our_MIDI');
     }
     for (var clickBar = 0; clickBar < class_groove_click_click_bars; clickBar++)
-      addClickBarToMidiTrack(midiTrack);
+      addClickBarToMidiTrack(
+        midiTrack,
+        isSequenceBarStraight((startBar + class_groove_click_groove_bars + clickBar) % length)
+      );
     return 'data:audio/midi;base64,' + btoa(midiFile.toBytes());
   }
 
