@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -151,6 +151,9 @@ function GrooveUtils() {
   root.isMIDIPaused = false;
   root.shouldMIDIRepeat = true;
   root.swingIsEnabled = false;
+  // set by the editor: called when the swing amount or style changes
+  /** @type {null | (() => void)} */
+  root.swingChangedCallback = null;
   // 'swing' (long-short-long-short) or 'brazilian' (long-short-short-long)
   root.swingStyle = 'swing';
   root.grooveUtilsUniqueIndex = global_num_GrooveUtilsCreated;
@@ -1588,6 +1591,7 @@ function GrooveUtils() {
         '' + swingAmount + '%';
       root.swingPercent = swingAmount;
       root.midiNoteHasChanged();
+      if (root.swingChangedCallback) root.swingChangedCallback();
     }
   };
 
@@ -1613,6 +1617,7 @@ function GrooveUtils() {
         'swingLabel swingStyleToggle' + (root.swingStyle == 'brazilian' ? ' brazilian' : '');
     }
     root.midiNoteHasChanged();
+    if (root.swingChangedCallback) root.swingChangedCallback();
   };
 
   // click on the label to switch between swing and Brazilian swing

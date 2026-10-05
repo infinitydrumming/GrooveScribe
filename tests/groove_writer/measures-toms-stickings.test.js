@@ -392,3 +392,92 @@ describe('ShowHideABCResults', () => {
     expect(panel.style.display).toBe('block');
   });
 });
+
+describe('straightBarButtonClick (straight bars in a swung groove)', () => {
+  beforeEach(async () => {
+    document.body.innerHTML = '';
+    window.localStorage.clear();
+    gw = await newGrooveWriter();
+    buildMeasureFixture(gw, 1);
+    gw.updateCurrentURL = vi.fn();
+    gw.displayNewSVG = vi.fn();
+    gw.addMeasureButtonClick({}); // two bars
+  });
+
+  const switchText = (bar) => document.getElementById('straightBarButton' + bar).textContent;
+
+  it('switches a bar between swing and straight and keeps it in the groove data', () => {
+    expect(switchText(2)).toBe('swing');
+    gw.straightBarButtonClick(2);
+    expect(switchText(2)).toBe('straight');
+    expect(switchText(1)).toBe('swing');
+    expect(gw.grooveDataFromClickableUI().straightBars).toEqual([false, true]);
+
+    gw.straightBarButtonClick(2);
+    expect(switchText(2)).toBe('swing');
+    expect(gw.grooveDataFromClickableUI().straightBars).toEqual([false, false]);
+  });
+
+  it("a new bar copies the last bar's setting; removing a bar moves the others along", () => {
+    gw.straightBarButtonClick(2);
+    gw.addMeasureButtonClick({}); // bar 3 copies bar 2: straight
+    expect(gw.grooveDataFromClickableUI().straightBars).toEqual([false, true, true]);
+
+    gw.straightBarButtonClick(3); // bar 3 back to swing
+    gw.closeMeasureButtonClick(2);
+    expect(gw.grooveDataFromClickableUI().straightBars).toEqual([false, false]);
+    expect(switchText(2)).toBe('swing');
+  });
+});
+
+describe('metronome auto speed-up with a target tempo', () => {
+  beforeEach(async () => {
+    document.body.innerHTML = '';
+    gw = await newGrooveWriter();
+    buildMeasureFixture(gw, 1);
+  });
+
+  // the speed-up popup's settings, as in index.html
+  const popup = ({ amount, minutes, keepGoing, target }) => {
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `<input id="metronomeAutoSpeedupTempoIncreaseAmount" value="${amount}">` +
+        `<input id="metronomeAutoSpeedupTempoIncreaseInterval" value="${minutes}">` +
+        `<input type="checkbox" id="metronomeAutoSpeedUpKeepGoingForever" ${keepGoing ? 'checked' : ''}>` +
+        `<input type="checkbox" id="metronomeAutoSpeedUpUseTarget" ${target ? 'checked' : ''}>` +
+        `<input id="metronomeAutoSpeedUpTargetTempo" value="${target || 120}">`
+    );
+  };
+
+  // tempo after each loop of playback, one loop finishing every minute
+  const tempoEachMinute = (startTempo, minutes) => {
+    let tempo = startTempo;
+    const gu = gw.myGrooveUtils;
+    gu.getTempo = () => tempo;
+    gu.setTempo = (t) => (tempo = t);
+    const start = new Date(1000);
+    gu.getMidiStartTime = () => start;
+    const tempos = [];
+    for (let minute = 0; minute <= minutes; minute++) {
+      gu.getMidiPlayTime = () => new Date(minute * 60000);
+      gw.metronomeAutoSpeedUpTempoUpdate();
+      tempos.push(tempo);
+    }
+    return tempos;
+  };
+
+  it('keeps increasing until the target, then holds it', () => {
+    popup({ amount: 10, minutes: 1, keepGoing: false, target: 115 });
+    expect(tempoEachMinute(100, 4)).toEqual([100, 110, 115, 115, 115]);
+  });
+
+  it('without a target, still stops after one increase unless "keep increasing" is ticked', () => {
+    popup({ amount: 10, minutes: 1, keepGoing: false, target: 0 });
+    expect(tempoEachMinute(100, 3)).toEqual([100, 110, 110, 110]);
+  });
+
+  it('does not change the tempo when it already is at or above the target', () => {
+    popup({ amount: 10, minutes: 1, keepGoing: true, target: 90 });
+    expect(tempoEachMinute(100, 2)).toEqual([100, 100, 100]);
+  });
+});

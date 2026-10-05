@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each". See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -631,7 +631,8 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
     baseindex +
     '" onClick="myGrooveWriter.pasteMeasureButtonClick(' +
     baseindex +
-    ')" class="pasteMeasureButton"><i class="fa fa-paste"></i></span>';
+    ')" class="pasteMeasureButton"><i class="fa fa-paste"></i></span>' +
+    straightBarButtonHTML(baseindex, ctx.straightBar);
   newHTML += '</span>';
 
   if (baseindex == ctx.numberOfMeasures)
@@ -643,6 +644,32 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 
   return newHTML;
 } // end function buildStaffContainerHTML
+
+/**
+ * The switch under a bar's copy / paste buttons: "swing" plays the bar with the
+ * swing slider's setting, "straight" plays it straight (Infinity Drumming, 2026).
+ *
+ * @param {number} baseindex  The bar, starting at 1.
+ * @param {boolean} straight
+ * @returns {string}
+ */
+export function straightBarButtonHTML(baseindex, straight) {
+  return (
+    '<span title="' +
+    (straight
+      ? 'This bar plays straight. Click to swing it'
+      : 'This bar plays with the swing setting. Click to play it straight') +
+    '" id="straightBarButton' +
+    baseindex +
+    '" onClick="myGrooveWriter.straightBarButtonClick(' +
+    baseindex +
+    ')" class="straightBarButton' +
+    (straight ? ' straight' : '') +
+    '">' +
+    (straight ? 'straight' : 'swing') +
+    '</span>'
+  );
+}
 
 // `layout` is permutations.getPermutationLayout(...) for the current note
 // setting; `repeats` is the current "Play each ×" value.

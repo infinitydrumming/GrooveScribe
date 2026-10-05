@@ -167,6 +167,13 @@ export const coverageGrooves = [
     url: '?TimeSig=4/4&Div=12&Tempo=80&Measures=1&H=|X-XX-XX-XX-X|&S=|--O--O--O--O|&K=|o--o--o--o--|',
   },
 
+  // ---- Straight bars in a swung groove (Infinity Drumming): rendered bar by bar
+  // with "Swing" / "Straight" markings, straight bars played without swing.
+  {
+    name: 'Straight bars 2 and 4 (swung 16ths, 4 bars)',
+    url: '?TimeSig=4/4&Div=16&Tempo=80&Swing=30&StraightBars=2,4&Measures=4&H=|xxxxxxxxxxxxxxxx|xxxxxxxxxxxxxxxx|xxxxxxxxxxxxxxxx|xxxxxxxxxxxxxxxx|&S=|----O-------O---|----O-------O---|----O-------O---|----O-------O---|&K=|o-------o-------|o-------o-------|o-------o-------|o-------o-------|',
+  },
+
   // ---- Voice/articulation mismatches: each character is valid for SOME voice
   // but placed in a voice where it is not, exercising every "this symbol isn't
   // valid for this drum" fall-through in tablatureToABCNotationPerNote. Such

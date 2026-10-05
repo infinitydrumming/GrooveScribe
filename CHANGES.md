@@ -11,6 +11,25 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-05 (fifth update) — speed-up target tempo
+
+- **Target tempo for the metronome's Auto Speed Up:** tick "Stop at" and enter a
+  tempo (clicking the box ticks it). The tempo keeps rising by the chosen amount
+  per interval until it reaches the target, then holds there. Without it, the
+  speed-up works as before.
+
+## 2026-10-05 (fourth update) — straight and swung bars
+
+- **Straight bars in a swung groove:** each bar has a small "swing" switch under its
+  copy and paste buttons. Click it to make the bar "straight": it then plays
+  straight while the other bars swing with the swing slider (amount and style,
+  regular or Brazilian). A new bar copies the last bar's setting.
+- The sheet music marks "Swing" (or "Brazilian swing") and "Straight" over the first
+  bar and wherever the feel changes, when the groove is swung and has straight bars.
+- Saved in links as `StraightBars=2,4` (the straight bars); links without it are
+  unchanged, and shared links and embedded grooves play and mark it the same way.
+- The help page explains it.
+
 ## 2026-10-05 (third update) — swung click in click-only bars
 
 - Fixed: with the "Groove / click bars" option on, the click went straight in the

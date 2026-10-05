@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -23,6 +23,26 @@ import {
   GetDefaultTomGroove,
   GetEmptyGroove,
 } from './noteArrays.js';
+
+// "2,4" -> [false, true, false, true] for 4 bars (numbers outside the groove are ignored)
+function straightBarsFromList(list, numberOfMeasures) {
+  var straightBars = [];
+  for (var bar = 0; bar < numberOfMeasures; bar++) straightBars.push(false);
+  list.split(',').forEach(function (value) {
+    var barNum = parseInt(value, 10);
+    if (barNum >= 1 && barNum <= numberOfMeasures) straightBars[barNum - 1] = true;
+  });
+  return straightBars;
+}
+
+// [false, true, false, true] -> "2,4" ('' when no bar is straight)
+function straightBarsToList(straightBars, numberOfMeasures) {
+  var numbers = [];
+  (straightBars || []).forEach(function (straight, bar) {
+    if (straight && bar < numberOfMeasures) numbers.push(bar + 1);
+  });
+  return numbers.join(',');
+}
 
 export function getQueryVariableFromString(variable, def_value, my_string) {
   // Tolerate query strings with or without a leading '?'. window.location.search
@@ -101,6 +121,12 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
     myGrooveData.numberOfMeasures = 1;
   else if (myGrooveData.numberOfMeasures > constant_MAX_MEASURES)
     myGrooveData.numberOfMeasures = constant_MAX_MEASURES;
+
+  // StraightBars=2,4: those bars (1-based) play straight when the groove is swung
+  myGrooveData.straightBars = straightBarsFromList(
+    String(getQueryVariableFromString('StraightBars', '', encodedURLData)),
+    myGrooveData.numberOfMeasures
+  );
 
   Stickings_string = getQueryVariableFromString('Stickings', false, encodedURLData);
   if (!Stickings_string) {
@@ -299,6 +325,10 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
   if (myGrooveData.metronomeFrequency !== 0) {
     fullURL += '&MetronomeFreq=' + myGrooveData.metronomeFrequency;
   }
+
+  // straight bars in a swung groove, only when there are any
+  var straightList = straightBarsToList(myGrooveData.straightBars, myGrooveData.numberOfMeasures);
+  if (straightList) fullURL += '&StraightBars=' + straightList;
 
   // "Groove / click bars" practice option, only when it is on
   if (myGrooveData.grooveClickGrooveBars > 0) {

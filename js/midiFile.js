@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -632,7 +632,8 @@ export function create_MIDIURLFromGrooveData(gu, myGrooveData, MIDI_type) {
       // notes per measure at the note setting (the editor does the same), so
       // swing groups each beat in any time signature, not only 4/4
       (myGrooveData.timeDivision * myGrooveData.numBeats) / myGrooveData.noteValue,
-      swing_percentage,
+      // a straight bar plays without swing
+      myGrooveData.straightBars && myGrooveData.straightBars[measureIndex] ? 0 : swing_percentage,
       myGrooveData.numBeats,
       myGrooveData.noteValue,
       myGrooveData.swingStyle || 'swing'

@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
@@ -513,6 +513,12 @@
 			</div>
 			<div id="metronomeAutoSpeedupConfigurationKeepIncreasing">
 				<input type="checkbox" checked id="metronomeAutoSpeedUpKeepGoingForever"><label for="metronomeAutoSpeedUpKeepGoingForever">Keep increasing after the first interval</label>
+			</div>
+			<!-- Infinity Drumming, 2026: target tempo -->
+			<div id="metronomeAutoSpeedupConfigurationTarget">
+				<input type="checkbox" id="metronomeAutoSpeedUpUseTarget"><label for="metronomeAutoSpeedUpUseTarget">Stop at</label>
+				<input type="number" min="30" max="300" value="120" id="metronomeAutoSpeedUpTargetTempo" onfocus="document.getElementById('metronomeAutoSpeedUpUseTarget').checked = true;"> bpm
+				<span id="metronomeAutoSpeedupTargetNote">(keeps increasing until it gets there, then holds)</span>
 			</div>
 			<div id="metronomeAutoSpeedupConfigurationSliders">
 				<div id="metronomeAutoSpeedupConfigurationAmountLable">Amount in BPM</div>
