@@ -11,6 +11,12 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-05 (third update) — swung click in click-only bars
+
+- Fixed: with the "Groove / click bars" option on, the click went straight in the
+  click-only bars even when the groove was swung. It now keeps the groove's swing
+  (amount, and regular or Brazilian), so the click sounds the same in both parts.
+
 ## 2026-10-05 (second update) — Brazilian swing
 
 - **Brazilian swing:** click the word SWING in front of the swing slider to switch

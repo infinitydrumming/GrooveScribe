@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -1805,6 +1805,13 @@ function GrooveWriter() {
     );
   }
 
+  // the swing grouping for the groove's note setting: pairs of 8ths, or 16ths
+  function get_num_notes_for_swing() {
+    if (class_time_division < 16)
+      return (8 * class_num_beats_per_measure) / class_note_value_per_measure;
+    return (16 * class_num_beats_per_measure) / class_note_value_per_measure;
+  }
+
   function createMidiUrlFromClickableUI(MIDI_type) {
     var Sticking_Array = get_empty_note_array_in_32nds();
     var HH_Array = get_empty_note_array_in_32nds();
@@ -1867,10 +1874,7 @@ function GrooveWriter() {
       case 'none':
       /* falls through */
       default:
-        if (class_time_division < 16)
-          num_notes_for_swing = (8 * class_num_beats_per_measure) / class_note_value_per_measure;
-        else
-          num_notes_for_swing = (16 * class_num_beats_per_measure) / class_note_value_per_measure;
+        num_notes_for_swing = get_num_notes_for_swing();
 
         root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
           midiTrack,
@@ -3636,6 +3640,9 @@ function GrooveWriter() {
     midiTrack.setInstrument(0, 0x13);
 
     var empty = get_empty_note_array_in_32nds();
+    // the click keeps the groove's swing (amount and style), so it doesn't
+    // straighten out in the click-only bars
+    var swing_percentage = root.myGrooveUtils.getSwing() / 100;
     for (var bar = 0; bar < bars; bar++) {
       root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
         midiTrack,
@@ -3646,8 +3653,8 @@ function GrooveWriter() {
         'our_MIDI',
         root.getMetronomeFrequency() || 4,
         empty.length,
-        16,
-        0,
+        get_num_notes_for_swing(),
+        swing_percentage,
         class_num_beats_per_measure,
         class_note_value_per_measure
       );

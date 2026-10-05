@@ -381,6 +381,53 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
       expect(gw.HTMLforPermutationOptions()).toContain('<option value="2" selected>');
     });
 
+    it('keeps the groove\'s swing on the click in "groove / click" click-only bars', () => {
+      // gaps between the first five note-ons of the loaded MIDI
+      const firstGaps = () => {
+        const url = String(globalThis.MIDI.Player.loadFile.mock.calls.at(-1)[0]);
+        const bytes = Uint8Array.from(atob(url.split(',')[1]), (c) => c.charCodeAt(0));
+        const times = [];
+        let p = 22; // after the file and track headers
+        let tick = 0;
+        let status = 0;
+        const vlq = () => {
+          let v = 0;
+          let b;
+          do {
+            b = bytes[p++];
+            v = (v << 7) | (b & 0x7f);
+          } while (b & 0x80);
+          return v;
+        };
+        while (p < bytes.length) {
+          tick += vlq();
+          if (bytes[p] & 0x80) status = bytes[p++];
+          if (status == 0xff) {
+            p++;
+            p += vlq();
+          } else if ((status & 0xf0) == 0xc0) p++;
+          else {
+            const velocity = bytes[p + 1];
+            p += 2;
+            if ((status & 0xf0) == 0x90 && velocity > 0 && times.at(-1) !== tick) times.push(tick);
+          }
+        }
+        return times.slice(1, 5).map((t, i) => t - times[i]);
+      };
+      // an empty swung groove with the 16th-note click, 1 groove bar then 1 click bar
+      gw.loadNewGroove(
+        '?TimeSig=4/4&Div=16&Tempo=80&Swing=30&MetronomeFreq=16&GrooveBars=1&ClickBars=1' +
+          '&Measures=1&H=|----------------|&S=|----------------|&K=|----------------|'
+      );
+      loadMidi(false);
+      const grooveBar = firstGaps();
+      expect(grooveBar[0]).toBeGreaterThan(grooveBar[1]); // swung, not straight
+
+      fireNote('complete', 1); // the groove bar has played: the click-only bar is next
+      loadMidi(false);
+      expect(firstGaps()).toEqual(grooveBar);
+    });
+
     it('builds MIDI across snare-permutation sections when active', () => {
       gw.permutationPopupClick('snare_16ths');
       checkAll();
