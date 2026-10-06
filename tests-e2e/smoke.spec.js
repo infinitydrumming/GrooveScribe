@@ -52,6 +52,23 @@ test.describe('core UI', () => {
   });
 });
 
+test.describe('menus scroll', () => {
+  // The Grooves list is taller than its box; it must scroll (a theme rule once
+  // set overflow: hidden on it and the list could not be scrolled).
+  test('the Grooves menu scrolls with the mouse wheel', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 500 });
+    await page.goto('/index.html');
+    await page.waitForSelector('#svgTarget svg');
+    await page.click('#groovesAnchor');
+    const list = page.locator('#grooveListWrapper');
+    await expect(list).toBeVisible();
+    const box = await list.boundingBox();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.wheel(0, 400);
+    await expect.poll(() => list.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+  });
+});
+
 test.describe('visual layout (screenshot backstop)', () => {
   // Pixel screenshots catch CSS/layout regressions that SVG-markup snapshots
   // don't. A small tolerance absorbs font-antialiasing noise. If these prove
