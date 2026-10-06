@@ -1,0 +1,345 @@
+/* Infinity Drumming, 2026: Infinity Scribe theme.
+ * Brand palette: navy #051124 / #00162a, blue #0b76db, amber #fe9f13,
+ * burnt orange #c55000, red #e10000, burgundy #800020, white, black.
+ * Loaded after the original stylesheets and only changes colours, borders and
+ * spacing. Text colours are chosen for strong contrast (WCAG AA or better) so
+ * every option is easy to read. */
+
+:root {
+  --id-navy-900: #051124;
+  --id-navy-800: #00162a;
+  --id-navy-700: #0a2240;
+  --id-navy-600: #17345a;
+  --id-blue: #0b76db;
+  --id-blue-dark: #0960b3;
+  --id-blue-tint: #e6f1fc;
+  --id-amber: #fe9f13;
+  --id-orange: #c55000;
+  --id-red: #e10000;
+  --id-burgundy: #800020;
+
+  --id-text-on-dark: #ffffff;
+  --id-text-on-dark-2: #d3dce7; /* secondary text on navy */
+  --id-text-on-dark-3: #a9b8ca; /* small print on navy */
+  --id-text: #051124;
+  --id-text-2: #44546a; /* secondary text on white */
+  --id-surface-2: #eef2f7;
+  --id-border: #c3cfdc;
+
+  /* the variables the original stylesheets already use */
+  --header-bg-color: var(--id-navy-900);
+  --header-bg-start-color: var(--id-navy-900);
+  --header-bg-end-color: var(--id-navy-700);
+  --bpm-bg-color: var(--id-navy-700);
+  --side-bg-color: var(--id-navy-800);
+  --bottom-bg-color: var(--id-navy-800);
+  --side-highlight-bg-color: var(--id-blue);
+  --highlight-color: var(--id-blue);
+  --highlight-color-on-white: var(--id-blue);
+}
+
+body,
+#GrooveWriter {
+  background-color: var(--id-navy-800);
+}
+
+/* clear keyboard focus ring for anyone not using a mouse */
+:focus-visible {
+  outline: 3px solid var(--id-amber);
+  outline-offset: 2px;
+}
+
+/* ---------- top bar ---------- */
+#TopNav {
+  border-bottom: 1px solid var(--id-navy-600);
+}
+#logoInSubdivision {
+  background-color: var(--id-navy-900);
+}
+#metronomeLabel {
+  color: var(--id-text-on-dark-2);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+}
+.metronomeButton,
+.rightButtons {
+  color: var(--id-text-on-dark-2);
+  padding: 2px 9px;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.metronomeButton:hover,
+.rightButtons:hover,
+.metronomeButton.selected:hover,
+.rightButtons.selected:hover,
+.rightButtons.buttonSelected:hover {
+  font-weight: inherit;
+  transform: none;
+  color: var(--id-text-on-dark);
+  background-color: rgba(255, 255, 255, 0.12);
+}
+/* the chosen metronome setting is a filled amber pill, easy to spot */
+.metronomeButton.buttonSelected,
+.metronomeButton.selected,
+.metronomeButton.buttonSelected:hover,
+.metronomeButton.selected:hover,
+.rightButtons.buttonSelected,
+.rightButtons.buttonSelected:hover {
+  color: var(--id-navy-900);
+  background-color: var(--id-amber);
+  font-weight: 700;
+}
+/* Permutations is dimmed until the note setting allows it */
+#permutationAnchor {
+  color: #6f819a;
+}
+#permutationAnchor.enabled {
+  color: var(--id-text-on-dark-2);
+}
+
+/* ---------- left side menu ---------- */
+#LeftHandNav {
+  background: var(--id-navy-800);
+  border-right: 1px solid var(--id-navy-600);
+}
+.left-button {
+  color: var(--id-text-on-dark-2);
+}
+.left-button-content {
+  border-bottom: 1px solid var(--id-navy-600);
+}
+#timeSigLabel,
+#timeSubLabel {
+  color: var(--id-amber);
+}
+.left-button.disabled,
+.left-button.disabled:hover {
+  color: #5d6f86;
+  background-color: var(--id-navy-800);
+}
+.left-button.buttonSelected,
+.left-button.buttonSelected:hover {
+  background: var(--id-blue);
+  color: var(--id-text-on-dark);
+  transform: none;
+  box-shadow: inset 4px 0 0 var(--id-amber);
+}
+.myButton:hover,
+.left-button:hover {
+  background: var(--id-navy-700);
+  color: var(--id-text-on-dark);
+  transform: none;
+}
+.myButton:active,
+.left-button:active {
+  background: var(--id-navy-600);
+}
+#advancedEditAnchor.buttonSelected {
+  background: var(--id-blue);
+}
+
+/* ---------- player bar ---------- */
+#midiPlayer,
+.playerControl {
+  background: var(--id-navy-700);
+}
+.midiPlayImage,
+.midiRepeatImage {
+  background: var(--id-blue);
+  color: var(--id-text-on-dark);
+}
+.midiPlayImage:hover,
+.midiRepeatImage:hover {
+  background: var(--id-blue-dark);
+}
+.MIDIPlayTime,
+.tempoLabel,
+.tempoTextField,
+.swingLabel,
+.swingOutput {
+  color: var(--id-text-on-dark-2);
+}
+.tempoTextField {
+  background-color: var(--id-navy-700);
+}
+.swingStyleToggle.brazilian {
+  color: var(--id-amber);
+}
+#totalPlayTime {
+  color: var(--id-amber);
+}
+
+/* sliders: blue fill up to an amber handle. The fill is painted by
+ * updateRangeSlider() from these :before / :after colours. */
+input[type='range'] {
+  background: transparent;
+}
+input[type='range']:before {
+  color: var(--id-blue);
+}
+input[type='range']:after {
+  color: #2e4f7a;
+}
+input[type='range']::-webkit-slider-thumb {
+  background: var(--id-amber);
+  box-shadow: 0 0 0 2px var(--id-navy-900);
+}
+input[type='range']::-moz-range-thumb {
+  background: var(--id-amber);
+}
+input[type='range']:active::-webkit-slider-thumb {
+  background: #ffffff;
+}
+input[type='range']:active::-moz-range-thumb {
+  background: #ffffff;
+}
+
+/* ---------- title / author / comment ---------- */
+#sheetMusicTextFields {
+  background-color: var(--id-surface-2);
+  border-top: 1px solid var(--id-border);
+  border-bottom: 1px solid var(--id-border);
+  color: var(--id-text);
+}
+.sheetMusicInputField,
+#sheetMusicTextFields input {
+  border: 1px solid var(--id-border);
+  border-radius: 4px;
+  padding: 3px 6px;
+  color: var(--id-text);
+  background: #ffffff;
+}
+#KeyButton {
+  color: var(--id-text-2);
+}
+
+/* ---------- note grid ---------- */
+.stickings-label:hover,
+.hhfoot-label:hover,
+.cymbals-label:hover {
+  color: var(--id-blue);
+}
+#addMeasureButton:hover,
+.pasteMeasureButton:hover {
+  color: var(--id-navy-900);
+}
+.straightBarButton.straight {
+  background-color: var(--id-text-2);
+  border-color: var(--id-text-2);
+}
+
+/* ---------- bottom tools and footer ---------- */
+#bottomButtonRow {
+  background: var(--id-navy-800);
+  color: var(--id-text-on-dark-2);
+  border-top: 1px solid var(--id-navy-600);
+}
+.pageBottomButton {
+  border-radius: 8px;
+  padding: 6px 10px;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+.pageBottomButton:hover {
+  color: var(--id-text-on-dark);
+  background-color: var(--id-navy-700);
+}
+.bottomButtonLabel {
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+#creditsFooter {
+  background: var(--id-navy-800);
+  color: var(--id-text-on-dark-3);
+}
+#creditsFooter a {
+  color: var(--id-text-on-dark);
+}
+#creditsFeatures {
+  color: var(--id-text-on-dark-3);
+}
+
+/* ---------- menus and pop-ups ---------- */
+.noteContextMenu > ul.list,
+#grooveListWrapper,
+.grooveListUL {
+  background: #ffffff;
+  color: var(--id-text);
+}
+.noteContextMenu > ul.list,
+#grooveListWrapper {
+  border: 1px solid var(--id-border);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(5, 17, 36, 0.25);
+  overflow: hidden;
+}
+ul.list a:hover,
+.noteContextMenu > ul.list li:hover,
+.grooveListLI:hover {
+  background: var(--id-blue-tint);
+}
+.grooveListHeaderLI {
+  background: var(--id-navy-900);
+  color: var(--id-text-on-dark);
+}
+#PermutationOptions.displayed {
+  background-color: var(--id-surface-2);
+  color: var(--id-text);
+}
+#timeSigPopupCancel {
+  color: var(--id-text-2);
+  border: 1px solid var(--id-border);
+}
+#timeSigPopupBeta {
+  color: var(--id-burgundy);
+}
+#metronomeAutoSpeedupTargetNote,
+.grooveClickNote {
+  color: var(--id-text-2);
+}
+input[type='checkbox']:not(:checked) + label {
+  color: var(--id-text-2);
+}
+input[type='checkbox']:checked + label {
+  color: var(--id-text);
+}
+#fullURLPopupTextField {
+  background: #fff4e0;
+}
+#fullURLPopup,
+#metronomeAutoSpeedupConfiguration,
+#cursorTimingConfiguration,
+#grooveClickConfiguration,
+#timeSigPopup {
+  color: var(--id-text);
+  border: 1px solid var(--id-border);
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 12px 32px rgba(5, 17, 36, 0.35);
+}
+/* sliders inside the white pop-ups need a lighter track */
+#fullURLPopup input[type='range']::-webkit-slider-runnable-track,
+#metronomeAutoSpeedupConfiguration input[type='range']::-webkit-slider-runnable-track,
+#cursorTimingConfiguration input[type='range']::-webkit-slider-runnable-track,
+#grooveClickConfiguration input[type='range']::-webkit-slider-runnable-track {
+  background: var(--id-border);
+}
+#fullURLPopup input[type='range']::-moz-range-track,
+#metronomeAutoSpeedupConfiguration input[type='range']::-moz-range-track,
+#cursorTimingConfiguration input[type='range']::-moz-range-track,
+#grooveClickConfiguration input[type='range']::-moz-range-track {
+  background: var(--id-border);
+}
+#metronomeAutoSpeedupConfigurationCloseButton,
+#timeSigPopupOK {
+  padding: 6px 18px;
+  font-weight: 700;
+  border-radius: 6px;
+}
+#metronomeAutoSpeedupConfigurationCloseButton:hover,
+#timeSigPopupOK:hover {
+  background: var(--id-blue-dark);
+}
