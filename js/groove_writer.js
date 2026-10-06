@@ -3699,21 +3699,32 @@ function GrooveWriter() {
     document.getElementById('grooveClickConfiguration').style.display = 'block';
   };
 
-  root.close_GrooveClickConfiguration = function () {
+  // The numbers take effect as they are typed (so pressing Play with the popup
+  // still open, as is easy to do on a phone, plays the new numbers), and again
+  // on Done.
+  root.grooveClickBarsChanged = function () {
     var readBars = function (id, fallback) {
       var bars = parseInt(document.getElementById(id).value, 10);
       if (isNaN(bars)) return fallback;
       return Math.min(Math.max(bars, 1), 32);
     };
-    class_groove_click_groove_bars = readBars(
-      'grooveClickGrooveBars',
-      class_groove_click_groove_bars
-    );
-    class_groove_click_click_bars = readBars('grooveClickClickBars', class_groove_click_click_bars);
-    document.getElementById('grooveClickConfiguration').style.display = 'none';
+    var grooveBars = readBars('grooveClickGrooveBars', class_groove_click_groove_bars);
+    var clickBars = readBars('grooveClickClickBars', class_groove_click_click_bars);
+    if (
+      grooveBars === class_groove_click_groove_bars &&
+      clickBars === class_groove_click_click_bars
+    )
+      return;
+    class_groove_click_groove_bars = grooveBars;
+    class_groove_click_click_bars = clickBars;
     resetGrooveClickPhase();
     root.myGrooveUtils.midiNoteHasChanged(); // start over with the new numbers
     root.updateCurrentURL(); // the option and its numbers are part of the link
+  };
+
+  root.close_GrooveClickConfiguration = function () {
+    root.grooveClickBarsChanged();
+    document.getElementById('grooveClickConfiguration').style.display = 'none';
   };
 
   // Turn the option on or off from a link (grooveBars 0 = off), without the popup.

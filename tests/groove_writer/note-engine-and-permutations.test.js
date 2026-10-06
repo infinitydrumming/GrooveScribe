@@ -453,6 +453,25 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
         expect(playCycle(false)).toEqual([1, 2, 3, 0]);
       });
 
+      it('new numbers apply as they are typed, without pressing Done', () => {
+        // a student types 6 and 2, then presses Play with the popup still open
+        gw.loadNewGroove(groove(1, '&GrooveBars=4&ClickBars=4'));
+        document.body.insertAdjacentHTML(
+          'beforeend',
+          '<div id="grooveClickConfiguration"><input id="grooveClickGrooveBars">' +
+            '<input id="grooveClickClickBars"></div>'
+        );
+        gw.show_GrooveClickConfiguration();
+        document.getElementById('grooveClickGrooveBars').value = '6';
+        document.getElementById('grooveClickClickBars').value = '2';
+        gw.grooveClickBarsChanged();
+        expect(playCycle(true)).toEqual([1, 1, 1, 1, 1, 1, 0, 0]);
+        // a half-typed (empty) box keeps the last number
+        document.getElementById('grooveClickClickBars').value = '';
+        gw.grooveClickBarsChanged();
+        expect(playCycle(true)).toEqual([1, 1, 1, 1, 1, 1, 0, 0]);
+      });
+
       it('the groove keeps counting through the click bars', () => {
         // 2-bar groove, 3 + 2: 1 2 1 (click click) 2 1 2 (click click) ...
         gw.loadNewGroove(groove(2, '&GrooveBars=3&ClickBars=2'));

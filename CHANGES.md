@@ -11,6 +11,12 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-07 — groove / click numbers apply as you type
+
+- The groove / click bar numbers now take effect as they are typed, not only on
+  Done, so pressing Play with the pop-up still open (easy on a phone) plays the
+  new numbers instead of the old ones.
+
 ## 2026-10-07 — screen stays on while playing
 
 - New `js/screenWakeLock.js`: while a groove is playing, phones and tablets keep
