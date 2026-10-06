@@ -11,6 +11,13 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-07 — screen stays on while playing
+
+- New `js/screenWakeLock.js`: while a groove is playing, phones and tablets keep
+  the screen on (Screen Wake Lock API, where the browser has it). It lets go on
+  pause, stop or the end of the groove, and is asked for again if you switch
+  back to the page while it is still playing.
+
 ## 2026-10-06 — Grooves menu scrolls again
 
 - The colour theme had stopped the Grooves menu from scrolling (`overflow: hidden`
