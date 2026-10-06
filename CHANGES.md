@@ -11,6 +11,11 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-06 — footer feature list
+
+- The "New in Infinity Scribe" line under the app lists everything added up to
+  6 October 2026.
+
 ## 2026-10-06 — Infinity Drumming colours
 
 - New `css/infinity_theme.css`, loaded last by `index.html`: navy, blue and amber
