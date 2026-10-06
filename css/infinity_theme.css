@@ -274,7 +274,10 @@ input[type='range']:active::-moz-range-thumb {
   border: 1px solid var(--id-border);
   border-radius: 6px;
   box-shadow: 0 8px 24px rgba(5, 17, 36, 0.25);
-  overflow: hidden;
+}
+/* menus that can be longer than the screen must keep scrolling */
+#grooveListWrapper {
+  overflow: auto;
 }
 ul.list a:hover,
 .noteContextMenu > ul.list li:hover,

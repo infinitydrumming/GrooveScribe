@@ -11,6 +11,11 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-06 — Grooves menu scrolls again
+
+- The colour theme had stopped the Grooves menu from scrolling (`overflow: hidden`
+  for its rounded corners). It scrolls again; a new end-to-end test checks it.
+
 ## 2026-10-06 — footer feature list
 
 - The "New in Infinity Scribe" line under the app lists everything added up to
