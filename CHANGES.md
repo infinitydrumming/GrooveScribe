@@ -14,7 +14,8 @@ The original copyright notices and credits are unchanged.
 ## 2026-10-06 — Infinity Drumming colours
 
 - New `css/infinity_theme.css`, loaded last by `index.html`: navy, blue and amber
-  from the Infinity Drumming brand palette, with high-contrast text throughout.
+  from the Infinity Drumming brand palette, with high-contrast text throughout. The SCRIBE in the Infinity Scribe
+  wordmark is now amber to match.
   The chosen metronome setting is a filled amber pill, the chosen note setting
   is blue with an amber edge, sliders fill in blue with an amber handle, and
   menus and pop-ups have rounded corners. Colours and spacing only; the music,
