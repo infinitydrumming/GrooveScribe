@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -64,6 +64,7 @@ import {
   is_touch_device as _is_touch_device,
 } from './browserInfo.js';
 import { createGrooveData } from './grooveData.js';
+import { createScreenWakeLock } from './screenWakeLock.js';
 import {
   getQueryVariableFromString as _getQueryVariableFromString,
   getGrooveDataFromUrlString as _urlParse,
@@ -1143,11 +1144,14 @@ function GrooveUtils() {
     document.location = midiURL;
   };
 
+  var screenWakeLock = createScreenWakeLock(); // the screen stays on while playing
+
   root.pauseMIDI_playback = function () {
     if (root.isMIDIPaused === false) {
       root.isMIDIPaused = true;
       root.midiEventCallbacks.pauseEvent(root.midiEventCallbacks.classRoot);
       MIDI.Player.pause();
+      screenWakeLock.keepAwake(false);
       root.cancelPendingCursorUpdates();
       root.midiEventCallbacks.notePlaying(root.midiEventCallbacks.classRoot, 'clear', -1);
       root.clearHighlightNoteInABCSVG();
@@ -1176,6 +1180,7 @@ function GrooveUtils() {
     }
     root.midiEventCallbacks.playEvent(root.midiEventCallbacks.classRoot);
     root.isMIDIPaused = false;
+    screenWakeLock.keepAwake(true);
   };
 
   // stop button or keypress
@@ -1183,6 +1188,7 @@ function GrooveUtils() {
     if (MIDI.Player.playing || root.isMIDIPaused) {
       root.isMIDIPaused = false;
       MIDI.Player.stop();
+      screenWakeLock.keepAwake(false);
       root.midiEventCallbacks.stopEvent(root.midiEventCallbacks.classRoot);
       root.cancelPendingCursorUpdates();
       root.midiEventCallbacks.notePlaying(root.midiEventCallbacks.classRoot, 'clear', -1);
@@ -1347,6 +1353,7 @@ function GrooveUtils() {
       } else {
         // not repeating, so stopping
         MIDI.Player.stop();
+        screenWakeLock.keepAwake(false);
         root.midiEventCallbacks.percentProgress(root.midiEventCallbacks.classRoot, 100);
         root.midiEventCallbacks.stopEvent(root.midiEventCallbacks.classRoot);
       }

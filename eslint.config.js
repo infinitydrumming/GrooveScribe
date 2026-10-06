@@ -104,6 +104,7 @@ export default [
       'js/urlSerialization.js',
       'js/midiFile.js',
       'js/abcNotation.js',
+      'js/screenWakeLock.js',
       'js/groove_utils.js',
       'js/groove_writer.js',
       'js/grooves.js',
