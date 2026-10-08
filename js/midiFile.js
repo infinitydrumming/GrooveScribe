@@ -91,7 +91,7 @@ import {
 // end of the MIDI file, so they lead back into the 1 every time it loops.
 
 // The grace notes of one bar, by slot, with the note tokens stripped of them.
-function takeGraceNotes(HH_Array, Snare_Array, Toms_Array, num_notes) {
+function takeGraceNotes(HH_Array, Snare_Array, Kick_Array, Toms_Array, num_notes) {
   var bySlot = [];
   var found = false;
   var strip = function (array) {
@@ -110,12 +110,13 @@ function takeGraceNotes(HH_Array, Snare_Array, Toms_Array, num_notes) {
   };
   var hh = strip(HH_Array);
   var snare = strip(Snare_Array);
+  var kick = strip(Kick_Array);
   var toms = Toms_Array
     ? Toms_Array.map(function (tom) {
         return strip(tom);
       })
     : Toms_Array;
-  return { found: found, bySlot: bySlot, hh: hh, snare: snare, toms: toms };
+  return { found: found, bySlot: bySlot, hh: hh, snare: snare, kick: kick, toms: toms };
 }
 
 // The grace-note hits before one slot, as { before: ticks before the note,
@@ -340,9 +341,10 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   var delay_for_next_note = 0;
 
   // flams, drags and ruffs: the drums play the notes, the grace notes are added
-  var graces = takeGraceNotes(HH_Array, Snare_Array, Toms_Array, num_notes);
+  var graces = takeGraceNotes(HH_Array, Snare_Array, Kick_Array, Toms_Array, num_notes);
   HH_Array = graces.hh;
   Snare_Array = graces.snare;
+  Kick_Array = graces.kick;
   Toms_Array = graces.toms;
   delay_for_next_note = startBarGraceNotes(gu, midiTrack, graces);
 

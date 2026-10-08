@@ -12,7 +12,12 @@
 // stays in GrooveWriter.
 
 import { getNoteScaler } from './musicMath.js';
-import { ornamentFromChar, tokenWithOrnament } from './ornaments.js';
+import {
+  ornamentFromChar,
+  ornamentFromToken,
+  tokenWithOrnament,
+  withoutGrace,
+} from './ornaments.js';
 import {
   constant_ABC_HH_Accent,
   constant_ABC_HH_Close,
@@ -67,10 +72,11 @@ import {
 // (see ornaments.js).  The readers below leave it out of the note's own state;
 // ornamentToken() adds it to a note's ABC token where whole bars are read.
 
-/** The grid cell that holds a line's note `id` (H, S, T1, T2, T4, C, R). */
+/** The grid cell that holds a line's note `id` (H, S, K, T1, T2, T4, C, R). */
 export var ORNAMENT_CELL_PREFIX = {
   H: 'hi-hat',
   S: 'snare',
+  K: 'kick',
   T1: 'tom1-',
   T2: 'tom2-',
   T4: 'tom4-',
@@ -436,7 +442,7 @@ export function get32NoteArrayFromClickableUI(
 
     Snare_Array[array_index] = ornamentToken(get_snare_state(id, 'ABC'), 'S', id);
 
-    Kick_Array[array_index] = get_kick_state(i + startIndexForClickableUI, 'ABC');
+    Kick_Array[array_index] = ornamentToken(get_kick_state(id, 'ABC'), 'K', id);
   }
 
   var num_notes = Snare_Array.length;
@@ -465,12 +471,14 @@ export function muteArrayFromClickableUI(
   if (kickMuted && hhFootMuted) fill_array_with_value_false(Kick_Array, Kick_Array.length);
   else if (kickMuted || hhFootMuted) {
     for (var k = 0; k < Kick_Array.length; k++) {
-      var kickOn =
-        Kick_Array[k] == constant_ABC_KI_Normal || Kick_Array[k] == constant_ABC_KI_SandK;
-      var footOn =
-        Kick_Array[k] == constant_ABC_KI_Splash || Kick_Array[k] == constant_ABC_KI_SandK;
+      var feet = withoutGrace(Kick_Array[k]); // (a kick flam stays with the kick)
+      var kickOn = feet == constant_ABC_KI_Normal || feet == constant_ABC_KI_SandK;
+      var footOn = feet == constant_ABC_KI_Splash || feet == constant_ABC_KI_SandK;
       if (kickMuted) Kick_Array[k] = footOn ? constant_ABC_KI_Splash : false;
-      else Kick_Array[k] = kickOn ? constant_ABC_KI_Normal : false;
+      else
+        Kick_Array[k] = kickOn
+          ? tokenWithOrnament(constant_ABC_KI_Normal, ornamentFromToken(Kick_Array[k]))
+          : false;
     }
   }
 

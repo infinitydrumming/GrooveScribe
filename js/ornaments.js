@@ -14,7 +14,7 @@ var GRACE_COUNT = { f: 1, d: 2, r: 3 };
 var TYPE_FOR_COUNT = { 1: 'f', 2: 'd', 3: 'r' };
 
 // drums the grace notes can be moved to
-var TARGET_PITCH = { S: 'c', T1: 'e', T2: 'd', T3: 'B', T4: 'A', H: '^g' };
+var TARGET_PITCH = { S: 'c', T1: 'e', T2: 'd', T3: 'B', T4: 'A', H: '^g', K: 'F' };
 
 // one link character per (type, grace drum): f / d / r on the same drum
 var CHARS = {
@@ -25,6 +25,7 @@ var CHARS = {
   T4: 'nop',
   H: 'stu',
   T3: 'vwx',
+  K: 'abc',
 };
 var TYPES = 'fdr';
 
@@ -36,6 +37,7 @@ var GRACE_MIDI = {
   d: 47, // tom 2
   B: 45, // tom 3
   A: 43, // floor tom
+  F: 35, // kick
   '^g': 42, // closed hi-hat
   "^A'": 51, // ride
   "^B'": 53, // ride bell

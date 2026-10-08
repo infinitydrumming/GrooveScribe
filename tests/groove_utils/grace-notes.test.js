@@ -137,6 +137,30 @@ describe('grace notes (flams, drags, ruffs)', () => {
     );
   });
 
+  it('plays flams, drags and ruffs on the kick, also with the hi-hat foot', () => {
+    const query =
+      '?TimeSig=4/4&Div=16&Tempo=120&H=|----------------|&S=|----------------|&K=|o-------X-------|&KO=|----------------|';
+    const plain = play(query);
+    const drags = play(query.replace('&KO=|----------------|', '&KO=|d-------f-------|'));
+    const KICK = 35;
+    const spacing = Math.round(30 * ticksPerMs(120));
+    const kicks = drags.events.filter((e) => e.key == KICK);
+    const mains = kicks.filter((e) => e.velocity == 85).map((e) => e.tick);
+    const graces = kicks.filter((e) => e.velocity < 85).map((e) => e.tick);
+    // the drag on the 1 leads in from the end of the loop, the flam is before beat 3
+    expect(graces).toEqual([mains[1] - spacing, drags.end - 2 * spacing, drags.end - spacing]);
+    // the hi-hat foot still plays with the kick on beat 3
+    expect(drags.events.filter((e) => e.velocity == 85)).toEqual(plain.events);
+  });
+
+  it('carries the kick ornament line in links, with grace notes on another drum', () => {
+    const gd = gu.getGrooveDataFromUrlString(
+      '?TimeSig=4/4&Div=16&H=|----------------|&S=|----------------|&K=|----o-----------|&KO=|----D-----------|'
+    );
+    expect(gd.kick_array[4]).toBe('{/cc}F'); // a drag on the snare into the kick
+    expect(gu.getUrlStringFromGrooveData(gd)).toContain('&KO=|----D-----------|');
+  });
+
   describe('in links', () => {
     const base = '?TimeSig=4/4&Div=16&Tempo=90&H=|xxxxxxxxxxxxxxxx|';
     it('still reads the old snare flam and drag, and writes them as ornaments', () => {

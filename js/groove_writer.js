@@ -386,6 +386,8 @@ function GrooveWriter() {
 
   // set the kick note on with type
   function set_kick_state(id, mode, make_sound) {
+    // the kick's flam / drag / ruff goes when the kick does
+    if (mode == 'off' || mode == 'splash') clear_ornament('K', id);
     // hide everything optional
     document.getElementById('kick_circle' + id).style.backgroundColor =
       constant_note_hidden_color_rgb;
@@ -463,16 +465,18 @@ function GrooveWriter() {
   var ORNAMENT_SHORT = { f: 'fl', d: 'dr', r: 'ru' };
   var GRACE_DRUM_NAMES = {
     S: 'snare',
+    K: 'kick',
     T1: 'high tom',
     T2: 'mid tom',
     T4: 'floor tom',
     H: 'hi-hat',
   };
-  var GRACE_DRUM_SHORT = { S: 'sn', T1: 'ht', T2: 'mt', T4: 'ft', H: 'hh' };
+  var GRACE_DRUM_SHORT = { S: 'sn', K: 'bd', T1: 'ht', T2: 'mt', T4: 'ft', H: 'hh' };
   // the grid's note types and the lines they are on
   var ORNAMENT_LINE_FOR_TYPE = {
     hh: 'H',
     snare: 'S',
+    kick: 'K',
     tom1: 'T1',
     tom2: 'T2',
     tom4: 'T4',
@@ -511,6 +515,8 @@ function GrooveWriter() {
         return is_hh_on(id);
       case 'S':
         return is_snare_on(id);
+      case 'K':
+        return is_kick_part_on(id);
       case 'T1':
         return is_tom_on(id, 1);
       case 'T2':
@@ -529,7 +535,7 @@ function GrooveWriter() {
   // alongside the notes' tab lines when bars are added, removed, pasted or the
   // note setting changes.
   function emptyOrnamentLines() {
-    return { H: '', S: '', T1: '', T2: '', T4: '', C: '', R: '' };
+    return { H: '', S: '', K: '', T1: '', T2: '', T4: '', C: '', R: '' };
   }
   function addOrnamentChars(lines, id) {
     for (var line in lines) lines[line] += _grid.get_ornament_char(line, id);
@@ -1716,6 +1722,7 @@ function GrooveWriter() {
   var NOTE_SETTERS = {
     hh: set_hh_state,
     snare: set_snare_state,
+    kick: set_kick_part_state,
     tom1: set_tom1_state,
     tom2: set_tom2_state,
     tom4: set_tom4_state,
@@ -2216,7 +2223,7 @@ function GrooveWriter() {
 
         myGrooveData.hh_array.push(_grid.ornamentToken(get_hh_state(i, 'ABC'), 'H', i));
         myGrooveData.snare_array.push(_grid.ornamentToken(get_snare_state(i, 'ABC'), 'S', i));
-        myGrooveData.kick_array.push(get_kick_state(i, 'ABC'));
+        myGrooveData.kick_array.push(_grid.ornamentToken(get_kick_state(i, 'ABC'), 'K', i));
 
         // like the toms, the cymbal lines only count while they are shown
         var cymbalsShown = isCymbalsVisible();
@@ -3036,6 +3043,7 @@ function GrooveWriter() {
       {
         H: lines.OrnH,
         S: lines.OrnS,
+        K: lines.OrnK,
         T1: lines.OrnT1,
         T2: lines.OrnT2,
         T4: lines.OrnT4,

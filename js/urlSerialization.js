@@ -21,11 +21,12 @@ import {
 } from './ornaments.js';
 
 // Flams, drags and ruffs ride on ornament lines next to each note line:
-// "SO" for the snare, "HO" for the hi-hat line, "T1O" for tom 1, and so on.
+// "SO" for the snare, "KO" for the kick, "HO" for the hi-hat line, "T1O" for tom 1, and so on.
 function ornamentLines(myGrooveData) {
   return {
     HO: myGrooveData.hh_array,
     SO: myGrooveData.snare_array,
+    KO: myGrooveData.kick_array,
     T1O: myGrooveData.toms_array[0],
     T2O: myGrooveData.toms_array[1],
     T3O: myGrooveData.toms_array[2],

@@ -14,13 +14,13 @@ The original copyright notices and credits are unchanged.
 ## 2026-10-08 — flams, drags and ruffs on every drum
 
 - New `js/ornaments.js`. A flam (1 grace note), drag (2) or ruff (3) can go on any
-  note of the snare, the toms and the cymbal lines (hi-hat, crash, ride), from the
-  note's right-click menu, with its grace notes on the same drum or on another
-  (snare, high / mid / floor tom, hi-hat). The note shows a small label.
+  note of the snare, the kick, the toms and the cymbal lines (hi-hat, crash, ride),
+  from the note's right-click menu, with its grace notes on the same drum or on
+  another (snare, kick, high / mid / floor tom, hi-hat). The note shows a small label.
 - The ornament travels inside the note's ABC token as a grace group, like the
   snare flam always has, so it comes with the note through copy / paste, adding
   and removing bars, note-setting changes, permutations and undo. Links carry it
-  on ornament lines next to each line (`SO`, `HO`, `T1O`, `T2O`, `T4O`, `CO`, `RO`).
+  on ornament lines next to each line (`SO`, `KO`, `HO`, `T1O`, `T2O`, `T4O`, `CO`, `RO`).
   Older links' snare flams and drags still load, and are written the new way.
 - Playback (`js/midiFile.js`): the drums play the notes and the grace notes are
   added as separate soft hits a fixed number of milliseconds before their note,

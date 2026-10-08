@@ -155,7 +155,7 @@
 					Infinity Scribe &middot; based on <a href="https://github.com/montulli/GrooveScribe" target="_blank" rel="noopener">Groove Scribe by Lou Montulli and Mike Johnston</a>
 					&middot; Modified by Infinity Drumming
 					&middot; <a href="https://github.com/infinitydrumming/GrooveScribe" target="_blank" rel="noopener">Source code (GPL v2)</a>
-					<div id="creditsFeatures">New in Infinity Scribe (updated 8 October 2026): flams, drags and ruffs on the snare, toms and cymbals, with grace notes on any drum and a practice speed control &middot; screen stays on while playing &middot; new Infinity Drumming colours &middot; Brazilian swing and Brazilian grooves &middot; Blues Shuffle and an 8th-note Train Beat &middot; swung or straight feel for each bar &middot; auto speed-up with a target tempo &middot; groove / click bars that keep the groove&rsquo;s place, with a swung click in the silent bars &middot; cursor timing setting to line the cursor up with the sound &middot; mid tom, crash, ride and hi-hat foot lines &middot; tom and ride accents and ghost notes &middot; permutations for every note setting, including cross-rhythms and alternating kick &amp; snare &middot; copy and paste bars &middot; auto-scroll</div>
+					<div id="creditsFeatures">New in Infinity Scribe (updated 8 October 2026): flams, drags and ruffs on the snare, kick, toms and cymbals, with grace notes on any drum and a practice speed control &middot; screen stays on while playing &middot; new Infinity Drumming colours &middot; Brazilian swing and Brazilian grooves &middot; Blues Shuffle and an 8th-note Train Beat &middot; swung or straight feel for each bar &middot; auto speed-up with a target tempo &middot; groove / click bars that keep the groove&rsquo;s place, with a swung click in the silent bars &middot; cursor timing setting to line the cursor up with the sound &middot; mid tom, crash, ride and hi-hat foot lines &middot; tom and ride accents and ghost notes &middot; permutations for every note setting, including cross-rhythms and alternating kick &amp; snare &middot; copy and paste bars &middot; auto-scroll</div>
 				</div>
 
 				<div id="midiTextOutput">
@@ -351,6 +351,7 @@
 				<li class="graceDrumMenuTitle">Grace notes on:</li>
 				<li data-grace-drum="same" onclick='myGrooveWriter.graceDrumPopupClick("same");'>The same drum</li>
 				<li data-grace-drum="S" onclick='myGrooveWriter.graceDrumPopupClick("S");'>Snare</li>
+				<li data-grace-drum="K" onclick='myGrooveWriter.graceDrumPopupClick("K");'>Kick</li>
 				<li data-grace-drum="T1" onclick='myGrooveWriter.graceDrumPopupClick("T1");'>High tom</li>
 				<li data-grace-drum="T2" onclick='myGrooveWriter.graceDrumPopupClick("T2");'>Mid tom</li>
 				<li data-grace-drum="T4" onclick='myGrooveWriter.graceDrumPopupClick("T4");'>Floor tom</li>
@@ -361,6 +362,11 @@
 			<ul id="kickContextMenu" class="list">
 				<li onclick='myGrooveWriter.notePopupClick("kick", "off");'>Off</li>
 				<li onclick='myGrooveWriter.notePopupClick("kick", "normal");'>Kick Normal</li>
+				<li class="ornamentMenuItem ornamentMenuFirst" data-orn-choice="f" onclick='myGrooveWriter.ornamentPopupClick("kick", "f");'>Flam</li>
+				<li class="ornamentMenuItem" data-orn-choice="d" onclick='myGrooveWriter.ornamentPopupClick("kick", "d");'>Drag</li>
+				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("kick", "r");'>Ruff</li>
+				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("kick", "on");'>Grace notes on&hellip;</li>
+				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("kick", "none");'>No flam / drag / ruff</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
