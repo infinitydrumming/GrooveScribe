@@ -11,6 +11,32 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-08 — flams, drags and ruffs on every drum
+
+- New `js/ornaments.js`. A flam (1 grace note), drag (2) or ruff (3) can go on any
+  note of the snare, the toms and the cymbal lines (hi-hat, crash, ride), from the
+  note's right-click menu, with its grace notes on the same drum or on another
+  (snare, high / mid / floor tom, hi-hat). The note shows a small label.
+- The ornament travels inside the note's ABC token as a grace group, like the
+  snare flam always has, so it comes with the note through copy / paste, adding
+  and removing bars, note-setting changes, permutations and undo. Links carry it
+  on ornament lines next to each line (`SO`, `HO`, `T1O`, `T2O`, `T4O`, `CO`, `RO`).
+  Older links' snare flams and drags still load, and are written the new way.
+- Playback (`js/midiFile.js`): the drums play the notes and the grace notes are
+  added as separate soft hits a fixed number of milliseconds before their note,
+  whatever the tempo. They are slipped in among the notes already written (only
+  delta times are split), so no other note moves. A bar's first note takes its
+  grace notes from the end of the previous bar; the groove's first note takes them
+  from the end of the file (so they lead back in every loop), the end of the
+  count-in, or a short lead-in when playing starts. Groove / click cycles end with
+  the grace notes of the next cycle's first bar. The old recorded snare flam and
+  drag sounds are no longer used.
+- Metronome Options > "Flams, drags & ruffs": grace-note spacing (15–150 ms,
+  default 30) and volume (default 40% of a normal hit), saved in the link as
+  `GraceMs` / `GraceVol` only when changed.
+- Golden master: the four coverage grooves with snare flams / drags changed sound
+  (their sheet music is unchanged); two new coverage grooves with ornaments.
+
 ## 2026-10-07 — groove / click numbers apply as you type
 
 - The groove / click bar numbers now take effect as they are typed, not only on

@@ -1,8 +1,15 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride tabs, bar scaling for paste, tom ghosts and accents, ride accent. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride tabs, bar scaling for paste, tom ghosts and accents, ride accent, ornament (flam / drag / ruff) tab lines. See CHANGES.md.
 // Note-array / drum-tab conversions and default grooves (Step 2 extraction).
 // Pure module: converts between tab strings and ABC note arrays, builds default
 // grooves, and note-mapping/sticking-count helpers. GrooveUtils delegates here.
 
+import {
+  ornamentChar,
+  ornamentFromChar,
+  ornamentFromToken,
+  tokenWithOrnament,
+  withoutGrace,
+} from './ornaments.js';
 import {
   constant_ABC_HH_Accent,
   constant_ABC_HH_Close,
@@ -215,6 +222,8 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
 }
 
 function abcNotationToTablaturePerNote(drumType, abcChar) {
+  // a flam / drag / ruff is written on its own ornament line (ornamentTabLine)
+  abcChar = withoutGrace(abcChar);
   var tabChar = '-';
 
   switch (abcChar) {
@@ -650,4 +659,43 @@ export function convert_sticking_counts_to_actual_counts(
       sticking_array[i] = new_count_string;
     }
   }
+}
+
+// --- ornament lines (Infinity Drumming, 2026) -----------------------------------
+// Flams, drags and ruffs on a line are written in links as a tab line of their
+// own, one character per note (see ornaments.js), next to the line's notes.
+
+/** The ornament tab line for a line's notes ('-' where there is none). */
+export function ornamentTabLine(noteArray, maxLength, separatorDistance) {
+  var line = '';
+  if (maxLength > noteArray.length) maxLength = noteArray.length;
+  for (var i = 0; i < maxLength; i++) {
+    line += ornamentChar(ornamentFromToken(noteArray[i]));
+    if (separatorDistance > 0 && (i + 1) % separatorDistance === 0) line += '|';
+  }
+  return line;
+}
+
+/**
+ * Put the ornaments of an ornament tab line onto a line's notes (in place),
+ * scaling the tab line to the notes like noteArraysFromURLData does.
+ */
+export function applyOrnamentTabLine(noteArray, ornamentString) {
+  var chars = decodeURIComponent(ornamentString).replace(/[:|]/g, '');
+  if (!chars.length || !noteArray.length) return noteArray;
+  var stringScaler = 1;
+  var arrayScaler = 1;
+  if (chars.length > noteArray.length && chars.length / noteArray.length >= 2)
+    stringScaler = Math.ceil(chars.length / noteArray.length);
+  else if (chars.length < noteArray.length && noteArray.length / chars.length >= 2)
+    arrayScaler = Math.ceil(noteArray.length / chars.length);
+  for (
+    var j = 0, k = 0;
+    j < chars.length && k < noteArray.length;
+    j += stringScaler, k += arrayScaler
+  ) {
+    var ornament = ornamentFromChar(chars[j]);
+    if (ornament && noteArray[k]) noteArray[k] = tokenWithOrnament(noteArray[k], ornament);
+  }
+  return noteArray;
 }

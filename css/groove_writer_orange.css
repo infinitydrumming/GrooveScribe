@@ -1142,6 +1142,7 @@ hr {
 #fullURLPopup,
 #metronomeAutoSpeedupConfiguration,
 #cursorTimingConfiguration,
+#graceNoteConfiguration,
 #grooveClickConfiguration,
 #timeSigPopup {
   /visibility: hidden;
@@ -1325,6 +1326,61 @@ hr {
 }
 #cursorTimingButtons {
   text-align: center;
+}
+/* Infinity Drumming, 2026: flams, drags & ruffs popup */
+#graceNoteTitle {
+  font-size: 22px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.graceNoteText,
+.graceNoteLabel,
+.graceNoteOutput {
+  font-size: 13px;
+  margin: 6px 0;
+}
+.graceNoteLabel {
+  font-weight: bold;
+  margin-top: 12px;
+}
+#graceNoteSpacing,
+#graceNoteVolume {
+  width: 100%;
+}
+.graceNoteOutput {
+  color: var(--highlight-color);
+  text-align: center;
+}
+#graceNoteButtons {
+  text-align: center;
+}
+/* a note's flam / drag / ruff, shown as a small label on the note */
+[data-orn] {
+  position: relative;
+}
+[data-orn]::after {
+  content: attr(data-orn-label);
+  position: absolute;
+  top: -6px;
+  left: -2px;
+  padding: 0 2px;
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 11px;
+  white-space: nowrap;
+  color: #fff;
+  background: var(--highlight-color);
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 1;
+}
+/* the hi-hat cell is taller than its mark: keep the label on the mark */
+.hi-hat[data-orn]::after {
+  top: 10px;
+}
+.graceDrumMenuTitle {
+  font-weight: bold;
+  pointer-events: none;
 }
 /* Infinity Drumming, 2026: speed-up target tempo */
 #metronomeAutoSpeedupConfigurationTarget {

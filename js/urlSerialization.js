@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -14,8 +14,68 @@ import {
 } from './constants.js';
 import { parseTimeSigString, calc_notes_per_measure } from './musicMath.js';
 import {
+  DEFAULT_GRACE_SPACING_MS,
+  DEFAULT_GRACE_VOLUME,
+  clampGraceSpacing,
+  clampGraceVolume,
+} from './ornaments.js';
+
+// Flams, drags and ruffs ride on ornament lines next to each note line:
+// "SO" for the snare, "HO" for the hi-hat line, "T1O" for tom 1, and so on.
+function ornamentLines(myGrooveData) {
+  return {
+    HO: myGrooveData.hh_array,
+    SO: myGrooveData.snare_array,
+    T1O: myGrooveData.toms_array[0],
+    T2O: myGrooveData.toms_array[1],
+    T3O: myGrooveData.toms_array[2],
+    T4O: myGrooveData.toms_array[3],
+    CO: myGrooveData.crash_array,
+    RO: myGrooveData.ride_array,
+  };
+}
+
+// read the ornament lines and the grace-note settings from a link
+function readOrnaments(myGrooveData, encodedURLData) {
+  var lines = ornamentLines(myGrooveData);
+  for (var name in lines) {
+    var ornaments = getQueryVariableFromString(name, false, encodedURLData);
+    if (ornaments && lines[name]) applyOrnamentTabLine(lines[name], ornaments);
+  }
+  myGrooveData.graceSpacingMs = clampGraceSpacing(
+    getQueryVariableFromString('GraceMs', DEFAULT_GRACE_SPACING_MS, encodedURLData)
+  );
+  myGrooveData.graceVolume = clampGraceVolume(
+    getQueryVariableFromString('GraceVol', DEFAULT_GRACE_VOLUME, encodedURLData)
+  );
+}
+
+// the ornament lines that have any ornaments (written for the H, C and R lines
+// as they go into the link), and the grace-note settings when they are changed
+function ornamentsForUrl(myGrooveData, hhLine, crashLine, rideLine, total_notes) {
+  var lines = ornamentLines(myGrooveData);
+  lines.HO = hhLine;
+  lines.CO = crashLine;
+  lines.RO = rideLine;
+  if (!myGrooveData.showToms) lines.T1O = lines.T2O = lines.T4O = null;
+  lines.T3O = null; // tom 3 isn't written to links
+  var url = '';
+  for (var name in lines) {
+    if (!lines[name]) continue;
+    var tab = ornamentTabLine(lines[name], total_notes, myGrooveData.notesPerMeasure);
+    if (/[^-|]/.test(tab)) url += '&' + name + '=|' + tab;
+  }
+  if (myGrooveData.graceSpacingMs && myGrooveData.graceSpacingMs != DEFAULT_GRACE_SPACING_MS)
+    url += '&GraceMs=' + myGrooveData.graceSpacingMs;
+  if (myGrooveData.graceVolume && myGrooveData.graceVolume != DEFAULT_GRACE_VOLUME)
+    url += '&GraceVol=' + myGrooveData.graceVolume;
+  return url;
+}
+import {
   noteArraysFromURLData,
   tabLineFromAbcNoteArray,
+  ornamentTabLine,
+  applyOrnamentTabLine,
   GetDefaultStickingsGroove,
   GetDefaultHHGroove,
   GetDefaultSnareGroove,
@@ -267,6 +327,8 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
   var swingStyle = String(getQueryVariableFromString('swingstyle', '', encodedURLData));
   myGrooveData.swingStyle = swingStyle.toLowerCase() == 'brazilian' ? 'brazilian' : 'swing';
 
+  readOrnaments(myGrooveData, encodedURLData);
+
   return myGrooveData;
 }
 
@@ -441,6 +503,8 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
     fullURL +=
       '&R=|' +
       tabLineFromAbcNoteArray('R', rideLine, true, true, total_notes, myGrooveData.notesPerMeasure);
+
+  fullURL += ornamentsForUrl(myGrooveData, hhLine, crashLine, rideLine, total_notes);
 
   // only add if we need them.  // they are long and ugly. :)
   if (myGrooveData.showStickings) {

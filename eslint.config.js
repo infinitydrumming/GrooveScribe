@@ -105,6 +105,7 @@ export default [
       'js/midiFile.js',
       'js/abcNotation.js',
       'js/screenWakeLock.js',
+      'js/ornaments.js',
       'js/groove_utils.js',
       'js/groove_writer.js',
       'js/grooves.js',

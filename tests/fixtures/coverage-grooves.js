@@ -174,6 +174,18 @@ export const coverageGrooves = [
     url: '?TimeSig=4/4&Div=16&Tempo=80&Swing=30&StraightBars=2,4&Measures=4&H=|xxxxxxxxxxxxxxxx|xxxxxxxxxxxxxxxx|xxxxxxxxxxxxxxxx|xxxxxxxxxxxxxxxx|&S=|----O-------O---|----O-------O---|----O-------O---|----O-------O---|&K=|o-------o-------|o-------o-------|o-------o-------|o-------o-------|',
   },
 
+  // Flams, drags and ruffs (Infinity Drumming, 2026) on the snare, toms and
+  // cymbals, some with their grace notes on another drum, one leading into bar 2
+  // and one on the very first note.
+  {
+    name: 'Flams, drags and ruffs on every line (straight 16, 2 bars)',
+    url: '?TimeSig=4/4&Div=16&Tempo=90&Measures=2&H=|xxxxxxxxxxxxxxxx|xxxxxxxxxxxxxxxx|&S=|----O-------o---|o---O-------O---|&K=|o-------o-------|o-------o-------|&T1=|--------------x-|----------------|&T4=|---------------x|----------------|&C=|c---------------|----------------|&R=|----------------|--------r-------|&HO=|--------f-------|----------------|&SO=|----f-------d---|F---r-------f---|&T1O=|--------------F-|----------------|&T4O=|---------------j|----------------|&CO=|f---------------|----------------|&RO=|----------------|--------d-------|&GraceMs=45',
+  },
+  {
+    name: 'Flams and ruffs in triplets (triplet 12)',
+    url: '?TimeSig=4/4&Div=12&Tempo=100&Measures=1&H=|r-rr-rr-rr-r|&S=|---o-----o--|&K=|o-----o-----|&SO=|---f-----r--|',
+  },
+
   // ---- Voice/articulation mismatches: each character is valid for SOME voice
   // but placed in a voice where it is not, exercising every "this symbol isn't
   // valid for this drum" fall-through in tablatureToABCNotationPerNote. Such

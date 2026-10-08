@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
@@ -155,7 +155,7 @@
 					Infinity Scribe &middot; based on <a href="https://github.com/montulli/GrooveScribe" target="_blank" rel="noopener">Groove Scribe by Lou Montulli and Mike Johnston</a>
 					&middot; Modified by Infinity Drumming
 					&middot; <a href="https://github.com/infinitydrumming/GrooveScribe" target="_blank" rel="noopener">Source code (GPL v2)</a>
-					<div id="creditsFeatures">New in Infinity Scribe (updated 6 October 2026): new Infinity Drumming colours &middot; Brazilian swing and Brazilian grooves &middot; Blues Shuffle and an 8th-note Train Beat &middot; swung or straight feel for each bar &middot; auto speed-up with a target tempo &middot; groove / click bars that keep the groove&rsquo;s place, with a swung click in the silent bars &middot; cursor timing setting to line the cursor up with the sound &middot; mid tom, crash, ride and hi-hat foot lines &middot; tom and ride accents and ghost notes &middot; permutations for every note setting, including cross-rhythms and alternating kick &amp; snare &middot; copy and paste bars &middot; auto-scroll</div>
+					<div id="creditsFeatures">New in Infinity Scribe (updated 8 October 2026): flams, drags and ruffs on the snare, toms and cymbals, with grace notes on any drum and a practice speed control &middot; screen stays on while playing &middot; new Infinity Drumming colours &middot; Brazilian swing and Brazilian grooves &middot; Blues Shuffle and an 8th-note Train Beat &middot; swung or straight feel for each bar &middot; auto speed-up with a target tempo &middot; groove / click bars that keep the groove&rsquo;s place, with a swung click in the silent bars &middot; cursor timing setting to line the cursor up with the sound &middot; mid tom, crash, ride and hi-hat foot lines &middot; tom and ride accents and ghost notes &middot; permutations for every note setting, including cross-rhythms and alternating kick &amp; snare &middot; copy and paste bars &middot; auto-scroll</div>
 				</div>
 
 				<div id="midiTextOutput">
@@ -213,6 +213,7 @@
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuGrooveClick" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("GrooveClick");' title="Play the groove for some bars, then just the click for some bars">Groove / click bars</li>
 				<li class="metronomeOptionsContextMenuItem menuChecked" id="metronomeOptionsContextMenuAutoScroll" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("AutoScroll");' title="While playing, scroll the page to follow the playing bar of the music">Auto-scroll</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuCursorTiming" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("CursorTiming");' title="Line the blue playback cursor up with the sound on this device">Cursor timing</li>
+				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuGraceNotes" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("GraceNotes");' title="How far apart and how loud the grace notes of flams, drags and ruffs are">Flams, drags &amp; ruffs</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuCountIn"   onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("CountIn");' title="One measure of metronome count in at the start" >Count it in</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuOffTheOne" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("OffTheOne");' title="Click on the e, &, or a">Offset click</li>
 				<!--
@@ -255,6 +256,11 @@
 				<li onclick='myGrooveWriter.notePopupClick("hh","accent");'>Hi-hat accent</li>
 				<li onclick='myGrooveWriter.notePopupClick("hh","metronome_normal");'>Click</li>
 				<li onclick='myGrooveWriter.notePopupClick("hh","metronome_accent");'>Click - accent</li>
+				<li class="ornamentMenuItem ornamentMenuFirst" data-orn-choice="f" onclick='myGrooveWriter.ornamentPopupClick("hh", "f");'>Flam</li>
+				<li class="ornamentMenuItem" data-orn-choice="d" onclick='myGrooveWriter.ornamentPopupClick("hh", "d");'>Drag</li>
+				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("hh", "r");'>Ruff</li>
+				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("hh", "on");'>Grace notes on&hellip;</li>
+				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("hh", "none");'>No flam / drag / ruff</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -263,6 +269,11 @@
 				<li onclick='myGrooveWriter.notePopupClick("crash", "crash");'>Crash 1</li>
 				<li onclick='myGrooveWriter.notePopupClick("crash", "crash2");'>Crash 2</li>
 				<li onclick='myGrooveWriter.notePopupClick("crash", "splash");'>Splash</li>
+				<li class="ornamentMenuItem ornamentMenuFirst" data-orn-choice="f" onclick='myGrooveWriter.ornamentPopupClick("crash", "f");'>Flam</li>
+				<li class="ornamentMenuItem" data-orn-choice="d" onclick='myGrooveWriter.ornamentPopupClick("crash", "d");'>Drag</li>
+				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("crash", "r");'>Ruff</li>
+				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("crash", "on");'>Grace notes on&hellip;</li>
+				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("crash", "none");'>No flam / drag / ruff</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -273,6 +284,11 @@
 				<li onclick='myGrooveWriter.notePopupClick("ride", "ride_bell");'>Ride Bell</li>
 				<li onclick='myGrooveWriter.notePopupClick("ride", "cow_bell");'>Cow Bell</li>
 				<li onclick='myGrooveWriter.notePopupClick("ride", "stacker");'>Stacker</li>
+				<li class="ornamentMenuItem ornamentMenuFirst" data-orn-choice="f" onclick='myGrooveWriter.ornamentPopupClick("ride", "f");'>Flam</li>
+				<li class="ornamentMenuItem" data-orn-choice="d" onclick='myGrooveWriter.ornamentPopupClick("ride", "d");'>Drag</li>
+				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("ride", "r");'>Ruff</li>
+				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("ride", "on");'>Grace notes on&hellip;</li>
+				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("ride", "none");'>No flam / drag / ruff</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -281,6 +297,11 @@
 				<li onclick='myGrooveWriter.notePopupClick("tom1", "normal");'>Tom Normal</li>
 				<li onclick='myGrooveWriter.notePopupClick("tom1", "accent");'>Tom Accent</li>
 				<li onclick='myGrooveWriter.notePopupClick("tom1", "ghost");'>Ghost Note</li>
+				<li class="ornamentMenuItem ornamentMenuFirst" data-orn-choice="f" onclick='myGrooveWriter.ornamentPopupClick("tom1", "f");'>Flam</li>
+				<li class="ornamentMenuItem" data-orn-choice="d" onclick='myGrooveWriter.ornamentPopupClick("tom1", "d");'>Drag</li>
+				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("tom1", "r");'>Ruff</li>
+				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("tom1", "on");'>Grace notes on&hellip;</li>
+				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("tom1", "none");'>No flam / drag / ruff</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -289,6 +310,11 @@
 				<li onclick='myGrooveWriter.notePopupClick("tom2", "normal");'>Tom Normal</li>
 				<li onclick='myGrooveWriter.notePopupClick("tom2", "accent");'>Tom Accent</li>
 				<li onclick='myGrooveWriter.notePopupClick("tom2", "ghost");'>Ghost Note</li>
+				<li class="ornamentMenuItem ornamentMenuFirst" data-orn-choice="f" onclick='myGrooveWriter.ornamentPopupClick("tom2", "f");'>Flam</li>
+				<li class="ornamentMenuItem" data-orn-choice="d" onclick='myGrooveWriter.ornamentPopupClick("tom2", "d");'>Drag</li>
+				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("tom2", "r");'>Ruff</li>
+				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("tom2", "on");'>Grace notes on&hellip;</li>
+				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("tom2", "none");'>No flam / drag / ruff</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -297,6 +323,11 @@
 				<li onclick='myGrooveWriter.notePopupClick("tom4", "normal");'>Tom Normal</li>
 				<li onclick='myGrooveWriter.notePopupClick("tom4", "accent");'>Tom Accent</li>
 				<li onclick='myGrooveWriter.notePopupClick("tom4", "ghost");'>Ghost Note</li>
+				<li class="ornamentMenuItem ornamentMenuFirst" data-orn-choice="f" onclick='myGrooveWriter.ornamentPopupClick("tom4", "f");'>Flam</li>
+				<li class="ornamentMenuItem" data-orn-choice="d" onclick='myGrooveWriter.ornamentPopupClick("tom4", "d");'>Drag</li>
+				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("tom4", "r");'>Ruff</li>
+				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("tom4", "on");'>Grace notes on&hellip;</li>
+				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("tom4", "none");'>No flam / drag / ruff</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -307,7 +338,23 @@
 				<li onclick='myGrooveWriter.notePopupClick("snare", "ghost");'>Ghost Note</li>
 				<li onclick='myGrooveWriter.notePopupClick("snare", "xstick");'>Cross Stick</li>
 				<li onclick='myGrooveWriter.notePopupClick("snare", "buzz");'>Buzz Stroke</li>
-				<li onclick='myGrooveWriter.notePopupClick("snare", "flam");'>Flam</li>
+				<li class="ornamentMenuItem ornamentMenuFirst" data-orn-choice="f" onclick='myGrooveWriter.ornamentPopupClick("snare", "f");'>Flam</li>
+				<li class="ornamentMenuItem" data-orn-choice="d" onclick='myGrooveWriter.ornamentPopupClick("snare", "d");'>Drag</li>
+				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("snare", "r");'>Ruff</li>
+				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("snare", "on");'>Grace notes on&hellip;</li>
+				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("snare", "none");'>No flam / drag / ruff</li>
+			</ul>
+		</div>
+		<!-- Infinity Drumming, 2026: which drum a flam / drag / ruff's grace notes are played on -->
+		<div class="noteContextMenu">
+			<ul id="graceDrumContextMenu" class="list">
+				<li class="graceDrumMenuTitle">Grace notes on:</li>
+				<li data-grace-drum="same" onclick='myGrooveWriter.graceDrumPopupClick("same");'>The same drum</li>
+				<li data-grace-drum="S" onclick='myGrooveWriter.graceDrumPopupClick("S");'>Snare</li>
+				<li data-grace-drum="T1" onclick='myGrooveWriter.graceDrumPopupClick("T1");'>High tom</li>
+				<li data-grace-drum="T2" onclick='myGrooveWriter.graceDrumPopupClick("T2");'>Mid tom</li>
+				<li data-grace-drum="T4" onclick='myGrooveWriter.graceDrumPopupClick("T4");'>Floor tom</li>
+				<li data-grace-drum="H" onclick='myGrooveWriter.graceDrumPopupClick("H");'>Hi-hat</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -505,6 +552,19 @@
 			<div class="grooveClickRow">then just the click for <input type="number" id="grooveClickClickBars" min="1" max="32" value="4" oninput="myGrooveWriter.grooveClickBarsChanged();"> bars, and repeat.</div>
 			<div class="grooveClickNote">Counted bar by bar: the groove keeps its place through the click bars (the cursor keeps moving through it) and comes back in where it would be. Uses the metronome setting; if the metronome is off, the click bars click on quarter notes.</div>
 			<div id="grooveClickCloseButtonDiv"><button id="grooveClickCloseButton" onclick="myGrooveWriter.close_GrooveClickConfiguration();">Done</button></div>
+		</div>
+
+		<!-- metronome option "Flams, drags & ruffs" (Infinity Drumming, 2026), hidden by default -->
+		<div id="graceNoteConfiguration">
+			<div id="graceNoteTitle">Flams, drags &amp; ruffs</div>
+			<div class="graceNoteText">Spread the grace notes out to practise them slowly, then bring them back in. The grace notes always sit just before their note, so nothing else moves.</div>
+			<div class="graceNoteLabel">Spacing between the grace notes</div>
+			<input type="range" min="15" max="150" step="5" value="30" id="graceNoteSpacing" oninput="myGrooveWriter.graceSpacingChange(event);">
+			<div class="graceNoteOutput" id="graceNoteSpacingOutput"></div>
+			<div class="graceNoteLabel">Grace note volume</div>
+			<input type="range" min="5" max="100" step="5" value="40" id="graceNoteVolume" oninput="myGrooveWriter.graceVolumeChange(event);">
+			<div class="graceNoteOutput" id="graceNoteVolumeOutput"></div>
+			<div id="graceNoteButtons"><button onclick="myGrooveWriter.graceNotesReset();">Reset</button> <button onclick="myGrooveWriter.close_GraceNoteConfiguration();">Done</button></div>
 		</div>
 
 		<!-- metronome option "Cursor timing" (Infinity Drumming, 2026), hidden by default -->

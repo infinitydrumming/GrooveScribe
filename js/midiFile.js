@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -76,8 +76,185 @@ import {
   constant_OUR_MIDI_VELOCITY_NORMAL,
 } from './constants.js';
 import { isTripletDivisionFromNotesPerMeasure, scaleNoteArrayToFullSize } from './musicMath.js';
+import {
+  DEFAULT_GRACE_SPACING_MS,
+  DEFAULT_GRACE_VOLUME,
+  graceNotesForToken,
+  withoutGrace,
+} from './ornaments.js';
 
-export function MIDI_build_midi_url_count_in_track(gu, timeSigTop, timeSigBottom) {
+// --- grace notes (flams, drags, ruffs) -------------------------------------------
+// Grace notes play a fixed number of milliseconds before their note, whatever the
+// tempo, and never move the notes around them: they are slotted into the gap
+// before the note.  A note on the first slot of a bar takes its grace notes from
+// the end of the previous bar; for the groove's very first note they go at the
+// end of the MIDI file, so they lead back into the 1 every time it loops.
+
+// The grace notes of one bar, by slot, with the note tokens stripped of them.
+function takeGraceNotes(HH_Array, Snare_Array, Toms_Array, num_notes) {
+  var bySlot = [];
+  var found = false;
+  var strip = function (array) {
+    if (!array) return array;
+    var copy = null;
+    for (var i = 0; i < num_notes; i++) {
+      var graces = graceNotesForToken(array[i]);
+      if (!graces) continue;
+      if (!bySlot[i]) bySlot[i] = [];
+      bySlot[i].push(graces);
+      found = true;
+      if (!copy) copy = array.slice();
+      copy[i] = withoutGrace(array[i]);
+    }
+    return copy || array;
+  };
+  var hh = strip(HH_Array);
+  var snare = strip(Snare_Array);
+  var toms = Toms_Array
+    ? Toms_Array.map(function (tom) {
+        return strip(tom);
+      })
+    : Toms_Array;
+  return { found: found, bySlot: bySlot, hh: hh, snare: snare, toms: toms };
+}
+
+// The grace-note hits before one slot, as { before: ticks before the note,
+// note, velocity }, earliest first.
+function graceHitsForSlot(gu, midiTrack, slotGraces) {
+  var spacingMs = gu.graceSpacingMs || DEFAULT_GRACE_SPACING_MS;
+  var volume = gu.graceVolume || DEFAULT_GRACE_VOLUME;
+  // the tempo this track was written at, else the player's
+  var tempo = midiTrack.graceTempo || (gu.getTempo ? gu.getTempo() : 80);
+  // 128 ticks per quarter note
+  var spacing = Math.max(1, Math.round((spacingMs * tempo * 128) / 60000));
+  var velocity = Math.max(1, Math.round((constant_OUR_MIDI_VELOCITY_NORMAL * volume) / 100));
+  var hits = [];
+  slotGraces.forEach(function (graces) {
+    for (var k = graces.count; k >= 1; k--)
+      hits.push({ before: k * spacing, note: graces.midiNote, velocity: velocity });
+  });
+  return hits.sort(function (a, b) {
+    return b.before - a.before;
+  });
+}
+
+// ticks of an event's delta time, as written (jsmidgen keeps it as MIDI bytes)
+function eventTicks(event) {
+  var ticks = 0;
+  (event.time || []).forEach(function (b) {
+    ticks = (ticks << 7) | (b & 0x7f);
+  });
+  return ticks;
+}
+
+// Slip a grace hit in among the events already on the track, `back` ticks before
+// the end of the last one.  Only delta times are split, so no other note moves.
+// It goes no earlier than the start of the track's notes (midiTrack.graceFloor).
+function insertGraceHitBack(midiTrack, hit, back) {
+  var events = midiTrack.events;
+  var floor = midiTrack.graceFloor || 0;
+  var k = events.length - 1;
+  while (k > floor && back > eventTicks(events[k])) {
+    back -= eventTicks(events[k]);
+    k--;
+  }
+  if (k <= floor) {
+    // not that much track before it: as early as it can go
+    k = floor + 1;
+    back = k < events.length ? eventTicks(events[k]) : 0;
+  }
+  if (k >= events.length) {
+    midiTrack.addNoteOn(9, hit.note, 0, hit.velocity);
+    return;
+  }
+  var delta = eventTicks(events[k]);
+  midiTrack.addNoteOn(9, hit.note, delta - back, hit.velocity);
+  var graceEvent = events.pop();
+  events[k].setTime(back);
+  events.splice(k, 0, graceEvent);
+}
+
+// Add grace hits before a note that will play `gap` ticks after the track's last
+// event.  Hits that fall in that gap are added in order; earlier ones are slipped
+// in among the notes already written (other drums keep playing around them).
+// Returns the ticks left between the last added hit and the note.
+function addGraceHits(midiTrack, hits, gap) {
+  var at = 0; // ticks into the gap
+  hits.forEach(function (hit) {
+    if (hit.before > gap) {
+      insertGraceHitBack(midiTrack, hit, Math.round(hit.before - gap));
+      return;
+    }
+    var when = Math.max(at, gap - hit.before);
+    midiTrack.addNoteOn(9, hit.note, when - at, hit.velocity);
+    at = when;
+  });
+  return gap - at;
+}
+
+// Grace notes for a bar's first slot, before the bar starts.  Returns the delay
+// before the bar's first note.
+function startBarGraceNotes(gu, midiTrack, graces) {
+  var firstOnTrack = !midiTrack.graceStarted;
+  midiTrack.graceStarted = true;
+  if (firstOnTrack) gu.graceLeadIn = null;
+  if (!graces.bySlot[0] || gu.metronomeSolo) return 0;
+  var leadIn = graceHitsForSlot(gu, midiTrack, graces.bySlot[0]);
+  // the grace notes before the track's very first note, for a lead-in when playing starts
+  if (firstOnTrack) gu.graceLeadIn = leadIn;
+  if (!firstOnTrack) return addGraceHits(midiTrack, leadIn, 0);
+  graceHitsAtEndOfFile(midiTrack, leadIn);
+  return 0;
+}
+
+// Grace notes before slot i (i > 0), in the gap before it.  Returns the gap left.
+function slotGraceNotes(gu, midiTrack, graces, i, gap) {
+  if (i === 0 || !graces.bySlot[i] || gu.metronomeSolo) return gap;
+  return addGraceHits(midiTrack, graceHitsForSlot(gu, midiTrack, graces.bySlot[i]), gap);
+}
+
+/**
+ * Use these grace hits (from gu.graceLeadIn) at the end of a track instead of its
+ * own first note's, e.g. when the next file starts on a different bar.
+ */
+export function setTrackLoopLeadIn(midiTrack, hits) {
+  if (hits && hits.length) graceHitsAtEndOfFile(midiTrack, hits);
+  else midiTrack.graceLoopHits = null;
+}
+
+/**
+ * A short MIDI file holding just the grace notes before a groove's first note,
+ * played once when the groove starts so that note's flam / drag / ruff is heard.
+ */
+export function MIDI_build_lead_in_track(gu, hits) {
+  var midiFile = new Midi.File();
+  var midiTrack = new Midi.Track();
+  midiFile.addTrack(midiTrack);
+  midiTrack.setTempo(gu.getTempo());
+  midiTrack.setInstrument(0, 0x13);
+  midiTrack.addNoteOff(9, 60, 1); // (the player skips a first note without a blank)
+  var left = addGraceHits(midiTrack, hits, hits[0].before + 1);
+  midiTrack.addNoteOff(0, 60, left);
+  return 'data:audio/midi;base64,' + btoa(midiFile.toBytes());
+}
+
+// The groove's first note: its grace notes go at the end of the file.
+function graceHitsAtEndOfFile(midiTrack, hits) {
+  midiTrack.graceLoopHits = hits;
+  if (midiTrack.graceToBytesWrapped) return;
+  midiTrack.graceToBytesWrapped = true;
+  var toBytes = midiTrack.toBytes;
+  midiTrack.toBytes = function () {
+    if (midiTrack.graceLoopHits) {
+      // they lead into the first note of the next time round, at the end of the file
+      addGraceHits(midiTrack, midiTrack.graceLoopHits, 0);
+      midiTrack.graceLoopHits = null;
+    }
+    return toBytes.apply(midiTrack, arguments);
+  };
+}
+
+export function MIDI_build_midi_url_count_in_track(gu, timeSigTop, timeSigBottom, leadInHits) {
   var midiFile = new Midi.File();
   var midiTrack = new Midi.Track();
   midiFile.addTrack(midiTrack);
@@ -106,6 +283,13 @@ export function MIDI_build_midi_url_count_in_track(gu, timeSigTop, timeSigBottom
       constant_OUR_MIDI_VELOCITY_NORMAL
     );
     midiTrack.addNoteOff(9, constant_OUR_MIDI_METRONOME_NORMAL, noteDelay);
+  }
+
+  // the grace notes of the groove's first note go at the end of the count-in
+  if (leadInHits && leadInHits.length) {
+    var lastClick = midiTrack.events.pop(); // the last click's note-off, a beat later
+    var left = addGraceHits(midiTrack, leadInHits, noteDelay);
+    midiTrack.addNoteOff(9, lastClick.param1, left);
   }
 
   var midi_url = 'data:audio/midi;base64,' + btoa(midiFile.toBytes());
@@ -148,10 +332,19 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   if (midiTrack.events.length < 4) {
     midiTrack.addNoteOff(midi_channel, 60, 1); // add a blank note for spacing
   }
+  // grace notes are never slipped in before here
+  if (midiTrack.graceFloor === undefined) midiTrack.graceFloor = midiTrack.events.length - 1;
 
   var isTriplets = isTripletDivisionFromNotesPerMeasure(num_notes, timeSigTop, timeSigBottom);
   var offsetClickStartBeat = gu.getMetronomeOptionsOffsetClickStartRotation(isTriplets);
   var delay_for_next_note = 0;
+
+  // flams, drags and ruffs: the drums play the notes, the grace notes are added
+  var graces = takeGraceNotes(HH_Array, Snare_Array, Toms_Array, num_notes);
+  HH_Array = graces.hh;
+  Snare_Array = graces.snare;
+  Toms_Array = graces.toms;
+  delay_for_next_note = startBarGraceNotes(gu, midiTrack, graces);
 
   for (var i = 0; i < num_notes; i++) {
     var duration = 0;
@@ -188,6 +381,9 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
         else duration -= duration * swing_percentage;
       }
     }
+
+    // grace notes before this slot's notes (the first slot's went in above)
+    delay_for_next_note = slotGraceNotes(gu, midiTrack, graces, i, delay_for_next_note);
 
     // Metronome sounds.
     /** @type {number | false} */
@@ -566,6 +762,7 @@ export function create_MIDIURLFromGrooveData(gu, myGrooveData, MIDI_type) {
   midiFile.addTrack(midiTrack);
 
   midiTrack.setTempo(myGrooveData.tempo);
+  midiTrack.graceTempo = myGrooveData.tempo; // grace notes are timed in ms at this tempo
   midiTrack.setInstrument(0, 0x13);
 
   var swing_percentage = myGrooveData.swingPercent / 100;

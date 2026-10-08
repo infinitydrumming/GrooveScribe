@@ -1,9 +1,10 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
 // helpers below are pure. GrooveUtils delegates its ABC methods here.
 
+import { takeGraceGroups } from './ornaments.js';
 import { constant_NUMBER_OF_TOMS } from './constants.js';
 import {
   isTripletDivisionFromNotesPerMeasure,
@@ -110,10 +111,12 @@ function getABCforNote(note_array_of_arrays, start_index, end_of_group, scaler) 
     moveAccentsOrOtherModifiersOutsideOfGroup(abcNoteStrings, '[');
     moveAccentsOrOtherModifiersOutsideOfGroup(abcNoteStrings, ']');
 
-    // this is the flam notation, it can't be in a sub grouping
-    ABC_String += moveAccentsOrOtherModifiersOutsideOfGroup(abcNoteStrings, '{/c}');
-    // this is the drag notation, it can't be in a sub grouping
-    ABC_String += moveAccentsOrOtherModifiersOutsideOfGroup(abcNoteStrings, '{/cc}');
+    // grace notes (flams, drags, ruffs on any drum) can't be inside a chord: they
+    // go in front of it.  ABC allows one grace group per chord, so when two drums
+    // have one on the same beat the first is written (both still play).
+    var graceGroups = takeGraceGroups(abcNoteStrings.notes1);
+    abcNoteStrings.notes1 = graceGroups.rest;
+    ABC_String += graceGroups.graces.slice(0, 1).join('');
 
     ABC_String += '[' + abcNoteStrings.notes1 + abcNoteStrings.notes2 + abcNoteStrings.notes3 + ']'; // [^gc]
   } else {

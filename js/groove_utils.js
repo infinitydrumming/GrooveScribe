@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, grace-note spacing and volume for flams / drags / ruffs. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -66,12 +66,20 @@ import {
 import { createGrooveData } from './grooveData.js';
 import { createScreenWakeLock } from './screenWakeLock.js';
 import {
+  DEFAULT_GRACE_SPACING_MS,
+  DEFAULT_GRACE_VOLUME,
+  clampGraceSpacing,
+  clampGraceVolume,
+} from './ornaments.js';
+import {
   getQueryVariableFromString as _getQueryVariableFromString,
   getGrooveDataFromUrlString as _urlParse,
   getUrlStringFromGrooveData as _urlBuild,
 } from './urlSerialization.js';
 import {
   MIDI_build_midi_url_count_in_track as _MIDI_build_midi_url_count_in_track,
+  MIDI_build_lead_in_track as _MIDI_build_lead_in_track,
+  setTrackLoopLeadIn as _setTrackLoopLeadIn,
   MIDI_from_HH_Snare_Kick_Arrays as _MIDI_from_HH_Snare_Kick_Arrays,
   create_MIDIURLFromGrooveData as _create_MIDIURLFromGrooveData,
 } from './midiFile.js';
@@ -158,6 +166,9 @@ function GrooveUtils() {
   root.swingChangedCallback = null;
   // 'swing' (long-short-long-short) or 'brazilian' (long-short-short-long)
   root.swingStyle = 'swing';
+  // flams, drags and ruffs: how far apart the grace notes are (ms) and how loud (%)
+  root.graceSpacingMs = DEFAULT_GRACE_SPACING_MS;
+  root.graceVolume = DEFAULT_GRACE_VOLUME;
   root.grooveUtilsUniqueIndex = global_num_GrooveUtilsCreated;
 
   // metronome options
@@ -1079,8 +1090,9 @@ function GrooveUtils() {
     root.midiEventCallbacks.noteHasChangedSinceLastDataLoad = false;
   };
 
-  root.MIDI_build_midi_url_count_in_track = function (timeSigTop, timeSigBottom) {
-    return _MIDI_build_midi_url_count_in_track(root, timeSigTop, timeSigBottom);
+  // leadInHits (optional): grace notes to end the count-in with (root.graceLeadIn)
+  root.MIDI_build_midi_url_count_in_track = function (timeSigTop, timeSigBottom, leadInHits) {
+    return _MIDI_build_midi_url_count_in_track(root, timeSigTop, timeSigBottom, leadInHits);
   };
 
   /*
@@ -1689,6 +1701,24 @@ function GrooveUtils() {
     root.setSwingSlider(swingAmount);
 
     root.swingUpdateText(swingAmount); // update the output
+  };
+
+  // the grace notes before the first note of the MIDI built last (or null)
+  root.graceLeadIn = null;
+  root.MIDI_build_lead_in_track = function (hits) {
+    return _MIDI_build_lead_in_track(root, hits);
+  };
+  root.setTrackLoopLeadIn = function (midiTrack, hits) {
+    _setTrackLoopLeadIn(midiTrack, hits);
+  };
+
+  root.setGraceSpacingMs = function (ms) {
+    root.graceSpacingMs = clampGraceSpacing(ms);
+    root.midiNoteHasChanged();
+  };
+  root.setGraceVolume = function (percent) {
+    root.graceVolume = clampGraceVolume(percent);
+    root.midiNoteHasChanged();
   };
 
   root.getSwingStyle = function () {

@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines, separate kick / hi-hat foot muting, tom ghosts and accents, ride accent. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines, separate kick / hi-hat foot muting, tom ghosts and accents, ride accent, flams / drags / ruffs. See CHANGES.md.
 // Clickable-grid note state (Step 4 extraction from groove_writer.js).
 //
 // Read side of the note grid: given a cell id, report whether a voice is on and
@@ -12,6 +12,7 @@
 // stays in GrooveWriter.
 
 import { getNoteScaler } from './musicMath.js';
+import { ornamentFromChar, tokenWithOrnament } from './ornaments.js';
 import {
   constant_ABC_HH_Accent,
   constant_ABC_HH_Close,
@@ -60,6 +61,35 @@ import {
   constant_sticking_left_on_color_rgb,
   constant_sticking_right_on_color_rgb,
 } from './constants.js';
+
+// --- flams, drags and ruffs (Infinity Drumming, 2026) ----------------------------
+// A note's ornament is kept on its grid cell as data-orn, one link character
+// (see ornaments.js).  The readers below leave it out of the note's own state;
+// ornamentToken() adds it to a note's ABC token where whole bars are read.
+
+/** The grid cell that holds a line's note `id` (H, S, T1, T2, T4, C, R). */
+export var ORNAMENT_CELL_PREFIX = {
+  H: 'hi-hat',
+  S: 'snare',
+  T1: 'tom1-',
+  T2: 'tom2-',
+  T4: 'tom4-',
+  C: 'crash',
+  R: 'ride',
+};
+
+/** The ornament character on a note ('-' for none). */
+export function get_ornament_char(line, id) {
+  var cell = document.getElementById(ORNAMENT_CELL_PREFIX[line] + id);
+  return (cell && cell.getAttribute('data-orn')) || '-';
+}
+
+/** A note's ABC token with its ornament's grace notes in front (false stays false). */
+export function ornamentToken(token, line, id) {
+  if (!token) return token;
+  var ornament = ornamentFromChar(get_ornament_char(line, id));
+  return ornament ? tokenWithOrnament(token, ornament) : token;
+}
 
 export function is_snare_on(id) {
   var state = get_snare_state(id, 'ABC');
@@ -380,27 +410,31 @@ export function get32NoteArrayFromClickableUI(
     if (ctx.stickingsVisible)
       Sticking_Array[array_index] = get_sticking_state(i + startIndexForClickableUI, 'ABC');
 
-    HH_Array[array_index] = get_hh_state(i + startIndexForClickableUI, 'ABC');
+    var id = i + startIndexForClickableUI;
+    // (each with its flam / drag / ruff, if it has one)
+    HH_Array[array_index] = ornamentToken(get_hh_state(id, 'ABC'), 'H', id);
 
     if (ctx.tomsVisible) {
-      Toms_Array[0][array_index] = get_tom_state(i + startIndexForClickableUI, 1, 'ABC');
-      Toms_Array[1][array_index] = get_tom_state(i + startIndexForClickableUI, 2, 'ABC');
-      Toms_Array[3][array_index] = get_tom_state(i + startIndexForClickableUI, 4, 'ABC');
+      Toms_Array[0][array_index] = ornamentToken(get_tom_state(id, 1, 'ABC'), 'T1', id);
+      Toms_Array[1][array_index] = ornamentToken(get_tom_state(id, 2, 'ABC'), 'T2', id);
+      Toms_Array[3][array_index] = ornamentToken(get_tom_state(id, 4, 'ABC'), 'T4', id);
     }
 
     // the crash and ride lines ride along after the toms (see constants.js)
     if (ctx.cymbalsVisible && Toms_Array.length > constant_RIDE_VOICE_INDEX) {
-      Toms_Array[constant_CRASH_VOICE_INDEX][array_index] = get_crash_state(
-        i + startIndexForClickableUI,
-        'ABC'
+      Toms_Array[constant_CRASH_VOICE_INDEX][array_index] = ornamentToken(
+        get_crash_state(id, 'ABC'),
+        'C',
+        id
       );
-      Toms_Array[constant_RIDE_VOICE_INDEX][array_index] = get_ride_state(
-        i + startIndexForClickableUI,
-        'ABC'
+      Toms_Array[constant_RIDE_VOICE_INDEX][array_index] = ornamentToken(
+        get_ride_state(id, 'ABC'),
+        'R',
+        id
       );
     }
 
-    Snare_Array[array_index] = get_snare_state(i + startIndexForClickableUI, 'ABC');
+    Snare_Array[array_index] = ornamentToken(get_snare_state(id, 'ABC'), 'S', id);
 
     Kick_Array[array_index] = get_kick_state(i + startIndexForClickableUI, 'ABC');
   }
