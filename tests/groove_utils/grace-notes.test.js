@@ -60,7 +60,7 @@ describe('grace notes (flams, drags, ruffs)', () => {
     const drag = play(
       '?TimeSig=4/4&Div=16&Tempo=120&H=|xxxxxxxxxxxxxxxx|&S=|----d-------o---|&K=|o-------o-------|'
     );
-    const spacing = Math.round(30 * ticksPerMs(120)); // 8 ticks
+    const spacing = Math.round(45 * ticksPerMs(120)); // drags are spaced 1.5 × a flam's 30 ms
     const graces = drag.events.filter((e) => e.key == SNARE && e.velocity < 85);
     const main = drag.events.find((e) => e.key == SNARE && e.velocity == 85);
     expect(graces.map((e) => main.tick - e.tick)).toEqual([2 * spacing, spacing]);
@@ -90,7 +90,7 @@ describe('grace notes (flams, drags, ruffs)', () => {
     const ruff = midiEvents(gu.create_MIDIURLFromGrooveData(gd));
     expect(ruff.end).toBe(plain.end); // the loop is no longer and no shorter
     const graces = ruff.events.filter((e) => e.key == SNARE && e.velocity < 85);
-    const spacing = Math.round(30 * ticksPerMs(120));
+    const spacing = Math.round(45 * ticksPerMs(120)); // (a ruff, like a drag: 45 ms)
     expect(graces.map((e) => ruff.end - e.tick)).toEqual([3 * spacing, 2 * spacing, spacing]);
   });
 
@@ -124,7 +124,7 @@ describe('grace notes (flams, drags, ruffs)', () => {
       '?TimeSig=4/4&Div=16&Tempo=100&H=|xxxxxxxxxxxxxxxx|&S=|------------o---|&K=|o-------o-------|';
     const plain = play(query);
     const ruff = play(query.replace('o---|&K', 'o---|&SO=|------------r---|&K'));
-    const spacing = Math.round(120 * ticksPerMs(100));
+    const spacing = Math.round(180 * ticksPerMs(100)); // 1.5 × 120 ms for a ruff
     const snare = ruff.events.filter((e) => e.key == SNARE).map((e) => e.tick);
     expect([snare[1] - snare[0], snare[2] - snare[1], snare[3] - snare[2]]).toEqual([
       spacing,
@@ -143,12 +143,13 @@ describe('grace notes (flams, drags, ruffs)', () => {
     const plain = play(query);
     const drags = play(query.replace('&KO=|----------------|', '&KO=|d-------f-------|'));
     const KICK = 35;
-    const spacing = Math.round(30 * ticksPerMs(120));
+    const flam = Math.round(30 * ticksPerMs(120));
+    const drag = Math.round(45 * ticksPerMs(120));
     const kicks = drags.events.filter((e) => e.key == KICK);
     const mains = kicks.filter((e) => e.velocity == 85).map((e) => e.tick);
     const graces = kicks.filter((e) => e.velocity < 85).map((e) => e.tick);
     // the drag on the 1 leads in from the end of the loop, the flam is before beat 3
-    expect(graces).toEqual([mains[1] - spacing, drags.end - 2 * spacing, drags.end - spacing]);
+    expect(graces).toEqual([mains[1] - flam, drags.end - 2 * drag, drags.end - drag]);
     // the hi-hat foot still plays with the kick on beat 3
     expect(drags.events.filter((e) => e.velocity == 85)).toEqual(plain.events);
   });

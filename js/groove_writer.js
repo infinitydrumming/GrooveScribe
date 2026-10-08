@@ -110,6 +110,7 @@ import {
   clampGraceVolume,
   DEFAULT_GRACE_SPACING_MS,
   DEFAULT_GRACE_VOLUME,
+  DRAG_SPACING_FACTOR,
 } from './ornaments.js';
 
 // GrooveWriter class.   The only one in this file.
@@ -3977,7 +3978,14 @@ function GrooveWriter() {
     var volumeSlider = /** @type {HTMLInputElement} */ (document.getElementById('graceNoteVolume'));
     spacingSlider.value = String(spacing);
     volumeSlider.value = String(gu.graceVolume);
-    document.getElementById('graceNoteSpacingOutput').innerHTML = spacing + ' ms (' + feel + ')';
+    document.getElementById('graceNoteSpacingOutput').innerHTML =
+      'Flams ' +
+      spacing +
+      ' ms, drags and ruffs ' +
+      Math.round(spacing * DRAG_SPACING_FACTOR) +
+      ' ms between notes (' +
+      feel +
+      ')';
     document.getElementById('graceNoteVolumeOutput').innerHTML =
       gu.graceVolume + '% of a normal hit';
   }

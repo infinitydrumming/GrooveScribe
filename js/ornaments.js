@@ -186,8 +186,13 @@ export function graceNotesForToken(token) {
 
 // --- grace-note timing ----------------------------------------------------------
 
-/** Default gap between grace notes (and to the main note), in milliseconds. */
+/** Default gap between a flam's grace note and its note, in milliseconds. */
 export var DEFAULT_GRACE_SPACING_MS = 30;
+/**
+ * Drags and ruffs are spaced wider than flams (by this much), so each grace note
+ * is heard, like an open, even double stroke: 45 ms at the default 30.
+ */
+export var DRAG_SPACING_FACTOR = 1.5;
 /** Default grace-note volume, as a percentage of a normal hit. */
 export var DEFAULT_GRACE_VOLUME = 40;
 var MIN_GRACE_SPACING_MS = 15;

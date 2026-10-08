@@ -33,7 +33,9 @@ The original copyright notices and credits are unchanged.
   drag sounds are no longer used.
 - Metronome Options > "Flams, drags & ruffs": grace-note spacing (15–150 ms,
   default 30) and volume (default 40% of a normal hit), saved in the link as
-  `GraceMs` / `GraceVol` only when changed.
+  `GraceMs` / `GraceVol` only when changed. Drags and ruffs are spaced 1.5 times
+  wider than flams (45 ms at the default), so each grace note is heard, like an
+  open, even double stroke.
 - Golden master: the four coverage grooves with snare flams / drags changed sound
   (their sheet music is unchanged); two new coverage grooves with ornaments.
 

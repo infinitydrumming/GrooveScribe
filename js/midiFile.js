@@ -79,6 +79,7 @@ import { isTripletDivisionFromNotesPerMeasure, scaleNoteArrayToFullSize } from '
 import {
   DEFAULT_GRACE_SPACING_MS,
   DEFAULT_GRACE_VOLUME,
+  DRAG_SPACING_FACTOR,
   graceNotesForToken,
   withoutGrace,
 } from './ornaments.js';
@@ -126,11 +127,14 @@ function graceHitsForSlot(gu, midiTrack, slotGraces) {
   var volume = gu.graceVolume || DEFAULT_GRACE_VOLUME;
   // the tempo this track was written at, else the player's
   var tempo = midiTrack.graceTempo || (gu.getTempo ? gu.getTempo() : 80);
-  // 128 ticks per quarter note
-  var spacing = Math.max(1, Math.round((spacingMs * tempo * 128) / 60000));
+  // 128 ticks per quarter note; drags and ruffs are spaced wider than flams
+  var ticks = function (ms) {
+    return Math.max(1, Math.round((ms * tempo * 128) / 60000));
+  };
   var velocity = Math.max(1, Math.round((constant_OUR_MIDI_VELOCITY_NORMAL * volume) / 100));
   var hits = [];
   slotGraces.forEach(function (graces) {
+    var spacing = ticks(graces.count > 1 ? spacingMs * DRAG_SPACING_FACTOR : spacingMs);
     for (var k = graces.count; k >= 1; k--)
       hits.push({ before: k * spacing, note: graces.midiNote, velocity: velocity });
   });
