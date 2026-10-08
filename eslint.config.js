@@ -106,6 +106,7 @@ export default [
       'js/abcNotation.js',
       'js/screenWakeLock.js',
       'js/ornaments.js',
+      'js/barMeters.js',
       'js/groove_utils.js',
       'js/groove_writer.js',
       'js/grooves.js',

@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -6,6 +6,18 @@
 // hold no state — layout numbers and the note-grouping size come in via a small
 // context object / arguments, so GrooveWriter (which owns that state) delegates
 // its HTMLforStaffContainer / HTMLforPermutationOptions methods here.
+
+// Whether the note at `slot` (from 0) ends a group on the grid: every
+// ctx.noteGrouping notes, or at ctx.groupEnds (the classic x/8 groups,
+// Infinity Drumming, 2026).
+function endsNoteGroup(ctx, slot) {
+  // no gap after a short bar's last note (its unused slots follow, hidden)
+  if (ctx.groupEnds)
+    return (
+      slot + 1 < ctx.groupEnds[ctx.groupEnds.length - 1] && ctx.groupEnds.indexOf(slot + 1) >= 0
+    );
+  return (slot + 1) % ctx.noteGrouping === 0;
+}
 
 export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
   var newHTML =
@@ -70,7 +82,7 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 
     // add space between notes, exept on the last note
     if (
-      (i - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+      endsNoteGroup(ctx, i - indexStartForNotes) &&
       i < ctx.notesPerMeasure + indexStartForNotes - 1
     ) {
       newHTML += '<div class="space_between_note_groups"> </div>\n';
@@ -151,7 +163,7 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 												</div>\n';
 
     if (
-      (i - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+      endsNoteGroup(ctx, i - indexStartForNotes) &&
       i < ctx.notesPerMeasure + indexStartForNotes - 1
     ) {
       newHTML += '<div class="space_between_note_groups"> </div> \n';
@@ -215,7 +227,7 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
         '</div>\n';
 
       if (
-        (c - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+        endsNoteGroup(ctx, c - indexStartForNotes) &&
         c < ctx.notesPerMeasure + indexStartForNotes - 1
       ) {
         newHTML += '<div class="space_between_note_groups"> </div> \n';
@@ -288,7 +300,7 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 													';
 
     if (
-      (i - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+      endsNoteGroup(ctx, i - indexStartForNotes) &&
       i < ctx.notesPerMeasure + indexStartForNotes - 1
     ) {
       newHTML += '<div class="space_between_note_groups"> </div> \n';
@@ -332,7 +344,7 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 						';
 
     if (
-      (i - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+      endsNoteGroup(ctx, i - indexStartForNotes) &&
       i < ctx.notesPerMeasure + indexStartForNotes - 1
     ) {
       newHTML += '<div class="space_between_note_groups"> </div> \n';
@@ -376,7 +388,7 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 						';
 
     if (
-      (i - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+      endsNoteGroup(ctx, i - indexStartForNotes) &&
       i < ctx.notesPerMeasure + indexStartForNotes - 1
     ) {
       newHTML += '<div class="space_between_note_groups"> </div> \n';
@@ -471,7 +483,7 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
       '</div> \n';
 
     if (
-      (i - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+      endsNoteGroup(ctx, i - indexStartForNotes) &&
       i < ctx.notesPerMeasure + indexStartForNotes - 1
     ) {
       newHTML += '<div class="space_between_note_groups"> </div> ';
@@ -515,7 +527,7 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 						';
 
     if (
-      (i - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+      endsNoteGroup(ctx, i - indexStartForNotes) &&
       i < ctx.notesPerMeasure + indexStartForNotes - 1
     ) {
       newHTML += '<div class="space_between_note_groups"> </div> \n';
@@ -553,7 +565,7 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 													';
 
     if (
-      (j - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+      endsNoteGroup(ctx, j - indexStartForNotes) &&
       j < ctx.notesPerMeasure + indexStartForNotes - 1
     ) {
       newHTML += '<div class="space_between_note_groups"> </div> ';
@@ -592,7 +604,7 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 													';
 
     if (
-      (j - (indexStartForNotes - 1)) % ctx.noteGrouping === 0 &&
+      endsNoteGroup(ctx, j - indexStartForNotes) &&
       j < ctx.notesPerMeasure + indexStartForNotes - 1
     ) {
       newHTML += '<div class="space_between_note_groups"> </div> ';
@@ -632,7 +644,8 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
     '" onClick="myGrooveWriter.pasteMeasureButtonClick(' +
     baseindex +
     ')" class="pasteMeasureButton"><i class="fa fa-paste"></i></span>' +
-    straightBarButtonHTML(baseindex, ctx.straightBar);
+    straightBarButtonHTML(baseindex, ctx.straightBar) +
+    barTimeSigButtonHTML(baseindex, ctx.barTimeSig);
   newHTML += '</span>';
 
   if (baseindex == ctx.numberOfMeasures)
@@ -644,6 +657,29 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 
   return newHTML;
 } // end function buildStaffContainerHTML
+
+/**
+ * The button under a bar's swing / straight switch that shows, and changes, the
+ * bar's own time signature (Infinity Drumming, 2026).
+ *
+ * @param {number} baseindex  The bar, starting at 1.
+ * @param {string} [timeSig]  e.g. "4/4"; no button without it.
+ * @returns {string}
+ */
+function barTimeSigButtonHTML(baseindex, timeSig) {
+  if (!timeSig) return '';
+  return (
+    '<span title="This bar is in ' +
+    timeSig +
+    '. Click to give it its own time signature" id="barTimeSigButton' +
+    baseindex +
+    '" onClick="myGrooveWriter.barTimeSigButtonClick(' +
+    baseindex +
+    ')" class="barTimeSigButton">' +
+    timeSig +
+    '</span>'
+  );
+}
 
 /**
  * The switch under a bar's copy / paste buttons: "swing" plays the bar with the

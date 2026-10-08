@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars, grace-note settings. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar. See CHANGES.md.
 // grooveData — the central data contract for Groove Scribe.
 //
 // A GrooveData describes a single groove: its time signature, subdivision and
@@ -85,6 +85,10 @@ const EMPTY_NOTE_ARRAY = [
  * @property {number} grooveClickClickBars   Click-only bars for that option. URL "ClickBars".
  * @property {boolean[]} straightBars  Per bar (index 0 = bar 1): true plays that bar straight
  *                                     even when the groove is swung. URL "StraightBars" (1-based list).
+ * @property {Array<{top: number, bottom: number}>} barTimeSigs  Each bar's time signature when
+ *   they differ (bar 1's is numBeats / noteValue); empty when every bar is the same. URL
+ *   "BarSigs" (only when they differ). notesPerMeasure is then the bar stride: the most
+ *   note slots any bar has (see barMeters.js).
  * @property {number} graceSpacingMs  Flams, drags and ruffs: gap between the grace notes (and to
  *                                     the note), in ms. URL "GraceMs" (only when not the default).
  * @property {number} graceVolume     Grace-note volume, % of a normal hit. URL "GraceVol".
@@ -136,6 +140,7 @@ export function createGrooveData(config = {}) {
     grooveClickGrooveBars: 0, // 0 = "Groove / click bars" off
     grooveClickClickBars: 0,
     straightBars: [],
+    barTimeSigs: [],
     graceSpacingMs: DEFAULT_GRACE_SPACING_MS,
     graceVolume: DEFAULT_GRACE_VOLUME,
     debugMode: config.debugMode ?? false,
