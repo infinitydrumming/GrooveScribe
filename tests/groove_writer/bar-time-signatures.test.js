@@ -86,4 +86,24 @@ describe('GrooveWriter: a time signature for each bar', () => {
     expect(link()).toContain('&H=|xxxxxxxx|xxxx|xxxxxxxx|');
     expect(link()).toContain('&K=|o---o---|o---|o---o---|');
   });
+  it('spaces the grid in the classic groups for x/8 bars', () => {
+    gw.loadNewGroove(
+      '?TimeSig=3/8&Div=8&Tempo=120&Measures=3&BarSigs=3/8,5/8,7/8' +
+        '&H=|xxx|xxxxx|xxxxxxx|&S=|-o-|--o-o|-o--o-o|&K=|o--|o--o-|o-o-o--|'
+    );
+    // a bar's note positions, as "x" per note and "|" per gap
+    const groups = (bar) => {
+      const div = document.createElement('div');
+      div.innerHTML = gw.HTMLforStaffContainer(bar + 1, bar * 7);
+      const row = div.querySelector('.bg-highlight').parentElement;
+      return [...row.children]
+        .filter((el) => /bg-highlight|space_between/.test(el.className))
+        .map((el) => (el.className == 'bg-highlight' ? 'x' : '|'))
+        .join('');
+    };
+    // every bar has 7 slots; the 3/8 and 5/8 bars hide their extra ones
+    expect(groups(0)).toBe('xxxxxxx');
+    expect(groups(1)).toBe('xxx|xxxx');
+    expect(groups(2)).toBe('xx|xx|xxx');
+  });
 });

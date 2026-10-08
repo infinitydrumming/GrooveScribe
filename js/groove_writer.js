@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -96,6 +96,7 @@ import {
   constant_sticking_both_on_color_rgb,
   constant_sticking_count_on_color_rgb,
 } from './constants.js';
+import { beamGroupEnds } from './musicMath.js';
 import * as _perm from './permutations.js';
 import * as _view from './viewHtml.js';
 import * as _grid from './gridState.js';
@@ -5352,6 +5353,12 @@ function GrooveWriter() {
       numberOfMeasures: class_number_of_measures,
       straightBar: !!class_straight_bars[baseindex - 1],
       barTimeSig: barSigLabel(baseindex - 1),
+      // x/8 bars are grouped like their beaming (5/8 = 3+2, ...)
+      groupEnds: beamGroupEnds(
+        barSigOf(baseindex - 1).top,
+        barSigOf(baseindex - 1).bottom,
+        barCountOf(baseindex - 1)
+      ),
       // the beats are grouped by the bar's own time signature
       noteGrouping: root.myGrooveUtils.noteGroupingSize(
         barCountOf(baseindex - 1),

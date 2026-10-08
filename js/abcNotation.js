@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -7,6 +7,7 @@
 import { takeGraceGroups } from './ornaments.js';
 import { constant_NUMBER_OF_TOMS } from './constants.js';
 import {
+  beamGroupEnds,
   isTripletDivision,
   isTripletDivisionFromNotesPerMeasure,
   notesPerMeasureInFullSizeArray,
@@ -506,6 +507,40 @@ function snare_HH_kick_ABC_for_triplets(
   return ABC_String;
 }
 
+// The beamed group note i of a bar (in 32nd notes) is in: whether it starts or
+// ends the group, how far it is to the group's end, and how long a rest at its
+// start can be.  Even groups (abc_gen_note_grouping_size, the last one cut short
+// in odd time signatures), or the classic x/8 groups of beamGroupEnds.
+function quadsBeamGroupAt(i, notes_per_measure, timeSigTop, timeSigBottom, beamEnds) {
+  var position = i % notes_per_measure;
+  if (beamEnds) {
+    var start = 0;
+    for (var g = 0; g < beamEnds.length; g++) {
+      if (position < beamEnds[g]) {
+        return {
+          isStart: position === start,
+          isLast: position === beamEnds[g] - 1,
+          toEnd: beamEnds[g] - position,
+          restLength: beamEnds[g] - position,
+        };
+      }
+      start = beamEnds[g];
+    }
+  }
+  var size = abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom);
+  var restLength = size;
+  // make sure the group end doesn't go beyond the measure.   Happens in odd time sigs
+  if (position + restLength > notes_per_measure) restLength = notes_per_measure - position;
+  var toEnd = i % size === 0 ? size : size - (i % size);
+  if (position + toEnd > notes_per_measure) toEnd = notes_per_measure - position;
+  return {
+    isStart: i % size === 0,
+    isLast: i % size == size - 1,
+    toEnd: toEnd,
+    restLength: restLength,
+  };
+}
+
 function snare_HH_kick_ABC_for_quads(
   sticking_array,
   HH_array,
@@ -535,29 +570,13 @@ function snare_HH_kick_ABC_for_quads(
   // comes first it will create a wrong sized note
   if (kick_stems_up) all_drum_array_of_array = all_drum_array_of_array.concat([kick_array]);
 
+  var beamEnds = beamGroupEnds(timeSigTop, timeSigBottom, notes_per_measure);
   for (var i = 0; i < num_notes; i++) {
-    var grouping_size_for_rests = abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom);
-    // make sure the group end doesn't go beyond the measure.   Happens in odd time sigs
-    if ((i % notes_per_measure) + grouping_size_for_rests > notes_per_measure) {
-      // if we are in an odd time signature then the last few notes will have a different grouping to reach the end of the measure
-      grouping_size_for_rests = notes_per_measure - (i % notes_per_measure);
-    }
+    var group = quadsBeamGroupAt(i, notes_per_measure, timeSigTop, timeSigBottom, beamEnds);
+    var grouping_size_for_rests = group.restLength;
+    var end_of_group = group.toEnd;
 
-    var end_of_group;
-    if (i % abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) === 0)
-      end_of_group = abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom);
-    else
-      end_of_group =
-        abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) -
-        (i % abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom));
-
-    // make sure the group end doesn't go beyond the measure.   Happens in odd time sigs
-    if ((i % notes_per_measure) + end_of_group > notes_per_measure) {
-      // if we are in an odd time signature then the last few notes will have a different grouping to reach the end of the measure
-      end_of_group = notes_per_measure - (i % notes_per_measure);
-    }
-
-    if (i % abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) === 0) {
+    if (group.isStart) {
       // we will only output a rest at the beginning of a beat phrase
       stickings_voice_string += getABCforRest(
         [sticking_array],
@@ -598,10 +617,7 @@ function snare_HH_kick_ABC_for_quads(
       kick_voice_string += getABCforNote([kick_array], i, end_of_group, scaler);
     }
 
-    if (
-      i % abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) ==
-      abc_gen_note_grouping_size(false, timeSigTop, timeSigBottom) - 1
-    ) {
+    if (group.isLast) {
       stickings_voice_string += ' ';
       hh_snare_voice_string += ' '; // Add a space to break the bar line every group notes
       kick_voice_string += ' ';

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { newGrooveUtils, installMidiGlobal } from '../helpers/legacyLoader.js';
 import { addMeterChange } from '../../js/abcNotation.js';
+import { beamGroupEnds } from '../../js/musicMath.js';
 
 // Infinity Drumming, 2026: a time signature for each bar ("BarSigs" in links).
 
@@ -133,6 +134,29 @@ describe('a time signature for each bar', () => {
     const bar = 'V:Stickings\nx8 x8 |\\\nV:Hands stem=up\n%%voicemap drum\n[^g2F2]^g2 |\\\n';
     expect(addMeterChange(bar, { top: 3, bottom: 8 })).toBe(
       'V:Stickings\n[M:3/8]x8 x8 |\\\nV:Hands stem=up\n%%voicemap drum\n[M:3/8][^g2F2]^g2 |\\\n'
+    );
+  });
+  it('groups x/8 bars the classic way: 5/8 as 3+2, 7/8 as 2+2+3', () => {
+    expect(beamGroupEnds(3, 8, 3)).toEqual([3]);
+    expect(beamGroupEnds(5, 8, 5)).toEqual([3, 5]);
+    expect(beamGroupEnds(7, 8, 7)).toEqual([2, 4, 7]);
+    expect(beamGroupEnds(5, 8, 10)).toEqual([6, 10]); // in 16ths
+    // 6/8, 9/8, 12/8 and every x/4 bar keep the usual grouping
+    expect(beamGroupEnds(6, 8, 6)).toBeNull();
+    expect(beamGroupEnds(4, 4, 8)).toBeNull();
+  });
+
+  it('beams the sheet music in those groups', () => {
+    const hands = (q) =>
+      gu
+        .createABCFromGrooveData(gu.getGrooveDataFromUrlString(q), 800)
+        .split('V:Hands')[1]
+        .split('\n')[2];
+    expect(hands('?TimeSig=5/8&Div=8&Measures=1&H=|xxxxx|&S=|--o-o|&K=|o--o-|')).toBe(
+      '[^g4F4]^g4[c4^g4] [^g4F4][c4^g4] ||'
+    );
+    expect(hands('?TimeSig=6/8&Div=8&Measures=1&H=|xxxxxx|&S=|---o--|&K=|o-----|')).toBe(
+      '[^g4F4]^g4^g4 [c4^g4]^g4^g4 ||'
     );
   });
 });

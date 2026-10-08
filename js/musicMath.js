@@ -1,6 +1,9 @@
 // Time-signature and note-division math (Step 2 extraction). Pure functions
 // with no DOM/GrooveUtils dependency — they only call each other. GrooveUtils
 // delegates its matching methods here.
+//
+// Modified by Infinity Drumming, 2026: classic beam groups for x/8 bars
+// (beamGroupEnds). See CHANGES.md.
 
 export function parseTimeSigString(timeSigString) {
   var split_arr = timeSigString.split('/');
@@ -124,4 +127,39 @@ export function scaleNoteArrayToFullSize(
   }
 
   return retArray;
+}
+
+// --- Classic beaming for x/8 bars (Infinity Drumming, 2026) ---------------------
+// 8th notes are beamed in groups of 2 and 3, the 3s first: 5/8 = 3+2, 8/8 = 3+3+2,
+// except 7/8 = 2+2+3, the usual way it is written.  3/8 is one group of 3.  6/8,
+// 9/8, 12/8 and 15/8 stay in groups of 3, as they always were.
+var EIGHTH_NOTE_GROUPS = {
+  2: [2],
+  3: [3],
+  4: [2, 2],
+  5: [3, 2],
+  7: [2, 2, 3],
+  8: [3, 3, 2],
+  10: [3, 3, 2, 2],
+  11: [3, 3, 3, 2],
+  13: [3, 3, 3, 2, 2],
+  14: [3, 3, 3, 3, 2],
+};
+
+/**
+ * Where the beamed groups of an x/8 bar end, counted in its note slots (e.g. a
+ * 5/8 bar of 10 16th notes -> [6, 10]); null for every other time signature,
+ * which keeps its even groups.
+ */
+export function beamGroupEnds(timeSigTop, timeSigBottom, slotsPerBar) {
+  var groups = timeSigBottom == 8 ? EIGHTH_NOTE_GROUPS[timeSigTop] : null;
+  if (!groups) return null;
+  var slotsPerEighth = slotsPerBar / timeSigTop;
+  var ends = [];
+  var at = 0;
+  groups.forEach(function (eighths) {
+    at += eighths * slotsPerEighth;
+    ends.push(at);
+  });
+  return ends;
 }

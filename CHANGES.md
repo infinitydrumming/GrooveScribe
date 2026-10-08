@@ -29,6 +29,10 @@ The original copyright notices and credits are unchanged.
   between bars of different lengths keeps the notes in place.
 - A note setting has to fit every bar (triplets only when every bar is x/4);
   permutations are only offered when every bar is 4/4.
+- Classic beaming for x/8 bars, in the sheet music and the grid's spacing: 3/8 as
+  one group of 3, 5/8 as 3+2, 7/8 as 2+2+3, 8/8 as 3+3+2 (and 10, 11, 13, 14/8),
+  in 8th and 16th notes alike (`beamGroupEnds` in `js/musicMath.js`). 6/8, 9/8,
+  12/8 and every x/4 bar beam as before.
 
 ## 2026-10-08 — flams, drags and ruffs on every drum
 
