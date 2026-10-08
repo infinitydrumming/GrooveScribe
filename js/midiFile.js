@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -76,6 +76,7 @@ import {
   constant_OUR_MIDI_VELOCITY_NORMAL,
 } from './constants.js';
 import { isTripletDivisionFromNotesPerMeasure, scaleNoteArrayToFullSize } from './musicMath.js';
+import { fullSizeBar, isMixedMeter } from './barMeters.js';
 import {
   DEFAULT_GRACE_SPACING_MS,
   DEFAULT_GRACE_VOLUME,
@@ -773,6 +774,12 @@ export function create_MIDIURLFromGrooveData(gu, myGrooveData, MIDI_type) {
 
   var swing_percentage = myGrooveData.swingPercent / 100;
 
+  // bars with different time signatures: each bar with its own length and beats
+  if (isMixedMeter(myGrooveData.barTimeSigs, myGrooveData.numberOfMeasures)) {
+    addMixedMeterBars(gu, midiTrack, myGrooveData, MIDI_type, swing_percentage);
+    return 'data:audio/midi;base64,' + btoa(midiFile.toBytes());
+  }
+
   // the midi converter expects all the arrays to be 32 or 48 notes long.
   // Expand them
   var FullNoteHHArray = scaleNoteArrayToFullSize(
@@ -855,4 +862,27 @@ export function create_MIDIURLFromGrooveData(gu, myGrooveData, MIDI_type) {
   var midi_url = 'data:audio/midi;base64,' + btoa(midiFile.toBytes());
 
   return midi_url;
+}
+
+// The bars of a groove whose bars have different time signatures, one at a time,
+// each scaled to its own number of notes and played in its own time signature.
+function addMixedMeterBars(gu, midiTrack, gd, MIDI_type, swing_percentage) {
+  for (var bar = 0; bar < gd.numberOfMeasures; bar++) {
+    var notes = fullSizeBar(gd, bar);
+    gu.MIDI_from_HH_Snare_Kick_Arrays(
+      midiTrack,
+      notes.hh,
+      notes.snare,
+      notes.kick,
+      notes.toms,
+      MIDI_type,
+      gd.metronomeFrequency,
+      notes.hh.length,
+      (gd.timeDivision * notes.sig.top) / notes.sig.bottom, // swing groups each beat of this bar
+      gd.straightBars && gd.straightBars[bar] ? 0 : swing_percentage,
+      notes.sig.top,
+      notes.sig.bottom,
+      gd.swingStyle || 'swing'
+    );
+  }
 }

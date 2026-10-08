@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -13,6 +13,14 @@ import {
   constant_MAX_MEASURES,
 } from './constants.js';
 import { parseTimeSigString, calc_notes_per_measure } from './musicMath.js';
+import {
+  barSigsFromList,
+  barSigsToList,
+  barStride,
+  barNoteCount,
+  barSlice,
+  isMixedMeter,
+} from './barMeters.js';
 import {
   DEFAULT_GRACE_SPACING_MS,
   DEFAULT_GRACE_VOLUME,
@@ -36,12 +44,67 @@ function ornamentLines(myGrooveData) {
   };
 }
 
+// Each bar's time signature ("BarSigs=4/4,2/4,..."), when they differ: sets
+// barTimeSigs and the bar stride, and returns each bar's note count (null when
+// the bars are all the same).
+function readBarTimeSigs(myGrooveData, encodedURLData) {
+  var sigs = barSigsFromList(
+    getQueryVariableFromString('BarSigs', '', encodedURLData),
+    myGrooveData.numberOfMeasures,
+    myGrooveData.numBeats,
+    myGrooveData.noteValue
+  );
+  if (!isMixedMeter(sigs, myGrooveData.numberOfMeasures)) return null;
+  myGrooveData.barTimeSigs = sigs;
+  myGrooveData.notesPerMeasure = barStride(
+    myGrooveData.timeDivision,
+    sigs,
+    myGrooveData.numberOfMeasures,
+    myGrooveData.numBeats,
+    myGrooveData.noteValue
+  );
+  return sigs.map(function (sig) {
+    return barNoteCount(myGrooveData.timeDivision, sig);
+  });
+}
+
+// A line of notes from a link: bar by bar when the bars have different lengths
+function readNoteLine(drumType, noteString, notesPerMeasure, numberOfMeasures, barCounts) {
+  if (barCounts) return noteArraysFromBarTabs(drumType, noteString, barCounts, notesPerMeasure);
+  return noteArraysFromURLData(drumType, noteString, notesPerMeasure, numberOfMeasures);
+}
+
+// "&BarSigs=..." for a link when the bars have different time signatures
+function barSigsForUrl(myGrooveData) {
+  var list = barSigsToList(myGrooveData.barTimeSigs, myGrooveData.numberOfMeasures);
+  return list ? '&BarSigs=' + list : '';
+}
+
+// A tab line writer for a link: bars of different lengths are written each with
+// only their own notes ("|x-x-x-x-|x-x-|"); otherwise as it always was.
+function tabLineWriter(myGrooveData, total_notes) {
+  var mixed = isMixedMeter(myGrooveData.barTimeSigs, myGrooveData.numberOfMeasures);
+  var stride = myGrooveData.notesPerMeasure;
+  return function (writeLine, noteArray) {
+    if (!mixed) return writeLine(noteArray, total_notes, stride);
+    var line = '';
+    for (var bar = 0; bar < myGrooveData.numberOfMeasures; bar++) {
+      var count = barNoteCount(myGrooveData.timeDivision, myGrooveData.barTimeSigs[bar]);
+      line += writeLine(barSlice(noteArray, bar, stride, count), count, count);
+    }
+    return line;
+  };
+}
+
 // read the ornament lines and the grace-note settings from a link
-function readOrnaments(myGrooveData, encodedURLData) {
+function readOrnaments(myGrooveData, encodedURLData, barCounts) {
   var lines = ornamentLines(myGrooveData);
   for (var name in lines) {
     var ornaments = getQueryVariableFromString(name, false, encodedURLData);
-    if (ornaments && lines[name]) applyOrnamentTabLine(lines[name], ornaments);
+    if (!ornaments || !lines[name]) continue;
+    if (barCounts)
+      applyOrnamentBarTabs(lines[name], ornaments, barCounts, myGrooveData.notesPerMeasure);
+    else applyOrnamentTabLine(lines[name], ornaments);
   }
   myGrooveData.graceSpacingMs = clampGraceSpacing(
     getQueryVariableFromString('GraceMs', DEFAULT_GRACE_SPACING_MS, encodedURLData)
@@ -53,7 +116,7 @@ function readOrnaments(myGrooveData, encodedURLData) {
 
 // the ornament lines that have any ornaments (written for the H, C and R lines
 // as they go into the link), and the grace-note settings when they are changed
-function ornamentsForUrl(myGrooveData, hhLine, crashLine, rideLine, total_notes) {
+function ornamentsForUrl(myGrooveData, hhLine, crashLine, rideLine, tabWriter) {
   var lines = ornamentLines(myGrooveData);
   lines.HO = hhLine;
   lines.CO = crashLine;
@@ -63,7 +126,7 @@ function ornamentsForUrl(myGrooveData, hhLine, crashLine, rideLine, total_notes)
   var url = '';
   for (var name in lines) {
     if (!lines[name]) continue;
-    var tab = ornamentTabLine(lines[name], total_notes, myGrooveData.notesPerMeasure);
+    var tab = tabWriter(ornamentTabLine, lines[name]);
     if (/[^-|]/.test(tab)) url += '&' + name + '=|' + tab;
   }
   if (myGrooveData.graceSpacingMs && myGrooveData.graceSpacingMs != DEFAULT_GRACE_SPACING_MS)
@@ -74,9 +137,11 @@ function ornamentsForUrl(myGrooveData, hhLine, crashLine, rideLine, total_notes)
 }
 import {
   noteArraysFromURLData,
+  noteArraysFromBarTabs,
   tabLineFromAbcNoteArray,
   ornamentTabLine,
   applyOrnamentTabLine,
+  applyOrnamentBarTabs,
   GetDefaultStickingsGroove,
   GetDefaultHHGroove,
   GetDefaultSnareGroove,
@@ -189,6 +254,10 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
     myGrooveData.numberOfMeasures
   );
 
+  // a time signature for each bar, when they differ: every bar keeps the longest
+  // bar's number of note slots, and each bar's notes are read into its own
+  var barCounts = readBarTimeSigs(myGrooveData, encodedURLData);
+
   Stickings_string = getQueryVariableFromString('Stickings', false, encodedURLData);
   if (!Stickings_string) {
     Stickings_string = GetDefaultStickingsGroove(
@@ -248,53 +317,60 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
     }
 
     /// the toms array index starts at zero (0) the first one is T1
-    myGrooveData.toms_array[i] = noteArraysFromURLData(
+    myGrooveData.toms_array[i] = readNoteLine(
       'T' + (i + 1),
       Tom_string,
       myGrooveData.notesPerMeasure,
-      myGrooveData.numberOfMeasures
+      myGrooveData.numberOfMeasures,
+      barCounts
     );
   }
 
   // Crash line (C) and ride line (R).  Older URLs carry crashes and rides in the
   // hi-hat line instead; those stay in hh_array and render the same way.
   var emptyGroove = GetEmptyGroove(myGrooveData.notesPerMeasure, myGrooveData.numberOfMeasures);
-  myGrooveData.crash_array = noteArraysFromURLData(
+  myGrooveData.crash_array = readNoteLine(
     'C',
     getQueryVariableFromString('C', false, encodedURLData) || emptyGroove,
     myGrooveData.notesPerMeasure,
-    myGrooveData.numberOfMeasures
+    myGrooveData.numberOfMeasures,
+    barCounts
   );
-  myGrooveData.ride_array = noteArraysFromURLData(
+  myGrooveData.ride_array = readNoteLine(
     'R',
     getQueryVariableFromString('R', false, encodedURLData) || emptyGroove,
     myGrooveData.notesPerMeasure,
-    myGrooveData.numberOfMeasures
+    myGrooveData.numberOfMeasures,
+    barCounts
   );
 
-  myGrooveData.sticking_array = noteArraysFromURLData(
+  myGrooveData.sticking_array = readNoteLine(
     'Stickings',
     Stickings_string,
     myGrooveData.notesPerMeasure,
-    myGrooveData.numberOfMeasures
+    myGrooveData.numberOfMeasures,
+    barCounts
   );
-  myGrooveData.hh_array = noteArraysFromURLData(
+  myGrooveData.hh_array = readNoteLine(
     'H',
     HH_string,
     myGrooveData.notesPerMeasure,
-    myGrooveData.numberOfMeasures
+    myGrooveData.numberOfMeasures,
+    barCounts
   );
-  myGrooveData.snare_array = noteArraysFromURLData(
+  myGrooveData.snare_array = readNoteLine(
     'S',
     Snare_string,
     myGrooveData.notesPerMeasure,
-    myGrooveData.numberOfMeasures
+    myGrooveData.numberOfMeasures,
+    barCounts
   );
-  myGrooveData.kick_array = noteArraysFromURLData(
+  myGrooveData.kick_array = readNoteLine(
     'K',
     Kick_string,
     myGrooveData.notesPerMeasure,
-    myGrooveData.numberOfMeasures
+    myGrooveData.numberOfMeasures,
+    barCounts
   );
 
   myGrooveData.title = getQueryVariableFromString('title', '', encodedURLData);
@@ -328,7 +404,7 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
   var swingStyle = String(getQueryVariableFromString('swingstyle', '', encodedURLData));
   myGrooveData.swingStyle = swingStyle.toLowerCase() == 'brazilian' ? 'brazilian' : 'swing';
 
-  readOrnaments(myGrooveData, encodedURLData);
+  readOrnaments(myGrooveData, encodedURLData, barCounts);
 
   return myGrooveData;
 }
@@ -402,8 +478,17 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
       myGrooveData.grooveClickClickBars;
   }
 
+  // a time signature for each bar, when they differ
+  fullURL += barSigsForUrl(myGrooveData);
+
   // notes
   var total_notes = myGrooveData.notesPerMeasure * myGrooveData.numberOfMeasures;
+  var tabWriter = tabLineWriter(myGrooveData, total_notes);
+  var writeTab = function (drumType, noteArray) {
+    return tabWriter(function (notes, maxLength, separatorDistance) {
+      return tabLineFromAbcNoteArray(drumType, notes, true, true, maxLength, separatorDistance);
+    }, noteArray);
+  };
 
   // Cymbal lines: wherever the hi-hat is silent, a ride (or else a crash 1)
   // is written into the H line exactly as older versions did, so the link still
@@ -423,102 +508,33 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
     }
   }
 
-  var HH =
-    '&H=|' +
-    tabLineFromAbcNoteArray('H', hhLine, true, true, total_notes, myGrooveData.notesPerMeasure);
-  var Snare =
-    '&S=|' +
-    tabLineFromAbcNoteArray(
-      'S',
-      myGrooveData.snare_array,
-      true,
-      true,
-      total_notes,
-      myGrooveData.notesPerMeasure
-    );
-  var Kick =
-    '&K=|' +
-    tabLineFromAbcNoteArray(
-      'K',
-      myGrooveData.kick_array,
-      true,
-      true,
-      total_notes,
-      myGrooveData.notesPerMeasure
-    );
+  var HH = '&H=|' + writeTab('H', hhLine);
+  var Snare = '&S=|' + writeTab('S', myGrooveData.snare_array);
+  var Kick = '&K=|' + writeTab('K', myGrooveData.kick_array);
 
   fullURL += HH + Snare + Kick;
 
   // only add if we need them.  // they are long and ugly. :)
   if (myGrooveData.showToms) {
-    var Tom1 =
-      '&T1=|' +
-      tabLineFromAbcNoteArray(
-        'T1',
-        myGrooveData.toms_array[0],
-        true,
-        true,
-        total_notes,
-        myGrooveData.notesPerMeasure
-      );
+    var Tom1 = '&T1=|' + writeTab('T1', myGrooveData.toms_array[0]);
     // Mid tom (T2): only written when it has notes, so grooves that don't use it
     // keep exactly the same URL as before the mid tom existed.
     var Tom2 = '';
     var midTom = myGrooveData.toms_array[1];
     if (midTom && midTom.slice(0, total_notes).some(Boolean))
-      Tom2 =
-        '&T2=|' +
-        tabLineFromAbcNoteArray(
-          'T2',
-          midTom,
-          true,
-          true,
-          total_notes,
-          myGrooveData.notesPerMeasure
-        );
-    var Tom4 =
-      '&T4=|' +
-      tabLineFromAbcNoteArray(
-        'T4',
-        myGrooveData.toms_array[3],
-        true,
-        true,
-        total_notes,
-        myGrooveData.notesPerMeasure
-      );
+      Tom2 = '&T2=|' + writeTab('T2', midTom);
+    var Tom4 = '&T4=|' + writeTab('T4', myGrooveData.toms_array[3]);
     fullURL += Tom1 + Tom2 + Tom4;
   }
 
-  if (crashLine.some(Boolean))
-    fullURL +=
-      '&C=|' +
-      tabLineFromAbcNoteArray(
-        'C',
-        crashLine,
-        true,
-        true,
-        total_notes,
-        myGrooveData.notesPerMeasure
-      );
-  if (rideLine.some(Boolean))
-    fullURL +=
-      '&R=|' +
-      tabLineFromAbcNoteArray('R', rideLine, true, true, total_notes, myGrooveData.notesPerMeasure);
+  if (crashLine.some(Boolean)) fullURL += '&C=|' + writeTab('C', crashLine);
+  if (rideLine.some(Boolean)) fullURL += '&R=|' + writeTab('R', rideLine);
 
-  fullURL += ornamentsForUrl(myGrooveData, hhLine, crashLine, rideLine, total_notes);
+  fullURL += ornamentsForUrl(myGrooveData, hhLine, crashLine, rideLine, tabWriter);
 
   // only add if we need them.  // they are long and ugly. :)
   if (myGrooveData.showStickings) {
-    var Stickings =
-      '&Stickings=|' +
-      tabLineFromAbcNoteArray(
-        'stickings',
-        myGrooveData.sticking_array,
-        true,
-        true,
-        total_notes,
-        myGrooveData.notesPerMeasure
-      );
+    var Stickings = '&Stickings=|' + writeTab('stickings', myGrooveData.sticking_array);
     fullURL += Stickings;
   }
 

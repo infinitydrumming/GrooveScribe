@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -7,10 +7,12 @@
 import { takeGraceGroups } from './ornaments.js';
 import { constant_NUMBER_OF_TOMS } from './constants.js';
 import {
+  isTripletDivision,
   isTripletDivisionFromNotesPerMeasure,
   notesPerMeasureInFullSizeArray,
   scaleNoteArrayToFullSize,
 } from './musicMath.js';
+import { fullSizeBar, isMixedMeter } from './barMeters.js';
 import {
   create_note_mapping_array_for_highlighting,
   convert_sticking_counts_to_actual_counts,
@@ -853,6 +855,9 @@ export function addFeelMarking(measureABC, text) {
  * @returns {string}
  */
 export function createABCFromGrooveData(gu, myGrooveData, renderWidth) {
+  if (isMixedMeter(myGrooveData.barTimeSigs, myGrooveData.numberOfMeasures))
+    return createMixedMeterABC(gu, myGrooveData, renderWidth);
+
   var FullNoteStickingArray = scaleNoteArrayToFullSize(
     myGrooveData.sticking_array,
     myGrooveData.numberOfMeasures,
@@ -1036,6 +1041,91 @@ function createMeasureByMeasureABC(
         toms,
         notesPerMeasure
       )
+    );
+  }
+  return abc;
+}
+
+// --- A time signature for each bar (Infinity Drumming, 2026) ---------------------
+
+/**
+ * Write a time signature change at the start of one bar's ABC: an inline
+ * "[M:7/8]" at the start of every voice's notes.
+ * @param {string} measureABC
+ * @param {{top: number, bottom: number}} sig
+ */
+export function addMeterChange(measureABC, sig) {
+  var lines = measureABC.split('\n');
+  var inVoice = false;
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].indexOf('V:') === 0) inVoice = true;
+    else if (inVoice && lines[i].indexOf('%%') !== 0) {
+      lines[i] = '[M:' + sig.top + '/' + sig.bottom + ']' + lines[i];
+      inVoice = false;
+    }
+  }
+  return lines.join('\n');
+}
+
+// The ABC for a groove whose bars have different time signatures: bar by bar,
+// each with its own number of notes and beats, and the new time signature
+// written wherever it changes.
+function createMixedMeterABC(gu, myGrooveData, renderWidth) {
+  var gd = myGrooveData;
+  var triplets = isTripletDivision(gd.timeDivision);
+  var abc = gu.get_top_ABC_BoilerPlate(
+    false,
+    gd.title,
+    gd.author,
+    gd.comments,
+    gd.showLegend,
+    triplets,
+    gd.kickStemsUp,
+    gd.numBeats,
+    gd.noteValue,
+    renderWidth
+  );
+  var feelMarkings = getFeelMarkings(
+    gd.straightBars,
+    gd.numberOfMeasures,
+    gd.swingPercent,
+    gd.swingStyle,
+    triplets
+  );
+  var measuresPerLine = gd.timeDivision >= 32 ? 1 : 2;
+  gu.note_mapping_array = [];
+  for (var bar = 0; bar < gd.numberOfMeasures; bar++) {
+    var notes = fullSizeBar(gd, bar);
+    var sig = notes.sig;
+    var fullCount = notes.fullCount;
+    var hh = notes.hh;
+    var snare = notes.snare;
+    var kick = notes.kick;
+    var toms = notes.toms;
+    var addon_abc;
+    if (bar + 1 == gd.numberOfMeasures) addon_abc = '|\n';
+    else if ((bar + 1) % measuresPerLine === 0) addon_abc = '\n';
+    else addon_abc = '\\\n';
+    var measureABC = gu.create_ABC_from_snare_HH_kick_arrays(
+      notes.sticking,
+      hh,
+      snare,
+      kick,
+      toms,
+      addon_abc,
+      fullCount,
+      gd.timeDivision,
+      fullCount,
+      gd.kickStemsUp,
+      sig.top,
+      sig.bottom
+    );
+    var previous = bar > 0 ? gd.barTimeSigs[bar - 1] : null;
+    if (previous && (previous.top != sig.top || previous.bottom != sig.bottom))
+      measureABC = addMeterChange(measureABC, sig);
+    abc += addFeelMarking(measureABC, feelMarkings[bar]);
+    gu.note_mapping_array = gu.note_mapping_array.concat(
+      create_note_mapping_array_for_highlighting(hh, snare, kick, toms, fullCount)
     );
   }
   return abc;

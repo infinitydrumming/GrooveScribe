@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride tabs, bar scaling for paste, tom ghosts and accents, ride accent, ornament (flam / drag / ruff) tab lines. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride tabs, bar scaling for paste, tom ghosts and accents, ride accent, ornament (flam / drag / ruff) tab lines, bars of different lengths. See CHANGES.md.
 // Note-array / drum-tab conversions and default grooves (Step 2 extraction).
 // Pure module: converts between tab strings and ABC note arrays, builds default
 // grooves, and note-mapping/sticking-count helpers. GrooveUtils delegates here.
@@ -10,6 +10,7 @@ import {
   tokenWithOrnament,
   withoutGrace,
 } from './ornaments.js';
+import { barTabsToArray } from './barMeters.js';
 import {
   constant_ABC_HH_Accent,
   constant_ABC_HH_Close,
@@ -661,6 +662,16 @@ export function convert_sticking_counts_to_actual_counts(
   }
 }
 
+/**
+ * A link's tab line for bars of different lengths: each bar scaled to its own
+ * note count, at the bar stride (see barMeters.js).
+ */
+export function noteArraysFromBarTabs(drumType, noteString, barCounts, stride) {
+  return barTabsToArray(noteString, barCounts, stride, function (ch) {
+    return tablatureToABCNotationPerNote(drumType, ch);
+  });
+}
+
 // --- ornament lines (Infinity Drumming, 2026) -----------------------------------
 // Flams, drags and ruffs on a line are written in links as a tab line of their
 // own, one character per note (see ornaments.js), next to the line's notes.
@@ -680,6 +691,14 @@ export function ornamentTabLine(noteArray, maxLength, separatorDistance) {
  * Put the ornaments of an ornament tab line onto a line's notes (in place),
  * scaling the tab line to the notes like noteArraysFromURLData does.
  */
+/** Like applyOrnamentTabLine, for bars of different lengths (see barMeters.js). */
+export function applyOrnamentBarTabs(noteArray, ornamentString, barCounts, stride) {
+  var ornaments = barTabsToArray(ornamentString, barCounts, stride, ornamentFromChar);
+  for (var n = 0; n < noteArray.length; n++)
+    if (ornaments[n] && noteArray[n]) noteArray[n] = tokenWithOrnament(noteArray[n], ornaments[n]);
+  return noteArray;
+}
+
 export function applyOrnamentTabLine(noteArray, ornamentString) {
   var chars = decodeURIComponent(ornamentString).replace(/[:|]/g, '');
   if (!chars.length || !noteArray.length) return noteArray;
