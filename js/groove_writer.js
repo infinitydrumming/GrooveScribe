@@ -82,8 +82,6 @@ import {
   constant_OUR_MIDI_KICK_NORMAL,
   constant_OUR_MIDI_SNARE_ACCENT,
   constant_OUR_MIDI_SNARE_BUZZ,
-  constant_OUR_MIDI_SNARE_DRAG,
-  constant_OUR_MIDI_SNARE_FLAM,
   constant_OUR_MIDI_SNARE_GHOST,
   constant_OUR_MIDI_SNARE_NORMAL,
   constant_OUR_MIDI_SNARE_XSTICK,
@@ -103,6 +101,17 @@ import * as _view from './viewHtml.js';
 import * as _grid from './gridState.js';
 import { getFeelMarkings, addFeelMarking } from './abcNotation.js';
 import { scaleTabMeasure } from './noteArrays.js';
+import {
+  ornamentChar,
+  ornamentFromChar,
+  ornamentFromToken,
+  withoutGrace,
+  clampGraceSpacing,
+  clampGraceVolume,
+  DEFAULT_GRACE_SPACING_MS,
+  DEFAULT_GRACE_VOLUME,
+  DRAG_SPACING_FACTOR,
+} from './ornaments.js';
 
 // GrooveWriter class.   The only one in this file.
 
@@ -323,6 +332,7 @@ function GrooveWriter() {
     switch (mode) {
       case 'off':
         circle.style.backgroundColor = constant_note_off_color_hex;
+        clear_ornament('T' + tom_num, id);
         return;
       case 'normal':
         circle.style.backgroundColor = constant_note_on_color_hex;
@@ -377,6 +387,8 @@ function GrooveWriter() {
 
   // set the kick note on with type
   function set_kick_state(id, mode, make_sound) {
+    // the kick's flam / drag / ruff goes when the kick does
+    if (mode == 'off' || mode == 'splash') clear_ornament('K', id);
     // hide everything optional
     document.getElementById('kick_circle' + id).style.backgroundColor =
       constant_note_hidden_color_rgb;
@@ -446,6 +458,110 @@ function GrooveWriter() {
     }
   }
 
+  // --- Flams, drags and ruffs on the grid (Infinity Drumming, 2026) ------------
+  // A note's ornament is kept on its grid cell (data-orn, one link character, see
+  // ornaments.js) and shown as a small label on the note.  gridState adds it to
+  // the note's ABC token when bars are read.
+  var ORNAMENT_NAMES = { f: 'Flam', d: 'Drag', r: 'Ruff' };
+  var ORNAMENT_SHORT = { f: 'fl', d: 'dr', r: 'ru' };
+  var GRACE_DRUM_NAMES = {
+    S: 'snare',
+    K: 'kick',
+    T1: 'high tom',
+    T2: 'mid tom',
+    T4: 'floor tom',
+    H: 'hi-hat',
+  };
+  var GRACE_DRUM_SHORT = { S: 'sn', K: 'bd', T1: 'ht', T2: 'mt', T4: 'ft', H: 'hh' };
+  // the grid's note types and the lines they are on
+  var ORNAMENT_LINE_FOR_TYPE = {
+    hh: 'H',
+    snare: 'S',
+    kick: 'K',
+    tom1: 'T1',
+    tom2: 'T2',
+    tom4: 'T4',
+    crash: 'C',
+    ride: 'R',
+  };
+
+  function set_ornament(line, id, ornament_char) {
+    var cell = document.getElementById(_grid.ORNAMENT_CELL_PREFIX[line] + id);
+    if (!cell) return;
+    var ornament = ornamentFromChar(ornament_char);
+    if (!ornament) {
+      cell.removeAttribute('data-orn');
+      cell.removeAttribute('data-orn-label');
+      cell.removeAttribute('title');
+      return;
+    }
+    var label = ORNAMENT_SHORT[ornament.type];
+    var title = ORNAMENT_NAMES[ornament.type];
+    if (ornament.on) {
+      label += ' ' + GRACE_DRUM_SHORT[ornament.on];
+      title += ', grace notes on the ' + GRACE_DRUM_NAMES[ornament.on];
+    }
+    cell.setAttribute('data-orn', ornament_char);
+    cell.setAttribute('data-orn-label', label);
+    cell.setAttribute('title', title);
+  }
+
+  function clear_ornament(line, id) {
+    set_ornament(line, id, '-');
+  }
+
+  function is_line_note_on(line, id) {
+    switch (line) {
+      case 'H':
+        return is_hh_on(id);
+      case 'S':
+        return is_snare_on(id);
+      case 'K':
+        return is_kick_part_on(id);
+      case 'T1':
+        return is_tom_on(id, 1);
+      case 'T2':
+        return is_tom_on(id, 2);
+      case 'T4':
+        return is_tom_on(id, 4);
+      case 'C':
+        return !!get_crash_state(id, 'ABC');
+      case 'R':
+        return !!get_ride_state(id, 'ABC');
+    }
+    return false;
+  }
+
+  // The ornaments of the grid as tab lines, one character per note, collected
+  // alongside the notes' tab lines when bars are added, removed, pasted or the
+  // note setting changes.
+  function emptyOrnamentLines() {
+    return { H: '', S: '', K: '', T1: '', T2: '', T4: '', C: '', R: '' };
+  }
+  function addOrnamentChars(lines, id) {
+    for (var line in lines) lines[line] += _grid.get_ornament_char(line, id);
+  }
+  // put them back (scaled like setNotesFromURLData scales notes), on notes that are on
+  function setOrnamentsFromTabLines(lines, numberOfMeasures) {
+    var notesOnScreen = class_notes_per_measure * numberOfMeasures;
+    for (var line in lines) {
+      var chars = (lines[line] || '').replace(/[:|]/g, '');
+      if (!chars.length) continue;
+      var stringScaler = 1;
+      var displayScaler = 1;
+      if (chars.length > notesOnScreen && chars.length / notesOnScreen >= 2)
+        stringScaler = Math.ceil(chars.length / notesOnScreen);
+      else if (chars.length < notesOnScreen && notesOnScreen / chars.length >= 2)
+        displayScaler = Math.ceil(notesOnScreen / chars.length);
+      for (
+        var j = 0, id = 0;
+        j < chars.length && id < notesOnScreen;
+        j += stringScaler, id += displayScaler
+      )
+        set_ornament(line, id, is_line_note_on(line, id) ? chars[j] : '-');
+    }
+  }
+
   function set_snare_state(id, mode, make_sound) {
     // hide everything optional
     document.getElementById('snare_circle' + id).style.backgroundColor =
@@ -465,6 +581,7 @@ function GrooveWriter() {
           constant_note_off_color_hex;
         document.getElementById('snare_circle' + id).style.borderColor =
           constant_note_border_color_hex;
+        clear_ornament('S', id);
         break;
       case 'normal':
         document.getElementById('snare_circle' + id).style.backgroundColor =
@@ -473,13 +590,14 @@ function GrooveWriter() {
           constant_note_border_color_hex;
         if (make_sound) play_single_note_for_note_setting(constant_OUR_MIDI_SNARE_NORMAL);
         break;
+      // the old snare flam (accented) and drag: now an ornament on the note
       case 'flam':
-        document.getElementById('snare_flam' + id).style.color = constant_note_on_color_hex;
-        if (make_sound) play_single_note_for_note_setting(constant_OUR_MIDI_SNARE_FLAM);
+        set_snare_state(id, 'accent', make_sound);
+        set_ornament('S', id, 'f');
         break;
       case 'drag':
-        document.getElementById('snare_drag' + id).style.color = constant_note_on_color_hex;
-        if (make_sound) play_single_note_for_note_setting(constant_OUR_MIDI_SNARE_DRAG);
+        set_snare_state(id, 'normal', make_sound);
+        set_ornament('S', id, 'd');
         break;
       case 'ghost':
         document.getElementById('snare_ghost' + id).style.color = constant_note_on_color_hex;
@@ -591,6 +709,7 @@ function GrooveWriter() {
       splash: constant_OUR_MIDI_SPLASH,
     };
     if (mode == 'normal') mode = 'crash';
+    if (mode == 'off') clear_ornament('C', id);
     set_cymbal_line_state(id, mode, make_sound, parts, sounds, 'crash_c1');
   }
 
@@ -611,6 +730,7 @@ function GrooveWriter() {
       stacker: constant_OUR_MIDI_HIHAT_STACKER,
     };
     if (mode == 'normal') mode = 'ride';
+    if (mode == 'off') clear_ornament('R', id);
     set_cymbal_line_state(id, mode, make_sound, parts, sounds, 'ride_ride');
   }
 
@@ -1071,6 +1191,10 @@ function GrooveWriter() {
         root.show_CursorTimingConfiguration();
         break;
 
+      case 'GraceNotes':
+        root.show_GraceNoteConfiguration();
+        break;
+
       case 'CountIn':
         if (class_metronome_count_in_active) {
           // just turn it off if it is on, don't show the configurator
@@ -1489,6 +1613,7 @@ function GrooveWriter() {
     }
 
     if (contextMenu) {
+      markOrnamentMenu(contextMenu, type, id);
       if (!event) event = window.event;
       if (event.clientX || event.clientY) {
         contextMenu.style.top = event.clientY - 30 + 'px';
@@ -1593,6 +1718,92 @@ function GrooveWriter() {
 
     updateSheetMusic();
   };
+
+  // --- Flam / drag / ruff menu items (Infinity Drumming, 2026) -------------------
+  var NOTE_SETTERS = {
+    hh: set_hh_state,
+    snare: set_snare_state,
+    kick: set_kick_part_state,
+    tom1: set_tom1_state,
+    tom2: set_tom2_state,
+    tom4: set_tom4_state,
+    crash: set_crash_state,
+    ride: set_ride_state,
+  };
+  var class_grace_drum_note = null; // { type, id } the "Grace notes on" menu is for
+
+  // choice: 'f' flam, 'd' drag, 'r' ruff, 'none', or 'on' to pick the grace notes' drum
+  root.ornamentPopupClick = function (type, choice) {
+    var id = class_which_index_last_clicked;
+    var line = ORNAMENT_LINE_FOR_TYPE[type];
+    if (!line) return;
+
+    if (choice == 'on') {
+      class_grace_drum_note = { type: type, id: id };
+      var noteMenu = document.getElementById(type + 'ContextMenu');
+      var drumMenu = document.getElementById('graceDrumContextMenu');
+      if (noteMenu && drumMenu) {
+        drumMenu.style.top = noteMenu.style.top;
+        drumMenu.style.left = noteMenu.style.left;
+      }
+      // after this click has closed the note menu
+      window.setTimeout(function () {
+        if (drumMenu) root.myGrooveUtils.showContextMenu(drumMenu);
+      }, 10);
+      return;
+    }
+
+    if (choice == 'none') set_ornament(line, id, '-');
+    else setNoteOrnament(type, id, choice, null, true);
+    updateSheetMusic();
+  };
+
+  // target: 'same', or the line the grace notes are played on (S, T1, T2, T4, H)
+  root.graceDrumPopupClick = function (target) {
+    if (!class_grace_drum_note) return;
+    var type = class_grace_drum_note.type;
+    var id = class_grace_drum_note.id;
+    var line = ORNAMENT_LINE_FOR_TYPE[type];
+    var current = ornamentFromChar(_grid.get_ornament_char(line, id));
+    var on = target == 'same' || target == line ? null : target;
+    setNoteOrnament(type, id, current ? current.type : 'f', on, false);
+    updateSheetMusic();
+  };
+
+  // tick the note's flam / drag / ruff (or "No flam") in its menu, and its grace drum
+  function markOrnamentMenu(contextMenu, type, id) {
+    var line = ORNAMENT_LINE_FOR_TYPE[type];
+    if (!line) return;
+    var current = ornamentFromChar(_grid.get_ornament_char(line, id));
+    var chosen = current ? current.type : 'none';
+    contextMenu.querySelectorAll('[data-orn-choice]').forEach(function (item) {
+      addOrRemoveKeywordFromClass(
+        item,
+        'menuChecked',
+        item.getAttribute('data-orn-choice') == chosen
+      );
+    });
+    var drum = (current && current.on) || 'same';
+    document.querySelectorAll('#graceDrumContextMenu [data-grace-drum]').forEach(function (item) {
+      addOrRemoveKeywordFromClass(
+        item,
+        'menuChecked',
+        item.getAttribute('data-grace-drum') == drum
+      );
+    });
+  }
+
+  // Put an ornament on a note, turning the note on first if it is off.  keepDrum:
+  // a note that already has its grace notes on another drum keeps that drum.
+  function setNoteOrnament(type, id, ornamentType, on, keepDrum) {
+    var line = ORNAMENT_LINE_FOR_TYPE[type];
+    if (keepDrum) {
+      var current = ornamentFromChar(_grid.get_ornament_char(line, id));
+      if (current) on = current.on;
+    }
+    if (!is_line_note_on(line, id)) NOTE_SETTERS[type](id, 'normal', true);
+    set_ornament(line, id, ornamentChar({ type: ornamentType, on: on }));
+  }
 
   // called when we initially mouseOver a note.
   // We can use it to sense left or right mouse or ctrl events
@@ -1985,6 +2196,8 @@ function GrooveWriter() {
     for (var bar = 0; bar < class_number_of_measures; bar++)
       myGrooveData.straightBars.push(!!class_straight_bars[bar]);
     myGrooveData.tempo = root.myGrooveUtils.getTempo();
+    myGrooveData.graceSpacingMs = root.myGrooveUtils.graceSpacingMs;
+    myGrooveData.graceVolume = root.myGrooveUtils.graceVolume;
     myGrooveData.metronomeFrequency = root.getMetronomeFrequency();
     myGrooveData.grooveClickGrooveBars = class_groove_click_active
       ? class_groove_click_groove_bars
@@ -2009,19 +2222,23 @@ function GrooveWriter() {
         // only grab the stickings if they are visible
         if (isStickingsVisible()) myGrooveData.sticking_array.push(get_sticking_state(i, 'ABC'));
 
-        myGrooveData.hh_array.push(get_hh_state(i, 'ABC'));
-        myGrooveData.snare_array.push(get_snare_state(i, 'ABC'));
-        myGrooveData.kick_array.push(get_kick_state(i, 'ABC'));
+        myGrooveData.hh_array.push(_grid.ornamentToken(get_hh_state(i, 'ABC'), 'H', i));
+        myGrooveData.snare_array.push(_grid.ornamentToken(get_snare_state(i, 'ABC'), 'S', i));
+        myGrooveData.kick_array.push(_grid.ornamentToken(get_kick_state(i, 'ABC'), 'K', i));
 
         // like the toms, the cymbal lines only count while they are shown
         var cymbalsShown = isCymbalsVisible();
-        myGrooveData.crash_array.push(cymbalsShown ? get_crash_state(i, 'ABC') : false);
-        myGrooveData.ride_array.push(cymbalsShown ? get_ride_state(i, 'ABC') : false);
+        myGrooveData.crash_array.push(
+          cymbalsShown ? _grid.ornamentToken(get_crash_state(i, 'ABC'), 'C', i) : false
+        );
+        myGrooveData.ride_array.push(
+          cymbalsShown ? _grid.ornamentToken(get_ride_state(i, 'ABC'), 'R', i) : false
+        );
 
         if (isTomsVisible()) {
-          myGrooveData.toms_array[0].push(get_tom_state(i, 1, 'ABC'));
-          myGrooveData.toms_array[1].push(get_tom_state(i, 2, 'ABC'));
-          myGrooveData.toms_array[3].push(get_tom_state(i, 4, 'ABC'));
+          myGrooveData.toms_array[0].push(_grid.ornamentToken(get_tom_state(i, 1, 'ABC'), 'T1', i));
+          myGrooveData.toms_array[1].push(_grid.ornamentToken(get_tom_state(i, 2, 'ABC'), 'T2', i));
+          myGrooveData.toms_array[3].push(_grid.ornamentToken(get_tom_state(i, 4, 'ABC'), 'T4', i));
         } else {
           myGrooveData.toms_array[0].push(false);
           myGrooveData.toms_array[1].push(false);
@@ -2565,6 +2782,7 @@ function GrooveWriter() {
     var uiRide = '';
     var uiSnare = '';
     var uiKick = '';
+    var uiOrnaments = emptyOrnamentLines();
 
     // get the encoded notes out of the UI.
     // run through all the measure, but don't include the one that we are deleting
@@ -2584,6 +2802,7 @@ function GrooveWriter() {
         uiRide += get_ride_state(i, 'URL');
         uiSnare += get_snare_state(i, 'URL');
         uiKick += get_kick_state(i, 'URL');
+        addOrnamentChars(uiOrnaments, i);
       }
     }
 
@@ -2602,7 +2821,8 @@ function GrooveWriter() {
       uiSnare,
       uiKick,
       uiCrash,
-      uiRide
+      uiRide,
+      uiOrnaments
     );
 
     updateSheetMusic();
@@ -2621,6 +2841,7 @@ function GrooveWriter() {
     var uiRide = '';
     var uiSnare = '';
     var uiKick = '';
+    var uiOrnaments = emptyOrnamentLines();
     var i;
 
     // get the encoded notes out of the UI.
@@ -2635,6 +2856,7 @@ function GrooveWriter() {
       uiRide += get_ride_state(i, 'URL');
       uiSnare += get_snare_state(i, 'URL');
       uiKick += get_kick_state(i, 'URL');
+      addOrnamentChars(uiOrnaments, i);
     }
 
     // run the the last measure twice to default in some notes
@@ -2648,6 +2870,7 @@ function GrooveWriter() {
       uiRide += get_ride_state(i, 'URL');
       uiSnare += get_snare_state(i, 'URL');
       uiKick += get_kick_state(i, 'URL');
+      addOrnamentChars(uiOrnaments, i);
     }
 
     class_number_of_measures++;
@@ -2667,7 +2890,8 @@ function GrooveWriter() {
       uiSnare,
       uiKick,
       uiCrash,
-      uiRide
+      uiRide,
+      uiOrnaments
     );
 
     // reference the button and scroll it into view
@@ -2722,8 +2946,11 @@ function GrooveWriter() {
       Crash: '',
       Ride: '',
     };
+    // flams, drags and ruffs: "Orn" + the line (OrnH, OrnS, OrnT1 ...)
+    var ornaments = emptyOrnamentLines();
     var topIndex = class_notes_per_measure * class_number_of_measures;
     for (var i = 0; i < topIndex; i++) {
+      addOrnamentChars(ornaments, i);
       lines.Stickings += get_sticking_state(i, 'URL');
       lines.HH += get_hh_state(i, 'URL');
       lines.Tom1 += get_tom_state(i, 1, 'URL');
@@ -2734,6 +2961,7 @@ function GrooveWriter() {
       lines.Crash += get_crash_state(i, 'URL');
       lines.Ride += get_ride_state(i, 'URL');
     }
+    for (var line in ornaments) lines['Orn' + line] = ornaments[line];
     return lines;
   }
 
@@ -2812,7 +3040,17 @@ function GrooveWriter() {
       lines.Snare,
       lines.Kick,
       lines.Crash,
-      lines.Ride
+      lines.Ride,
+      {
+        H: lines.OrnH,
+        S: lines.OrnS,
+        K: lines.OrnK,
+        T1: lines.OrnT1,
+        T2: lines.OrnT2,
+        T4: lines.OrnT4,
+        C: lines.OrnC,
+        R: lines.OrnR,
+      }
     );
 
     // make sure pasted toms, cymbals and stickings are visible
@@ -3107,28 +3345,46 @@ function GrooveWriter() {
 
       if (playStarting) resetGrooveClickPhase(); // always start with the groove
 
+      // a flam / drag / ruff on the groove's first note: its grace notes come
+      // before the 1, so they are played at the end of the count-in, or in a
+      // short lead-in when there is no count-in
+      var leadIn = null;
+      if (playStarting) {
+        buildGrooveMidiUrl();
+        leadIn = root.myGrooveUtils.graceLeadIn;
+      }
+
       if (playStarting && class_metronome_count_in_active) {
         midiURL = root.myGrooveUtils.MIDI_build_midi_url_count_in_track(
           class_num_beats_per_measure,
-          class_note_value_per_measure
+          class_note_value_per_measure,
+          leadIn
         );
         root.myGrooveUtils.midiNoteHasChanged(); // this track is temporary
         class_metronome_count_in_is_playing = true;
+      } else if (leadIn) {
+        midiURL = root.myGrooveUtils.MIDI_build_lead_in_track(leadIn);
+        root.myGrooveUtils.midiNoteHasChanged(); // this track is temporary
+        class_metronome_count_in_is_playing = true; // (no cursor, like a count-in)
       } else {
         if (class_metronome_count_in_is_playing) {
           // we saved the state above so that we could reset the Offset click start, otherwise it starts on the 'e'
           class_metronome_count_in_is_playing = false;
           root.myGrooveUtils.resetMetronomeOptionsOffsetClickStartRotation();
         }
-        if (class_groove_click_active && grooveClickSequenceLength() > 0)
-          midiURL = createGrooveClickCycleMidiUrl(class_groove_click_cycle_start_bar);
-        else midiURL = createMidiUrlFromClickableUI('our_MIDI');
+        midiURL = buildGrooveMidiUrl();
         class_loaded_midi_straight_bars = loadedMidiStraightBars();
         root.myGrooveUtils.midiResetNoteHasChanged();
       }
       root.myGrooveUtils.loadMIDIFromURL(midiURL);
       root.updateGrooveDBSource();
     };
+
+    function buildGrooveMidiUrl() {
+      if (class_groove_click_active && grooveClickSequenceLength() > 0)
+        return createGrooveClickCycleMidiUrl(class_groove_click_cycle_start_bar);
+      return createMidiUrlFromClickableUI('our_MIDI');
+    }
 
     root.myGrooveUtils.midiEventCallbacks.notePlaying = function (
       myroot,
@@ -3523,7 +3779,8 @@ function GrooveWriter() {
       i < abcArray.length && displayIndex < topDisplay;
       i += noteStringScaler, displayIndex += displayScaler
     ) {
-      switch (abcArray[i]) {
+      // the note itself (its flam / drag / ruff is put on below)
+      switch (withoutGrace(abcArray[i])) {
         case constant_ABC_CR_Crash2:
           setFunction(displayIndex, 'crash2', false);
           break;
@@ -3637,7 +3894,20 @@ function GrooveWriter() {
           console.log('Bad note in setNotesFromABCArray: ' + abcArray[i]);
           break;
       }
+      setOrnamentFromToken(drumType, displayIndex, abcArray[i]);
     }
+  }
+
+  // Put a note's flam / drag / ruff on the grid.  An older groove's crash or ride in
+  // the hi-hat line has moved onto its own line, so its ornament goes with it.
+  function setOrnamentFromToken(drumType, id, token) {
+    var line = drumType;
+    if (line == 'H' && token && !is_hh_on(id)) {
+      if (get_ride_state(id, 'ABC')) line = 'R';
+      else if (get_crash_state(id, 'ABC')) line = 'C';
+    }
+    if (!_grid.ORNAMENT_CELL_PREFIX[line]) return;
+    set_ornament(line, id, ornamentChar(ornamentFromToken(token)));
   }
 
   // get a really long URL that encodes all of the notes and the rest of the state of the page.
@@ -3691,6 +3961,61 @@ function GrooveWriter() {
 
   root.close_CursorTimingConfiguration = function () {
     document.getElementById('cursorTimingConfiguration').style.display = 'none';
+  };
+
+  // --- "Flams, drags & ruffs": grace-note spacing and volume, for practice -------
+  // Saved in the groove's link (only when changed), so a teacher can send a
+  // slowed-down version.
+  function showGraceNoteSettings() {
+    var gu = root.myGrooveUtils;
+    var spacing = gu.graceSpacingMs;
+    var feel = 'wide open, for practice';
+    if (spacing <= 35) feel = 'tight, as played';
+    else if (spacing <= 70) feel = 'relaxed';
+    var spacingSlider = /** @type {HTMLInputElement} */ (
+      document.getElementById('graceNoteSpacing')
+    );
+    var volumeSlider = /** @type {HTMLInputElement} */ (document.getElementById('graceNoteVolume'));
+    spacingSlider.value = String(spacing);
+    volumeSlider.value = String(gu.graceVolume);
+    document.getElementById('graceNoteSpacingOutput').innerHTML =
+      'Flams ' +
+      spacing +
+      ' ms, drags and ruffs ' +
+      Math.round(spacing * DRAG_SPACING_FACTOR) +
+      ' ms between notes (' +
+      feel +
+      ')';
+    document.getElementById('graceNoteVolumeOutput').innerHTML =
+      gu.graceVolume + '% of a normal hit';
+  }
+
+  root.show_GraceNoteConfiguration = function () {
+    showGraceNoteSettings();
+    document.getElementById('graceNoteConfiguration').style.display = 'block';
+  };
+
+  root.graceSpacingChange = function (event) {
+    root.myGrooveUtils.setGraceSpacingMs(clampGraceSpacing(event.target.value));
+    showGraceNoteSettings();
+    root.updateCurrentURL();
+  };
+
+  root.graceVolumeChange = function (event) {
+    root.myGrooveUtils.setGraceVolume(clampGraceVolume(event.target.value));
+    showGraceNoteSettings();
+    root.updateCurrentURL();
+  };
+
+  root.graceNotesReset = function () {
+    root.myGrooveUtils.setGraceSpacingMs(DEFAULT_GRACE_SPACING_MS);
+    root.myGrooveUtils.setGraceVolume(DEFAULT_GRACE_VOLUME);
+    showGraceNoteSettings();
+    root.updateCurrentURL();
+  };
+
+  root.close_GraceNoteConfiguration = function () {
+    document.getElementById('graceNoteConfiguration').style.display = 'none';
   };
 
   root.show_GrooveClickConfiguration = function () {
@@ -3978,6 +4303,17 @@ function GrooveWriter() {
         midiTrack,
         isSequenceBarStraight((startBar + class_groove_click_groove_bars + clickBar) % length)
       );
+
+    // end with the grace notes of the next cycle's first bar (it may not be this one's)
+    var ownLeadIn = root.myGrooveUtils.graceLeadIn;
+    var nextBar =
+      (startBar + class_groove_click_groove_bars + class_groove_click_click_bars) % length;
+    var probe = new Midi.Track();
+    if (sections) addPermutationBarToMidiTrack(probe, sections, nextBar);
+    else addGrooveBarToMidiTrack(probe, nextBar, 'our_MIDI');
+    root.myGrooveUtils.setTrackLoopLeadIn(midiTrack, root.myGrooveUtils.graceLeadIn);
+    root.myGrooveUtils.graceLeadIn = ownLeadIn;
+
     return 'data:audio/midi;base64,' + btoa(midiFile.toBytes());
   }
 
@@ -4298,6 +4634,8 @@ function GrooveWriter() {
     refreshStraightBarButtons();
     root.myGrooveUtils.setSwing(myGrooveData.swingPercent);
     root.myGrooveUtils.setSwingStyle(myGrooveData.swingStyle);
+    root.myGrooveUtils.setGraceSpacingMs(myGrooveData.graceSpacingMs);
+    root.myGrooveUtils.setGraceVolume(myGrooveData.graceVolume);
 
     setGrooveClickFromLink(myGrooveData.grooveClickGrooveBars, myGrooveData.grooveClickClickBars);
     root.setMetronomeFrequency(myGrooveData.metronomeFrequency);
@@ -4343,7 +4681,8 @@ function GrooveWriter() {
     Snare,
     Kick,
     Crash,
-    Ride
+    Ride,
+    Ornaments
   ) {
     var oldDivision = class_time_division;
     var wasStickingsVisable = isStickingsVisible();
@@ -4391,6 +4730,8 @@ function GrooveWriter() {
       setNotesFromURLData('S', Snare, class_number_of_measures);
       setNotesFromURLData('K', Kick, class_number_of_measures);
     }
+    // and the flams, drags and ruffs on them
+    if (Ornaments) setOrnamentsFromTabLines(Ornaments, class_number_of_measures);
 
     // un-highlight the old div
     unselectButton(document.getElementById('subdivision_' + oldDivision + 'ths'));
@@ -4438,6 +4779,7 @@ function GrooveWriter() {
     var uiRide = '|';
     var uiSnare = '|';
     var uiKick = '|';
+    var uiOrnaments = emptyOrnamentLines();
 
     if (newDivision == 48 && !have_shown_mixed_division_message) {
       have_shown_mixed_division_message = true;
@@ -4491,6 +4833,7 @@ function GrooveWriter() {
         uiRide += get_ride_state(i, 'URL');
         uiSnare += get_snare_state(i, 'URL');
         uiKick += get_kick_state(i, 'URL');
+        addOrnamentChars(uiOrnaments, i);
       }
 
       // override the hi-hat if we are going to a higher division.
@@ -4559,7 +4902,8 @@ function GrooveWriter() {
       uiSnare,
       uiKick,
       uiCrash,
-      uiRide
+      uiRide,
+      uiOrnaments
     );
 
     updateSheetMusic();

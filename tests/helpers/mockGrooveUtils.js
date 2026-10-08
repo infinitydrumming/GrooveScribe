@@ -54,6 +54,8 @@ export function installMockGrooveUtils() {
     this.setTempo = vi.fn();
     this.setSwing = vi.fn();
     this.setSwingStyle = vi.fn();
+    this.setGraceSpacingMs = vi.fn();
+    this.setGraceVolume = vi.fn();
     this.setMetronomeFrequencyDisplay = vi.fn();
     this.oneTimeInitializeMidi = vi.fn();
 

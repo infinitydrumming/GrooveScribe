@@ -249,6 +249,8 @@ if (typeof GrooveDisplay === 'undefined') {
       myGrooveUtils.setTempo(myGrooveData.tempo);
       myGrooveUtils.setSwing(myGrooveData.swingPercent);
       myGrooveUtils.setSwingStyle(myGrooveData.swingStyle);
+      myGrooveUtils.setGraceSpacingMs(myGrooveData.graceSpacingMs);
+      myGrooveUtils.setGraceVolume(myGrooveData.graceVolume);
       myGrooveUtils.oneTimeInitializeMidi();
 
       root.GrooveDisplayUniqueCounter++;
@@ -335,6 +337,8 @@ if (typeof GrooveDisplay === 'undefined') {
         myGrooveUtils.setTempo(GrooveData.tempo);
         myGrooveUtils.setSwing(GrooveData.swingPercent);
         myGrooveUtils.setSwingStyle(GrooveData.swingStyle);
+        myGrooveUtils.setGraceSpacingMs(GrooveData.graceSpacingMs);
+        myGrooveUtils.setGraceVolume(GrooveData.graceVolume);
         myGrooveUtils.setMetronomeFrequencyDisplay(GrooveData.metronomeFrequency);
         myGrooveUtils.oneTimeInitializeMidi();
       }

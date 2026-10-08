@@ -315,6 +315,7 @@ input[type='checkbox']:checked + label {
 #fullURLPopup,
 #metronomeAutoSpeedupConfiguration,
 #cursorTimingConfiguration,
+#graceNoteConfiguration,
 #grooveClickConfiguration,
 #timeSigPopup {
   color: var(--id-text);
@@ -327,12 +328,14 @@ input[type='checkbox']:checked + label {
 #fullURLPopup input[type='range']::-webkit-slider-runnable-track,
 #metronomeAutoSpeedupConfiguration input[type='range']::-webkit-slider-runnable-track,
 #cursorTimingConfiguration input[type='range']::-webkit-slider-runnable-track,
+#graceNoteConfiguration input[type='range']::-webkit-slider-runnable-track,
 #grooveClickConfiguration input[type='range']::-webkit-slider-runnable-track {
   background: var(--id-border);
 }
 #fullURLPopup input[type='range']::-moz-range-track,
 #metronomeAutoSpeedupConfiguration input[type='range']::-moz-range-track,
 #cursorTimingConfiguration input[type='range']::-moz-range-track,
+#graceNoteConfiguration input[type='range']::-moz-range-track,
 #grooveClickConfiguration input[type='range']::-moz-range-track {
   background: var(--id-border);
 }
@@ -345,4 +348,13 @@ input[type='checkbox']:checked + label {
 #metronomeAutoSpeedupConfigurationCloseButton:hover,
 #timeSigPopupOK:hover {
   background: var(--id-blue-dark);
+}
+
+/* a note's flam / drag / ruff label: amber, like other "chosen" marks */
+[data-orn]::after {
+  color: var(--id-navy-900);
+  background: var(--id-amber);
+}
+.ornamentMenuFirst {
+  border-top: 2px solid var(--id-border);
 }

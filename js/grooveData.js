@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars, grace-note settings. See CHANGES.md.
 // grooveData — the central data contract for Groove Scribe.
 //
 // A GrooveData describes a single groove: its time signature, subdivision and
@@ -8,6 +8,7 @@
 // this module is the single place its shape is defined and constructed.
 
 import { constant_DEFAULT_TEMPO } from './constants.js';
+import { DEFAULT_GRACE_SPACING_MS, DEFAULT_GRACE_VOLUME } from './ornaments.js';
 
 // A fresh 32-slot note lane, every slot a rest. Each note array in a GrooveData
 // is a copy of this (never a shared reference), so mutating one lane or measure
@@ -84,6 +85,9 @@ const EMPTY_NOTE_ARRAY = [
  * @property {number} grooveClickClickBars   Click-only bars for that option. URL "ClickBars".
  * @property {boolean[]} straightBars  Per bar (index 0 = bar 1): true plays that bar straight
  *                                     even when the groove is swung. URL "StraightBars" (1-based list).
+ * @property {number} graceSpacingMs  Flams, drags and ruffs: gap between the grace notes (and to
+ *                                     the note), in ms. URL "GraceMs" (only when not the default).
+ * @property {number} graceVolume     Grace-note volume, % of a normal hit. URL "GraceVol".
  * @property {(boolean|number)} debugMode  Debug flag inherited from the owning GrooveUtils.
  * @property {boolean} grooveDBAuthoring   GrooveDB authoring mode flag.
  * @property {boolean} viewMode        View (vs. edit) mode flag.
@@ -132,6 +136,8 @@ export function createGrooveData(config = {}) {
     grooveClickGrooveBars: 0, // 0 = "Groove / click bars" off
     grooveClickClickBars: 0,
     straightBars: [],
+    graceSpacingMs: DEFAULT_GRACE_SPACING_MS,
+    graceVolume: DEFAULT_GRACE_VOLUME,
     debugMode: config.debugMode ?? false,
     grooveDBAuthoring: config.grooveDBAuthoring ?? false,
     viewMode: config.viewMode ?? true,

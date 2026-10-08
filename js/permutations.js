@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, alternating kick / snare, repeats. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, alternating kick / snare, repeats, kick flams kept with the hi-hat foot. See CHANGES.md.
 // Permutation engine (Step 4 extraction from groove_writer.js).
 //
 // Pure combinatorial generators for the "permutation" practice modes: they build
@@ -8,6 +8,7 @@
 // UI (shouldDisplayPermutationForSection, get_numberOfActivePermutationSections)
 // stay in GrooveWriter, which delegates its own methods here.
 
+import { withoutGrace } from './ornaments.js';
 import {
   constant_ABC_SN_Normal,
   constant_ABC_SN_Accent,
@@ -973,7 +974,8 @@ export function filter_kick_array_for_permutation(old_kick_array) {
   var new_kick_array = [];
 
   for (var i in old_kick_array) {
-    if (old_kick_array[i] == constant_ABC_KI_Splash || old_kick_array[i] == constant_ABC_KI_SandK)
+    var feet = withoutGrace(old_kick_array[i]);
+    if (feet == constant_ABC_KI_Splash || feet == constant_ABC_KI_SandK)
       new_kick_array.push(constant_ABC_KI_Splash);
     else new_kick_array.push(false);
   }
@@ -1002,8 +1004,8 @@ export function merge_kick_arrays(primary_kick_array, secondary_kick_array) {
 
       case constant_ABC_KI_Normal:
         if (
-          secondary_kick_array[i] == constant_ABC_KI_SandK ||
-          secondary_kick_array[i] == constant_ABC_KI_Splash
+          withoutGrace(secondary_kick_array[i]) == constant_ABC_KI_SandK ||
+          withoutGrace(secondary_kick_array[i]) == constant_ABC_KI_Splash
         )
           new_kick_array.push(constant_ABC_KI_SandK);
         else new_kick_array.push(constant_ABC_KI_Normal);
@@ -1011,8 +1013,8 @@ export function merge_kick_arrays(primary_kick_array, secondary_kick_array) {
 
       case constant_ABC_KI_Splash:
         if (
-          secondary_kick_array[i] == constant_ABC_KI_Normal ||
-          secondary_kick_array[i] == constant_ABC_KI_SandK
+          withoutGrace(secondary_kick_array[i]) == constant_ABC_KI_Normal ||
+          withoutGrace(secondary_kick_array[i]) == constant_ABC_KI_SandK
         )
           new_kick_array.push(constant_ABC_KI_SandK);
         else new_kick_array.push(constant_ABC_KI_Splash);
