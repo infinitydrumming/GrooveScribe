@@ -21,7 +21,7 @@ var SIG_PATTERN = /^(\d{1,2})\/(\d{1,2})$/;
 var BOTTOMS = [2, 4, 8, 16];
 
 /** A time signature "7/8" as { top: 7, bottom: 8 }, or null if it isn't one we support. */
-export function parseBarSig(text) {
+function parseBarSig(text) {
   var match = SIG_PATTERN.exec(String(text).trim());
   if (!match) return null;
   var top = parseInt(match[1], 10);

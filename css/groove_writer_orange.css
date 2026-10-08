@@ -956,6 +956,24 @@ body {
   color: var(--highlight-color-on-white);
   user-select: none;
 }
+.barTimeSigButton {
+  display: block;
+  margin-top: 6px;
+  padding: 1px 3px;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 14px;
+  text-align: center;
+  border: 1px solid var(--highlight-color-on-white);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--highlight-color-on-white);
+  user-select: none;
+}
+/* the note slots past the end of a bar that is shorter than the others */
+.hiddenBarSlot {
+  display: none !important;
+}
 .straightBarButton.straight {
   color: #fff;
   background-color: #777;

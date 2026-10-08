@@ -11,6 +11,25 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-08 — a time signature for each bar
+
+- New `js/barMeters.js`. Each bar can have its own time signature, from a button
+  under the bar (the TIME button still sets every bar). Links carry them as
+  `BarSigs=4/4,2/4,4/4` only when the bars differ; grooves in one time signature
+  are exactly as before (golden master unchanged).
+- Every bar keeps the longest bar's number of note slots (the bar stride), so bar
+  b still starts at b × stride everywhere; a shorter bar hides its extra slots on
+  the grid, and they are always rests. Each bar's notes are written in links with
+  only its own slots.
+- Sheet music: an inline `[M:x/y]` in every voice where the time signature
+  changes. Playback, metronome, count-in, cursor, groove / click bars (click bars
+  as long as the bars they stand in for) follow each bar's length.
+- Changing a bar's time signature keeps its notes from the start (cut off or with
+  rests added); adding a bar copies the last bar's time signature; copy / paste
+  between bars of different lengths keeps the notes in place.
+- A note setting has to fit every bar (triplets only when every bar is x/4);
+  permutations are only offered when every bar is 4/4.
+
 ## 2026-10-08 — flams, drags and ruffs on every drum
 
 - New `js/ornaments.js`. A flam (1 grace note), drag (2) or ruff (3) can go on any

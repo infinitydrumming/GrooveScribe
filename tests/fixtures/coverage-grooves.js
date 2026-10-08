@@ -186,6 +186,16 @@ export const coverageGrooves = [
     url: '?TimeSig=4/4&Div=12&Tempo=100&Measures=1&H=|r-rr-rr-rr-r|&S=|---o-----o--|&K=|o-----o-----|&SO=|---f-----r--|',
   },
 
+  // A time signature for each bar (Infinity Drumming, 2026)
+  {
+    name: 'Bar time signatures 4/4 2/4 4/4 (8ths, like Alive)',
+    url: '?TimeSig=4/4&Div=8&Tempo=100&Measures=3&BarSigs=4/4,2/4,4/4&MetronomeFreq=4&H=|xxxxxxxx|xxxx|xxxxxxxx|&S=|--o---o-|--o-|--o---o-|&K=|o---o---|o---|o---o---|',
+  },
+  {
+    name: 'Bar time signatures 4/4 3/8 5/8 4/4 (16ths, like Here Comes the Sun)',
+    url: '?TimeSig=4/4&Div=16&Tempo=120&Measures=4&BarSigs=4/4,3/8,5/8,4/4&H=|xxxxxxxxxxxxxxxx|xxxxxx|xxxxxxxxxx|xxxxxxxxxxxxxxxx|&S=|----o-------o---|--o---|--o-----o-|----o-------o---|&K=|o-------o-------|o-----|o---o-----|o-------o-------|&SO=|----------------|--f---|----------|------------d---|',
+  },
+
   // ---- Voice/articulation mismatches: each character is valid for SOME voice
   // but placed in a voice where it is not, exercising every "this symbol isn't
   // valid for this drum" fall-through in tablatureToABCNotationPerNote. Such
