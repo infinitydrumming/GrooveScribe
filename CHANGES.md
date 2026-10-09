@@ -11,6 +11,90 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-09 — our own short links (ready for Cloudflare Pages)
+
+- New `functions/api/shorten.js` and `functions/s/[code].js`, Cloudflare Pages
+  functions: **Save & Share** makes short links like
+  `scribe.infinitydrumming.com/s/Ab3kP9xy`, kept in a KV namespace (`SHORT_LINKS`).
+  The code comes from the groove's own link (the same groove always gets the same
+  short link); only Infinity Scribe groove links are accepted; nothing about the
+  person is stored. Tested on Cloudflare's local runtime (wrangler) and in
+  `tests/shortLinks.test.js`.
+- The app tries these first and falls back to the original Groove Scribe short
+  links when they aren't there (GitHub Pages).
+- Setting it up: `docs/CLOUDFLARE_SETUP.md`.
+
+## 2026-10-09 — new layout, Save & Share, My Grooves, student view
+
+- New `css/infinity_layout.css` (index.html only; the embed pages keep their look):
+  a header (logo, Grooves, Permutations, Help, Undo, **Save & Share**), one
+  toolbar (time signature, note setting, metronome, counting, view), the content
+  as cards, the play bar pinned to the bottom of the window, and the credits in a
+  small strip under it. Every control keeps its id and job. The music area is as
+  wide as before, so the golden-master sheet music and MIDI are unchanged; the
+  two whole-page smoke screenshots change.
+- Bars wrap onto the next line when they don't fit (they used to run off the right
+  of the screen). Each bar is a card headed "Bar 1", "Bar 2"... with its time
+  signature, swing, copy, paste and remove buttons along the top. Notes that are on
+  show in each drum's colour (hi-hat blue, snare amber, kick navy) by CSS over the
+  editor's own black, which it still reads back.
+- The groove's title, author and comment show in the header; clicking them opens
+  a "Groove details" box with the Title, Author and Comment fields and the key
+  switch (same ids), so they no longer sit between the music and the grid.
+- The view switch is now **Student view** / **Edit**.
+- **Save & Share** panel (the old share pop-up, same ids): "Your groove is saved
+  in this link", Copy link, short link and embed code, **Save to My Grooves**,
+  WhatsApp, Email, Print / PDF, MIDI file.
+- New `js/myGrooves.js`: **My Grooves**, grooves saved in this browser's local
+  storage, listed at the top of the Grooves menu.
+- index.html now has a phone `viewport` setting, so phones get the narrow layout
+  (icon-only header, scrolling toolbar, the grid scrolling sideways in its card)
+  instead of a shrunken desktop page.
+
+## 2026-10-09 — counting over the notes
+
+- A **COUNTING** button writes the count over the notes ("1 e & a", "1 &", "1 & a"
+  in triplets, "1 2 3" in 8th-note x/8 bars) using the stickings line's existing
+  count symbol. A beat that has stickings keeps just its stickings. Links carry it
+  as `Count=1`; it is off by default, so existing grooves are unchanged.
+  (`addCounting` in `js/abcNotation.js`, `GrooveUtils.showCounts`.)
+
+## 2026-10-09 — practice timer, and speed-up every so many bars
+
+- New `js/practiceTimer.js`. **Practice timer** (Metronome Options): stop after a
+  number of minutes or bars. Links carry it as `Practice=10m` or `Practice=16b`.
+  The player shows what is left ("4:12 left", "12 bars left") and "Done!".
+- Playback goes round a set of bars (the groove, a permutation, or a groove /
+  click cycle), built again before each time round. When the practice ends inside
+  the next time round, only its bars up to the end are built, then a crash and a
+  kick on the next 1, so it stops right on the bar line (a minutes timer finishes
+  the bar the time runs out in). `GrooveUtils.stopAtEndOfRound` stops the player
+  at the end of that file.
+- **Auto speed up** can step every so many bars (4 to 64) instead of minutes, e.g.
+  5 bpm every 16 bars; "Keep increasing" and "Stop at" work as before. The minutes
+  setting is unchanged.
+
+## 2026-10-09 — Infinity Scribe icon
+
+- New browser-tab, bookmark and home-screen icon: a navy "iS" with a white i and an
+  amber S (`images/iscribe-icon-32/96/192/512.png`,
+  `images/iscribe-apple-touch-icon.png`), in place of the GrooveScribe "g", on the
+  app, help and about pages. The original icons stay in `images/`.
+
+## 2026-10-09 — exact tempo
+
+- Swung, triplet and Brazilian-swing grooves played about 1.5% fast: the MIDI
+  library drops the fraction of every delta time (a triplet note is 10.67 ticks,
+  written as 10). MIDI tracks are now made by `newExactTimeTrack()` in
+  `js/midiFile.js`, which carries each fraction over to the next event, and a
+  triplet note is exactly 128 / 12 ticks.
+- Every bar after the first also lost one tick (the player's opening blank tick
+  was taken back from every bar, not just the bar that added it), about 0.2% fast
+  on any groove of more than one bar.
+- Every bar now plays for exactly its own length (512 ticks for 4/4). The
+  golden-master MIDI changed only in timing: the same notes, drums and volumes,
+  each at most a few ticks later (`tests/groove_utils/tempo-accuracy.test.js`).
+
 ## 2026-10-08 — a time signature for each bar
 
 - New `js/barMeters.js`. Each bar can have its own time signature, from a button

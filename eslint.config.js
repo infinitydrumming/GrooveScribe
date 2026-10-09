@@ -107,6 +107,8 @@ export default [
       'js/screenWakeLock.js',
       'js/ornaments.js',
       'js/barMeters.js',
+      'js/practiceTimer.js',
+      'js/myGrooves.js',
       'js/groove_utils.js',
       'js/groove_writer.js',
       'js/grooves.js',
@@ -115,6 +117,16 @@ export default [
     ],
     languageOptions: {
       sourceType: 'module',
+    },
+  },
+
+  // Cloudflare Pages functions (short links): ES modules on Cloudflare's servers.
+  {
+    files: ['functions/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: { ...globals.serviceworker },
     },
   },
 

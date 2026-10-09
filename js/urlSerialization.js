@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -13,6 +13,7 @@ import {
   constant_MAX_MEASURES,
 } from './constants.js';
 import { parseTimeSigString, calc_notes_per_measure } from './musicMath.js';
+import { parsePracticeLimit, practiceLimitToText } from './practiceTimer.js';
 import {
   barSigsFromList,
   barSigsToList,
@@ -238,6 +239,14 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
       getQueryVariableFromString('ClickBars', '4', encodedURLData)
     );
   }
+
+  // counting over the notes (Infinity Drumming)
+  myGrooveData.showCounts = getQueryVariableFromString('Count', '0', encodedURLData) == '1';
+
+  // practice timer (Infinity Drumming): "10m" or "16b"
+  myGrooveData.practiceLimit = practiceLimitToText(
+    parsePracticeLimit(getQueryVariableFromString('Practice', '', encodedURLData))
+  );
 
   myGrooveData.numberOfMeasures = parseInt(
     getQueryVariableFromString('measures', 1, encodedURLData),
@@ -477,6 +486,12 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
       '&ClickBars=' +
       myGrooveData.grooveClickClickBars;
   }
+
+  // counting over the notes, only when it is on
+  if (myGrooveData.showCounts) fullURL += '&Count=1';
+
+  // practice timer, only when it is on
+  if (myGrooveData.practiceLimit) fullURL += '&Practice=' + myGrooveData.practiceLimit;
 
   // a time signature for each bar, when they differ
   fullURL += barSigsForUrl(myGrooveData);

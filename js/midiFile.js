@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar, exact tempo for swung and triplet notes. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -153,6 +153,27 @@ function eventTicks(event) {
   return ticks;
 }
 
+/**
+ * Infinity Drumming, 2026: exact timing.  The MIDI library drops the fraction of
+ * every delta time (a triplet note is 10.67 ticks, written as 10), so swung and
+ * triplet grooves used to play about 1.5% fast.  A track made here carries each
+ * fraction over to its next event instead.  Whole-tick timing is unchanged.
+ */
+export function newExactTimeTrack() {
+  var track = new Midi.Track();
+  var carried = 0;
+  ['addNoteOn', 'addNoteOff'].forEach(function (name) {
+    var add = track[name];
+    track[name] = function (channel, pitch, time, velocity) {
+      var exact = carried + (time || 0);
+      var ticks = Math.max(0, Math.round(exact));
+      carried = exact - ticks;
+      return add.call(track, channel, pitch, ticks, velocity);
+    };
+  });
+  return track;
+}
+
 // Slip a grace hit in among the events already on the track, `back` ticks before
 // the end of the last one.  Only delta times are split, so no other note moves.
 // It goes no earlier than the start of the track's notes (midiTrack.graceFloor).
@@ -234,7 +255,7 @@ export function setTrackLoopLeadIn(midiTrack, hits) {
  */
 export function MIDI_build_lead_in_track(gu, hits) {
   var midiFile = new Midi.File();
-  var midiTrack = new Midi.Track();
+  var midiTrack = newExactTimeTrack();
   midiFile.addTrack(midiTrack);
   midiTrack.setTempo(gu.getTempo());
   midiTrack.setInstrument(0, 0x13);
@@ -262,7 +283,7 @@ function graceHitsAtEndOfFile(midiTrack, hits) {
 
 export function MIDI_build_midi_url_count_in_track(gu, timeSigTop, timeSigBottom, leadInHits) {
   var midiFile = new Midi.File();
-  var midiTrack = new Midi.Track();
+  var midiTrack = newExactTimeTrack();
   midiFile.addTrack(midiTrack);
 
   midiTrack.setTempo(gu.getTempo());
@@ -335,8 +356,11 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   // start of midi track
   // Some sort of bug in the midi player makes it skip the first note without a blank
   // TODO: Find and fix midi bug
+  // (Infinity Drumming, 2026: its tick is taken off this bar's end, and only this bar's)
+  var leadBlankTicks = 0;
   if (midiTrack.events.length < 4) {
     midiTrack.addNoteOff(midi_channel, 60, 1); // add a blank note for spacing
+    leadBlankTicks = 1;
   }
   // grace notes are never slipped in before here
   if (midiTrack.graceFloor === undefined) midiTrack.graceFloor = midiTrack.events.length - 1;
@@ -357,7 +381,7 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
     var duration = 0;
 
     if (isTriplets) {
-      duration = 10.666; // "ticks"   16 for 32nd notes.  10.66 for 48th triplets
+      duration = 128 / 12; // "ticks"   16 for 32nd notes.  10.67 for 48th triplets
     } else {
       duration = 16;
     }
@@ -752,7 +776,7 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
     delay_for_next_note += duration;
   }
 
-  if (delay_for_next_note) midiTrack.addNoteOff(0, 60, delay_for_next_note - 1); // add a blank note for spacing
+  if (delay_for_next_note) midiTrack.addNoteOff(0, 60, delay_for_next_note - leadBlankTicks); // add a blank note for spacing
 } // end of function
 
 /**
@@ -765,7 +789,7 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
  */
 export function create_MIDIURLFromGrooveData(gu, myGrooveData, MIDI_type) {
   var midiFile = new Midi.File();
-  var midiTrack = new Midi.Track();
+  var midiTrack = newExactTimeTrack();
   midiFile.addTrack(midiTrack);
 
   midiTrack.setTempo(myGrooveData.tempo);

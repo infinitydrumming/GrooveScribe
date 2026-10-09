@@ -51,8 +51,8 @@ function fillContainer(id, html) {
 if (!utils.grooveDBAuthoring) {
   replaceSlot(
     'viewEditSwitchSlot',
-    '<span class="left-button" onclick="myGrooveWriter.swapViewEditMode();">' +
-      '<span class="left-button-content"><span id="view-edit-switch">Switch to EDIT mode</span></span></span>'
+    '<span class="left-button" id="viewEditSwitch" onclick="myGrooveWriter.swapViewEditMode();">' +
+      '<span class="left-button-content"><span id="view-edit-switch"><i class="fa fa-pencil"></i> Edit</span></span></span>'
   );
 }
 if (utils.is_touch_device()) {
@@ -73,7 +73,10 @@ for (let m = 1; m <= myGrooveWriter.numberOfMeasures(); m++) {
 }
 fillContainer('measureContainer', gridHTML);
 
-fillContainer('grooveListWrapper', grooves.getGroovesAsHTML());
+fillContainer(
+  'grooveListWrapper',
+  '<div id="myGroovesMenu"></div>' + grooves.getGroovesAsHTML() // My Grooves first, when there are any
+);
 
 // Initialize the notes/player once the page has fully loaded (matches the
 // original window.onload handler).

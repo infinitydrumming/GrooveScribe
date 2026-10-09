@@ -56,7 +56,7 @@ describe('GrooveWriter view & lifecycle', () => {
       expect(gw.myGrooveUtils.viewMode).toBe(true);
     });
 
-    it('first call flips to edit mode: shows .edit-block, relabels the button to "Switch to VIEW mode"', async () => {
+    it('first call flips to edit mode: shows .edit-block, relabels the button to "Student view"', async () => {
       const gw = await newGrooveWriter();
       document.body.innerHTML = '<span id="view-edit-switch"></span><div class="edit-block"></div>';
       gw.updateCurrentURL = vi.fn();
@@ -64,11 +64,13 @@ describe('GrooveWriter view & lifecycle', () => {
       gw.swapViewEditMode(true);
 
       expect(gw.myGrooveUtils.viewMode).toBe(false);
-      expect(document.getElementById('view-edit-switch').innerHTML).toBe('Switch to VIEW mode');
+      expect(document.getElementById('view-edit-switch').innerHTML).toBe(
+        '<i class="fa fa-eye"></i> Student view'
+      );
       expect(document.querySelector('.edit-block').style.display).toBe('block');
     });
 
-    it('second call flips back to view mode: hides .edit-block, relabels the button to "Switch to EDIT mode"', async () => {
+    it('second call flips back to view mode: hides .edit-block, relabels the button to "Edit"', async () => {
       const gw = await newGrooveWriter();
       document.body.innerHTML = '<span id="view-edit-switch"></span><div class="edit-block"></div>';
       gw.updateCurrentURL = vi.fn();
@@ -77,7 +79,9 @@ describe('GrooveWriter view & lifecycle', () => {
       gw.swapViewEditMode(true);
 
       expect(gw.myGrooveUtils.viewMode).toBe(true);
-      expect(document.getElementById('view-edit-switch').innerHTML).toBe('Switch to EDIT mode');
+      expect(document.getElementById('view-edit-switch').innerHTML).toBe(
+        '<i class="fa fa-pencil"></i> Edit'
+      );
       expect(document.querySelector('.edit-block').style.display).toBe('none');
     });
 

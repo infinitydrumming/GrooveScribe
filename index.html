@@ -2,16 +2,18 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
 
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="mobile-web-app-capable" content="yes">
-		<link rel="icon" sizes="192x192" href="images/gscribe-icon-192.png">
-		<link rel="icon" sizes="96x96" href="images/gscribe-icon-96.png">
-		<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="images/iscribe-icon-32.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="images/iscribe-icon-96.png">
+		<link rel="icon" type="image/png" sizes="192x192" href="images/iscribe-icon-192.png">
+		<link rel="apple-touch-icon" href="images/iscribe-apple-touch-icon.png">
 
 		<meta property="og:type" content="website"/>
 		<meta property="og:title" content="Infinity Scribe | Infinity Drumming"/>
@@ -28,7 +30,8 @@
 	    <link rel="stylesheet" type="text/css" href="css/groove_writer_orange.css">
 		<link rel="stylesheet" type="text/css" href="css/groove_display_orange.css">
 		<link rel="stylesheet" type="text/css" href="css/infinity_theme.css">
-		<link href='https://fonts.googleapis.com/css?family=Lato:400,700,300' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" type="text/css" href="css/infinity_layout.css">
+		<link href='https://fonts.googleapis.com/css?family=Lato:400,700,300,900' rel='stylesheet' type='text/css'>
 
 		<!--   Other peoples JS libraries    -->
 		<!-- <script src="./MIDI.js/js/MIDI/MIDI.JS.min.js" type="text/javascript"></script> -->
@@ -68,27 +71,18 @@
 		<div class="nonPrintable">
 			<div id="LeftHandNav">
 				<span id="divisionButtonContainer">
-					<span id="logoInSubdivision" class="left-button-content"><img src="images/InfinityDrumming_Logo.png" alt="Infinity Drumming"></span>
+					<span class="toolbarLabel edit-block" id="timeToolbarLabel">Time</span>
 					<span class="left-button edit-block" id="timeLabel" onclick="myGrooveWriter.timeSigPopupOpen();"><span class="left-button-content"><span><span id="timeSigLabel" class="buttonFraction"><sup>4</sup>/<sub>4</sub></span><span id="timeSubLabel">TIME</span></span></span></span>
-					<span class="left-button subdivision edit-block" id="subdivision_8ths"  onclick="myGrooveWriter.changeDivision(8);"><span class="left-button-content"><span><span class="buttonFraction"><sup>1</sup>/<sub>8</sub></span>NOTES</span></span></span>
-					<span class="left-button subdivision edit-block" id="subdivision_16ths" onclick="myGrooveWriter.changeDivision(16);"><span class="left-button-content"><span><span class="buttonFraction"><sup>1</sup>/<sub>16</sub></span>NOTES</span></span></span>
-					<span class="left-button subdivision edit-block" id="subdivision_32ths" onclick="myGrooveWriter.changeDivision(32);"><span class="left-button-content"><span><span class="buttonFraction"><sup>1</sup>/<sub>32</sub></span>NOTES</span></span></span>
-					<span class="left-button subdivision edit-block" id="subdivision_12ths" onclick="myGrooveWriter.changeDivision(12);"><span class="left-button-content"><span><span class="buttonFraction"><sup>1</sup>/<sub>8</sub></span>TRIPLETS</span></span></span>
-					<span class="left-button subdivision edit-block" id="subdivision_24ths" onclick="myGrooveWriter.changeDivision(24);"><span class="left-button-content"><span><span class="buttonFraction"><sup>1</sup>/<sub>16</sub></span>TRIPLETS</span></span></span>
-					<span class="left-button subdivision edit-block" id="subdivision_48ths" onclick="myGrooveWriter.changeDivision(48);"><span class="left-button-content"><span>MIXED<br>Division</span></span></span>
+					<span class="toolbarLabel edit-block" id="notesToolbarLabel">Notes</span>
+					<span class="left-button subdivision edit-block" id="subdivision_8ths"  onclick="myGrooveWriter.changeDivision(8);"><span class="left-button-content"><span>8ths</span></span></span>
+					<span class="left-button subdivision edit-block" id="subdivision_16ths" onclick="myGrooveWriter.changeDivision(16);"><span class="left-button-content"><span>16ths</span></span></span>
+					<span class="left-button subdivision edit-block" id="subdivision_32ths" onclick="myGrooveWriter.changeDivision(32);"><span class="left-button-content"><span>32nds</span></span></span>
+					<span class="left-button subdivision edit-block" id="subdivision_12ths" onclick="myGrooveWriter.changeDivision(12);"><span class="left-button-content"><span>8th triplets</span></span></span>
+					<span class="left-button subdivision edit-block" id="subdivision_24ths" onclick="myGrooveWriter.changeDivision(24);"><span class="left-button-content"><span>16th triplets</span></span></span>
+					<span class="left-button subdivision edit-block" id="subdivision_48ths" onclick="myGrooveWriter.changeDivision(48);"><span class="left-button-content"><span>Mixed</span></span></span>
 
-					<!-- Populated by js/main.js after load (was document.write). -->
-					<span id="viewEditSwitchSlot"></span>
-					<span id="advancedEditSlot"></span>
-
-					<span class="left-button edit-block" id="undoButton" onclick="myGrooveWriter.undoCommand();"><span class="left-button-content"><i class="fa fa-undo"></i>&nbsp;&nbsp;Undo</span></span>
-				</span>
-
-			</div>
-			<div id="TopNav" class="fullWidthEle">
-				<span id="logoTextUpperLeft"><img src="images/InfinityScribe_Logo_word_stack.svg" alt="Infinity Scribe"></span>
-				<span id="upperLeft">
-					<span id="metronomeContainer">
+					<span class="toolbarSpacer"></span>
+					<span id="metronomeContainer" class="toolbarGroup">
 						<span id="metronomeLabel">METRONOME:</span>
 						<span class="metronomeButton" id="metronomeOff" onclick="myGrooveWriter.setMetronomeFrequency(0);">OFF</span>
 						<span class="metronomeButton" id="metronome1Bar" title="One click per bar, on the 1" onclick="myGrooveWriter.setMetronomeFrequency(1);">Bar</span>
@@ -97,11 +91,29 @@
 						<span class="metronomeButton" id="metronome16ths" onclick="myGrooveWriter.setMetronomeFrequency(16);">16th</span>
 						<span class="metronomeButton Options grooveDB_hidden" id="metronomeOptionsAnchor" onclick="myGrooveWriter.metronomeOptionsAnchorClick(event);">Options</span>
 					</span>
+					<span class="toolbarToggle grooveDB_hidden" id="countingButton" onclick="myGrooveWriter.toggleCounting();" title="Show the counting (1 e &amp; a) over the notes"><span class="toolbarSwitch"></span> Counting</span>
+					<!-- Populated by js/main.js after load (was document.write). -->
+					<span id="viewEditSwitchSlot"></span>
+					<span id="advancedEditSlot"></span>
+
+				</span>
+
+			</div>
+			<div id="TopNav" class="fullWidthEle">
+				<span id="logoInHeader"><img src="images/InfinityDrumming_Logo.png" alt="Infinity Drumming"></span>
+				<span id="logoTextUpperLeft"><img src="images/InfinityScribe_Logo_word_stack.svg" alt="Infinity Scribe"></span>
+				<span class="headerDivider" id="headerTitleDivider"></span>
+				<span id="headerGrooveTitle" onclick="myGrooveWriter.showGrooveDetails();" title="Title, author and comment">
+					<span id="headerTitleText">Untitled groove</span><i class="fa fa-pencil" id="headerTitleEdit"></i>
+					<span id="headerTitleSub"></span>
 				</span>
 				<span id="upperRight">
-					<span class="rightButtons grooveDB_hidden" id="permutationAnchor" onclick="myGrooveWriter.permutationAnchorClick(event);"><i class="fa fa-bars"></i> Permutations</span>
-					<span class="rightButtons" id="groovesAnchor" onclick="myGrooveWriter.groovesAnchorClick(event);"><i class="fa fa-bars"></i> Grooves</span>
-					<span class="rightButtons" id="helpAnchor" onclick="myGrooveWriter.helpAnchorClick(event);"><i class="fa fa-bars"></i> Help</span>
+					<span class="rightButtons grooveDB_hidden" id="permutationAnchor" onclick="myGrooveWriter.permutationAnchorClick(event);"><i class="fa fa-random"></i><span class="headerButtonText"> Permutations</span></span>
+					<span class="rightButtons" id="groovesAnchor" onclick="myGrooveWriter.groovesAnchorClick(event);"><i class="fa fa-book"></i><span class="headerButtonText"> Grooves</span></span>
+					<span class="rightButtons" id="helpAnchor" onclick="myGrooveWriter.helpAnchorClick(event);"><i class="fa fa-question-circle"></i><span class="headerButtonText"> Help</span></span>
+					<span class="headerDivider"></span>
+					<span title="Undo" class="left-button edit-block" id="undoButton" onclick="myGrooveWriter.undoCommand();"><span class="left-button-content"><i class="fa fa-undo"></i><span class="headerButtonText"> Undo</span></span></span>
+					<span class="grooveDB_hidden" id="shareSaveButton" onclick="event.preventDefault(); myGrooveWriter.show_FullURLPopup();"><i class="fa fa-floppy-o"></i><span class="headerButtonText"> Save &amp; Share</span></span>
 				</span>
 			</div>
 			<div id="midiPlayer" class="fullWidthEle"><!-- space for the midiplayer to be attached by the javascript --></div>
@@ -128,12 +140,6 @@
 				<div class="warnings" id="diverr">
 				</div>
 
-				<div id="sheetMusicTextFields" class="fullWidthEle grooveDB_hidden edit-block">
-					<span class="sheetMusicTextField"><b>Title:</b> <input class="sheetMusicInputField" id="tuneTitle" onchange="myGrooveWriter.refresh_ABC();" type="text"></span>
-					<span class="sheetMusicTextField"><b>Author:</b> <input class="sheetMusicInputField" id="tuneAuthor" onchange="myGrooveWriter.refresh_ABC();"  type="text"></span>
-					<span class="sheetMusicTextField"><b>Comment:</b> <input class="sheetMusicInputField" id="tuneComments" onchange="myGrooveWriter.refresh_ABC();"  type="text"></span>
-					<span id='KeyButton'><input type="checkbox" class="hiddenCheckbox" id="showLegend" onclick="myGrooveWriter.refresh_ABC();"><label id="LegendLabel" for="showLegend"><i class="fa fa-key"></i></label></span>
-				</div>
 
 				<div id="musicalInput" class="fullWidthEle edit-block">
 					<!-- The clickable note grid is built by js/main.js (was document.write). -->
@@ -148,14 +154,13 @@
 					<span class=" grooveDB_hidden pageBottomButton" id="stickingsButton" onclick="myGrooveWriter.stickingsAnchorClick();"><span class="bottomButtonLabel">STICKINGS</span></span>
 					<span class=" grooveDB_hidden pageBottomButton" id="downloadButton" onclick="myGrooveWriter.DownloadAnchorClick();"><span class="bottomButtonIcon"><i class="fa fa-download fa-2x"></i></span><span class="bottomButtonLabel">DOWNLOAD</span></span>
 					<span class=" grooveDB_hidden pageBottomButton" id="printButton" onclick="myGrooveWriter.printMusic();"><span class="bottomButtonIcon"><i class="fa fa-print fa-2x"></i></span><span class="bottomButtonLabel">PRINT</span></span>
-					<span class=" grooveDB_hidden pageBottomButton" id="shareSaveButton" onclick="event.preventDefault(); myGrooveWriter.show_FullURLPopup();"><span class="bottomButtonIcon"><i class="fa fa-share fa-2x"></i></span><span class="bottomButtonLabel">SHARE</span></span>
 				</div>
 
+				<div id="creditsFeatures">New in Infinity Scribe (updated 9 October 2026): a new look, with the play bar always at the bottom &middot; Save &amp; Share, with My Grooves on this device &middot; student view &middot; counting (1 e &amp; a) over the notes &middot; practice timer (stop after so many minutes or bars) &middot; speed up every so many bars &middot; spot-on tempo for swung and triplet grooves &middot; new Infinity Scribe icon &middot; a time signature for each bar, with classic beaming in 3/8, 5/8 and 7/8 &middot; flams, drags and ruffs on the snare, kick, toms and cymbals, with grace notes on any drum and a practice speed control &middot; screen stays on while playing &middot; new Infinity Drumming colours &middot; Brazilian swing and Brazilian grooves &middot; Blues Shuffle and an 8th-note Train Beat &middot; swung or straight feel for each bar &middot; auto speed-up with a target tempo &middot; groove / click bars that keep the groove&rsquo;s place, with a swung click in the silent bars &middot; cursor timing setting to line the cursor up with the sound &middot; mid tom, crash, ride and hi-hat foot lines &middot; tom and ride accents and ghost notes &middot; permutations for every note setting, including cross-rhythms and alternating kick &amp; snare &middot; copy and paste bars &middot; auto-scroll</div>
 				<div id="creditsFooter" class="fullWidthEle">
 					Infinity Scribe &middot; based on <a href="https://github.com/montulli/GrooveScribe" target="_blank" rel="noopener">Groove Scribe by Lou Montulli and Mike Johnston</a>
 					&middot; Modified by Infinity Drumming
 					&middot; <a href="https://github.com/infinitydrumming/GrooveScribe" target="_blank" rel="noopener">Source code (GPL v2)</a>
-					<div id="creditsFeatures">New in Infinity Scribe (updated 8 October 2026): a time signature for each bar &middot; flams, drags and ruffs on the snare, kick, toms and cymbals, with grace notes on any drum and a practice speed control &middot; screen stays on while playing &middot; new Infinity Drumming colours &middot; Brazilian swing and Brazilian grooves &middot; Blues Shuffle and an 8th-note Train Beat &middot; swung or straight feel for each bar &middot; auto speed-up with a target tempo &middot; groove / click bars that keep the groove&rsquo;s place, with a swung click in the silent bars &middot; cursor timing setting to line the cursor up with the sound &middot; mid tom, crash, ride and hi-hat foot lines &middot; tom and ride accents and ghost notes &middot; permutations for every note setting, including cross-rhythms and alternating kick &amp; snare &middot; copy and paste bars &middot; auto-scroll</div>
 				</div>
 
 				<div id="midiTextOutput">
@@ -210,6 +215,7 @@
 			<ul id="metronomeOptionsContextMenu" class="list">
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuSolo"      onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("Solo");'  title="Just hear the metronome." >Solo</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuSpeedUp"   onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("SpeedUp");' title="Increase the tempo automatically" >Auto speed up</li>
+				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuPracticeTimer" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("PracticeTimer");' title="Stop playing after a number of minutes or bars">Practice timer</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuGrooveClick" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("GrooveClick");' title="Play the groove for some bars, then just the click for some bars">Groove / click bars</li>
 				<li class="metronomeOptionsContextMenuItem menuChecked" id="metronomeOptionsContextMenuAutoScroll" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("AutoScroll");' title="While playing, scroll the page to follow the playing bar of the music">Auto-scroll</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuCursorTiming" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("CursorTiming");' title="Line the blue playback cursor up with the sound on this device">Cursor timing</li>
@@ -532,22 +538,40 @@
 		</div>
 
 		<!-- this is used by the share/save button, and is hidden by default -->
+		<!-- groove details (Infinity Drumming, 2026): title, author and comment, opened from the header -->
+		<div id="grooveDetailsPopup">
+			<span id="grooveDetailsClose" onclick="myGrooveWriter.close_GrooveDetails();"><i class="fa fa-lg fa-times-circle"></i></span>
+			<div id="grooveDetailsTitle">Groove details</div>
+			<div id="sheetMusicTextFields" class="grooveDB_hidden">
+				<label class="sheetMusicTextField">Title <input class="sheetMusicInputField" id="tuneTitle" onchange="myGrooveWriter.refresh_ABC();" type="text" placeholder="e.g. Funky Drummer"></label>
+				<label class="sheetMusicTextField">Author <input class="sheetMusicInputField" id="tuneAuthor" onchange="myGrooveWriter.refresh_ABC();"  type="text" placeholder="e.g. Infinity Drumming"></label>
+				<label class="sheetMusicTextField">Comment <input class="sheetMusicInputField" id="tuneComments" onchange="myGrooveWriter.refresh_ABC();"  type="text" placeholder="e.g. Grade 3, play along at 90"></label>
+				<span id='KeyButton'><input type="checkbox" id="showLegend" onclick="myGrooveWriter.refresh_ABC();"><label id="LegendLabel" for="showLegend">Show the key to the drum symbols on the music</label></span>
+			</div>
+			<div id="grooveDetailsButtons"><button id="grooveDetailsDone" onclick="myGrooveWriter.close_GrooveDetails();">Done</button></div>
+		</div>
+
+		<!-- Save & Share (Infinity Drumming, 2026): the groove is saved in its link -->
 		<div id="fullURLPopup">
 			<span id="fullURLPopupCloseButton" onclick="myGrooveWriter.close_FullURLPopup();"><i class="fa fa-lg fa-times-circle"></i></span>
-			<div id="fullURLPopupTitle">Share Your Groove</div>
-			<div id="fullURLPopupSubTitle">Use this URL to share or save this groove</div>
-			<div id="fullURLPopupSubSubTitle">(You can also bookmark this page)</div>
+			<div id="fullURLPopupTitle"><i class="fa fa-floppy-o"></i> Save &amp; Share</div>
+			<div id="fullURLPopupSaved"><i class="fa fa-check-circle"></i><div><b>Your groove is saved in this link.</b><br>Open the link any time to get the groove back exactly as it is now.</div></div>
+			<div id="fullURLPopupTextFieldContainer"><input type="text" id="fullURLPopupTextField"><button id="fullURLPopupCopyButton" onclick="myGrooveWriter.copyShareURLToClipboard();"><i class="fa fa-copy"></i> Copy link</button></div>
+			<div id="fullURLPopupSubTitle">Bookmark it, or send it to yourself or your teacher.</div>
 			<div id="fullURLPopupCheckboxes">
-				<span><label  id="shortURLLabel" class="fullURLPopupCheckboxLabel"><input type="checkbox" id="shortenerCheckbox" onchange="myGrooveWriter.shortenerCheckboxChanged();">Short URL</label></span>
-				<span><label id="embedCodeLabel" class="fullURLPopupCheckboxLabel"><input type="checkbox" id="embedCodeCheckbox" onchange="myGrooveWriter.embedCodeCheckboxChanged();">Embed Code</label></span>
+				<span><label  id="shortURLLabel" class="fullURLPopupCheckboxLabel"><input type="checkbox" id="shortenerCheckbox" onchange="myGrooveWriter.shortenerCheckboxChanged();">Short link</label></span>
+				<span><label id="embedCodeLabel" class="fullURLPopupCheckboxLabel"><input type="checkbox" id="embedCodeCheckbox" onchange="myGrooveWriter.embedCodeCheckboxChanged();">Code to put it on a web page</label></span>
 			</div>
-			<div id="fullURLPopupTextFieldContainer"><input type="text" id="fullURLPopupTextField"></div>
-			<br>
-			<div id="shareButtonContainer">
-				<button id="fullURLPopupCopyButton" onclick="myGrooveWriter.copyShareURLToClipboard();">&nbsp;<i class="fa fa-copy"></i> &nbsp;COPY&nbsp;</button>
-				&nbsp; &nbsp; &nbsp;
-				<share-button id="shareButton"></share-button>
+			<button id="saveToMyGroovesButton" onclick="myGrooveWriter.saveToMyGrooves();"><i class="fa fa-star"></i><span><b>Save to My Grooves</b><small id="saveToMyGroovesNote">Keeps it on this device, under Grooves &rsaquo; My Grooves</small></span></button>
+			<div id="moreWaysTitle">More ways to keep it</div>
+			<div id="moreWays">
+				<button onclick="myGrooveWriter.shareByWhatsApp();"><i class="fa fa-whatsapp"></i>WhatsApp</button>
+				<button onclick="myGrooveWriter.shareByEmail();"><i class="fa fa-envelope"></i>Email</button>
+				<button onclick="myGrooveWriter.close_FullURLPopup(); myGrooveWriter.printMusic();"><i class="fa fa-print"></i>Print / PDF</button>
+				<button onclick="myGrooveWriter.MIDISaveAs();"><i class="fa fa-music"></i>MIDI file</button>
 			</div>
+			<div id="shareButtonContainer"><share-button id="shareButton"></share-button></div>
+		</div>
 		</div>
 
 
@@ -573,6 +597,20 @@
 			<div id="graceNoteButtons"><button onclick="myGrooveWriter.graceNotesReset();">Reset</button> <button onclick="myGrooveWriter.close_GraceNoteConfiguration();">Done</button></div>
 		</div>
 
+		<!-- metronome option "Practice timer" (Infinity Drumming, 2026), hidden by default -->
+		<div id="practiceTimerConfiguration">
+			<div id="practiceTimerTitle">Practice timer</div>
+			<div class="practiceTimerText">Play for a set time or number of bars. When it's up, the groove finishes the bar it's in, ends on a crash, and stops.</div>
+			<div class="practiceTimerUnits">
+				<input type="radio" name="practiceTimerUnit" id="practiceTimerUnitMinutes" checked onchange="myGrooveWriter.practiceTimerUnitChange();"><label for="practiceTimerUnitMinutes">Minutes</label>
+				<input type="radio" name="practiceTimerUnit" id="practiceTimerUnitBars" onchange="myGrooveWriter.practiceTimerUnitChange();"><label for="practiceTimerUnitBars">Bars</label>
+			</div>
+			<div class="practiceTimerRow">Stop after <input type="number" min="1" max="999" value="5" id="practiceTimerAmount"> <span id="practiceTimerUnitLabel">minutes</span></div>
+			<div id="practiceTimerPresets"></div>
+			<div class="practiceTimerNote">The timer is saved in the groove's link, so you can send a student "play this for 10 minutes".</div>
+			<div id="practiceTimerButtons"><button onclick="myGrooveWriter.close_PracticeTimerConfiguration('off');">Turn off</button> <button id="practiceTimerSetButton" onclick="myGrooveWriter.close_PracticeTimerConfiguration('ok');">Set timer</button></div>
+		</div>
+
 		<!-- metronome option "Cursor timing" (Infinity Drumming, 2026), hidden by default -->
 		<div id="cursorTimingConfiguration">
 			<div id="cursorTimingTitle">Cursor timing</div>
@@ -585,8 +623,9 @@
 		<!-- this is used by the metronome auto speed up option menu, and is hidden by default -->
 		<div id="metronomeAutoSpeedupConfiguration">
 			<div id="metronomeAutoSpeedupOutputText">
-				Increase <span id="metronomeAutoSpeedupTempoIncreaseAmountOutput">5</span> bpm in
-				<span id="metronomeAutoSpeedupTempoIncreaseIntervalOutput">2</span> min
+				Increase <span id="metronomeAutoSpeedupTempoIncreaseAmountOutput">5</span> bpm
+				<span id="metronomeAutoSpeedupMinutesText">in <span id="metronomeAutoSpeedupTempoIncreaseIntervalOutput">2</span> min</span>
+				<span id="metronomeAutoSpeedupBarsText" style="display: none">every <span id="metronomeAutoSpeedupTempoIncreaseBarsOutput">16</span> bars</span>
 			</div>
 			<div id="metronomeAutoSpeedupConfigurationKeepIncreasing">
 				<input type="checkbox" checked id="metronomeAutoSpeedUpKeepGoingForever"><label for="metronomeAutoSpeedUpKeepGoingForever">Keep increasing after the first interval</label>
@@ -600,8 +639,16 @@
 			<div id="metronomeAutoSpeedupConfigurationSliders">
 				<div id="metronomeAutoSpeedupConfigurationAmountLable">Amount in BPM</div>
 				<input type=range min=1 max=100 value=5 class="metronomeAutoSpeedUpRange" id="metronomeAutoSpeedupTempoIncreaseAmount" oninput="myGrooveWriter.updateRangeLabel(event, 'metronomeAutoSpeedupTempoIncreaseAmountOutput');">
+				<!-- Infinity Drumming, 2026: speed up every so many minutes or bars -->
+				<div id="metronomeAutoSpeedupUnits">
+					Speed up every:
+					<input type="radio" name="metronomeAutoSpeedupUnit" id="metronomeAutoSpeedupUnitMinutes" checked onchange="myGrooveWriter.speedUpUnitChange();"><label for="metronomeAutoSpeedupUnitMinutes">minutes</label>
+					<input type="radio" name="metronomeAutoSpeedupUnit" id="metronomeAutoSpeedupUnitBars" onchange="myGrooveWriter.speedUpUnitChange();"><label for="metronomeAutoSpeedupUnitBars">bars</label>
+				</div>
 				<div id="metronomeAutoSpeedupConfigurationIntervalLable">Interval in Minutes</div>
 				<input type=range min=1 max=20 value=2 class="metronomeAutoSpeedUpRange" id="metronomeAutoSpeedupTempoIncreaseInterval" step="1" oninput="myGrooveWriter.updateRangeLabel(event, 'metronomeAutoSpeedupTempoIncreaseIntervalOutput');">
+				<div id="metronomeAutoSpeedupConfigurationBarsLable" style="display: none">Interval in Bars</div>
+				<input type=range min=4 max=64 value=16 step=4 class="metronomeAutoSpeedUpRange" id="metronomeAutoSpeedupTempoIncreaseBars" style="display: none" oninput="myGrooveWriter.updateRangeLabel(event, 'metronomeAutoSpeedupTempoIncreaseBarsOutput');">
 			</div>
 			<div id="metronomeAutoSpeedupCloseButtonDiv">
 				<button id="metronomeAutoSpeedupConfigurationCloseButton" onclick="myGrooveWriter.close_MetronomeAutoSpeedupConfiguration('ok');">Done</button>

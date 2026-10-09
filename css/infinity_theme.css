@@ -167,7 +167,8 @@ body,
 .swingStyleToggle.brazilian {
   color: var(--id-amber);
 }
-#totalPlayTime {
+#totalPlayTime,
+.practiceTimerStatus {
   color: var(--id-amber);
 }
 
@@ -300,7 +301,8 @@ ul.list a:hover,
   color: var(--id-burgundy);
 }
 #metronomeAutoSpeedupTargetNote,
-.grooveClickNote {
+.grooveClickNote,
+.practiceTimerNote {
   color: var(--id-text-2);
 }
 input[type='checkbox']:not(:checked) + label {
@@ -316,6 +318,7 @@ input[type='checkbox']:checked + label {
 #metronomeAutoSpeedupConfiguration,
 #cursorTimingConfiguration,
 #graceNoteConfiguration,
+#practiceTimerConfiguration,
 #grooveClickConfiguration,
 #timeSigPopup {
   color: var(--id-text);
@@ -329,7 +332,8 @@ input[type='checkbox']:checked + label {
 #metronomeAutoSpeedupConfiguration input[type='range']::-webkit-slider-runnable-track,
 #cursorTimingConfiguration input[type='range']::-webkit-slider-runnable-track,
 #graceNoteConfiguration input[type='range']::-webkit-slider-runnable-track,
-#grooveClickConfiguration input[type='range']::-webkit-slider-runnable-track {
+#grooveClickConfiguration input[type='range']::-webkit-slider-runnable-track,
+#practiceTimerConfiguration input[type='range']::-webkit-slider-runnable-track {
   background: var(--id-border);
 }
 #fullURLPopup input[type='range']::-moz-range-track,
@@ -340,12 +344,14 @@ input[type='checkbox']:checked + label {
   background: var(--id-border);
 }
 #metronomeAutoSpeedupConfigurationCloseButton,
+#practiceTimerSetButton,
 #timeSigPopupOK {
   padding: 6px 18px;
   font-weight: 700;
   border-radius: 6px;
 }
 #metronomeAutoSpeedupConfigurationCloseButton:hover,
+#practiceTimerSetButton:hover,
 #timeSigPopupOK:hover {
   background: var(--id-blue-dark);
 }
@@ -357,4 +363,14 @@ input[type='checkbox']:checked + label {
 }
 .ornamentMenuFirst {
   border-top: 2px solid var(--id-border);
+}
+
+/* the practice timer's "Turn off": a quiet outline button beside "Set timer" */
+#practiceTimerButtons button:first-child {
+  font-size: 16px;
+  padding: 6px 14px;
+  color: var(--id-text-2);
+  background: #fff;
+  border: 1px solid var(--id-border);
+  border-radius: 6px;
 }
