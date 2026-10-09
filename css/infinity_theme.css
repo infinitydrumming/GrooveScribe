@@ -259,10 +259,6 @@ input[type='range']:active::-moz-range-thumb {
 #creditsFooter a {
   color: var(--id-text-on-dark);
 }
-#creditsFeatures {
-  color: var(--id-text-on-dark-3);
-}
-
 /* ---------- menus and pop-ups ---------- */
 .noteContextMenu > ul.list,
 #grooveListWrapper,

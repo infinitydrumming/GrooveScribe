@@ -18,6 +18,8 @@ The original copyright notices and credits are unchanged.
 - The swing slider shows on phones too: on its own line in the play bar on an
   upright phone, beside the tempo on a phone on its side (it was hidden on
   narrow screens).
+- The "New in Infinity Scribe" feature list under the grid is gone (it took a lot
+  of room); what's new is in the help page and in this file.
 - "Total Play Time … repetitions" is a small badge just above the play bar (it
   sat on top of the credits); phones leave it out, the play bar has the time.
 - Phone on its side (screens under 520px tall): the header and toolbar scroll away
