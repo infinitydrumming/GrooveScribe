@@ -517,6 +517,20 @@ body,
   margin: 0;
 }
 
+/* "Total Play Time ... repetitions": a small badge just above the play bar */
+#totalPlayTime {
+  bottom: calc(var(--layout-player-h) + var(--layout-credits-h) + 6px);
+  right: 12px;
+  margin: 0;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: var(--id-navy-900);
+  font-size: 12px;
+}
+#totalPlayTime:empty {
+  display: none;
+}
+
 /* ---------- credits, under the play bar ---------- */
 #creditsFooter {
   position: fixed;
@@ -578,6 +592,12 @@ body,
   }
   #logoTextUpperLeft img {
     height: 26px;
+  }
+}
+/* phones: the play bar's own clock is enough */
+@media (max-width: 900px), (max-height: 520px) {
+  #totalPlayTime {
+    display: none;
   }
 }
 /* narrow but tall (a phone held upright): swing gets its own line in the play bar */
