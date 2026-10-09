@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -5373,9 +5373,42 @@ function GrooveWriter() {
     if (popup) popup.style.display = 'none';
   };
 
+  // Infinity Drumming, 2026: our own short links (scribe.infinitydrumming.com/s/...)
+  // when the site is hosted with them (functions/api/shorten.js); otherwise the
+  // original Groove Scribe short links below.
   function fillInShortenedURLInFullURLPopup(fullURL, cssIdOfTextFieldToFill) {
     document.getElementById('embedCodeCheckbox').checked = false; // uncheck embedCodeCheckbox, because it is not compatible
+    if (typeof fetch != 'function') {
+      fillInGScribeShortURL(fullURL, cssIdOfTextFieldToFill);
+      return;
+    }
+    fetch('/api/shorten', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: fullURL }),
+    })
+      .then(function (response) {
+        return response.ok ? response.json() : null;
+      })
+      .then(function (result) {
+        if (result && result.shortLink) showShortURL(result.shortLink, cssIdOfTextFieldToFill);
+        else fillInGScribeShortURL(fullURL, cssIdOfTextFieldToFill);
+      })
+      .catch(function () {
+        fillInGScribeShortURL(fullURL, cssIdOfTextFieldToFill); // not hosted with our short links
+      });
+  }
 
+  function showShortURL(shortLink, cssIdOfTextFieldToFill) {
+    var textField = document.getElementById(cssIdOfTextFieldToFill);
+    textField.value = shortLink;
+    // select the URL for copy/paste
+    textField.focus();
+    textField.select();
+    document.getElementById('shortenerCheckbox').checked = true;
+  }
+
+  function fillInGScribeShortURL(fullURL, cssIdOfTextFieldToFill) {
     var params = {
       dynamicLinkInfo: {
         domainUriPrefix: 'https://gscribe.com/share',
@@ -5393,12 +5426,7 @@ function GrooveWriter() {
       if (xhr.status === 200) {
         // success
         var response = JSON.parse(xhr.responseText);
-        var textField = document.getElementById(cssIdOfTextFieldToFill);
-        textField.value = response.shortLink;
-        // select the URL for copy/paste
-        textField.focus();
-        textField.select();
-        document.getElementById('shortenerCheckbox').checked = true; // this is now true if isn't already
+        showShortURL(response.shortLink, cssIdOfTextFieldToFill);
       } else {
         document.getElementById('shortenerCheckbox').checked = false; // request failed
       }

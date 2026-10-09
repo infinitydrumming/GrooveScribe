@@ -120,6 +120,16 @@ export default [
     },
   },
 
+  // Cloudflare Pages functions (short links): ES modules on Cloudflare's servers.
+  {
+    files: ['functions/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: { ...globals.serviceworker },
+    },
+  },
+
   // Test suite + build config: modern ESM, Node + Vitest environment. Covers the
   // Vitest suite (tests/), the Playwright suite (tests-e2e/), and *.config.js.
   {

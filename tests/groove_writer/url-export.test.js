@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -204,6 +204,47 @@ describe('GrooveWriter url-export (js/groove_writer.js)', () => {
   });
 
   describe('shortenerCheckboxChanged / embedCodeCheckboxChanged', () => {
+    // Infinity Drumming, 2026: our own short links (/api/shorten) are tried
+    // first; without them (GitHub Pages) it falls back to the original shortener.
+    const noOwnShortLinks = () =>
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(() => Promise.reject(new TypeError('not hosted with short links')))
+      );
+    afterEach(() => vi.unstubAllGlobals());
+
+    it('uses our own short link when the site has them', async () => {
+      const instances = installFakeXHR();
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(() =>
+          Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({ shortLink: 'https://scribe.infinitydrumming.com/s/Ab3kP9xy' }),
+          })
+        )
+      );
+      const gw = await newGrooveWriter();
+      buildGridDOM(gw, 1);
+      buildURLPopupDOM();
+      document.getElementById('shortenerCheckbox').checked = true;
+
+      gw.shortenerCheckboxChanged();
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/shorten',
+        expect.objectContaining({ method: 'POST' })
+      );
+      expect(JSON.parse(fetch.mock.calls[0][1].body).url).toContain('TimeSig=4/4');
+      await vi.waitFor(() =>
+        expect(document.getElementById('fullURLPopupTextField').value).toBe(
+          'https://scribe.infinitydrumming.com/s/Ab3kP9xy'
+        )
+      );
+      expect(instances).toHaveLength(0);
+    });
+
     it('shortenerCheckboxChanged, when unchecked, fills the plain full URL synchronously (no network call)', async () => {
       const instances = installFakeXHR();
       const gw = await newGrooveWriter();
@@ -219,6 +260,7 @@ describe('GrooveWriter url-export (js/groove_writer.js)', () => {
     });
 
     it('shortenerCheckboxChanged, when checked, POSTs to the firebasedynamiclinks shortener with the full URL', async () => {
+      noOwnShortLinks();
       const instances = installFakeXHR();
       const gw = await newGrooveWriter();
       buildGridDOM(gw, 1);
@@ -226,6 +268,7 @@ describe('GrooveWriter url-export (js/groove_writer.js)', () => {
       document.getElementById('shortenerCheckbox').checked = true;
 
       gw.shortenerCheckboxChanged();
+      await vi.waitFor(() => expect(instances).toHaveLength(1));
 
       expect(instances).toHaveLength(1);
       expect(instances[0].method).toBe('POST');
@@ -235,6 +278,7 @@ describe('GrooveWriter url-export (js/groove_writer.js)', () => {
     });
 
     it('shortenerCheckboxChanged fills the field and re-checks the box when the shortener XHR succeeds', async () => {
+      noOwnShortLinks();
       const instances = installFakeXHR();
       const gw = await newGrooveWriter();
       buildGridDOM(gw, 1);
@@ -242,6 +286,7 @@ describe('GrooveWriter url-export (js/groove_writer.js)', () => {
       document.getElementById('shortenerCheckbox').checked = true;
 
       gw.shortenerCheckboxChanged();
+      await vi.waitFor(() => expect(instances).toHaveLength(1));
       Object.defineProperty(instances[0], 'status', { value: 200, configurable: true });
       instances[0].responseText = JSON.stringify({ shortLink: 'https://gscribe.com/share/xyz' });
       instances[0].onload();
@@ -253,6 +298,7 @@ describe('GrooveWriter url-export (js/groove_writer.js)', () => {
     });
 
     it('shortenerCheckboxChanged unchecks the box when the shortener XHR fails', async () => {
+      noOwnShortLinks();
       const instances = installFakeXHR();
       const gw = await newGrooveWriter();
       buildGridDOM(gw, 1);
@@ -260,6 +306,7 @@ describe('GrooveWriter url-export (js/groove_writer.js)', () => {
       document.getElementById('shortenerCheckbox').checked = true;
 
       gw.shortenerCheckboxChanged();
+      await vi.waitFor(() => expect(instances).toHaveLength(1));
       Object.defineProperty(instances[0], 'status', { value: 500, configurable: true });
       instances[0].onload();
 
@@ -284,6 +331,7 @@ describe('GrooveWriter url-export (js/groove_writer.js)', () => {
     });
 
     it('embedCodeCheckboxChanged, when unchecked, falls back to the shortener XHR path', async () => {
+      noOwnShortLinks();
       const instances = installFakeXHR();
       const gw = await newGrooveWriter();
       buildGridDOM(gw, 1);
@@ -291,6 +339,7 @@ describe('GrooveWriter url-export (js/groove_writer.js)', () => {
       document.getElementById('embedCodeCheckbox').checked = false;
 
       gw.embedCodeCheckboxChanged();
+      await vi.waitFor(() => expect(instances).toHaveLength(1));
 
       expect(instances).toHaveLength(1);
       expect(instances[0].url).toContain('firebasedynamiclinks.googleapis.com/v1/shortLinks');

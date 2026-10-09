@@ -11,6 +11,19 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-09 — our own short links (ready for Cloudflare Pages)
+
+- New `functions/api/shorten.js` and `functions/s/[code].js`, Cloudflare Pages
+  functions: **Save & Share** makes short links like
+  `scribe.infinitydrumming.com/s/Ab3kP9xy`, kept in a KV namespace (`SHORT_LINKS`).
+  The code comes from the groove's own link (the same groove always gets the same
+  short link); only Infinity Scribe groove links are accepted; nothing about the
+  person is stored. Tested on Cloudflare's local runtime (wrangler) and in
+  `tests/shortLinks.test.js`.
+- The app tries these first and falls back to the original Groove Scribe short
+  links when they aren't there (GitHub Pages).
+- Setting it up: `docs/CLOUDFLARE_SETUP.md`.
+
 ## 2026-10-09 — new layout, Save & Share, My Grooves, student view
 
 - New `css/infinity_layout.css` (index.html only; the embed pages keep their look):
