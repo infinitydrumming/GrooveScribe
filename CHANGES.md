@@ -11,6 +11,20 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-09 — exact tempo
+
+- Swung, triplet and Brazilian-swing grooves played about 1.5% fast: the MIDI
+  library drops the fraction of every delta time (a triplet note is 10.67 ticks,
+  written as 10). MIDI tracks are now made by `newExactTimeTrack()` in
+  `js/midiFile.js`, which carries each fraction over to the next event, and a
+  triplet note is exactly 128 / 12 ticks.
+- Every bar after the first also lost one tick (the player's opening blank tick
+  was taken back from every bar, not just the bar that added it), about 0.2% fast
+  on any groove of more than one bar.
+- Every bar now plays for exactly its own length (512 ticks for 4/4). The
+  golden-master MIDI changed only in timing: the same notes, drums and volumes,
+  each at most a few ticks later (`tests/groove_utils/tempo-accuracy.test.js`).
+
 ## 2026-10-08 — a time signature for each bar
 
 - New `js/barMeters.js`. Each bar can have its own time signature, from a button

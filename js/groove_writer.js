@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -97,6 +97,7 @@ import {
   constant_sticking_count_on_color_rgb,
 } from './constants.js';
 import { beamGroupEnds } from './musicMath.js';
+import { newExactTimeTrack } from './midiFile.js';
 import * as _perm from './permutations.js';
 import * as _view from './viewHtml.js';
 import * as _grid from './gridState.js';
@@ -2253,7 +2254,7 @@ function GrooveWriter() {
     muteArrayFromClickableUI(Sticking_Array, HH_Array, Snare_Array, Kick_Array, Toms_Array, 0);
 
     var midiFile = new Midi.File();
-    var midiTrack = new Midi.Track();
+    var midiTrack = newExactTimeTrack();
     midiFile.addTrack(midiTrack);
 
     midiTrack.setTempo(root.myGrooveUtils.getTempo());
@@ -4515,7 +4516,7 @@ function GrooveWriter() {
   // click-only bars.
   function createGrooveClickCycleMidiUrl(startBar) {
     var midiFile = new Midi.File();
-    var midiTrack = new Midi.Track();
+    var midiTrack = newExactTimeTrack();
     midiFile.addTrack(midiTrack);
     midiTrack.setTempo(root.myGrooveUtils.getTempo());
     midiTrack.setInstrument(0, 0x13);
@@ -4539,7 +4540,7 @@ function GrooveWriter() {
     var ownLeadIn = root.myGrooveUtils.graceLeadIn;
     var nextBar =
       (startBar + class_groove_click_groove_bars + class_groove_click_click_bars) % length;
-    var probe = new Midi.Track();
+    var probe = newExactTimeTrack();
     if (sections) addPermutationBarToMidiTrack(probe, sections, nextBar);
     else addGrooveBarToMidiTrack(probe, nextBar, 'our_MIDI');
     root.myGrooveUtils.setTrackLoopLeadIn(midiTrack, root.myGrooveUtils.graceLeadIn);
