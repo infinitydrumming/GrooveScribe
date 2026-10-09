@@ -24,3 +24,6 @@ www/
 /android/
 /ios/
 .gradle/
+
+# Cloudflare wrangler local state
+.wrangler/
