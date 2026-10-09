@@ -1153,6 +1153,21 @@ function GrooveWriter() {
     }, 300);
   };
 
+  // The phone toolbar shows "Notes" and "Click" as selectors instead of rows of
+  // buttons (Infinity Drumming, 2026): keep them showing the current settings.
+  function syncToolbarSelects() {
+    var notes = document.getElementById('notesSelect');
+    if (notes) {
+      notes.value = String(class_time_division);
+      for (var i = 0; i < notes.options.length; i++) {
+        var button = document.getElementById('subdivision_' + notes.options[i].value + 'ths');
+        notes.options[i].disabled = !!button && /\bdisabled\b/.test(button.className);
+      }
+    }
+    var click = document.getElementById('clickSelect');
+    if (click) click.value = String(root.class_metronome_frequency);
+  }
+
   root.setMetronomeButton = function (metronomeInterval) {
     var id = '';
     switch (metronomeInterval) {
@@ -1188,6 +1203,7 @@ function GrooveWriter() {
     }
 
     selectButton(document.getElementById(id));
+    syncToolbarSelects();
 
     root.myGrooveUtils.midiNoteHasChanged(); // pretty likely the case
   };
@@ -3573,6 +3589,7 @@ function GrooveWriter() {
 
     // set the background and text color of the current subdivision
     selectButton(document.getElementById('subdivision_' + class_notes_per_measure + 'ths'));
+    syncToolbarSelects();
 
     // add html for the midi player
     root.myGrooveUtils.AddMidiPlayerToPage('midiPlayer', class_time_division);
@@ -5146,6 +5163,7 @@ function GrooveWriter() {
         });
         addOrRemoveKeywordFromClassById('subdivision_' + division + 'ths', 'disabled', !fits);
       });
+      syncToolbarSelects();
       return;
     }
     // check for incompatible odd time signature division  9/16 and 1/8 notes for instance
@@ -5167,6 +5185,7 @@ function GrooveWriter() {
       addOrRemoveKeywordFromClassById('subdivision_24ths', 'disabled', false);
       addOrRemoveKeywordFromClassById('subdivision_48ths', 'disabled', false);
     }
+    syncToolbarSelects();
   };
 
   root.setTimeSigLabel = function () {
@@ -5665,6 +5684,7 @@ function GrooveWriter() {
 
     // highlight the new div
     selectButton(document.getElementById('subdivision_' + class_time_division + 'ths'));
+    syncToolbarSelects();
 
     // This may disable or enable the menu
     setupPermutationMenu();

@@ -11,6 +11,15 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-09 — Notes and Click selectors on phones
+
+- On phones and narrow windows the rows of Notes buttons (8ths, 16ths, ...) and
+  Metronome buttons (Off, Bar, 4th, ...) no longer scroll sideways: they are two
+  selectors, "Notes: 16ths" and "Click: 4ths" (with a metronome icon), and the
+  click's extra options are a "..." button. The toolbar takes two rows, with
+  Counting and the Edit / Student view on the second. Desktop is unchanged
+  (`index.html`, `css/infinity_layout.css`, `syncToolbarSelects` in `js/groove_writer.js`).
+
 ## 2026-10-09 — "Swing" / "Straight" above the counts
 
 - With counting (or stickings) over the music, the "Swing" / "Straight" markings

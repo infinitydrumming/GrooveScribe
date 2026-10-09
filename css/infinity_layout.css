@@ -594,6 +594,20 @@ body,
 @media (max-width: 900px) and (min-height: 521px) {
   :root {
     --layout-player-h: 104px;
+    --layout-toolbar-h: 100px;
+  }
+  /* two rows: time, notes and click on the first, counting and the view switch on the second */
+  #divisionButtonContainer {
+    flex-wrap: wrap;
+    align-content: center;
+    row-gap: 8px;
+    overflow-x: hidden;
+  }
+  #divisionButtonContainer .toolbarSpacer {
+    display: none;
+  }
+  #metronomeContainer {
+    flex-wrap: nowrap;
   }
   #midiPlayer .tempoAndProgress {
     flex-direction: column;
@@ -1041,5 +1055,66 @@ body,
   .noteContextMenu ul {
     max-height: calc(100vh - 16px);
     overflow-y: auto;
+  }
+}
+
+/* ---------- Notes and Click selectors (phones and narrow windows) ---------- */
+.phoneSelectWrap {
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  color: var(--id-text);
+}
+.phoneSelectWrap select {
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--id-border);
+  border-radius: 8px;
+  background: var(--id-blue-tint);
+  color: var(--id-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+.phoneSelectWrap .clickIcon {
+  vertical-align: middle;
+  margin-right: 2px;
+}
+@media (min-width: 901px) {
+  .phoneSelectWrap {
+    display: none !important;
+  }
+}
+@media (max-width: 900px) {
+  #clickSelectWrap {
+    display: inline-flex;
+  }
+  /* the selectors replace the rows of buttons */
+  #divisionButtonContainer .subdivision,
+  #notesToolbarLabel,
+  #metronomeContainer .metronomeButton:not(.Options) {
+    display: none !important;
+  }
+}
+@media (max-width: 900px) {
+  .phoneSelectWrap select {
+    padding: 0 2px 0 6px;
+    font-size: 13px;
+  }
+  #notesSelect {
+    width: 128px;
+  }
+  #clickSelect {
+    width: 98px;
+  }
+  /* the click's extra options: just the dots */
+  #LeftHandNav .metronomeButton.Options {
+    font-size: 0;
+    padding: 7px 10px;
+  }
+  #LeftHandNav .metronomeButton.Options::before {
+    content: '\22EF';
+    font-size: 20px;
+    line-height: 1;
   }
 }
