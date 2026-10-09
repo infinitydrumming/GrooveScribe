@@ -517,6 +517,20 @@ body,
   margin: 0;
 }
 
+/* "Total Play Time ... repetitions": a small badge just above the play bar */
+#totalPlayTime {
+  bottom: calc(var(--layout-player-h) + var(--layout-credits-h) + 6px);
+  right: 12px;
+  margin: 0;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: var(--id-navy-900);
+  font-size: 12px;
+}
+#totalPlayTime:empty {
+  display: none;
+}
+
 /* ---------- credits, under the play bar ---------- */
 #creditsFooter {
   position: fixed;
@@ -579,14 +593,29 @@ body,
   #logoTextUpperLeft img {
     height: 26px;
   }
-  #midiPlayer .swingRow {
+}
+/* phones: the play bar's own clock is enough */
+@media (max-width: 900px), (max-height: 520px) {
+  #totalPlayTime {
     display: none;
   }
 }
-@media (max-width: 560px) {
+/* narrow but tall (a phone held upright): swing gets its own line in the play bar */
+@media (max-width: 900px) and (min-height: 521px) {
   :root {
-    --layout-player-h: 64px;
+    --layout-player-h: 104px;
   }
+  #midiPlayer .tempoAndProgress {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  #midiPlayer .tempoLabel,
+  #midiPlayer .swingLabel {
+    min-width: 50px;
+  }
+}
+@media (max-width: 560px) {
   body {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
