@@ -11,6 +11,14 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-09 — "Swing" / "Straight" above the counts
+
+- With counting (or stickings) over the music, the "Swing" / "Straight" markings
+  sat between the counts and the music, pushing some counts up out of line and
+  spacing out the bar's first beat. They now go above the counts, on an invisible
+  bar line at the start of the stickings voice (`addFeelMarking` in
+  `js/abcNotation.js`). Without counts or stickings nothing changes.
+
 ## 2026-10-09 — phones: menus on screen, landscape
 
 - Menus (Grooves, Help, Permutations, …) are kept fully on the screen; on a

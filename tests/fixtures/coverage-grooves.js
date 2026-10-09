@@ -200,6 +200,10 @@ export const coverageGrooves = [
     url: '?TimeSig=4/4&Div=16&Tempo=90&Measures=3&BarSigs=4/4,3/8,5/8&Count=1&H=|x-x-x-x-x-x-x-x-|x-x-x-|x-x-x-x-x-|&S=|----O-------O---|--o---|----o-----|&K=|o-o-------o--o--|o-----|o-----o---|&Stickings=|R-L-R-L---------|------|----------|',
   },
   {
+    name: 'Counting with swung and straight bars (labels above the counts)',
+    url: '?TimeSig=4/4&Div=16&Tempo=80&Swing=30&Measures=2&StraightBars=2&Count=1&H=|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-x-|&S=|----O-------O---|----O-------O---|&K=|o-o-------o--o--|o-o-------o--o--|',
+  },
+  {
     name: 'Counting over the notes (8th-note triplets)',
     url: '?TimeSig=4/4&Div=12&Tempo=90&Measures=1&Count=1&H=|x-xx-xx-xx-x|&S=|---o-----o--|&K=|o-----o-----|',
   },
