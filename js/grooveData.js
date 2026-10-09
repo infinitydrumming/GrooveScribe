@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar, practice timer. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar, practice timer, counting. See CHANGES.md.
 // grooveData — the central data contract for Groove Scribe.
 //
 // A GrooveData describes a single groove: its time signature, subdivision and
@@ -83,6 +83,8 @@ const EMPTY_NOTE_ARRAY = [
  * @property {number} grooveClickGrooveBars  "Groove / click bars" practice option: bars of groove
  *   before the click-only bars; 0 = option off. URL "GrooveBars".
  * @property {number} grooveClickClickBars   Click-only bars for that option. URL "ClickBars".
+ * @property {boolean} showCounts  Counting ("1 e & a") over the notes in the sheet music.
+ *   URL "Count=1" (only when on).
  * @property {string} practiceLimit  Practice timer: stop after this many minutes ("10m") or
  *   bars ("16b"); '' = off. URL "Practice".
  * @property {boolean[]} straightBars  Per bar (index 0 = bar 1): true plays that bar straight
@@ -142,6 +144,7 @@ export function createGrooveData(config = {}) {
     grooveClickGrooveBars: 0, // 0 = "Groove / click bars" off
     grooveClickClickBars: 0,
     practiceLimit: '', // '' = practice timer off
+    showCounts: false,
     straightBars: [],
     barTimeSigs: [],
     graceSpacingMs: DEFAULT_GRACE_SPACING_MS,

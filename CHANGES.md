@@ -11,6 +11,14 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-09 — counting over the notes
+
+- A **COUNTING** button writes the count over the notes ("1 e & a", "1 &", "1 & a"
+  in triplets, "1 2 3" in 8th-note x/8 bars) using the stickings line's existing
+  count symbol. A beat that has stickings keeps just its stickings. Links carry it
+  as `Count=1`; it is off by default, so existing grooves are unchanged.
+  (`addCounting` in `js/abcNotation.js`, `GrooveUtils.showCounts`.)
+
 ## 2026-10-09 — practice timer, and speed-up every so many bars
 
 - New `js/practiceTimer.js`. **Practice timer** (Metronome Options): stop after a

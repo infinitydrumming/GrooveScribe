@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -2416,6 +2416,7 @@ function GrooveWriter() {
       ? class_groove_click_click_bars
       : 0;
     myGrooveData.practiceLimit = practiceLimitToText(class_practice_limit);
+    myGrooveData.showCounts = root.myGrooveUtils.showCounts;
     myGrooveData.kickStemsUp = true;
 
     for (var i = 0; i < class_number_of_measures; i++) {
@@ -4058,6 +4059,19 @@ function GrooveWriter() {
     if (popup) popup.style.display = 'none';
   };
 
+  // --- Counting over the notes (Infinity Drumming, 2026) ---
+  function setCounting(on) {
+    root.myGrooveUtils.showCounts = on;
+    addOrRemoveKeywordFromClassById('countingButton', 'buttonSelected', on);
+  }
+
+  // the COUNTING button: "1 e & a" over the notes in the sheet music, or not
+  root.toggleCounting = function () {
+    setCounting(!root.myGrooveUtils.showCounts);
+    updateSheetMusic();
+    root.updateCurrentURL(); // counting is part of the link
+  };
+
   // the speed-up counts bars, not minutes
   function speedUpCountsBars() {
     var bars = /** @type {HTMLInputElement | null} */ (
@@ -5409,6 +5423,7 @@ function GrooveWriter() {
 
     setGrooveClickFromLink(myGrooveData.grooveClickGrooveBars, myGrooveData.grooveClickClickBars);
     setPracticeLimit(parsePracticeLimit(myGrooveData.practiceLimit), true);
+    setCounting(!!myGrooveData.showCounts);
     root.setMetronomeFrequency(myGrooveData.metronomeFrequency);
 
     updateSheetMusic();

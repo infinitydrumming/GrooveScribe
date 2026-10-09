@@ -374,3 +374,14 @@ input[type='checkbox']:checked + label {
   border: 1px solid var(--id-border);
   border-radius: 6px;
 }
+
+/* the COUNTING button: "1e&a" as its icon, amber when the counting is on */
+.countingIcon {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 32px;
+  letter-spacing: 0.02em;
+}
+#countingButton.buttonSelected {
+  color: var(--id-amber);
+}

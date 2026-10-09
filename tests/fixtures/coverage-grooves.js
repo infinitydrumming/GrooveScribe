@@ -195,6 +195,14 @@ export const coverageGrooves = [
     name: 'Bar time signatures 4/4 3/8 5/8 4/4 (16ths, like Here Comes the Sun)',
     url: '?TimeSig=4/4&Div=16&Tempo=120&Measures=4&BarSigs=4/4,3/8,5/8,4/4&H=|xxxxxxxxxxxxxxxx|xxxxxx|xxxxxxxxxx|xxxxxxxxxxxxxxxx|&S=|----o-------o---|--o---|--o-----o-|----o-------o---|&K=|o-------o-------|o-----|o---o-----|o-------o-------|&SO=|----------------|--f---|----------|------------d---|',
   },
+  {
+    name: 'Counting over the notes (16ths, stickings on beats 1-2; 3/8 + 5/8 bars)',
+    url: '?TimeSig=4/4&Div=16&Tempo=90&Measures=3&BarSigs=4/4,3/8,5/8&Count=1&H=|x-x-x-x-x-x-x-x-|x-x-x-|x-x-x-x-x-|&S=|----O-------O---|--o---|----o-----|&K=|o-o-------o--o--|o-----|o-----o---|&Stickings=|R-L-R-L---------|------|----------|',
+  },
+  {
+    name: 'Counting over the notes (8th-note triplets)',
+    url: '?TimeSig=4/4&Div=12&Tempo=90&Measures=1&Count=1&H=|x-xx-xx-xx-x|&S=|---o-----o--|&K=|o-----o-----|',
+  },
 
   // ---- Voice/articulation mismatches: each character is valid for SOME voice
   // but placed in a voice where it is not, exercising every "this symbol isn't

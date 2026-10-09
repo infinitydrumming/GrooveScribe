@@ -1,11 +1,15 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
 // helpers below are pure. GrooveUtils delegates its ABC methods here.
 
 import { takeGraceGroups } from './ornaments.js';
-import { constant_NUMBER_OF_TOMS } from './constants.js';
+import {
+  constant_NUMBER_OF_TOMS,
+  constant_ABC_STICK_COUNT,
+  constant_ABC_STICK_OFF,
+} from './constants.js';
 import {
   beamGroupEnds,
   isTripletDivision,
@@ -760,6 +764,29 @@ export function get_top_ABC_BoilerPlate(
   return fullABC;
 }
 
+/**
+ * Infinity Drumming, 2026: counting ("1 e & a") over every note of the note
+ * setting.  A beat with stickings keeps just its stickings ("R L", not "R e L a").
+ */
+function addCounting(sticking_array, time_division, timeSigTop, timeSigBottom) {
+  var fullSlots = notesPerMeasureInFullSizeArray(
+    isTripletDivision(time_division),
+    timeSigTop,
+    timeSigBottom
+  );
+  var step = fullSlots / ((time_division / 4) * timeSigTop * (4 / timeSigBottom));
+  var beat = fullSlots / timeSigTop;
+  if (step < 1 || step % 1 !== 0 || beat % step !== 0) return;
+  var isEmpty = function (sticking) {
+    return !sticking || sticking == constant_ABC_STICK_OFF;
+  };
+  for (var start = 0; start < sticking_array.length; start += beat) {
+    var slots = sticking_array.slice(start, start + beat);
+    if (slots.every(isEmpty))
+      for (var i = start; i < start + beat; i += step) sticking_array[i] = constant_ABC_STICK_COUNT;
+  }
+}
+
 export function create_ABC_from_snare_HH_kick_arrays(
   gu,
   sticking_array,
@@ -775,6 +802,8 @@ export function create_ABC_from_snare_HH_kick_arrays(
   timeSigTop,
   timeSigBottom
 ) {
+  if (gu.showCounts) addCounting(sticking_array, time_division, timeSigTop, timeSigBottom);
+
   // convert sticking count symbol to the actual count
   // do this right before ABC output so it can't every get encoded into something that gets saved.
   convert_sticking_counts_to_actual_counts(
@@ -871,6 +900,17 @@ export function addFeelMarking(measureABC, text) {
  * @returns {string}
  */
 export function createABCFromGrooveData(gu, myGrooveData, renderWidth) {
+  // counting over the notes, when this groove asks for it
+  var showCounts = gu.showCounts;
+  gu.showCounts = !!myGrooveData.showCounts;
+  try {
+    return grooveDataABC(gu, myGrooveData, renderWidth);
+  } finally {
+    gu.showCounts = showCounts;
+  }
+}
+
+function grooveDataABC(gu, myGrooveData, renderWidth) {
   if (isMixedMeter(myGrooveData.barTimeSigs, myGrooveData.numberOfMeasures))
     return createMixedMeterABC(gu, myGrooveData, renderWidth);
 
