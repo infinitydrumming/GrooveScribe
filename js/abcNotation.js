@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -886,8 +886,15 @@ export function getFeelMarkings(
 }
 
 // Print `text` over the first note of one bar's ABC (the start of its hands voice).
+// When counts or stickings are written over the bar (Infinity Drumming, 2026), the
+// text goes above them instead, on an invisible bar line at the start of the
+// stickings voice: there it neither pushes the counts out of line nor spaces the
+// first note out.
+var FIRST_STICKING = /(V:Stickings[^\n]*\n(?:\[M:[^\]]*\])?)("[^"]+"x)/;
 export function addFeelMarking(measureABC, text) {
   if (!text) return measureABC;
+  if (FIRST_STICKING.test(measureABC))
+    return measureABC.replace(FIRST_STICKING, '$1"@4,84' + text + '"[|]$2');
   return measureABC.replace('%%voicemap drum\n', '%%voicemap drum\n"^' + text + '"');
 }
 

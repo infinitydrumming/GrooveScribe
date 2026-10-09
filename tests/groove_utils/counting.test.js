@@ -38,6 +38,20 @@ describe('counting over the notes', () => {
     ).toBe('1 2 3 1 2 3 4 5');
   });
 
+  it('puts "Swing" / "Straight" above the counts, not between them and the music', () => {
+    const abc = gu.createABCFromGrooveData(
+      gu.getGrooveDataFromUrlString(
+        '?TimeSig=4/4&Div=16&Swing=30&Measures=2&StraightBars=2&Count=1' +
+          '&H=|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-x-|'
+      ),
+      800
+    );
+    // on an invisible bar line at the start of the counts, so the counts stay in line
+    expect(abc).toContain('"@4,84Swing"[|]"1"x');
+    expect(abc).toContain('"@4,84Straight"[|]"1"x');
+    expect(abc).not.toContain('"^Straight"');
+  });
+
   it('is saved in the link', () => {
     const gd = gu.getGrooveDataFromUrlString(groove + '&Count=1');
     expect(gd.showCounts).toBe(true);
