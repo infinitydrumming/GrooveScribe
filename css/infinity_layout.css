@@ -403,16 +403,6 @@ body,
   font-weight: 700;
 }
 
-/* what's new, at the end of the page */
-#creditsFeatures {
-  max-width: 1100px;
-  margin: 18px auto 0;
-  font-size: 12px;
-  line-height: 1.5;
-  text-align: center;
-  color: var(--id-text-2);
-}
-
 /* ---------- play bar ---------- */
 #midiPlayer {
   position: fixed;
@@ -623,9 +613,6 @@ body,
   /* the grid scrolls sideways inside its card, notes kept big enough to tap */
   #musicalInput {
     overflow-x: auto;
-  }
-  #creditsFeatures {
-    font-size: 11px;
   }
   #TopNav {
     gap: 6px;
