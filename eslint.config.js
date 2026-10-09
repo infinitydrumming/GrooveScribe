@@ -108,6 +108,7 @@ export default [
       'js/ornaments.js',
       'js/barMeters.js',
       'js/practiceTimer.js',
+      'js/myGrooves.js',
       'js/groove_utils.js',
       'js/groove_writer.js',
       'js/grooves.js',

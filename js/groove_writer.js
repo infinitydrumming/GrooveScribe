@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -98,6 +98,7 @@ import {
 } from './constants.js';
 import { beamGroupEnds } from './musicMath.js';
 import { newExactTimeTrack } from './midiFile.js';
+import { loadMyGrooves, saveMyGroove, removeMyGroove, myGroovesMenuHTML } from './myGrooves.js';
 import {
   parsePracticeLimit,
   practiceLimitToText,
@@ -1242,6 +1243,9 @@ function GrooveWriter() {
   root.groovesAnchorClick = function (event) {
     var contextMenu = document.getElementById('grooveListWrapper');
     if (contextMenu) {
+      var myGroovesMenu = document.getElementById('myGroovesMenu');
+      if (myGroovesMenu)
+        myGroovesMenu.innerHTML = myGroovesMenuHTML(loadMyGrooves(deviceStorage()));
       var anchorPoint = document.getElementById('groovesAnchor');
 
       if (anchorPoint) {
@@ -3512,20 +3516,23 @@ function GrooveWriter() {
     });
   };
 
+  // the view switch: the student view hides the editing tools (Infinity Drumming, 2026)
+  var STUDENT_VIEW_LABEL = '<i class="fa fa-eye"></i> Student view';
+  var EDIT_VIEW_LABEL = '<i class="fa fa-pencil"></i> Edit';
   root.swapViewEditMode = function (dontUpdateURL) {
     var view_edit_button = document.getElementById('view-edit-switch');
 
     if (root.myGrooveUtils.viewMode) {
       showHideCSS_ClassDisplay('.edit-block', true, true, 'block'); // show
 
-      if (view_edit_button) view_edit_button.innerHTML = 'Switch to VIEW mode';
+      if (view_edit_button) view_edit_button.innerHTML = STUDENT_VIEW_LABEL;
       root.myGrooveUtils.viewMode = false;
 
       if (!dontUpdateURL) root.updateCurrentURL();
     } else {
       showHideCSS_ClassDisplay('.edit-block', true, false, 'block'); // hide
 
-      if (view_edit_button) view_edit_button.innerHTML = 'Switch to EDIT mode';
+      if (view_edit_button) view_edit_button.innerHTML = EDIT_VIEW_LABEL;
       root.myGrooveUtils.viewMode = true;
       if (!dontUpdateURL) root.updateCurrentURL();
     }
@@ -5285,6 +5292,79 @@ function GrooveWriter() {
     copyText.setSelectionRange(0, 99999);
 
     document.execCommand('copy');
+    showButtonDone('fullURLPopupCopyButton', '<i class="fa fa-check"></i> Copied');
+  };
+
+  // --- Save & Share: My Grooves and sending the link (Infinity Drumming, 2026) ---
+  function deviceStorage() {
+    try {
+      return window.localStorage;
+    } catch (err) {
+      console.warn('This browser blocks storage, so My Grooves stays empty:', err);
+      return null;
+    }
+  }
+
+  // a button says it's done ("Copied", "Saved") for a moment
+  function showButtonDone(id, html) {
+    var button = document.getElementById(id);
+    if (!button) return;
+    if (button.dataset.label === undefined) button.dataset.label = button.innerHTML;
+    button.innerHTML = html;
+    button.classList.add('saved');
+    setTimeout(function () {
+      button.innerHTML = button.dataset.label || '';
+      button.classList.remove('saved');
+    }, 2500);
+  }
+
+  root.saveToMyGrooves = function () {
+    var title = /** @type {HTMLInputElement | null} */ (document.getElementById('tuneTitle'));
+    var saved = saveMyGroove(
+      deviceStorage(),
+      title ? title.value : '',
+      get_FullURLForPage(),
+      new Date().toISOString()
+    );
+    showButtonDone(
+      'saveToMyGroovesButton',
+      saved
+        ? '<i class="fa fa-check"></i><span><b>Saved to My Grooves</b><small>Find it under Grooves &rsaquo; My Grooves</small></span>'
+        : '<i class="fa fa-exclamation-triangle"></i><span><b>Couldn\'t save on this device</b><small>Bookmark the link instead</small></span>'
+    );
+  };
+
+  root.loadMyGroove = function (index) {
+    var entry = loadMyGrooves(deviceStorage())[index];
+    if (entry) root.loadNewGroove(entry.search);
+  };
+
+  root.removeMyGroove = function (index) {
+    removeMyGroove(deviceStorage(), index);
+    var myGroovesMenu = document.getElementById('myGroovesMenu');
+    if (myGroovesMenu) myGroovesMenu.innerHTML = myGroovesMenuHTML(loadMyGrooves(deviceStorage()));
+  };
+
+  function shareLinkText() {
+    var link = /** @type {HTMLInputElement | null} */ (
+      document.getElementById('fullURLPopupTextField')
+    );
+    return link && link.value ? link.value : get_FullURLForPage();
+  }
+
+  root.shareByWhatsApp = function () {
+    window.open(
+      'https://wa.me/?text=' + encodeURIComponent('Check out this groove: ' + shareLinkText()),
+      '_blank'
+    );
+  };
+
+  root.shareByEmail = function () {
+    window.location.href =
+      'mailto:?subject=' +
+      encodeURIComponent('A groove from Infinity Scribe') +
+      '&body=' +
+      encodeURIComponent('Check out this groove:\n\n' + shareLinkText());
   };
 
   root.close_FullURLPopup = function () {

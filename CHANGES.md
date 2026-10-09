@@ -11,6 +11,30 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-09 — new layout, Save & Share, My Grooves, student view
+
+- New `css/infinity_layout.css` (index.html only; the embed pages keep their look):
+  a header (logo, Grooves, Permutations, Help, Undo, **Save & Share**), one
+  toolbar (time signature, note setting, metronome, counting, view), the content
+  as cards, the play bar pinned to the bottom of the window, and the credits in a
+  small strip under it. Every control keeps its id and job. The music area is as
+  wide as before, so the golden-master sheet music and MIDI are unchanged; the
+  two whole-page smoke screenshots change.
+- Bars wrap onto the next line when they don't fit (they used to run off the right
+  of the screen). Each bar is a card headed "Bar 1", "Bar 2"... with its time
+  signature, swing, copy, paste and remove buttons along the top. Notes that are on
+  show in each drum's colour (hi-hat blue, snare amber, kick navy) by CSS over the
+  editor's own black, which it still reads back.
+- The view switch is now **Student view** / **Edit**.
+- **Save & Share** panel (the old share pop-up, same ids): "Your groove is saved
+  in this link", Copy link, short link and embed code, **Save to My Grooves**,
+  WhatsApp, Email, Print / PDF, MIDI file.
+- New `js/myGrooves.js`: **My Grooves**, grooves saved in this browser's local
+  storage, listed at the top of the Grooves menu.
+- index.html now has a phone `viewport` setting, so phones get the narrow layout
+  (icon-only header, scrolling toolbar, the grid scrolling sideways in its card)
+  instead of a shrunken desktop page.
+
 ## 2026-10-09 — counting over the notes
 
 - A **COUNTING** button writes the count over the notes ("1 e & a", "1 &", "1 & a"

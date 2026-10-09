@@ -1,0 +1,872 @@
+/* Infinity Drumming, 2026: the Infinity Scribe layout for the editor (index.html).
+ *
+ *   header   (#TopNav)        logo, Grooves, Permutations, Help, Undo, Save & Share
+ *   toolbar  (#LeftHandNav)   time signature, note setting, metronome, counting, view
+ *   content  (#RightHandContent, scrolls)  sheet music, title fields, grid, tools
+ *   play bar (#midiPlayer)    pinned to the bottom of the window
+ *   credits  (#creditsFooter) small print under the play bar
+ *
+ * Loaded after infinity_theme.css, only by index.html (the embed pages keep their
+ * own look).  Every element keeps its id and job; only where it sits and how it
+ * looks change.  Parts hidden in the student view are .edit-block, which the
+ * editor shows and hides with an inline "display", so their display isn't forced
+ * here. */
+
+:root {
+  --layout-header-h: 60px;
+  --layout-toolbar-h: 56px;
+  --layout-player-h: 72px;
+  --layout-credits-h: 24px;
+  --layout-page-bg: #f4f6fa;
+  --layout-radius: 14px;
+}
+
+body,
+#GrooveWriter {
+  background-color: var(--layout-page-bg);
+}
+#GrooveWriter {
+  min-width: 0;
+}
+.fullWidthEle {
+  max-width: none;
+}
+
+/* ---------- header ---------- */
+#TopNav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  margin-left: 0;
+  height: var(--layout-header-h);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  background: var(--id-navy-900);
+  border-bottom: 1px solid var(--id-navy-700);
+  z-index: 998;
+}
+#logoInHeader img {
+  display: block;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #fff;
+}
+#logoTextUpperLeft {
+  padding: 0;
+}
+#logoTextUpperLeft img {
+  display: block;
+  height: 32px;
+}
+#upperRight {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 0 auto;
+  float: none;
+}
+#TopNav .rightButtons,
+#TopNav #undoButton .left-button-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: auto;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--id-text-on-dark);
+  background: none;
+  font-size: 16px;
+  font-weight: 700;
+  transform: none;
+  cursor: pointer;
+}
+#TopNav .rightButtons i,
+#TopNav #undoButton i {
+  font-size: 18px;
+}
+#TopNav .rightButtons:hover,
+#TopNav #undoButton:hover .left-button-content {
+  background: var(--id-navy-700);
+}
+#TopNav #undoButton,
+#TopNav #undoButton:hover {
+  background: none;
+  transform: none;
+}
+#permutationAnchor:not(.enabled) {
+  color: var(--id-text-on-dark-3);
+}
+.headerDivider {
+  width: 1px;
+  height: 30px;
+  margin: 0 6px;
+  background: var(--id-navy-600);
+}
+#shareSaveButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 6px;
+  padding: 9px 18px;
+  border-radius: 20px;
+  background: var(--id-amber);
+  color: var(--id-navy-900);
+  font-size: 17px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+#shareSaveButton:hover {
+  background: #ffb547;
+}
+
+/* ---------- toolbar ---------- */
+#LeftHandNav {
+  position: fixed;
+  top: var(--layout-header-h);
+  left: 0;
+  width: 100%;
+  height: var(--layout-toolbar-h);
+  box-sizing: border-box;
+  background: #fff;
+  border: 0;
+  border-bottom: 1px solid var(--id-border);
+  z-index: 997;
+}
+#divisionButtonContainer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  padding: 0 16px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.toolbarLabel {
+  margin: 0 4px 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--id-text-2);
+}
+.toolbarLabel:first-child {
+  margin-left: 0;
+}
+.toolbarSpacer {
+  flex: 1 1 auto;
+  min-width: 12px;
+}
+#LeftHandNav .left-button,
+#LeftHandNav .left-button:hover,
+#LeftHandNav .left-button:active,
+#LeftHandNav .left-button.buttonSelected {
+  flex: none;
+  background: none;
+  transform: none;
+  box-shadow: none;
+  color: var(--id-text);
+}
+#LeftHandNav .left-button-content {
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--id-border);
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--id-text);
+  background: #fff;
+}
+#LeftHandNav .left-button:hover .left-button-content {
+  background: var(--id-blue-tint);
+}
+#LeftHandNav .left-button.buttonSelected .left-button-content {
+  background: var(--id-blue);
+  border-color: var(--id-blue);
+  color: #fff;
+}
+#LeftHandNav .left-button.disabled .left-button-content {
+  color: var(--id-border);
+  background: #fff;
+}
+#timeLabel {
+  height: auto;
+}
+#timeSigLabel {
+  display: inline;
+  margin: 0;
+  font-size: 17px;
+  color: var(--id-text);
+}
+#timeSubLabel {
+  display: none;
+}
+#metronomeContainer {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+#metronomeLabel {
+  height: auto;
+  margin: 0 6px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--id-text-2);
+}
+#LeftHandNav .metronomeButton {
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--id-text);
+  background: none;
+  cursor: pointer;
+}
+#LeftHandNav .metronomeButton:hover {
+  background: var(--id-blue-tint);
+}
+#LeftHandNav .metronomeButton.buttonSelected,
+#LeftHandNav .metronomeButton.selected {
+  background: var(--id-blue);
+  color: #fff;
+}
+#LeftHandNav .metronomeButton.Options {
+  margin-left: 4px;
+  border: 1px solid var(--id-border);
+}
+.toolbarToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  margin: 0 8px 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--id-text);
+  cursor: pointer;
+}
+.toolbarSwitch {
+  position: relative;
+  width: 34px;
+  height: 19px;
+  border-radius: 10px;
+  background: var(--id-border);
+}
+.toolbarSwitch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.15s ease;
+}
+.toolbarToggle.buttonSelected .toolbarSwitch {
+  background: var(--id-blue);
+}
+.toolbarToggle.buttonSelected .toolbarSwitch::after {
+  left: 17px;
+}
+
+/* ---------- content ---------- */
+#RightHandContent {
+  position: fixed;
+  top: calc(var(--layout-header-h) + var(--layout-toolbar-h));
+  left: 0;
+  right: 0;
+  bottom: calc(var(--layout-player-h) + var(--layout-credits-h));
+  width: auto;
+  height: auto;
+  box-sizing: border-box;
+  padding: 16px 20px 24px;
+  overflow-y: auto;
+  background: var(--layout-page-bg);
+}
+#sheetMusicDiv,
+#musicalInput,
+#sheetMusicTextFields,
+#PermutationOptions.displayed {
+  box-sizing: border-box;
+  margin-bottom: 14px;
+  background: #fff;
+  border: 1px solid var(--id-border);
+  border-radius: var(--layout-radius);
+  box-shadow: 0 1px 3px rgba(5, 17, 36, 0.06);
+}
+#sheetMusicDiv {
+  /* 20px page padding + 1px border + 15px padding each side: the music is as wide
+   * as it was beside the old 72px left-hand nav, so it is drawn just the same */
+  padding: 6px 15px;
+  overflow: hidden;
+}
+#sheetMusicTextFields {
+  padding: 10px 12px;
+  text-align: center;
+}
+#musicalInput {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--id-border);
+  white-space: normal; /* bars wrap onto the next line when they don't fit */
+  text-align: left;
+}
+#PermutationOptions.displayed {
+  padding: 10px 14px;
+}
+
+/* the tools under the grid */
+#bottomButtonRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+  background: none;
+  border: 0;
+}
+#bottomButtonRow .pageBottomButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 14px;
+  border: 1px solid var(--id-border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--id-navy-600);
+}
+#bottomButtonRow .pageBottomButton:hover {
+  background: var(--id-blue-tint);
+  color: var(--id-navy-900);
+}
+#bottomButtonRow .bottomButtonIcon {
+  display: inline-block;
+}
+#bottomButtonRow .bottomButtonIcon i,
+#bottomButtonRow .fa-2x {
+  font-size: 18px;
+}
+#bottomButtonRow #stickingsButton::before,
+#bottomButtonRow #stickingsButton.ClickToHide::before {
+  font-size: 18px;
+  line-height: 18px;
+}
+#bottomButtonRow #showHideTomsButton .bottomButtonIcon i {
+  font-size: 9px;
+}
+#bottomButtonRow .bottomButtonLabel {
+  display: inline;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* what's new, at the end of the page */
+#creditsFeatures {
+  max-width: 1100px;
+  margin: 18px auto 0;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--id-text-2);
+}
+
+/* ---------- play bar ---------- */
+#midiPlayer {
+  position: fixed;
+  top: auto;
+  bottom: var(--layout-credits-h);
+  left: 0;
+  width: 100%;
+  height: var(--layout-player-h);
+  background: var(--id-navy-900);
+  border-top: 1px solid var(--id-navy-700);
+  border-bottom: 0;
+  z-index: 999;
+}
+#midiPlayer .playerControl {
+  display: block;
+  height: 100%;
+  background: none;
+}
+#midiPlayer .playerControlsRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 100%;
+  padding: 0 18px;
+}
+#midiPlayer .midiPlayImage {
+  width: 54px;
+  height: 54px;
+  margin: 0;
+  line-height: 54px;
+  font-size: 24px;
+  background: var(--id-amber);
+}
+#midiPlayer .midiPlayImage:hover {
+  background: #ffb547;
+}
+#midiPlayer .midiPlayImage.Stopped::before,
+#midiPlayer .midiPlayImage.Paused::before,
+#midiPlayer .midiPlayImage.Playing::before {
+  color: var(--id-navy-900);
+}
+#midiPlayer .MIDIPlayTime {
+  width: auto;
+  min-width: 64px;
+  padding: 0;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--id-text-on-dark);
+}
+#midiPlayer .practiceTimerStatus {
+  margin: 0;
+}
+#midiPlayer .tempoAndProgress {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: auto;
+  height: auto;
+  flex: 1;
+}
+#midiPlayer .tempoRow,
+#midiPlayer .swingRow {
+  align-items: center;
+  gap: 10px;
+  height: auto;
+}
+#midiPlayer .tempoRow {
+  flex: 3;
+}
+#midiPlayer .swingRow {
+  flex: 2;
+}
+#midiPlayer .tempoLabel,
+#midiPlayer .swingLabel {
+  width: auto;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--id-text-on-dark-2);
+}
+#midiPlayer .tempoTextField {
+  width: 46px;
+  height: 30px;
+  margin: 0;
+  border-radius: 6px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--id-text-on-dark);
+  background: var(--id-navy-700);
+}
+#midiPlayer .swingOutput {
+  width: auto;
+  min-width: 40px;
+  padding: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--id-text-on-dark);
+}
+#midiPlayer .tempoInput,
+#midiPlayer .swingInput {
+  margin: 0;
+}
+
+/* ---------- credits, under the play bar ---------- */
+#creditsFooter {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--layout-credits-h);
+  box-sizing: border-box;
+  padding: 5px 12px;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 14px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  background: var(--id-navy-900);
+  border-top: 1px solid var(--id-navy-700);
+  color: var(--id-text-on-dark-3);
+  z-index: 999;
+}
+#creditsFooter a {
+  color: var(--id-text-on-dark-2);
+}
+
+/* ---------- pop-ups open in the middle, below the toolbar ---------- */
+#fullURLPopup,
+#metronomeAutoSpeedupConfiguration,
+#cursorTimingConfiguration,
+#graceNoteConfiguration,
+#practiceTimerConfiguration,
+#grooveClickConfiguration,
+#timeSigPopup {
+  position: fixed;
+  top: calc(var(--layout-header-h) + var(--layout-toolbar-h) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+}
+
+/* ---------- phones and narrow windows ---------- */
+@media (max-width: 1400px) {
+  /* the toolbar fits without its small section labels */
+  .toolbarLabel,
+  #metronomeLabel {
+    display: none !important;
+  }
+  #LeftHandNav .left-button-content {
+    padding: 0 10px;
+  }
+  #LeftHandNav .metronomeButton {
+    padding: 7px 8px;
+  }
+}
+@media (max-width: 900px) {
+  .headerButtonText {
+    display: none;
+  }
+  #logoTextUpperLeft img {
+    height: 26px;
+  }
+  #midiPlayer .swingRow {
+    display: none;
+  }
+}
+@media (max-width: 560px) {
+  :root {
+    --layout-player-h: 64px;
+  }
+  body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  /* the grid scrolls sideways inside its card, notes kept big enough to tap */
+  #musicalInput {
+    overflow-x: auto;
+  }
+  #creditsFeatures {
+    font-size: 11px;
+  }
+  #TopNav {
+    gap: 6px;
+    padding: 0 8px;
+  }
+  #logoInHeader {
+    display: none;
+  }
+  #shareSaveButton {
+    padding: 9px 12px;
+  }
+  #divisionButtonContainer {
+    padding: 0 8px;
+  }
+  #RightHandContent {
+    padding: 8px 6px 16px;
+  }
+  #sheetMusicDiv {
+    padding: 4px 6px;
+  }
+  #midiPlayer .playerControlsRow {
+    gap: 10px;
+    padding: 0 10px;
+  }
+  #midiPlayer .midiPlayImage {
+    width: 46px;
+    height: 46px;
+    line-height: 46px;
+  }
+  #midiPlayer .MIDIPlayTime {
+    font-size: 20px;
+    min-width: 0;
+  }
+  #creditsFooter {
+    font-size: 10px;
+  }
+  .sheetMusicTextField {
+    display: block;
+    margin: 4px 0;
+    text-align: left;
+  }
+  .sheetMusicTextField .sheetMusicInputField {
+    width: calc(100% - 90px);
+  }
+}
+
+/* ---------- the grid: each bar a card ---------- */
+#measureContainer {
+  counter-reset: bar;
+}
+#measureContainer .staff-container {
+  position: relative;
+  counter-increment: bar;
+  box-sizing: border-box;
+  margin: 6px;
+  padding: 34px 10px 8px 4px;
+  border: 1px solid var(--id-border);
+  border-radius: 12px;
+  background: #fbfcfe;
+  vertical-align: top;
+}
+#measureContainer .staff-container::before {
+  content: 'Bar ' counter(bar);
+  position: absolute;
+  top: 9px;
+  left: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--id-navy-900);
+}
+/* the bar's buttons along its top: time signature, swing, copy, paste, remove */
+#measureContainer .measureTools {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  flex-direction: row;
+  gap: 12px;
+}
+#measureContainer .measureTools > * {
+  margin-top: 0;
+}
+#measureContainer .barTimeSigButton,
+#measureContainer .straightBarButton {
+  order: -1;
+  padding: 2px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  border-radius: 12px;
+}
+#measureContainer .barTimeSigButton {
+  order: -2;
+  color: var(--id-blue);
+  background: var(--id-blue-tint);
+  border-color: #a8cdf3;
+}
+#measureContainer .copyMeasureButton,
+#measureContainer .pasteMeasureButton,
+#measureContainer .closeMeasureButton {
+  font-size: 15px;
+  color: #7d8ea5;
+}
+#measureContainer .copyMeasureButton:hover,
+#measureContainer .pasteMeasureButton:hover,
+#measureContainer .closeMeasureButton:hover {
+  color: var(--id-navy-900);
+}
+#addMeasureButton {
+  margin: 6px;
+  padding: 0 14px;
+  border: 2px dashed var(--id-border);
+  border-radius: 12px;
+  font-size: 26px;
+  line-height: 150px;
+  color: #7d8ea5;
+}
+
+/* notes that are on, in each drum's colour.  The editor paints them black and
+ * reads that inline colour back to know they're on, so the colour is changed
+ * here, on top, without touching it. */
+#measureContainer .hi-hat .note_part[style*='color: rgb(0, 0, 0)'],
+#measureContainer .cymbal .note_part[style*='color: rgb(0, 0, 0)'] {
+  color: var(--id-blue) !important;
+}
+#measureContainer .snare_circle[style*='background-color: rgb(0, 0, 0)'] {
+  background-color: var(--id-amber) !important;
+  border-color: var(--id-amber) !important;
+}
+#measureContainer .snare_accent[style*='color: rgb(255, 255, 255)'] {
+  color: var(--id-navy-900) !important;
+}
+#measureContainer .snare .note_part[style*='color: rgb(0, 0, 0)'] {
+  color: var(--id-orange) !important;
+}
+#measureContainer .kick_circle[style*='background-color: rgb(0, 0, 0)'],
+#measureContainer .tom_circle[style*='background-color: rgb(0, 0, 0)'] {
+  background-color: var(--id-navy-600) !important;
+  border-color: var(--id-navy-600) !important;
+}
+#measureContainer .kick .note_part[style*='color: rgb(0, 0, 0)'],
+#measureContainer .tom .note_part[style*='color: rgb(0, 0, 0)'] {
+  color: var(--id-navy-600) !important;
+}
+
+/* ---------- Save & Share ---------- */
+#fullURLPopup {
+  width: 460px;
+  padding: 20px 22px 18px;
+  border-radius: 16px;
+  text-align: left;
+}
+#fullURLPopupTitle {
+  margin-bottom: 12px;
+  font-size: 21px;
+  font-weight: 700;
+  text-align: left;
+  color: var(--id-text);
+}
+#fullURLPopupTitle i {
+  color: var(--id-blue);
+}
+#fullURLPopupCloseButton {
+  font-size: 18px;
+  color: #7d8ea5;
+}
+#fullURLPopupSaved {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 1px solid #9bd3ad;
+  border-radius: 10px;
+  background: #e9f7ee;
+  color: #14532d;
+  font-size: 15px;
+  line-height: 1.4;
+}
+#fullURLPopupSaved i {
+  margin-top: 1px;
+  font-size: 20px;
+  color: #1f8a46;
+}
+#fullURLPopupTextFieldContainer {
+  display: flex;
+  gap: 8px;
+  width: auto;
+}
+#fullURLPopupTextField {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  padding: 10px;
+  border: 1.5px solid var(--id-border);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--id-text-2);
+  font-family: Lato, sans-serif;
+  font-size: 14px;
+  text-align: left;
+}
+#fullURLPopupCopyButton {
+  flex: none;
+  padding: 10px 16px;
+  border-radius: 9px;
+  background: var(--id-amber);
+  color: var(--id-navy-900);
+  font-size: 16px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+#fullURLPopupSubTitle {
+  margin: 8px 0 4px;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  color: var(--id-text-2);
+}
+#fullURLPopupCheckboxes {
+  justify-content: flex-start;
+  gap: 18px;
+  width: auto;
+  margin: 6px 0 14px;
+}
+.fullURLPopupCheckboxLabel {
+  font-size: 13px;
+}
+#saveToMyGroovesButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--id-blue);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--id-blue);
+  font-family: Lato, sans-serif;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+#saveToMyGroovesButton i {
+  font-size: 20px;
+}
+#saveToMyGroovesButton small {
+  display: block;
+  font-size: 13px;
+  color: var(--id-text-2);
+}
+#saveToMyGroovesButton.saved {
+  border-color: #1f8a46;
+  color: #1f8a46;
+}
+#moreWaysTitle {
+  margin-top: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--id-text-2);
+}
+#moreWays {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+#moreWays button {
+  padding: 10px 4px;
+  border: 1px solid var(--id-border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--id-navy-600);
+  font-family: Lato, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#moreWays button:hover,
+#saveToMyGroovesButton:hover {
+  background: var(--id-blue-tint);
+}
+#moreWays i {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 20px;
+  color: var(--id-blue);
+}
+#shareButtonContainer {
+  display: none; /* the old social share buttons: WhatsApp and Email above instead */
+}
+
+/* My Grooves, at the top of the Grooves menu */
+.myGrooveDate {
+  margin-left: 6px;
+  font-size: 11px;
+  color: var(--id-text-2);
+}
+.myGrooveRemove {
+  float: right;
+  padding: 0 6px;
+  color: #7d8ea5;
+}
+.myGrooveRemove:hover {
+  color: var(--id-red);
+}
