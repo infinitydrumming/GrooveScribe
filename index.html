@@ -102,6 +102,11 @@
 			<div id="TopNav" class="fullWidthEle">
 				<span id="logoInHeader"><img src="images/InfinityDrumming_Logo.png" alt="Infinity Drumming"></span>
 				<span id="logoTextUpperLeft"><img src="images/InfinityScribe_Logo_word_stack.svg" alt="Infinity Scribe"></span>
+				<span class="headerDivider" id="headerTitleDivider"></span>
+				<span id="headerGrooveTitle" onclick="myGrooveWriter.showGrooveDetails();" title="Title, author and comment">
+					<span id="headerTitleText">Untitled groove</span><i class="fa fa-pencil" id="headerTitleEdit"></i>
+					<span id="headerTitleSub"></span>
+				</span>
 				<span id="upperRight">
 					<span class="rightButtons grooveDB_hidden" id="permutationAnchor" onclick="myGrooveWriter.permutationAnchorClick(event);"><i class="fa fa-random"></i><span class="headerButtonText"> Permutations</span></span>
 					<span class="rightButtons" id="groovesAnchor" onclick="myGrooveWriter.groovesAnchorClick(event);"><i class="fa fa-book"></i><span class="headerButtonText"> Grooves</span></span>
@@ -135,12 +140,6 @@
 				<div class="warnings" id="diverr">
 				</div>
 
-				<div id="sheetMusicTextFields" class="fullWidthEle grooveDB_hidden edit-block">
-					<span class="sheetMusicTextField"><b>Title:</b> <input class="sheetMusicInputField" id="tuneTitle" onchange="myGrooveWriter.refresh_ABC();" type="text"></span>
-					<span class="sheetMusicTextField"><b>Author:</b> <input class="sheetMusicInputField" id="tuneAuthor" onchange="myGrooveWriter.refresh_ABC();"  type="text"></span>
-					<span class="sheetMusicTextField"><b>Comment:</b> <input class="sheetMusicInputField" id="tuneComments" onchange="myGrooveWriter.refresh_ABC();"  type="text"></span>
-					<span id='KeyButton'><input type="checkbox" class="hiddenCheckbox" id="showLegend" onclick="myGrooveWriter.refresh_ABC();"><label id="LegendLabel" for="showLegend"><i class="fa fa-key"></i></label></span>
-				</div>
 
 				<div id="musicalInput" class="fullWidthEle edit-block">
 					<!-- The clickable note grid is built by js/main.js (was document.write). -->
@@ -539,6 +538,19 @@
 		</div>
 
 		<!-- this is used by the share/save button, and is hidden by default -->
+		<!-- groove details (Infinity Drumming, 2026): title, author and comment, opened from the header -->
+		<div id="grooveDetailsPopup">
+			<span id="grooveDetailsClose" onclick="myGrooveWriter.close_GrooveDetails();"><i class="fa fa-lg fa-times-circle"></i></span>
+			<div id="grooveDetailsTitle">Groove details</div>
+			<div id="sheetMusicTextFields" class="grooveDB_hidden">
+				<label class="sheetMusicTextField">Title <input class="sheetMusicInputField" id="tuneTitle" onchange="myGrooveWriter.refresh_ABC();" type="text" placeholder="e.g. Funky Drummer"></label>
+				<label class="sheetMusicTextField">Author <input class="sheetMusicInputField" id="tuneAuthor" onchange="myGrooveWriter.refresh_ABC();"  type="text" placeholder="e.g. Infinity Drumming"></label>
+				<label class="sheetMusicTextField">Comment <input class="sheetMusicInputField" id="tuneComments" onchange="myGrooveWriter.refresh_ABC();"  type="text" placeholder="e.g. Grade 3, play along at 90"></label>
+				<span id='KeyButton'><input type="checkbox" id="showLegend" onclick="myGrooveWriter.refresh_ABC();"><label id="LegendLabel" for="showLegend">Show the key to the drum symbols on the music</label></span>
+			</div>
+			<div id="grooveDetailsButtons"><button id="grooveDetailsDone" onclick="myGrooveWriter.close_GrooveDetails();">Done</button></div>
+		</div>
+
 		<!-- Save & Share (Infinity Drumming, 2026): the groove is saved in its link -->
 		<div id="fullURLPopup">
 			<span id="fullURLPopupCloseButton" onclick="myGrooveWriter.close_FullURLPopup();"><i class="fa fa-lg fa-times-circle"></i></span>

@@ -38,6 +38,9 @@ The original copyright notices and credits are unchanged.
   signature, swing, copy, paste and remove buttons along the top. Notes that are on
   show in each drum's colour (hi-hat blue, snare amber, kick navy) by CSS over the
   editor's own black, which it still reads back.
+- The groove's title, author and comment show in the header; clicking them opens
+  a "Groove details" box with the Title, Author and Comment fields and the key
+  switch (same ids), so they no longer sit between the music and the grid.
 - The view switch is now **Student view** / **Edit**.
 - **Save & Share** panel (the old share pop-up, same ids): "Your groove is saved
   in this link", Copy link, short link and embed code, **Save to My Grooves**,

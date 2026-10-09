@@ -63,6 +63,44 @@ body,
   display: block;
   height: 32px;
 }
+/* the groove's title, author and comment; the pencil opens them */
+#headerGrooveTitle {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  column-gap: 8px;
+  min-width: 0;
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: var(--id-text-on-dark);
+  cursor: pointer;
+}
+#headerGrooveTitle:hover {
+  background: var(--id-navy-700);
+}
+#headerTitleText {
+  overflow: hidden;
+  font-size: 19px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#headerTitleEdit {
+  font-size: 15px;
+  color: var(--id-text-on-dark-2);
+}
+#headerTitleSub {
+  grid-column: 1 / span 2;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--id-text-on-dark-2);
+}
+#headerTitleSub:empty {
+  display: none;
+}
 #upperRight {
   display: flex;
   align-items: center;
@@ -294,7 +332,6 @@ body,
 }
 #sheetMusicDiv,
 #musicalInput,
-#sheetMusicTextFields,
 #PermutationOptions.displayed {
   box-sizing: border-box;
   margin-bottom: 14px;
@@ -308,10 +345,6 @@ body,
    * as it was beside the old 72px left-hand nav, so it is drawn just the same */
   padding: 6px 15px;
   overflow: hidden;
-}
-#sheetMusicTextFields {
-  padding: 10px 12px;
-  text-align: center;
 }
 #musicalInput {
   padding: 10px 8px;
@@ -515,6 +548,7 @@ body,
 #graceNoteConfiguration,
 #practiceTimerConfiguration,
 #grooveClickConfiguration,
+#grooveDetailsPopup,
 #timeSigPopup {
   position: fixed;
   top: calc(var(--layout-header-h) + var(--layout-toolbar-h) + 8px);
@@ -599,13 +633,10 @@ body,
   #creditsFooter {
     font-size: 10px;
   }
-  .sheetMusicTextField {
-    display: block;
-    margin: 4px 0;
-    text-align: left;
-  }
-  .sheetMusicTextField .sheetMusicInputField {
-    width: calc(100% - 90px);
+  #headerTitleDivider,
+  #headerTitleText,
+  #headerTitleSub {
+    display: none;
   }
 }
 
@@ -869,4 +900,86 @@ body,
 }
 .myGrooveRemove:hover {
   color: var(--id-red);
+}
+
+/* ---------- groove details ---------- */
+#grooveDetailsPopup {
+  display: none;
+  z-index: 999;
+  width: 420px;
+  padding: 20px 22px 18px;
+  border: 1px solid var(--id-border);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--id-text);
+  box-shadow: 0 12px 32px rgba(5, 17, 36, 0.35);
+}
+#grooveDetailsTitle {
+  margin-bottom: 12px;
+  font-size: 21px;
+  font-weight: 700;
+}
+#grooveDetailsClose {
+  float: right;
+  font-size: 18px;
+  color: #7d8ea5;
+  cursor: pointer;
+}
+#grooveDetailsPopup .sheetMusicTextField {
+  display: block;
+  text-align: left;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--id-text-2);
+}
+#grooveDetailsPopup .sheetMusicInputField {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 4px;
+  padding: 9px 10px;
+  border: 1.5px solid var(--id-border);
+  border-radius: 9px;
+  font-family: Lato, sans-serif;
+  font-size: 16px;
+  color: var(--id-text);
+}
+#grooveDetailsPopup #KeyButton {
+  display: block;
+  float: none;
+  padding: 0;
+  font-size: 14px;
+  text-align: left;
+}
+#grooveDetailsPopup #LegendLabel {
+  margin: 0 0 0 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  color: var(--id-text);
+}
+#grooveDetailsButtons {
+  margin-top: 14px;
+  text-align: right;
+}
+#grooveDetailsDone {
+  padding: 8px 22px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--id-blue);
+  color: #fff;
+  font-family: Lato, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#grooveDetailsPopup #sheetMusicTextFields {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
 }

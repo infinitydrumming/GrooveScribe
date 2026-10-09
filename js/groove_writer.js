@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -2898,6 +2898,7 @@ function GrooveWriter() {
     }
 
     clearHiddenBarSlots();
+    refreshHeaderTitle();
     var fullABC = generate_ABC(renderWidth);
 
     document.getElementById('ABCsource').value = fullABC;
@@ -4077,6 +4078,38 @@ function GrooveWriter() {
     setCounting(!root.myGrooveUtils.showCounts);
     updateSheetMusic();
     root.updateCurrentURL(); // counting is part of the link
+  };
+
+  // --- Groove details in the header (Infinity Drumming, 2026) ---
+  // The title, "by" the author and the comment, shown in the header; the pencil
+  // opens the fields to change them.
+  function inputValue(id) {
+    var input = /** @type {HTMLInputElement | null} */ (document.getElementById(id));
+    return input ? input.value.trim() : '';
+  }
+
+  function refreshHeaderTitle() {
+    var title = document.getElementById('headerTitleText');
+    var sub = document.getElementById('headerTitleSub');
+    if (!title || !sub) return;
+    title.textContent = inputValue('tuneTitle') || 'Untitled groove';
+    var author = inputValue('tuneAuthor');
+    sub.textContent = [author ? 'by ' + author : '', inputValue('tuneComments')]
+      .filter(Boolean)
+      .join(' · ');
+  }
+
+  root.showGrooveDetails = function () {
+    var popup = document.getElementById('grooveDetailsPopup');
+    if (popup) popup.style.display = 'block';
+    var title = document.getElementById('tuneTitle');
+    if (title) title.focus();
+  };
+
+  root.close_GrooveDetails = function () {
+    var popup = document.getElementById('grooveDetailsPopup');
+    if (popup) popup.style.display = 'none';
+    root.refresh_ABC();
   };
 
   // the speed-up counts bars, not minutes
