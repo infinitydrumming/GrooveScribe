@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
@@ -156,7 +156,7 @@
 					Infinity Scribe &middot; based on <a href="https://github.com/montulli/GrooveScribe" target="_blank" rel="noopener">Groove Scribe by Lou Montulli and Mike Johnston</a>
 					&middot; Modified by Infinity Drumming
 					&middot; <a href="https://github.com/infinitydrumming/GrooveScribe" target="_blank" rel="noopener">Source code (GPL v2)</a>
-					<div id="creditsFeatures">New in Infinity Scribe (updated 8 October 2026): a time signature for each bar &middot; flams, drags and ruffs on the snare, kick, toms and cymbals, with grace notes on any drum and a practice speed control &middot; screen stays on while playing &middot; new Infinity Drumming colours &middot; Brazilian swing and Brazilian grooves &middot; Blues Shuffle and an 8th-note Train Beat &middot; swung or straight feel for each bar &middot; auto speed-up with a target tempo &middot; groove / click bars that keep the groove&rsquo;s place, with a swung click in the silent bars &middot; cursor timing setting to line the cursor up with the sound &middot; mid tom, crash, ride and hi-hat foot lines &middot; tom and ride accents and ghost notes &middot; permutations for every note setting, including cross-rhythms and alternating kick &amp; snare &middot; copy and paste bars &middot; auto-scroll</div>
+					<div id="creditsFeatures">New in Infinity Scribe (updated 9 October 2026): practice timer (stop after so many minutes or bars) &middot; speed up every so many bars &middot; spot-on tempo for swung and triplet grooves &middot; new Infinity Scribe icon &middot; a time signature for each bar, with classic beaming in 3/8, 5/8 and 7/8 &middot; flams, drags and ruffs on the snare, kick, toms and cymbals, with grace notes on any drum and a practice speed control &middot; screen stays on while playing &middot; new Infinity Drumming colours &middot; Brazilian swing and Brazilian grooves &middot; Blues Shuffle and an 8th-note Train Beat &middot; swung or straight feel for each bar &middot; auto speed-up with a target tempo &middot; groove / click bars that keep the groove&rsquo;s place, with a swung click in the silent bars &middot; cursor timing setting to line the cursor up with the sound &middot; mid tom, crash, ride and hi-hat foot lines &middot; tom and ride accents and ghost notes &middot; permutations for every note setting, including cross-rhythms and alternating kick &amp; snare &middot; copy and paste bars &middot; auto-scroll</div>
 				</div>
 
 				<div id="midiTextOutput">
@@ -211,6 +211,7 @@
 			<ul id="metronomeOptionsContextMenu" class="list">
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuSolo"      onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("Solo");'  title="Just hear the metronome." >Solo</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuSpeedUp"   onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("SpeedUp");' title="Increase the tempo automatically" >Auto speed up</li>
+				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuPracticeTimer" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("PracticeTimer");' title="Stop playing after a number of minutes or bars">Practice timer</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuGrooveClick" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("GrooveClick");' title="Play the groove for some bars, then just the click for some bars">Groove / click bars</li>
 				<li class="metronomeOptionsContextMenuItem menuChecked" id="metronomeOptionsContextMenuAutoScroll" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("AutoScroll");' title="While playing, scroll the page to follow the playing bar of the music">Auto-scroll</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuCursorTiming" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("CursorTiming");' title="Line the blue playback cursor up with the sound on this device">Cursor timing</li>
@@ -574,6 +575,20 @@
 			<div id="graceNoteButtons"><button onclick="myGrooveWriter.graceNotesReset();">Reset</button> <button onclick="myGrooveWriter.close_GraceNoteConfiguration();">Done</button></div>
 		</div>
 
+		<!-- metronome option "Practice timer" (Infinity Drumming, 2026), hidden by default -->
+		<div id="practiceTimerConfiguration">
+			<div id="practiceTimerTitle">Practice timer</div>
+			<div class="practiceTimerText">Play for a set time or number of bars. When it's up, the groove finishes the bar it's in, ends on a crash, and stops.</div>
+			<div class="practiceTimerUnits">
+				<input type="radio" name="practiceTimerUnit" id="practiceTimerUnitMinutes" checked onchange="myGrooveWriter.practiceTimerUnitChange();"><label for="practiceTimerUnitMinutes">Minutes</label>
+				<input type="radio" name="practiceTimerUnit" id="practiceTimerUnitBars" onchange="myGrooveWriter.practiceTimerUnitChange();"><label for="practiceTimerUnitBars">Bars</label>
+			</div>
+			<div class="practiceTimerRow">Stop after <input type="number" min="1" max="999" value="5" id="practiceTimerAmount"> <span id="practiceTimerUnitLabel">minutes</span></div>
+			<div id="practiceTimerPresets"></div>
+			<div class="practiceTimerNote">The timer is saved in the groove's link, so you can send a student "play this for 10 minutes".</div>
+			<div id="practiceTimerButtons"><button onclick="myGrooveWriter.close_PracticeTimerConfiguration('off');">Turn off</button> <button id="practiceTimerSetButton" onclick="myGrooveWriter.close_PracticeTimerConfiguration('ok');">Set timer</button></div>
+		</div>
+
 		<!-- metronome option "Cursor timing" (Infinity Drumming, 2026), hidden by default -->
 		<div id="cursorTimingConfiguration">
 			<div id="cursorTimingTitle">Cursor timing</div>
@@ -586,8 +601,9 @@
 		<!-- this is used by the metronome auto speed up option menu, and is hidden by default -->
 		<div id="metronomeAutoSpeedupConfiguration">
 			<div id="metronomeAutoSpeedupOutputText">
-				Increase <span id="metronomeAutoSpeedupTempoIncreaseAmountOutput">5</span> bpm in
-				<span id="metronomeAutoSpeedupTempoIncreaseIntervalOutput">2</span> min
+				Increase <span id="metronomeAutoSpeedupTempoIncreaseAmountOutput">5</span> bpm
+				<span id="metronomeAutoSpeedupMinutesText">in <span id="metronomeAutoSpeedupTempoIncreaseIntervalOutput">2</span> min</span>
+				<span id="metronomeAutoSpeedupBarsText" style="display: none">every <span id="metronomeAutoSpeedupTempoIncreaseBarsOutput">16</span> bars</span>
 			</div>
 			<div id="metronomeAutoSpeedupConfigurationKeepIncreasing">
 				<input type="checkbox" checked id="metronomeAutoSpeedUpKeepGoingForever"><label for="metronomeAutoSpeedUpKeepGoingForever">Keep increasing after the first interval</label>
@@ -601,8 +617,16 @@
 			<div id="metronomeAutoSpeedupConfigurationSliders">
 				<div id="metronomeAutoSpeedupConfigurationAmountLable">Amount in BPM</div>
 				<input type=range min=1 max=100 value=5 class="metronomeAutoSpeedUpRange" id="metronomeAutoSpeedupTempoIncreaseAmount" oninput="myGrooveWriter.updateRangeLabel(event, 'metronomeAutoSpeedupTempoIncreaseAmountOutput');">
+				<!-- Infinity Drumming, 2026: speed up every so many minutes or bars -->
+				<div id="metronomeAutoSpeedupUnits">
+					Speed up every:
+					<input type="radio" name="metronomeAutoSpeedupUnit" id="metronomeAutoSpeedupUnitMinutes" checked onchange="myGrooveWriter.speedUpUnitChange();"><label for="metronomeAutoSpeedupUnitMinutes">minutes</label>
+					<input type="radio" name="metronomeAutoSpeedupUnit" id="metronomeAutoSpeedupUnitBars" onchange="myGrooveWriter.speedUpUnitChange();"><label for="metronomeAutoSpeedupUnitBars">bars</label>
+				</div>
 				<div id="metronomeAutoSpeedupConfigurationIntervalLable">Interval in Minutes</div>
 				<input type=range min=1 max=20 value=2 class="metronomeAutoSpeedUpRange" id="metronomeAutoSpeedupTempoIncreaseInterval" step="1" oninput="myGrooveWriter.updateRangeLabel(event, 'metronomeAutoSpeedupTempoIncreaseIntervalOutput');">
+				<div id="metronomeAutoSpeedupConfigurationBarsLable" style="display: none">Interval in Bars</div>
+				<input type=range min=4 max=64 value=16 step=4 class="metronomeAutoSpeedUpRange" id="metronomeAutoSpeedupTempoIncreaseBars" style="display: none" oninput="myGrooveWriter.updateRangeLabel(event, 'metronomeAutoSpeedupTempoIncreaseBarsOutput');">
 			</div>
 			<div id="metronomeAutoSpeedupCloseButtonDiv">
 				<button id="metronomeAutoSpeedupConfigurationCloseButton" onclick="myGrooveWriter.close_MetronomeAutoSpeedupConfiguration('ok');">Done</button>

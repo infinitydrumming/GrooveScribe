@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, grace-note spacing and volume for flams / drags / ruffs. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -160,6 +160,7 @@ function GrooveUtils() {
   // midi state variables
   root.isMIDIPaused = false;
   root.shouldMIDIRepeat = true;
+  root.stopAtEndOfRound = false; // stop when the tune now playing ends (the practice timer)
   root.swingIsEnabled = false;
   // set by the editor: called when the swing amount or style changes
   /** @type {null | (() => void)} */
@@ -1342,7 +1343,12 @@ function GrooveUtils() {
       // at the end of a song
       root.midiEventCallbacks.notePlaying(root.midiEventCallbacks.classRoot, 'complete', 1);
 
-      if (root.shouldMIDIRepeat) {
+      if (root.stopAtEndOfRound) {
+        // the practice timer is up (Infinity Drumming, 2026)
+        root.stopAtEndOfRound = false;
+        MIDI.Player.loop(false); // or the player starts the tune again by itself
+        root.stopMIDI_playback();
+      } else if (root.shouldMIDIRepeat) {
         global_total_midi_repeats++;
 
         // regenerate the MIDI if the data needs refreshing or the OffsetClick is rotating every time

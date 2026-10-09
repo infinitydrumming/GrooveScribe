@@ -11,6 +11,21 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-09 — practice timer, and speed-up every so many bars
+
+- New `js/practiceTimer.js`. **Practice timer** (Metronome Options): stop after a
+  number of minutes or bars. Links carry it as `Practice=10m` or `Practice=16b`.
+  The player shows what is left ("4:12 left", "12 bars left") and "Done!".
+- Playback goes round a set of bars (the groove, a permutation, or a groove /
+  click cycle), built again before each time round. When the practice ends inside
+  the next time round, only its bars up to the end are built, then a crash and a
+  kick on the next 1, so it stops right on the bar line (a minutes timer finishes
+  the bar the time runs out in). `GrooveUtils.stopAtEndOfRound` stops the player
+  at the end of that file.
+- **Auto speed up** can step every so many bars (4 to 64) instead of minutes, e.g.
+  5 bpm every 16 bars; "Keep increasing" and "Stop at" work as before. The minutes
+  setting is unchanged.
+
 ## 2026-10-09 — Infinity Scribe icon
 
 - New browser-tab, bookmark and home-screen icon: a navy "iS" with a white i and an

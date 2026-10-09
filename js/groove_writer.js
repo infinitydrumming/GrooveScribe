@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -98,6 +98,13 @@ import {
 } from './constants.js';
 import { beamGroupEnds } from './musicMath.js';
 import { newExactTimeTrack } from './midiFile.js';
+import {
+  parsePracticeLimit,
+  practiceLimitToText,
+  barsBeforePracticeEnds,
+  practiceLeftText,
+  speedUpStepsDue,
+} from './practiceTimer.js';
 import * as _perm from './permutations.js';
 import * as _view from './viewHtml.js';
 import * as _grid from './gridState.js';
@@ -1301,6 +1308,7 @@ function GrooveWriter() {
       root.myGrooveUtils.getMetronomeSolo() ||
       class_metronome_auto_speed_up_active ||
       class_groove_click_active ||
+      class_practice_limit ||
       root.myGrooveUtils.getMetronomeOffsetClickStart() != '1'
     ) {
       // make menu look active
@@ -1344,6 +1352,12 @@ function GrooveWriter() {
           );
           root.show_MetronomeAutoSpeedupConfiguration();
         }
+        break;
+
+      case 'PracticeTimer':
+        // turn it off if it is on, otherwise choose the time or bars
+        if (class_practice_limit) setPracticeLimit(null, false);
+        else root.show_PracticeTimerConfiguration();
         break;
 
       case 'GrooveClick':
@@ -2401,6 +2415,7 @@ function GrooveWriter() {
     myGrooveData.grooveClickClickBars = class_groove_click_active
       ? class_groove_click_click_bars
       : 0;
+    myGrooveData.practiceLimit = practiceLimitToText(class_practice_limit);
     myGrooveData.kickStemsUp = true;
 
     for (var i = 0; i < class_number_of_measures; i++) {
@@ -3559,7 +3574,10 @@ function GrooveWriter() {
     root.myGrooveUtils.midiEventCallbacks.loadMidiDataEvent = function (myroot, playStarting) {
       var midiURL;
 
-      if (playStarting) resetGrooveClickPhase(); // always start with the groove
+      if (playStarting) {
+        resetGrooveClickPhase(); // always start with the groove
+        resetPracticeCount();
+      }
 
       // a flam / drag / ruff on the groove's first note: its grace notes come
       // before the 1, so they are played at the end of the count-in, or in a
@@ -3588,19 +3606,13 @@ function GrooveWriter() {
           class_metronome_count_in_is_playing = false;
           root.myGrooveUtils.resetMetronomeOptionsOffsetClickStartRotation();
         }
-        midiURL = buildGrooveMidiUrl();
+        midiURL = buildPlayingRoundMidiUrl();
         class_loaded_midi_straight_bars = loadedMidiStraightBars();
         root.myGrooveUtils.midiResetNoteHasChanged();
       }
       root.myGrooveUtils.loadMIDIFromURL(midiURL);
       root.updateGrooveDBSource();
     };
-
-    function buildGrooveMidiUrl() {
-      if (class_groove_click_active && grooveClickSequenceLength() > 0)
-        return createGrooveClickCycleMidiUrl(class_groove_click_cycle_start_bar);
-      return createMidiUrlFromClickableUI('our_MIDI');
-    }
 
     root.myGrooveUtils.midiEventCallbacks.notePlaying = function (
       myroot,
@@ -3613,6 +3625,11 @@ function GrooveWriter() {
         root.metronomeAutoSpeedUpTempoUpdate();
       }
 
+      // the practice timer counts the bars played (not the count-in)
+      if (note_type == 'complete' && !class_metronome_count_in_is_playing) countPracticeRound();
+      if (class_practice_limit && note_type != 'complete' && note_type != 'clear')
+        showPracticeStatus(percent_complete);
+
       // the count-in track doesn't count towards the groove bars
       if (
         note_type == 'complete' &&
@@ -3624,6 +3641,13 @@ function GrooveWriter() {
       if (note_type != 'complete' && note_type != 'clear')
         percent_complete = playingPercentToGroovePercent(percent_complete);
       hilight_note(note_type, percent_complete);
+    };
+
+    // stopped: the practice timer shows its setting again (or "Done!")
+    var stopEvent = root.myGrooveUtils.midiEventCallbacks.stopEvent;
+    root.myGrooveUtils.midiEventCallbacks.stopEvent = function (myroot) {
+      stopEvent.call(this, myroot);
+      showPracticeStatus(-1);
     };
 
     root.myGrooveUtils.oneTimeInitializeMidi();
@@ -3717,6 +3741,11 @@ function GrooveWriter() {
     var targetTempo = getAutoSpeedUpTargetTempo();
     if (targetTempo) keepIncreasingForever = true;
 
+    if (speedUpCountsBars()) {
+      speedUpAfterBars(totalTempoIncreaseAmount, keepIncreasingForever, targetTempo);
+      return;
+    }
+
     var curTempo = root.myGrooveUtils.getTempo();
 
     var midiStartTime = root.myGrooveUtils.getMidiStartTime();
@@ -3754,6 +3783,321 @@ function GrooveWriter() {
     if (targetTempo && curTempo + tempoDiffInt > targetTempo) tempoDiffInt = targetTempo - curTempo; // never past the target (none if already there)
 
     if (tempoDiffInt > 0) root.myGrooveUtils.setTempo(root.myGrooveUtils.getTempo() + tempoDiffInt);
+  };
+
+  // --- Practice timer, and speed-up counted in bars (Infinity Drumming, 2026) ---
+  // Playback goes round a set of bars (the groove, a permutation, or a groove /
+  // click cycle), built again just before each time round.  When the practice
+  // ends inside the next time round, only its bars up to the end are built,
+  // followed by a crash on the next 1, so it stops right on the bar line.
+  /** @type {import('./practiceTimer.js').PracticeLimit | null} */
+  var class_practice_limit = null;
+  var class_practice_played = { bars: 0, ms: 0 }; // since play was pressed
+  var class_practice_ending = false; // the loaded time round is the last
+  var class_practice_finished = false; // the timer has stopped the playing
+  /** @type {number[]} */
+  var class_round_bar_ms = []; // the loaded time round: each bar's length in ms
+  var class_round_full_ms = 0; // the whole time round's, had it all been built
+  var class_speed_up_bars = { played: 0, steps: 0 };
+  var PRACTICE_ENDING_TICKS = 384; // the closing crash rings for 3 beats
+  var PRACTICE_PRESETS = { minutes: [2, 5, 10, 15, 20, 30], bars: [8, 16, 32, 64] };
+
+  /** @param {number[]} values */
+  function sumOf(values) {
+    return values.reduce(function (a, b) {
+      return a + b;
+    }, 0);
+  }
+
+  function resetPracticeCount() {
+    class_practice_played = { bars: 0, ms: 0 };
+    class_practice_ending = false;
+    class_practice_finished = false;
+    class_speed_up_bars = { played: 0, steps: 0 };
+    root.myGrooveUtils.stopAtEndOfRound = false;
+    showPracticeStatus(-1);
+  }
+
+  // The bars of the next time round, in playing order.  `bar` is a bar of the
+  // groove, or of the permutation when one is chosen; `click` marks the
+  // click-only bars of the groove / click option.
+  function playingRoundBars() {
+    var round = [];
+    var length = grooveClickSequenceLength();
+    if (class_groove_click_active && length > 0) {
+      var start = class_groove_click_cycle_start_bar;
+      var grooveBars = class_groove_click_groove_bars;
+      for (var g = 0; g < grooveBars; g++) round.push({ bar: (start + g) % length, click: false });
+      for (var c = 0; c < class_groove_click_click_bars; c++)
+        round.push({ bar: (start + grooveBars + c) % length, click: true });
+      return round;
+    }
+    for (var b = 0; b < length; b++) round.push({ bar: b, click: false });
+    return round;
+  }
+
+  function roundBarMs(entry) {
+    var bar = class_permutation_type == 'none' ? entry.bar : 0; // permutations play bar 1
+    return (barLengthInBeats(bar) * 60000) / root.myGrooveUtils.getTempo();
+  }
+
+  function practiceEndingMs() {
+    return ((PRACTICE_ENDING_TICKS / 128) * 60000) / root.myGrooveUtils.getTempo();
+  }
+
+  function buildGrooveMidiUrl() {
+    if (class_groove_click_active && grooveClickSequenceLength() > 0)
+      return createGrooveClickCycleMidiUrl(class_groove_click_cycle_start_bar);
+    return createMidiUrlFromClickableUI('our_MIDI');
+  }
+
+  // The MIDI for the next time round (the last one cut short by the practice timer)
+  function buildPlayingRoundMidiUrl() {
+    var round = playingRoundBars();
+    class_round_bar_ms = round.map(roundBarMs);
+    class_round_full_ms = sumOf(class_round_bar_ms);
+    class_practice_ending = false;
+    if (class_practice_limit && round.length) {
+      var count = barsBeforePracticeEnds(
+        class_practice_limit,
+        class_practice_played,
+        class_round_bar_ms
+      );
+      if (count > 0) {
+        class_practice_ending = true;
+        class_round_bar_ms = class_round_bar_ms.slice(0, count);
+        return practiceEndingMidiUrl(round.slice(0, count));
+      }
+    }
+    return buildGrooveMidiUrl();
+  }
+
+  // The last bars of the practice, then a crash and a kick on the next 1
+  function practiceEndingMidiUrl(entries) {
+    var midiFile = new Midi.File();
+    var midiTrack = newExactTimeTrack();
+    midiFile.addTrack(midiTrack);
+    midiTrack.setTempo(root.myGrooveUtils.getTempo());
+    midiTrack.setInstrument(0, 0x13);
+    if (class_groove_click_active)
+      class_groove_click_playing_start_bar = class_groove_click_cycle_start_bar;
+    var sections = class_permutation_type == 'none' ? null : get_shown_permutation_sections();
+    entries.forEach(function (entry) {
+      if (entry.click)
+        addClickBarToMidiTrack(
+          midiTrack,
+          isSequenceBarStraight(entry.bar),
+          sections ? 0 : entry.bar
+        );
+      else if (sections) addPermutationBarToMidiTrack(midiTrack, sections, entry.bar);
+      else addGrooveBarToMidiTrack(midiTrack, entry.bar, 'our_MIDI');
+    });
+    root.myGrooveUtils.setTrackLoopLeadIn(midiTrack, null); // nothing comes after it
+    midiTrack.addNoteOn(9, constant_OUR_MIDI_HIHAT_CRASH, 0, constant_OUR_MIDI_VELOCITY_ACCENT);
+    midiTrack.addNoteOn(9, constant_OUR_MIDI_KICK_NORMAL, 0, constant_OUR_MIDI_VELOCITY_ACCENT);
+    midiTrack.addNoteOff(0, 60, PRACTICE_ENDING_TICKS);
+    return 'data:audio/midi;base64,' + btoa(midiFile.toBytes());
+  }
+
+  // A time round has just played
+  function countPracticeRound() {
+    if (!class_practice_limit) return;
+    class_practice_played.bars += class_round_bar_ms.length;
+    class_practice_played.ms += sumOf(class_round_bar_ms);
+    if (class_practice_ending) {
+      class_practice_ending = false;
+      class_practice_finished = true;
+      root.myGrooveUtils.stopAtEndOfRound = true;
+    } else {
+      root.myGrooveUtils.midiNoteHasChanged(); // the next time round may be the last
+    }
+    showPracticeStatus(-1);
+  }
+
+  function practiceStatusElement() {
+    var element = document.getElementById('practiceTimerStatus');
+    if (element) return element;
+    var playTime = document.getElementById(
+      'MIDIPlayTime' + root.myGrooveUtils.grooveUtilsUniqueIndex
+    );
+    if (!playTime || !playTime.parentNode) return null;
+    element = document.createElement('span');
+    element.id = 'practiceTimerStatus';
+    element.className = 'practiceTimerStatus';
+    playTime.parentNode.insertBefore(element, playTime.nextSibling);
+    return element;
+  }
+
+  function practiceLimitLabel(limit) {
+    if (limit.unit == 'minutes') return limit.amount + ' min';
+    return limit.amount + (limit.amount == 1 ? ' bar' : ' bars');
+  }
+
+  // "4:12 left", "12 bars left", "Done!" or the timer's setting.  `percent` is how
+  // far through the loaded time round playing is (-1: at its start).
+  function showPracticeStatus(percent) {
+    var element = practiceStatusElement();
+    if (!element) return;
+    if (!class_practice_limit) {
+      element.textContent = '';
+      element.style.display = 'none';
+      return;
+    }
+    element.style.display = '';
+    if (class_practice_finished) {
+      element.textContent = 'Done!';
+      return;
+    }
+    if (!root.myGrooveUtils.isPlaying()) {
+      element.textContent = 'Timer: ' + practiceLimitLabel(class_practice_limit);
+      return;
+    }
+    var intoMs = 0;
+    var intoBars = 0;
+    if (percent > 0 && !class_metronome_count_in_is_playing) {
+      var roundMs = sumOf(class_round_bar_ms);
+      intoMs = Math.min(
+        percent * (roundMs + (class_practice_ending ? practiceEndingMs() : 0)),
+        roundMs
+      );
+      var barEnd = 0;
+      class_round_bar_ms.forEach(function (ms) {
+        barEnd += ms;
+        if (barEnd <= intoMs + 1) intoBars++;
+      });
+    }
+    element.textContent = practiceLeftText(class_practice_limit, {
+      bars: class_practice_played.bars + intoBars,
+      ms: class_practice_played.ms + intoMs,
+    });
+  }
+
+  /** @param {import('./practiceTimer.js').PracticeLimit | null} limit */
+  function setPracticeLimit(limit, fromLink) {
+    class_practice_limit = limit;
+    class_practice_finished = false;
+    addOrRemoveKeywordFromClassById(
+      'metronomeOptionsContextMenuPracticeTimer',
+      'menuChecked',
+      !!limit
+    );
+    root.metronomeOptionsMenuSetSelectedState();
+    root.myGrooveUtils.midiNoteHasChanged(); // the next time round may be the last
+    showPracticeStatus(-1);
+    if (!fromLink) root.updateCurrentURL(); // the timer is part of the link
+  }
+
+  function practiceTimerUnit() {
+    var bars = /** @type {HTMLInputElement | null} */ (
+      document.getElementById('practiceTimerUnitBars')
+    );
+    return bars && bars.checked ? 'bars' : 'minutes';
+  }
+
+  function practiceTimerAmountInput() {
+    return /** @type {HTMLInputElement | null} */ (document.getElementById('practiceTimerAmount'));
+  }
+
+  function showPracticeTimerPresets() {
+    var unit = practiceTimerUnit();
+    var presets = document.getElementById('practiceTimerPresets');
+    if (presets)
+      presets.innerHTML = PRACTICE_PRESETS[unit]
+        .map(function (amount) {
+          return (
+            '<button onclick="myGrooveWriter.practiceTimerPreset(' +
+            amount +
+            ');">' +
+            amount +
+            '</button>'
+          );
+        })
+        .join(' ');
+    var label = document.getElementById('practiceTimerUnitLabel');
+    if (label) label.textContent = unit;
+  }
+
+  root.show_PracticeTimerConfiguration = function () {
+    var limit = class_practice_limit || { unit: 'minutes', amount: 5 };
+    var unitInput = /** @type {HTMLInputElement | null} */ (
+      document.getElementById(
+        limit.unit == 'bars' ? 'practiceTimerUnitBars' : 'practiceTimerUnitMinutes'
+      )
+    );
+    if (unitInput) unitInput.checked = true;
+    var amount = practiceTimerAmountInput();
+    if (amount) amount.value = String(limit.amount);
+    showPracticeTimerPresets();
+    var popup = document.getElementById('practiceTimerConfiguration');
+    if (popup) popup.style.display = 'block';
+  };
+
+  // minutes <-> bars: a sensible amount for the new unit
+  root.practiceTimerUnitChange = function () {
+    var amount = practiceTimerAmountInput();
+    if (amount) amount.value = practiceTimerUnit() == 'bars' ? '16' : '5';
+    showPracticeTimerPresets();
+  };
+
+  root.practiceTimerPreset = function (value) {
+    var amount = practiceTimerAmountInput();
+    if (amount) amount.value = String(value);
+  };
+
+  // 'ok' sets the timer, anything else turns it off
+  root.close_PracticeTimerConfiguration = function (action) {
+    var limit = null;
+    if (action == 'ok') {
+      var amount = practiceTimerAmountInput();
+      limit = parsePracticeLimit(
+        parseInt(amount ? amount.value : '', 10) + (practiceTimerUnit() == 'bars' ? 'b' : 'm')
+      );
+    }
+    setPracticeLimit(limit, false);
+    var popup = document.getElementById('practiceTimerConfiguration');
+    if (popup) popup.style.display = 'none';
+  };
+
+  // the speed-up counts bars, not minutes
+  function speedUpCountsBars() {
+    var bars = /** @type {HTMLInputElement | null} */ (
+      document.getElementById('metronomeAutoSpeedupUnitBars')
+    );
+    return !!(bars && bars.checked);
+  }
+
+  // Speed up every so many bars: called after each time round
+  function speedUpAfterBars(amount, keepIncreasing, targetTempo) {
+    if (class_metronome_count_in_is_playing) return; // the count-in doesn't count
+    var everyInput = /** @type {HTMLInputElement | null} */ (
+      document.getElementById('metronomeAutoSpeedupTempoIncreaseBars')
+    );
+    var every = parseInt(everyInput ? everyInput.value : '16', 10);
+    class_speed_up_bars.played += class_round_bar_ms.length;
+    var steps = speedUpStepsDue(class_speed_up_bars.played, class_speed_up_bars.steps, every);
+    if (!keepIncreasing) steps = Math.min(steps, 1 - class_speed_up_bars.steps); // just once
+    if (steps <= 0) return;
+    class_speed_up_bars.steps += steps;
+    var tempo = root.myGrooveUtils.getTempo();
+    var newTempo = tempo + steps * amount;
+    if (targetTempo) newTempo = Math.min(newTempo, Math.max(targetTempo, tempo)); // never past it
+    if (newTempo > tempo) root.myGrooveUtils.setTempo(newTempo);
+  }
+
+  // minutes <-> bars in the speed-up settings
+  root.speedUpUnitChange = function () {
+    var bars = speedUpCountsBars();
+    [
+      ['metronomeAutoSpeedupMinutesText', !bars],
+      ['metronomeAutoSpeedupConfigurationIntervalLable', !bars],
+      ['metronomeAutoSpeedupTempoIncreaseInterval', !bars],
+      ['metronomeAutoSpeedupBarsText', bars],
+      ['metronomeAutoSpeedupConfigurationBarsLable', bars],
+      ['metronomeAutoSpeedupTempoIncreaseBars', bars],
+    ].forEach(function (shown) {
+      var element = document.getElementById(String(shown[0]));
+      if (element) element.style.display = shown[1] ? '' : 'none';
+    });
   };
 
   // the speed-up's "Stop at" tempo, or 0 when that box isn't ticked
@@ -4341,6 +4685,13 @@ function GrooveWriter() {
   function playingPercentToGroovePercent(percent) {
     if (percent < 0) return percent;
     if (class_metronome_count_in_is_playing) return -1;
+    if (class_practice_ending) {
+      // the practice timer's last time round: its bars, then the closing crash
+      var roundMs = sumOf(class_round_bar_ms);
+      var at = percent * (roundMs + practiceEndingMs());
+      if (at >= roundMs) return -1;
+      percent = at / class_round_full_ms;
+    }
     percent = snapToSwungGrid(percent);
     if (class_groove_click_active) return grooveClickCycleGroovePercent(percent);
     return percent;
@@ -4556,6 +4907,7 @@ function GrooveWriter() {
       popup.style.display = 'block';
     }
 
+    root.speedUpUnitChange();
     document.getElementById('metronomeAutoSpeedupTempoIncreaseAmountOutput').innerHTML =
       document.getElementById('metronomeAutoSpeedupTempoIncreaseAmount').value;
     document.getElementById('metronomeAutoSpeedupTempoIncreaseIntervalOutput').innerHTML =
@@ -5056,6 +5408,7 @@ function GrooveWriter() {
     root.myGrooveUtils.setGraceVolume(myGrooveData.graceVolume);
 
     setGrooveClickFromLink(myGrooveData.grooveClickGrooveBars, myGrooveData.grooveClickClickBars);
+    setPracticeLimit(parsePracticeLimit(myGrooveData.practiceLimit), true);
     root.setMetronomeFrequency(myGrooveData.metronomeFrequency);
 
     updateSheetMusic();

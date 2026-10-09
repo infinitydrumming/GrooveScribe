@@ -107,6 +107,7 @@ export default [
       'js/screenWakeLock.js',
       'js/ornaments.js',
       'js/barMeters.js',
+      'js/practiceTimer.js',
       'js/groove_utils.js',
       'js/groove_writer.js',
       'js/grooves.js',

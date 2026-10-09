@@ -1,4 +1,4 @@
-/* Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar, speed-up target tempo, cursor timing popup. See CHANGES.md. */
+/* Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar, speed-up target tempo, cursor timing popup, practice timer. See CHANGES.md. */
 /* this is for debugging layout issues - puts a red border around everything */
 /* body * { border: 1px solid red; }		 */
 DEBUG {
@@ -1161,6 +1161,7 @@ hr {
 #metronomeAutoSpeedupConfiguration,
 #cursorTimingConfiguration,
 #graceNoteConfiguration,
+#practiceTimerConfiguration,
 #grooveClickConfiguration,
 #timeSigPopup {
   /visibility: hidden;
@@ -1345,6 +1346,65 @@ hr {
 #cursorTimingButtons {
   text-align: center;
 }
+/* Infinity Drumming, 2026: practice timer popup */
+#practiceTimerTitle {
+  font-size: 22px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.practiceTimerText,
+.practiceTimerNote {
+  font-size: 13px;
+  margin: 6px 0;
+}
+.practiceTimerNote {
+  color: #666;
+}
+.practiceTimerUnits,
+.practiceTimerRow,
+#practiceTimerPresets,
+#practiceTimerButtons,
+#metronomeAutoSpeedupUnits {
+  text-align: center;
+  margin: 8px 0;
+}
+.practiceTimerUnits,
+.practiceTimerRow {
+  font-size: 18px;
+}
+#practiceTimerAmount {
+  width: 60px;
+  font-size: 18px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--highlight-color);
+}
+#practiceTimerPresets button {
+  min-width: 40px;
+  margin: 2px;
+  font-size: 15px;
+}
+#metronomeAutoSpeedupUnits {
+  font-size: 13px;
+}
+#metronomeAutoSpeedupTempoIncreaseBars {
+  background: var(--highlight-color);
+  width: 365px;
+}
+#metronomeAutoSpeedupConfigurationBarsLable {
+  font-size: 12px;
+}
+#metronomeAutoSpeedupTempoIncreaseBarsOutput {
+  color: var(--highlight-color);
+  font-weight: 700;
+}
+/* the practice timer in the player: "4:12 left" */
+.practiceTimerStatus {
+  margin-left: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 /* Infinity Drumming, 2026: flams, drags & ruffs popup */
 #graceNoteTitle {
   font-size: 22px;
@@ -1456,6 +1516,7 @@ hr {
   margin-top: 15px;
 }
 #grooveClickCloseButton,
+#practiceTimerSetButton,
 #metronomeAutoSpeedupConfigurationCloseButton {
   font-size: 16px;
   font-weight: 500;
