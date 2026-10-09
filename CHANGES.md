@@ -15,6 +15,9 @@ The original copyright notices and credits are unchanged.
 
 - Menus (Grooves, Help, Permutations, …) are kept fully on the screen; on a
   phone they used to open partly off the left edge.
+- The swing slider shows on phones too: on its own line in the play bar on an
+  upright phone, beside the tempo on a phone on its side (it was hidden on
+  narrow screens).
 - Phone on its side (screens under 520px tall): the header and toolbar scroll away
   with the page, the play bar is slimmer and the credits come at the end, so the
   music and grid get nearly all the height.

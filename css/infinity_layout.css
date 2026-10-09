@@ -579,14 +579,23 @@ body,
   #logoTextUpperLeft img {
     height: 26px;
   }
-  #midiPlayer .swingRow {
-    display: none;
+}
+/* narrow but tall (a phone held upright): swing gets its own line in the play bar */
+@media (max-width: 900px) and (min-height: 521px) {
+  :root {
+    --layout-player-h: 104px;
+  }
+  #midiPlayer .tempoAndProgress {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  #midiPlayer .tempoLabel,
+  #midiPlayer .swingLabel {
+    min-width: 50px;
   }
 }
 @media (max-width: 560px) {
-  :root {
-    --layout-player-h: 64px;
-  }
   body {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
