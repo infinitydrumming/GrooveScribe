@@ -11,6 +11,14 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-09 — phones: menus on screen, landscape
+
+- Menus (Grooves, Help, Permutations, …) are kept fully on the screen; on a
+  phone they used to open partly off the left edge.
+- Phone on its side (screens under 520px tall): the header and toolbar scroll away
+  with the page, the play bar is slimmer and the credits come at the end, so the
+  music and grid get nearly all the height.
+
 ## 2026-10-09 — our own short links (ready for Cloudflare Pages)
 
 - New `functions/api/shorten.js` and `functions/s/[code].js`, Cloudflare Pages

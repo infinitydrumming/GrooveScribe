@@ -983,3 +983,47 @@ body,
   background: none;
   box-shadow: none;
 }
+
+/* ---------- short screens (a phone on its side) ----------
+ * The header and toolbar scroll away with the page, so the music and the grid
+ * get nearly all the height; the play bar stays at the bottom, slimmer, and the
+ * credits come at the end of the page. */
+@media (max-height: 520px) {
+  :root {
+    --layout-player-h: 56px;
+  }
+  body {
+    height: auto;
+  }
+  #TopNav,
+  #LeftHandNav {
+    position: absolute;
+  }
+  #RightHandContent {
+    position: static;
+    padding-top: calc(var(--layout-header-h) + var(--layout-toolbar-h) + 10px);
+    padding-bottom: calc(var(--layout-player-h) + 12px);
+    overflow: visible;
+  }
+  #midiPlayer {
+    bottom: 0;
+  }
+  #creditsFooter {
+    position: static;
+    margin-top: 12px;
+    border-radius: 8px;
+    white-space: normal;
+    height: auto;
+  }
+  #midiPlayer .midiPlayImage {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+  }
+  /* the menus fit the height of the screen and scroll */
+  #grooveListWrapper,
+  .noteContextMenu ul {
+    max-height: calc(100vh - 16px);
+    overflow-y: auto;
+  }
+}
