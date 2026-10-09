@@ -11,6 +11,13 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-09 — Infinity Scribe icon
+
+- New browser-tab, bookmark and home-screen icon: a navy "iS" with a white i and an
+  amber S (`images/iscribe-icon-32/96/192/512.png`,
+  `images/iscribe-apple-touch-icon.png`), in place of the GrooveScribe "g", on the
+  app, help and about pages. The original icons stay in `images/`.
+
 ## 2026-10-09 — exact tempo
 
 - Swung, triplet and Brazilian-swing grooves played about 1.5% fast: the MIDI
