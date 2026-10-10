@@ -81,6 +81,14 @@
 					<span class="left-button subdivision edit-block" id="subdivision_24ths" onclick="myGrooveWriter.changeDivision(24);"><span class="left-button-content"><span>16th triplets</span></span></span>
 					<span class="left-button subdivision edit-block" id="subdivision_48ths" onclick="myGrooveWriter.changeDivision(48);"><span class="left-button-content"><span>Mixed</span></span></span>
 
+					<span class="phoneSelectWrap edit-block" id="notesSelectWrap" title="How many notes per beat the grid has"><select id="notesSelect" aria-label="Notes per beat" onchange="myGrooveWriter.changeDivision(parseInt(this.value, 10));">
+						<option value="8">Notes: 8ths</option>
+						<option value="16">Notes: 16ths</option>
+						<option value="32">Notes: 32nds</option>
+						<option value="12">Notes: 8th trip.</option>
+						<option value="24">Notes: 16th trip.</option>
+						<option value="48">Notes: Mixed</option>
+					</select></span>
 					<span class="toolbarSpacer"></span>
 					<span id="metronomeContainer" class="toolbarGroup">
 						<span id="metronomeLabel">METRONOME:</span>
@@ -89,6 +97,13 @@
 						<span class="metronomeButton" id="metronome4ths" onclick="myGrooveWriter.setMetronomeFrequency(4);">4th</span>
 						<span class="metronomeButton" id="metronome8ths" onclick="myGrooveWriter.setMetronomeFrequency(8);">8th</span>
 						<span class="metronomeButton" id="metronome16ths" onclick="myGrooveWriter.setMetronomeFrequency(16);">16th</span>
+						<span class="phoneSelectWrap" id="clickSelectWrap" title="The metronome click while it plays"><svg class="clickIcon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 3h8l4 18H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 17L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="9" r="1.6" fill="currentColor"/></svg><select id="clickSelect" aria-label="Metronome click" onchange="myGrooveWriter.setMetronomeFrequency(parseInt(this.value, 10));">
+						<option value="0">Click: off</option>
+						<option value="1">Click: bar</option>
+						<option value="4">Click: 4ths</option>
+						<option value="8">Click: 8ths</option>
+						<option value="16">Click: 16ths</option>
+					</select></span>
 						<span class="metronomeButton Options grooveDB_hidden" id="metronomeOptionsAnchor" onclick="myGrooveWriter.metronomeOptionsAnchorClick(event);">Options</span>
 					</span>
 					<span class="toolbarToggle grooveDB_hidden" id="countingButton" onclick="myGrooveWriter.toggleCounting();" title="Show the counting (1 e &amp; a) over the notes"><span class="toolbarSwitch"></span> Counting</span>
