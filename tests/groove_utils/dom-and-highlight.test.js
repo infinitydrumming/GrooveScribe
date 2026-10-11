@@ -53,6 +53,30 @@ describe('GrooveUtils context menu handling', () => {
       expect(document.body.style.cursor).toBe('auto');
     });
 
+    it('toggleContextMenu: a second tap on what opened a menu closes it (Infinity Drumming, 2026)', () => {
+      document.body.innerHTML =
+        '<div id="menu" style="display:none;"></div><span id="btnA"></span><span id="btnB"></span>';
+      const menu = document.getElementById('menu');
+      const btnA = document.getElementById('btnA');
+      const btnB = document.getElementById('btnB');
+
+      expect(gu.toggleContextMenu(menu, btnA)).toBe(true);
+      expect(menu.style.display).toBe('block');
+      expect(gu.toggleContextMenu(menu, btnA)).toBe(false); // same button: closes
+      expect(menu.style.display).toBe('none');
+      expect(gu.visible_context_menu).toBe(false);
+
+      gu.toggleContextMenu(menu, btnA);
+      expect(gu.toggleContextMenu(menu, btnB)).toBe(true); // another note: the menu moves there
+      expect(menu.style.display).toBe('block');
+      expect(gu.toggleContextMenu(menu, btnB)).toBe(false);
+
+      gu.showContextMenu(menu); // opened without a button (e.g. a sub-menu)
+      expect(gu.toggleContextMenu(menu, btnA)).toBe(true); // stays open, now from btnA
+      gu.hideContextMenu(menu);
+      expect(gu.toggleContextMenu(menu, btnA)).toBe(true); // closed some other way: opens again
+    });
+
     it('closes a previously visible menu before showing a new one', () => {
       document.body.innerHTML =
         '<div id="menuA" style="display:none;"></div><div id="menuB" style="display:none;"></div>';

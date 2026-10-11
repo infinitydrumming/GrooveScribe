@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-11 — Tap a menu's button again to close it; "ABC" permutations button
+
+- Tapping the button that opened a menu closes it again: Grooves, Permutations,
+  Help, the click's "..." options, Stickings, Download, the instrument labels and
+  the note menus (`toggleContextMenu` in `js/groove_utils.js`), and the Save &
+  Share and time signature panels (`js/groove_writer.js`). Tapping another
+  button or note still switches straight to its menu.
+- The permutations button's icon is now "ABC" (`index.html`), and the header's
+  buttons sit a little closer on phones so it fits narrow ones
+  (`css/infinity_layout.css`).
+
 ## 2026-10-11 — Phones get new versions straight away
 
 - Every file the app page loads now carries the release version in its address

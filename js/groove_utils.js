@@ -188,6 +188,7 @@ function GrooveUtils() {
   root.tempoChangeCallback = null; //triggered when the tempo changes.  ARG1 is the new Tempo integer (needs to be very fast, it can get called a lot of times from the slider)
 
   root.visible_context_menu = false; // a single context menu can be visible at a time.
+  var contextMenuOpener = null; // what opened it (see toggleContextMenu)
 
   // grooveDataNew builds a fresh GrooveData. The canonical shape and defaults
   // now live in grooveData.js (createGrooveData); this wrapper just threads
@@ -277,7 +278,20 @@ function GrooveUtils() {
     }, 100);
   };
 
+  // Open a menu from a button (or note); tapping the same one again closes it
+  // (Infinity Drumming, 2026).  Returns whether the menu is now open.
+  root.toggleContextMenu = function (contextMenu, opener) {
+    if (opener && root.visible_context_menu === contextMenu && contextMenuOpener === opener) {
+      root.hideContextMenu(contextMenu);
+      return false;
+    }
+    root.showContextMenu(contextMenu);
+    contextMenuOpener = opener || null;
+    return true;
+  };
+
   root.hideContextMenu = function (contextMenu) {
+    contextMenuOpener = null;
     document.onclick = false;
     document.body.style.cursor = 'auto'; // make document.onclick work on iPad
 
