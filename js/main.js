@@ -10,6 +10,7 @@
 import { GrooveWriter } from './groove_writer.js';
 import { GrooveUtils } from './groove_utils.js';
 import { grooves } from './grooves.js';
+import { startUpdateChecks } from './updateCheck.js';
 
 // Inline HTML handlers (onclick="myGrooveWriter.…") and other consumers still
 // reference these as globals, so expose them on window.
@@ -96,3 +97,6 @@ fillContainer(
 window.addEventListener('load', function () {
   myGrooveWriter.runsOnPageLoad();
 });
+
+// Offer to update when a newer version has gone live (Infinity Drumming, 2026).
+startUpdateChecks();

@@ -19,6 +19,7 @@
     "typecheck": "tsc --noEmit",
     "knip": "knip",
     "check": "npm run lint && npm run typecheck && npm run format:check && npm run test",
+    "stamp": "node scripts/stamp-version.mjs",
     "build:www": "node scripts/build-www.mjs",
     "cap:sync": "npm run build:www && cap sync"
   },

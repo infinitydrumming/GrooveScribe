@@ -1153,3 +1153,46 @@ body,
     line-height: 1;
   }
 }
+
+/* ---------- "A new version is ready" bar (js/updateCheck.js) ---------- */
+#updateBar {
+  position: fixed;
+  top: calc(var(--layout-header-h) + var(--layout-toolbar-h) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  box-sizing: border-box;
+  padding: 8px 8px 8px 16px;
+  border-radius: 12px;
+  background: var(--id-navy-900);
+  color: #fff;
+  font-family: Lato, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(5, 17, 36, 0.3);
+}
+#updateBarButton {
+  flex: none;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--id-amber);
+  color: var(--id-text);
+  font: inherit;
+  cursor: pointer;
+}
+#updateBarClose {
+  flex: none;
+  padding: 4px 8px;
+  border: 0;
+  background: none;
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
