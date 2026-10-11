@@ -11,6 +11,19 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-11 — Phones get new versions straight away
+
+- Every file the app page loads now carries the release version in its address
+  (`?v=...`; the modules through an import map in `index.html`), so a phone never
+  mixes files kept from an older version with a new one, and loads the new files
+  as soon as it has the new page. `npm run stamp` (`scripts/stamp-version.mjs`)
+  writes the version on `index.html` and in `version.json` for each release;
+  `tests/version.test.js` checks they agree.
+- A page left open checks `version.json` when it opens and whenever it comes back
+  into view; if a newer version is live it shows "A new version of Infinity
+  Scribe is ready" with an **Update** button, which reloads the page (the groove
+  is kept: it is in the page's address) (`js/updateCheck.js`).
+
 ## 2026-10-11 — Phone toolbar fits on every phone
 
 - On a phone held upright the toolbar's rows could be cut off at the top and

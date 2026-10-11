@@ -109,6 +109,7 @@ export default [
       'js/barMeters.js',
       'js/practiceTimer.js',
       'js/myGrooves.js',
+      'js/updateCheck.js',
       'js/groove_utils.js',
       'js/groove_writer.js',
       'js/grooves.js',

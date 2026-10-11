@@ -67,6 +67,7 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `browserInfo.js` — user-agent / touch probes.
 - `permutations.js` — pure permutation-mode note-array generators (+ kick-array merge/filter).
 - `viewHtml.js` — pure HTML string builders (staff container, permutation-options menu).
+- `updateCheck.js` — the "new version is ready" bar (compares its own `?v=` with `version.json`).
 - `gridState.js` — the DOM grid **read** layer: per-cell state (`is_*_on`/`get_*_state`)
   and whole-measure array readers (`get32NoteArrayFromClickableUI`, `muteArrayFromClickableUI`).
   Reads the ambient global `document`; caller state injected via ctx/callbacks.
@@ -83,6 +84,9 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
 
 ## Conventions & gotchas
 
+- **Releases are version-stamped:** run `npm run stamp` before each release (writes `?v=<version>` on
+  every file `index.html` loads, the import map for the modules, and `version.json`). After adding a
+  module run it too: `tests/version.test.js` fails until the import map covers every module.
 - **Adding a new `js/*.js` ES module:** add it to the module-files list in
   `eslint.config.js` (else "import/export only allowed with sourceType: module").
   App source is otherwise treated as classic scripts. `tsconfig.json` `include` lists
