@@ -65,7 +65,7 @@ describe('GrooveWriter view & lifecycle', () => {
 
       expect(gw.myGrooveUtils.viewMode).toBe(false);
       expect(document.getElementById('view-edit-switch').innerHTML).toBe(
-        '<i class="fa fa-eye"></i> Student view'
+        '<i class="fa fa-eye"></i> Student<span class="longLabel"> view</span>'
       );
       expect(document.querySelector('.edit-block').style.display).toBe('block');
     });

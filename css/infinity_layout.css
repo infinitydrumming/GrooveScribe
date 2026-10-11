@@ -594,20 +594,50 @@ body,
 @media (max-width: 900px) and (min-height: 521px) {
   :root {
     --layout-player-h: 104px;
-    --layout-toolbar-h: 100px;
+    --layout-toolbar-h: var(--layout-toolbar-auto-h, 104px);
   }
-  /* two rows: time, notes and click on the first, counting and the view switch on the second */
+  /* the toolbar wraps onto rows: time, notes and click first, then the click's
+   * options, counting and the view switches.  It grows to fit them all (a
+   * narrow screen or larger text can make a third row); js/main.js keeps the
+   * page below it in step. */
+  #LeftHandNav {
+    height: auto;
+  }
   #divisionButtonContainer {
     flex-wrap: wrap;
     align-content: center;
     row-gap: 8px;
+    height: auto;
+    padding-top: 8px;
+    padding-bottom: 8px;
     overflow-x: hidden;
   }
   #divisionButtonContainer .toolbarSpacer {
     display: none;
   }
   #metronomeContainer {
-    flex-wrap: nowrap;
+    display: contents;
+  }
+  #timeLabel {
+    order: 1;
+  }
+  #notesSelectWrap {
+    order: 2;
+  }
+  #clickSelectWrap {
+    order: 3;
+  }
+  #metronomeOptionsAnchor {
+    order: 4;
+  }
+  #countingButton {
+    order: 5;
+  }
+  #viewEditSwitch {
+    order: 6;
+  }
+  #advancedEditAnchor {
+    order: 7;
   }
   #midiPlayer .tempoAndProgress {
     flex-direction: column;
@@ -623,6 +653,13 @@ body,
   body {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+  }
+  /* "Student view" and "Advanced Edit" say just "Student" and "Advanced" */
+  .longLabel {
+    display: none;
+  }
+  #LeftHandNav .toolbarToggle {
+    margin: 0 4px 0 8px;
   }
   /* the grid scrolls sideways inside its card, notes kept big enough to tap */
   #musicalInput {
@@ -1101,11 +1138,9 @@ body,
     padding: 0 2px 0 6px;
     font-size: 13px;
   }
-  #notesSelect {
-    width: 128px;
-  }
-  #clickSelect {
-    width: 98px;
+  /* each as wide as the choice it shows (not the longest one) */
+  .phoneSelectWrap select {
+    field-sizing: content;
   }
   /* the click's extra options: just the dots */
   #LeftHandNav .metronomeButton.Options {

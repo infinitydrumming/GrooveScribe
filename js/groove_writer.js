@@ -3534,7 +3534,7 @@ function GrooveWriter() {
   };
 
   // the view switch: the student view hides the editing tools (Infinity Drumming, 2026)
-  var STUDENT_VIEW_LABEL = '<i class="fa fa-eye"></i> Student view';
+  var STUDENT_VIEW_LABEL = '<i class="fa fa-eye"></i> Student<span class="longLabel"> view</span>';
   var EDIT_VIEW_LABEL = '<i class="fa fa-pencil"></i> Edit';
   root.swapViewEditMode = function (dontUpdateURL) {
     var view_edit_button = document.getElementById('view-edit-switch');
