@@ -11,6 +11,16 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-11 — Phone toolbar fits on every phone
+
+- On a phone held upright the toolbar's rows could be cut off at the top and
+  bottom (narrower phones, and the touch-only "Advanced Edit" button made a
+  third row). The toolbar now grows to fit its rows and the page below follows
+  it (`js/main.js`); the rows keep a fixed order (time, notes, click; then the
+  click's options, counting and the view switches); the selectors are as wide as
+  the choice they show; and on phones "Student view" / "Advanced Edit" read
+  "Student" / "Advanced" (`css/infinity_layout.css`).
+
 ## 2026-10-09 — Notes and Click selectors on phones
 
 - On phones and narrow windows the rows of Notes buttons (8ths, 16ths, ...) and

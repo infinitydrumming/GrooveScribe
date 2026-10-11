@@ -60,8 +60,21 @@ if (utils.is_touch_device()) {
     'advancedEditSlot',
     '<span class="left-button edit-block" id="advancedEditAnchor" ' +
       'onclick="event.preventDefault(); myGrooveWriter.toggleAdvancedEdit()">' +
-      '<span class="left-button-content">Advanced Edit</span></span>'
+      '<span class="left-button-content"><span>Advanced<span class="longLabel"> Edit</span></span></span></span>'
   );
+}
+
+// A phone held upright: the toolbar's rows can wrap onto another (a narrow
+// screen, larger text), so the page below it follows its real height
+// (Infinity Drumming, 2026; see css/infinity_layout.css).
+const toolbar = document.getElementById('LeftHandNav');
+if (toolbar && typeof ResizeObserver != 'undefined') {
+  new ResizeObserver(function () {
+    document.documentElement.style.setProperty(
+      '--layout-toolbar-auto-h',
+      toolbar.offsetHeight + 'px'
+    );
+  }).observe(toolbar);
 }
 
 // Dynamic content regions previously built with document.write.
