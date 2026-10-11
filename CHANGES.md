@@ -11,6 +11,13 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-11 — "Advanced Edit" is now "Articulations"
+
+- The touch-screen button that makes a tap open a note's menu (accent, ghost
+  note, open hi-hat, flam...) instead of turning the note on or off is now
+  called **Articulations**, with a tooltip saying what it does (`js/main.js`);
+  the help page explains it, and press and hold (`gscribe_help.html`).
+
 ## 2026-10-11 — Tap a menu's button again to close it; "ABC" permutations button
 
 - Tapping the button that opened a menu closes it again: Grooves, Permutations,

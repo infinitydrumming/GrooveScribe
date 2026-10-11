@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
@@ -31,65 +31,65 @@
 		<script type="importmap">
 		{
 			"imports": {
-				"./js/abcNotation.js": "./js/abcNotation.js?v=20261011-1127",
-				"./js/barMeters.js": "./js/barMeters.js?v=20261011-1127",
-				"./js/browserInfo.js": "./js/browserInfo.js?v=20261011-1127",
-				"./js/constants.js": "./js/constants.js?v=20261011-1127",
-				"./js/gridState.js": "./js/gridState.js?v=20261011-1127",
-				"./js/grooveData.js": "./js/grooveData.js?v=20261011-1127",
-				"./js/groove_utils.js": "./js/groove_utils.js?v=20261011-1127",
-				"./js/groove_writer.js": "./js/groove_writer.js?v=20261011-1127",
-				"./js/grooves.js": "./js/grooves.js?v=20261011-1127",
-				"./js/midiFile.js": "./js/midiFile.js?v=20261011-1127",
-				"./js/musicMath.js": "./js/musicMath.js?v=20261011-1127",
-				"./js/myGrooves.js": "./js/myGrooves.js?v=20261011-1127",
-				"./js/noteArrays.js": "./js/noteArrays.js?v=20261011-1127",
-				"./js/ornaments.js": "./js/ornaments.js?v=20261011-1127",
-				"./js/permutations.js": "./js/permutations.js?v=20261011-1127",
-				"./js/practiceTimer.js": "./js/practiceTimer.js?v=20261011-1127",
-				"./js/screenWakeLock.js": "./js/screenWakeLock.js?v=20261011-1127",
-				"./js/updateCheck.js": "./js/updateCheck.js?v=20261011-1127",
-				"./js/urlSerialization.js": "./js/urlSerialization.js?v=20261011-1127",
-				"./js/viewHtml.js": "./js/viewHtml.js?v=20261011-1127"
+				"./js/abcNotation.js": "./js/abcNotation.js?v=20261011-1607",
+				"./js/barMeters.js": "./js/barMeters.js?v=20261011-1607",
+				"./js/browserInfo.js": "./js/browserInfo.js?v=20261011-1607",
+				"./js/constants.js": "./js/constants.js?v=20261011-1607",
+				"./js/gridState.js": "./js/gridState.js?v=20261011-1607",
+				"./js/grooveData.js": "./js/grooveData.js?v=20261011-1607",
+				"./js/groove_utils.js": "./js/groove_utils.js?v=20261011-1607",
+				"./js/groove_writer.js": "./js/groove_writer.js?v=20261011-1607",
+				"./js/grooves.js": "./js/grooves.js?v=20261011-1607",
+				"./js/midiFile.js": "./js/midiFile.js?v=20261011-1607",
+				"./js/musicMath.js": "./js/musicMath.js?v=20261011-1607",
+				"./js/myGrooves.js": "./js/myGrooves.js?v=20261011-1607",
+				"./js/noteArrays.js": "./js/noteArrays.js?v=20261011-1607",
+				"./js/ornaments.js": "./js/ornaments.js?v=20261011-1607",
+				"./js/permutations.js": "./js/permutations.js?v=20261011-1607",
+				"./js/practiceTimer.js": "./js/practiceTimer.js?v=20261011-1607",
+				"./js/screenWakeLock.js": "./js/screenWakeLock.js?v=20261011-1607",
+				"./js/updateCheck.js": "./js/updateCheck.js?v=20261011-1607",
+				"./js/urlSerialization.js": "./js/urlSerialization.js?v=20261011-1607",
+				"./js/viewHtml.js": "./js/viewHtml.js?v=20261011-1607"
 			}
 		}
 		</script>
 
-		<link rel="stylesheet" type="text/css" href="font-awesome/4.7.0/css/font-awesome.min.css?v=20261011-1127">
-		<link rel="stylesheet" type="text/css" href="css/share-button.min.css?v=20261011-1127">
-	    <link rel="stylesheet" type="text/css" href="css/groove_writer_orange.css?v=20261011-1127">
-		<link rel="stylesheet" type="text/css" href="css/groove_display_orange.css?v=20261011-1127">
-		<link rel="stylesheet" type="text/css" href="css/infinity_theme.css?v=20261011-1127">
-		<link rel="stylesheet" type="text/css" href="css/infinity_layout.css?v=20261011-1127">
+		<link rel="stylesheet" type="text/css" href="font-awesome/4.7.0/css/font-awesome.min.css?v=20261011-1607">
+		<link rel="stylesheet" type="text/css" href="css/share-button.min.css?v=20261011-1607">
+	    <link rel="stylesheet" type="text/css" href="css/groove_writer_orange.css?v=20261011-1607">
+		<link rel="stylesheet" type="text/css" href="css/groove_display_orange.css?v=20261011-1607">
+		<link rel="stylesheet" type="text/css" href="css/infinity_theme.css?v=20261011-1607">
+		<link rel="stylesheet" type="text/css" href="css/infinity_layout.css?v=20261011-1607">
 		<link href='https://fonts.googleapis.com/css?family=Lato:400,700,300,900' rel='stylesheet' type='text/css'>
 
 		<!--   Other peoples JS libraries    -->
-		<!-- <script src="./MIDI.js/js/MIDI/MIDI.JS.min.js?v=20261011-1127" type="text/javascript"></script> -->
-		<script src="./MIDI.js/js/MIDI/AudioDetect.js?v=20261011-1127" type="text/javascript"></script>
-		<script src="./MIDI.js/js/MIDI/LoadPlugin.js?v=20261011-1127" type="text/javascript"></script>
-		<script src="./MIDI.js/js/MIDI/Plugin.js?v=20261011-1127" type="text/javascript"></script>
-		<script src="./MIDI.js/js/MIDI/Player.js?v=20261011-1127" type="text/javascript"></script>
-		<script src="./MIDI.js/inc/DOMLoader.XMLHttp.js?v=20261011-1127" type="text/javascript"></script>
-		<script src="./MIDI.js/inc/jasmid/stream.js?v=20261011-1127"></script>
-		<script src="./MIDI.js/inc/jasmid/midifile.js?v=20261011-1127"></script>
-		<script src="./MIDI.js/inc/jasmid/replayer.js?v=20261011-1127"></script>
-		<script src="./MIDI.js/inc/Base64.js?v=20261011-1127"></script>
-		<script src="./MIDI.js/inc/base64binary.js?v=20261011-1127"></script>
+		<!-- <script src="./MIDI.js/js/MIDI/MIDI.JS.min.js?v=20261011-1607" type="text/javascript"></script> -->
+		<script src="./MIDI.js/js/MIDI/AudioDetect.js?v=20261011-1607" type="text/javascript"></script>
+		<script src="./MIDI.js/js/MIDI/LoadPlugin.js?v=20261011-1607" type="text/javascript"></script>
+		<script src="./MIDI.js/js/MIDI/Plugin.js?v=20261011-1607" type="text/javascript"></script>
+		<script src="./MIDI.js/js/MIDI/Player.js?v=20261011-1607" type="text/javascript"></script>
+		<script src="./MIDI.js/inc/DOMLoader.XMLHttp.js?v=20261011-1607" type="text/javascript"></script>
+		<script src="./MIDI.js/inc/jasmid/stream.js?v=20261011-1607"></script>
+		<script src="./MIDI.js/inc/jasmid/midifile.js?v=20261011-1607"></script>
+		<script src="./MIDI.js/inc/jasmid/replayer.js?v=20261011-1607"></script>
+		<script src="./MIDI.js/inc/Base64.js?v=20261011-1607"></script>
+		<script src="./MIDI.js/inc/base64binary.js?v=20261011-1607"></script>
 
 		<!-- script to render ABC to an SVG image -->
-		<script type="text/javascript" src="./js/abc2svg-1.js?v=20261011-1127"></script>
+		<script type="text/javascript" src="./js/abc2svg-1.js?v=20261011-1607"></script>
 
 		<!-- script to convert SVG to PNGs for download -->
-		<script type="text/javascript" src="./js/pablo.min.js?v=20261011-1127"></script>
+		<script type="text/javascript" src="./js/pablo.min.js?v=20261011-1607"></script>
 
 		<!-- script for sharing to social sites -->
-		<script src="js/share-button.min.js?v=20261011-1127"></script>
+		<script src="js/share-button.min.js?v=20261011-1607"></script>
 
 
-		<!-- Minified version: <script src="./js/groove_writer.min.js?v=20261011-1127" type="text/javascript"></script> -->
+		<!-- Minified version: <script src="./js/groove_writer.min.js?v=20261011-1607" type="text/javascript"></script> -->
 
 		<!-- jsmidgen for generating a midi file -->
-		<script src="./js/jsmidgen.js?v=20261011-1127" type="text/javascript"></script>
+		<script src="./js/jsmidgen.js?v=20261011-1607" type="text/javascript"></script>
 		<!--   our custom JS is loaded as an ES module at the end of <body> (js/main.js).
 		       It creates window.myGrooveWriter, builds the dynamic DOM, and runs the
 		       page-load init. -->
@@ -701,7 +701,7 @@
 
 
 		<!-- App entry point: ES module that boots the app and runs page-load init. -->
-		<script type="module" src="js/main.js?v=20261011-1127"></script>
+		<script type="module" src="js/main.js?v=20261011-1607"></script>
 
 
 	</div>

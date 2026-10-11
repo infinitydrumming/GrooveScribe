@@ -60,8 +60,9 @@ if (utils.is_touch_device()) {
   replaceSlot(
     'advancedEditSlot',
     '<span class="left-button edit-block" id="advancedEditAnchor" ' +
+      'title="While on, tapping a note opens its articulations: accent, ghost note, open hi-hat, flam..." ' +
       'onclick="event.preventDefault(); myGrooveWriter.toggleAdvancedEdit()">' +
-      '<span class="left-button-content"><span>Advanced<span class="longLabel"> Edit</span></span></span></span>'
+      '<span class="left-button-content"><span>Articulations</span></span></span>'
   );
 }
 

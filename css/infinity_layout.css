@@ -664,7 +664,7 @@ body,
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
-  /* "Student view" and "Advanced Edit" say just "Student" and "Advanced" */
+  /* "Student view" says just "Student" */
   .longLabel {
     display: none;
   }
