@@ -1233,7 +1233,7 @@ function GrooveWriter() {
         contextMenu.style.left = anchorPos.x + anchorPoint.offsetWidth - 150 + 'px';
       }
 
-      root.myGrooveUtils.showContextMenu(contextMenu);
+      root.myGrooveUtils.toggleContextMenu(contextMenu, anchorPoint);
     }
   };
 
@@ -1251,7 +1251,7 @@ function GrooveWriter() {
         contextMenu.style.top = anchorPos.y + anchorPoint.offsetHeight + 'px';
         contextMenu.style.left = anchorPos.x + anchorPoint.offsetWidth - 150 + 'px';
       }
-      root.myGrooveUtils.showContextMenu(contextMenu);
+      root.myGrooveUtils.toggleContextMenu(contextMenu, anchorPoint);
     }
   };
 
@@ -1269,7 +1269,7 @@ function GrooveWriter() {
         contextMenu.style.top = anchorPos.y + anchorPoint.offsetHeight + 'px';
         contextMenu.style.left = anchorPos.x + anchorPoint.offsetWidth - 283 + 'px';
       }
-      root.myGrooveUtils.showContextMenu(contextMenu);
+      root.myGrooveUtils.toggleContextMenu(contextMenu, anchorPoint);
     }
   };
 
@@ -1284,7 +1284,7 @@ function GrooveWriter() {
         contextMenu.style.top = anchorPos.y + anchorPoint.offsetHeight + 'px';
         contextMenu.style.left = anchorPos.x + anchorPoint.offsetWidth - 150 + 'px';
       }
-      root.myGrooveUtils.showContextMenu(contextMenu);
+      root.myGrooveUtils.toggleContextMenu(contextMenu, anchorPoint);
     }
   };
 
@@ -1301,7 +1301,7 @@ function GrooveWriter() {
           contextMenu.style.left = event.clientX - 150 + 'px';
         }
       }
-      root.myGrooveUtils.showContextMenu(contextMenu);
+      root.myGrooveUtils.toggleContextMenu(contextMenu, anchorPoint);
     }
   };
 
@@ -1318,7 +1318,7 @@ function GrooveWriter() {
           contextMenu.style.left = event.clientX - 150 + 'px';
         }
       }
-      root.myGrooveUtils.showContextMenu(contextMenu);
+      root.myGrooveUtils.toggleContextMenu(contextMenu, anchorPoint);
     }
   };
 
@@ -1681,7 +1681,7 @@ function GrooveWriter() {
         contextMenu.style.top = event.clientY - 30 + 'px';
         contextMenu.style.left = event.clientX - 35 + 'px';
       }
-      root.myGrooveUtils.showContextMenu(contextMenu);
+      root.myGrooveUtils.toggleContextMenu(contextMenu, event.currentTarget);
     }
 
     return false;
@@ -1843,7 +1843,7 @@ function GrooveWriter() {
         contextMenu.style.top = event.clientY - 30 + 'px';
         contextMenu.style.left = event.clientX - 75 + 'px';
       }
-      root.myGrooveUtils.showContextMenu(contextMenu);
+      root.myGrooveUtils.toggleContextMenu(contextMenu, event.currentTarget);
     } else {
       return true; //error
     }
@@ -4993,6 +4993,10 @@ function GrooveWriter() {
 
   root.timeSigPopupOpen = function (type) {
     var popup = document.getElementById('timeSigPopup');
+    if (popup && popup.style.display == 'block' && class_time_sig_popup_bar === null) {
+      root.timeSigPopupClose('cancel'); // a second tap closes it (Infinity Drumming, 2026)
+      return;
+    }
     class_time_sig_popup_bar = null; // the whole groove
     setTimeSigPopup(
       isMixedMeterGroove() ? 'Choose a Time Signature for every bar' : 'Choose a Time Signature',
@@ -5273,7 +5277,11 @@ function GrooveWriter() {
   };
 
   root.show_FullURLPopup = function () {
-    document.getElementById('fullURLPopup');
+    var openPopup = document.getElementById('fullURLPopup');
+    if (openPopup && openPopup.style.display == 'block') {
+      root.close_FullURLPopup(); // a second tap on Save & Share closes it (Infinity Drumming, 2026)
+      return;
+    }
 
     new ShareButton({
       ui: {
