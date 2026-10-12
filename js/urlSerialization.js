@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting, more metronome clicks, diddle lines, beat-by-beat notes. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -14,7 +14,16 @@ import {
 } from './constants.js';
 import { parseTimeSigString, calc_notes_per_measure } from './musicMath.js';
 import { parsePracticeLimit, practiceLimitToText } from './practiceTimer.js';
+import { metronomeIsOn, parseMetronomeFrequency } from './metronome.js';
 import {
+  beatsFromList,
+  beatsToList,
+  hasBeatNotes,
+  inferBeats,
+  normalizeBeats,
+} from './beatNotes.js';
+import {
+  barSig,
   barSigsFromList,
   barSigsToList,
   barStride,
@@ -115,6 +124,73 @@ function readOrnaments(myGrooveData, encodedURLData, barCounts) {
   );
 }
 
+// The Mixed note setting's beats, bar by bar ("Beats=ssqq,ssss", see
+// beatNotes.js).  A bar without them gets them from its notes.
+function readBeatNotes(myGrooveData, encodedURLData) {
+  myGrooveData.beatNotes = [];
+  if (myGrooveData.timeDivision != 48) return;
+  var listed = beatsFromList(
+    getQueryVariableFromString('Beats', '', encodedURLData),
+    myGrooveData.numberOfMeasures
+  );
+  var lines = [
+    myGrooveData.hh_array,
+    myGrooveData.snare_array,
+    myGrooveData.kick_array,
+    myGrooveData.crash_array,
+    myGrooveData.ride_array,
+  ].concat(myGrooveData.toms_array);
+  for (var bar = 0; bar < myGrooveData.numberOfMeasures; bar++) {
+    var sig = barSig(myGrooveData.barTimeSigs, bar, myGrooveData.numBeats, myGrooveData.noteValue);
+    if (!hasBeatNotes(sig)) myGrooveData.beatNotes.push('');
+    else if (listed[bar]) myGrooveData.beatNotes.push(normalizeBeats(listed[bar], sig));
+    else myGrooveData.beatNotes.push(inferBeats(lines, bar * myGrooveData.notesPerMeasure, sig));
+  }
+}
+
+// Diddles ride on lines of their own next to each note line: "SD" for the
+// snare, "HD" for the hi-hat line, "T1D" for tom 1, and so on ("d" on a note).
+/**
+ * @param {Object<string, *>} lines  ornament lines by name ("SO", "HO" ...)
+ * @returns {Object<string, *>}  the same lines by diddle name ("SD", "HD" ...)
+ */
+function diddleLines(lines) {
+  var diddles = {};
+  for (var name in lines) diddles[name.replace(/O$/, 'D')] = lines[name];
+  return diddles;
+}
+
+// read the diddle lines from a link
+function readDiddles(myGrooveData, encodedURLData, barCounts) {
+  var lines = diddleLines(ornamentLines(myGrooveData));
+  for (var name in lines) {
+    var diddles = getQueryVariableFromString(name, false, encodedURLData);
+    if (!diddles || !lines[name]) continue;
+    if (barCounts)
+      applyDiddleBarTabs(lines[name], diddles, barCounts, myGrooveData.notesPerMeasure);
+    else applyDiddleTabLine(lines[name], diddles);
+  }
+}
+
+// the diddle lines that have any diddles (written for the H, C and R lines as
+// they go into the link)
+function diddlesForUrl(myGrooveData, hhLine, crashLine, rideLine, tabWriter) {
+  var lines = ornamentLines(myGrooveData);
+  lines.HO = hhLine;
+  lines.CO = crashLine;
+  lines.RO = rideLine;
+  if (!myGrooveData.showToms) lines.T1O = lines.T2O = lines.T4O = null;
+  lines.T3O = null; // tom 3 isn't written to links
+  var diddles = diddleLines(lines);
+  var url = '';
+  for (var name in diddles) {
+    if (!diddles[name]) continue;
+    var tab = tabWriter(diddleTabLine, diddles[name]);
+    if (/[^-|]/.test(tab)) url += '&' + name + '=|' + tab;
+  }
+  return url;
+}
+
 // the ornament lines that have any ornaments (written for the H, C and R lines
 // as they go into the link), and the grace-note settings when they are changed
 function ornamentsForUrl(myGrooveData, hhLine, crashLine, rideLine, tabWriter) {
@@ -143,6 +219,9 @@ import {
   ornamentTabLine,
   applyOrnamentTabLine,
   applyOrnamentBarTabs,
+  diddleTabLine,
+  applyDiddleTabLine,
+  applyDiddleBarTabs,
   GetDefaultStickingsGroove,
   GetDefaultHHGroove,
   GetDefaultSnareGroove,
@@ -221,9 +300,9 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
     myGrooveData.noteValue
   );
 
-  myGrooveData.metronomeFrequency = parseInt(
-    getQueryVariableFromString('MetronomeFreq', '0', encodedURLData),
-    10
+  // 0 (off), 1 (once a bar), 4, 8, 16, 12 (triplets), 24, "8s", "16s", "4d" (see metronome.js)
+  myGrooveData.metronomeFrequency = parseMetronomeFrequency(
+    getQueryVariableFromString('MetronomeFreq', '0', encodedURLData)
   );
 
   // "Groove / click bars" practice option (Infinity Drumming): on when GrooveBars
@@ -414,6 +493,8 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
   myGrooveData.swingStyle = swingStyle.toLowerCase() == 'brazilian' ? 'brazilian' : 'swing';
 
   readOrnaments(myGrooveData, encodedURLData, barCounts);
+  readDiddles(myGrooveData, encodedURLData, barCounts);
+  readBeatNotes(myGrooveData, encodedURLData);
 
   return myGrooveData;
 }
@@ -470,7 +551,7 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
   fullURL += '&Measures=' + myGrooveData.numberOfMeasures;
 
   // # metronome setting
-  if (myGrooveData.metronomeFrequency !== 0) {
+  if (metronomeIsOn(myGrooveData.metronomeFrequency)) {
     fullURL += '&MetronomeFreq=' + myGrooveData.metronomeFrequency;
   }
 
@@ -495,6 +576,10 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
 
   // a time signature for each bar, when they differ
   fullURL += barSigsForUrl(myGrooveData);
+
+  // the Mixed note setting's beats, bar by bar
+  if (myGrooveData.timeDivision == 48 && (myGrooveData.beatNotes || []).some(Boolean))
+    fullURL += '&Beats=' + beatsToList(myGrooveData.beatNotes);
 
   // notes
   var total_notes = myGrooveData.notesPerMeasure * myGrooveData.numberOfMeasures;
@@ -546,6 +631,7 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
   if (rideLine.some(Boolean)) fullURL += '&R=|' + writeTab('R', rideLine);
 
   fullURL += ornamentsForUrl(myGrooveData, hhLine, crashLine, rideLine, tabWriter);
+  fullURL += diddlesForUrl(myGrooveData, hhLine, crashLine, rideLine, tabWriter);
 
   // only add if we need them.  // they are long and ugly. :)
   if (myGrooveData.showStickings) {

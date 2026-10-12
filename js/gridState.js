@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines, separate kick / hi-hat foot muting, tom ghosts and accents, ride accent, flams / drags / ruffs. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines, separate kick / hi-hat foot muting, tom ghosts and accents, ride accent, flams / drags / ruffs, diddles. See CHANGES.md.
 // Clickable-grid note state (Step 4 extraction from groove_writer.js).
 //
 // Read side of the note grid: given a cell id, report whether a voice is on and
@@ -13,9 +13,12 @@
 
 import { getNoteScaler } from './musicMath.js';
 import {
+  hasDiddle,
   ornamentFromChar,
   ornamentFromToken,
+  tokenWithDiddle,
   tokenWithOrnament,
+  withoutDiddle,
   withoutGrace,
 } from './ornaments.js';
 import {
@@ -84,17 +87,44 @@ export var ORNAMENT_CELL_PREFIX = {
   R: 'ride',
 };
 
-/** The ornament character on a note ('-' for none). */
+/**
+ * A note's diddle is kept on the same cell as data-did.  The ornament lines the
+ * editor passes around (see groove_writer's emptyOrnamentLines) include one
+ * diddle line per note line: the line's name and "d" (Hd, Sd, ...).
+ */
+export var DIDDLE_LINE = {
+  Hd: 'H',
+  Sd: 'S',
+  Kd: 'K',
+  T1d: 'T1',
+  T2d: 'T2',
+  T4d: 'T4',
+  Cd: 'C',
+  Rd: 'R',
+};
+
+/** Whether a line's note `id` has a diddle. */
+export function has_diddle(line, id) {
+  var cell = document.getElementById(ORNAMENT_CELL_PREFIX[line] + id);
+  return !!cell && cell.hasAttribute('data-did');
+}
+
+/** The ornament character on a note ('-' for none); on a diddle line, 'd' or '-'. */
 export function get_ornament_char(line, id) {
+  if (DIDDLE_LINE[line]) return has_diddle(DIDDLE_LINE[line], id) ? 'd' : '-';
   var cell = document.getElementById(ORNAMENT_CELL_PREFIX[line] + id);
   return (cell && cell.getAttribute('data-orn')) || '-';
 }
 
-/** A note's ABC token with its ornament's grace notes in front (false stays false). */
+/**
+ * A note's ABC token with its ornament's grace notes in front, and its diddle
+ * (false stays false).
+ */
 export function ornamentToken(token, line, id) {
   if (!token) return token;
   var ornament = ornamentFromChar(get_ornament_char(line, id));
-  return ornament ? tokenWithOrnament(token, ornament) : token;
+  if (ornament) token = tokenWithOrnament(token, ornament);
+  return has_diddle(line, id) ? tokenWithDiddle(token, true) : token;
 }
 
 export function is_snare_on(id) {
@@ -471,13 +501,19 @@ export function muteArrayFromClickableUI(
   if (kickMuted && hhFootMuted) fill_array_with_value_false(Kick_Array, Kick_Array.length);
   else if (kickMuted || hhFootMuted) {
     for (var k = 0; k < Kick_Array.length; k++) {
-      var feet = withoutGrace(Kick_Array[k]); // (a kick flam stays with the kick)
+      // (a kick flam stays with the kick, a diddle with the foot that still plays)
+      var feet = withoutDiddle(withoutGrace(Kick_Array[k]));
+      var diddle = hasDiddle(Kick_Array[k]);
       var kickOn = feet == constant_ABC_KI_Normal || feet == constant_ABC_KI_SandK;
       var footOn = feet == constant_ABC_KI_Splash || feet == constant_ABC_KI_SandK;
-      if (kickMuted) Kick_Array[k] = footOn ? constant_ABC_KI_Splash : false;
+      if (kickMuted)
+        Kick_Array[k] = footOn ? tokenWithDiddle(constant_ABC_KI_Splash, diddle) : false;
       else
         Kick_Array[k] = kickOn
-          ? tokenWithOrnament(constant_ABC_KI_Normal, ornamentFromToken(Kick_Array[k]))
+          ? tokenWithDiddle(
+              tokenWithOrnament(constant_ABC_KI_Normal, ornamentFromToken(Kick_Array[k])),
+              diddle
+            )
           : false;
     }
   }

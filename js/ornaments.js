@@ -1,4 +1,4 @@
-// Infinity Drumming, 2026: flams, drags and ruffs on any drum or cymbal line.
+// Infinity Drumming, 2026: flams, drags and ruffs on any drum or cymbal line (and diddles).
 //
 // An ornament travels inside a note's ABC token as a grace-note group in front
 // of the note, the way the snare flam always has ("{/c}c"):
@@ -182,6 +182,38 @@ export function graceNotesForToken(token) {
   var midiNote = GRACE_MIDI[graces[0]];
   if (midiNote === undefined) return null;
   return { count: Math.min(graces.length, 3), midiNote: midiNote };
+}
+
+// --- diddles (double strokes) ----------------------------------------------------
+// A diddle plays a note as two strokes, each half as long: two 32nds for a 16th
+// note, two 16th-note triplets for an 8th-note triplet.  It is written with one
+// slash through the note's stem, the ABC decoration "!/!", which rides in the
+// note's token after any grace notes ("{/c}!/!c").  Links carry diddles on lines
+// of their own (see diddleChar), like ornaments.
+
+var DIDDLE_MARK = '!/!';
+
+/** Whether a note token has a diddle. */
+export function hasDiddle(token) {
+  return typeof token === 'string' && token.indexOf(DIDDLE_MARK) >= 0;
+}
+
+/** The note token without its diddle. */
+export function withoutDiddle(token) {
+  return hasDiddle(token) ? token.split(DIDDLE_MARK).join('') : token;
+}
+
+/** A note token with (or without) a diddle; a rest (false) stays a rest. */
+export function tokenWithDiddle(token, diddle) {
+  var plain = withoutDiddle(token);
+  if (!diddle || typeof plain !== 'string') return plain;
+  var parts = splitGrace(plain);
+  return parts.grace + DIDDLE_MARK + parts.main;
+}
+
+/** The link character for a note's diddle ('d', or '-' for none). */
+export function diddleChar(token) {
+  return hasDiddle(token) ? 'd' : '-';
 }
 
 // --- grace-note timing ----------------------------------------------------------

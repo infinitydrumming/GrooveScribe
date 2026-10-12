@@ -506,22 +506,34 @@ describe('time signature popup', () => {
     expect(document.getElementById('subdivision_48ths').className).not.toContain('disabled');
   });
 
-  it('setTimeDivisionSelectionOnOrOff disables triplet subdivisions outside x/4 time', () => {
+  // x/4 and x/8 time take triplets (Infinity Drumming, 2026); 8th-note triplets in
+  // x/8 time only with whole quarter notes (6/8, not 7/8)
+  const setTimeSigAndReadDisabled = (top, bottom) => {
     buildGridDOM(gw, 1);
     buildRenderPipelineFixtures();
     document.body.innerHTML +=
       '<span id="subdivision_8ths"></span><span id="subdivision_12ths"></span>' +
       '<span id="subdivision_24ths"></span><span id="subdivision_48ths"></span>';
-    document.getElementById('timeSigPopupTimeSigTop').value = '6';
-    document.getElementById('timeSigPopupTimeSigBottom').value = '8';
+    document.getElementById('timeSigPopupTimeSigTop').value = String(top);
+    document.getElementById('timeSigPopupTimeSigBottom').value = String(bottom);
 
-    gw.timeSigPopupClose('ok'); // 6/8 time; changeDivisionWithNotes calls setTimeDivisionSelectionOnOrOff internally
+    gw.timeSigPopupClose('ok'); // changeDivisionWithNotes calls setTimeDivisionSelectionOnOrOff internally
 
-    expect(document.getElementById('subdivision_12ths').className).toContain('disabled');
-    expect(document.getElementById('subdivision_24ths').className).toContain('disabled');
-    expect(document.getElementById('subdivision_48ths').className).toContain('disabled');
-    // 8ths are only disabled for an odd combination like 9/16; 6/8 keeps them enabled.
-    expect(document.getElementById('subdivision_8ths').className).not.toContain('disabled');
+    return ['8ths', '12ths', '24ths', '48ths'].filter((name) =>
+      document.getElementById('subdivision_' + name).className.includes('disabled')
+    );
+  };
+
+  it('setTimeDivisionSelectionOnOrOff keeps every triplet subdivision in 6/8 time', () => {
+    expect(setTimeSigAndReadDisabled(6, 8)).toEqual([]);
+  });
+
+  it('setTimeDivisionSelectionOnOrOff disables only 8th triplets in 7/8 time', () => {
+    expect(setTimeSigAndReadDisabled(7, 8)).toEqual(['12ths']);
+  });
+
+  it('setTimeDivisionSelectionOnOrOff disables 8ths and every triplet subdivision in 7/16 time', () => {
+    expect(setTimeSigAndReadDisabled(7, 16)).toEqual(['8ths', '12ths', '24ths', '48ths']);
   });
 
   it('setTimeDivisionSelectionOnOrOff warns but does not throw when the subdivision elements are missing', () => {

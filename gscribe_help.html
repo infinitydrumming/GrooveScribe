@@ -1,4 +1,4 @@
-<!--Modified by Infinity Drumming, 2026: Brazilian swing, straight and swung bars, speed-up target tempo, cursor timing, flams / drags / ruffs, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting, Save &amp; Share, My Grooves, student view, tap a menu's button again to close it, the Articulations button.  See CHANGES.md -->
+<!--Modified by Infinity Drumming, 2026: Brazilian swing, straight and swung bars, speed-up target tempo, cursor timing, flams / drags / ruffs, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting, Save &amp; Share, My Grooves, student view, tap a menu's button again to close it, the Articulations button, more metronome clicks, diddles, notes beat by beat, triplets in x/8 time, the 32nd-note count.  See CHANGES.md -->
 <link rel="icon" type="image/png" sizes="32x32" href="images/iscribe-icon-32.png">
 <link rel="icon" type="image/png" sizes="96x96" href="images/iscribe-icon-96.png">
 <link rel="icon" type="image/png" sizes="192x192" href="images/iscribe-icon-192.png">
@@ -42,11 +42,19 @@ Press <b>Student view</b> (top right of the toolbar) to hide the editing tools a
 <br>
 <h3>Metronome</h3>
 
-Options:
+Choose the click from the <b>Click</b> menu (next to the metronome icon). Every bar starts with a different sound on the 1.
 <ul>
+<li><b>bar</b> - one click per bar, on the 1.
 <li><b>4ths</b> - adds a cowbell on the 1 and a click on the 2, 3, and 4;
 <li><b>8ths</b> - Adds a click on all the "ands"   (plays 8th note triplets in triplet subdivisions)
 <li><b>16ths</b> - Adds a softer click on every 16th note.  Plays a louder click on the 2, 3, and 4.  (plays 16th note triplets in triplet subdivisions)
+<li><b>triplets</b> - 3 clicks a beat, <b>sextuplets</b> - 6 a beat (the triplets louder), whatever notes the groove is in.
+<li><b>swung 8ths</b> - a click on the beat and on the last triplet ("1 . a"), for playing over triplet and shuffle grooves; <b>swung 16ths</b> - the same at double speed.
+<li><b>dotted 4ths</b> - a click every dotted quarter note, the pulse of 6/8 and 12/8.
+<li>A beat is the bottom of the time signature: in 7/8 the triplets click three to every 8th note.
+</ul>
+The <b>...</b> button next to the Click menu has the click's other options:
+<ul>
 <li><b>Solo</b> - Plays the metronome, and mutes the groove when the play button is pressed.
 <li><b>Auto Speed Up</b> - Will increase the metronome BPM automatically after each loop through. Choose whether it speeds up every so many <b>minutes</b> or every so many <b>bars</b>, for example 5 bpm every 16 bars. Tick "Stop at" and enter a tempo to keep increasing until that target tempo, then hold it.
 <li><b>Practice timer</b> - Plays for a set number of minutes or bars, then stops by itself: the groove finishes the bar it's in and ends on a crash. The player shows what's left ("4:12 left", "12 bars left"). The timer is saved in the groove's link, so you can send a student "play this for 10 minutes". Click it again in the menu to turn it off.
@@ -56,7 +64,7 @@ Options:
 </ul>
 
 <h3>Counting</h3>
-Press <b>COUNTING</b> (below the grid) to write the count over the notes: "1 e &amp; a" in 16ths, "1 &amp;" in 8ths, "1 &amp; a" in triplets, and "1 2 3" in 8th-note bars like 3/8 and 5/8. A beat with stickings (R / L) keeps its stickings. Press it again to take the counting off. It is saved in the groove's link.
+Press <b>COUNTING</b> (below the grid) to write the count over the notes: "1 e &amp; a" in 16ths, "1 &amp;" in 8ths, "1 &amp; a" in triplets, "1 ah lee bee &amp; ah lah bah" in 32nds, and "1 2 3" in 8th-note bars like 3/8 and 5/8 (8th-note triplets in 6/8: "1 a &amp; 3 a &amp;"). With notes beat by beat, each beat is counted its own way. A beat with stickings (R / L) keeps its stickings. Press it again to take the counting off. It is saved in the groove's link.
 
 <h3>A time signature for each bar</h3>
 Each bar has a small time signature button (e.g. <b>4/4</b>) under its swing / straight switch. Click it to give that bar its own time signature, for example a bar of 2/4 in a 4/4 song, or the 3/8 and 5/8 bars of "Here Comes the Sun".
@@ -66,7 +74,19 @@ Each bar has a small time signature button (e.g. <b>4/4</b>) under its swing / s
 <li>The time signature button at the left of the toolbar sets every bar at once.
 <li>New bars copy the last bar's time signature.
 <li>Bars in x/8 are beamed the classic way, in 8th and 16th notes alike: 3/8 as one group of three, 5/8 as 3+2, 7/8 as 2+2+3 (6/8, 9/8 and 12/8 stay in threes). The grid is spaced in the same groups.
-<li>A note setting has to fit every bar, so triplets need all the bars in x/4, and permutations are only for grooves in 4/4 throughout.
+<li>A note setting has to fit every bar, and permutations are only for grooves in 4/4 throughout.
+<li>Triplets work in x/4 and x/8 bars. In x/8, 16th-note triplets put three notes on every 8th note (like 8th-note triplets in 4/4), and 8th-note triplets put three over every two 8th notes (like quarter-note triplets), so they need bars of whole quarter notes such as 6/8 and 12/8, not 7/8.
+</ul>
+
+<h3>Notes beat by beat (quarter-note triplets, fills...)</h3>
+Over each bar is a row of <b>BEATS</b>. Tap a beat to choose its notes: <b>8ths</b>, <b>16ths</b>, <b>8th triplets</b>, <b>16th triplets</b>, <b>quarter-note triplets</b> (over that beat and the next) or <b>32nd-note triplets</b>. For example, write a 16ths groove, then tap beat 3 of the last bar and choose quarter-note triplets for a fill.
+<ul>
+<li>The groove changes to the Mixed note setting. Each beat's label says its notes, and the grid shows only the notes each beat uses, so there is nothing extra to click.
+<li>The music, the sound, the cursor and the counting follow each beat.
+<li>In x/8 bars a beat is an 8th note: one 8th, two 16ths, a 16th-note triplet, or 8th-note triplets over that beat and the next.
+<li>When every beat is the same again, the groove goes back to that note setting (all 16ths: Notes 16ths).
+<li>Notes on places a beat no longer uses are taken off. Undo brings them back.
+<li>Copying and pasting a bar, adding a bar and changing a bar's time signature keep its beats. Each bar's beats are saved in the groove's link.
 </ul>
 
 <h3>Flams, drags and ruffs</h3>
@@ -77,6 +97,15 @@ The note shows a small label (fl, dr or ru) and the grace notes are written on t
 <li>The grace notes are timed in milliseconds just before their note, whatever the tempo, and never move the notes around them, so you can play exactly what is written at any speed.
 <li>Use <b>Metronome Options &gt; Flams, drags &amp; ruffs</b> to slow the grace notes down for practice.
 <li><b>No flam / drag / ruff</b> takes it off again; turning the note off does too.
+</ul>
+
+<h3>Diddles (double strokes)</h3>
+Right click a note on any drum or cymbal and choose <b>Diddle (double stroke)</b>: the note plays as two strokes, each half as long as the note setting's notes. A 16th-note diddle is two 32nds, an 8th-note diddle two 16ths, an 8th-triplet diddle two 16th triplets.
+<ul>
+<li>The music shows one slash through the note's stem (the standard sign for "twice as fast"), and the grid a red slash on the note.
+<li>An accented note's second stroke is played unaccented. A diddle can go with a flam, drag or ruff.
+<li>A note that shares its stem with another (a snare under the hi-hat) has the slash on the shared stem; only the drum with the diddle plays twice.
+<li>Choose it again to take it off; turning the note off does too.
 </ul>
 
 <h3>What swing is "correct" or "normal"?</h3>
@@ -140,7 +169,7 @@ You can use the "Undo" action in the help menu to restore the measures that were
 <h3>Editing tips</h3>
 <ul>
 <li>The "Hi-hat", "Snare", "Kick" and "Sticking" labels to the left of the editing grid have a menu when clicked.   You can quickly turn all the notes in a measure on or off using the menu.
-<li>Right click a note to choose its articulation: accent, ghost note, open hi-hat, cross stick, buzz stroke, flam, drag, ruff and so on.    On a phone or tablet, press and hold the note, or turn on the "Articulations" button: while it is on, tapping a note opens its articulations instead of turning it on or off.  (On iPhones and iPads use the button: they don't always pass a press and hold on.)
+<li>Right click a note to choose its articulation: accent, ghost note, open hi-hat, cross stick, buzz stroke, flam, drag, ruff, diddle and so on.    On a phone or tablet, press and hold the note, or turn on the "Articulations" button: while it is on, tapping a note opens its articulations instead of turning it on or off.  (On iPhones and iPads use the button: they don't always pass a press and hold on.)
 <li>Use the Grooves menu to select a groove close to the one you want, or use it to clear the editing grid to start a new groove from scratch.
 <li>Tap a menu's button again (Grooves, Help, the "ABC" permutations button, Save &amp; Share...) to close it.
 <li>You can change the notes while playing the groove and hear what you are doing while editing.

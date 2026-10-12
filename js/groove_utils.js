@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up, counting over the notes, menus kept on screen. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up, counting over the notes, menus kept on screen, more metronome clicks, a second tap closes a menu. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -65,6 +65,7 @@ import {
 } from './browserInfo.js';
 import { createGrooveData } from './grooveData.js';
 import { createScreenWakeLock } from './screenWakeLock.js';
+import { metronomeIsOn } from './metronome.js';
 import {
   DEFAULT_GRACE_SPACING_MS,
   DEFAULT_GRACE_VOLUME,
@@ -262,11 +263,12 @@ function GrooveUtils() {
       else if (box.left < 4) contextMenu.style.left = '4px';
     }
 
-    // Check for screen visibility of the bottom of the menu
-    if (contextMenu.offsetTop + contextMenu.clientHeight > document.documentElement.clientHeight) {
+    // Check for screen visibility of the bottom of the menu (borders and all)
+    var menuHeight = contextMenu.offsetHeight || contextMenu.clientHeight;
+    var screenHeight = document.documentElement.clientHeight;
+    if (screenHeight && contextMenu.offsetTop + menuHeight > screenHeight - 4) {
       // the menu has gone off the bottom of the screen
-      contextMenu.style.top =
-        document.documentElement.clientHeight - contextMenu.clientHeight + 'px';
+      contextMenu.style.top = Math.max(4, screenHeight - menuHeight - 4) + 'px';
     }
 
     // use a timeout to setup the onClick handler.
@@ -770,7 +772,8 @@ function GrooveUtils() {
     notes_per_measure,
     kick_stems_up,
     timeSigTop,
-    timeSigBottom
+    timeSigBottom,
+    beatPlan
   ) {
     return _create_ABC_from_snare_HH_kick_arrays(
       root,
@@ -785,7 +788,8 @@ function GrooveUtils() {
       notes_per_measure,
       kick_stems_up,
       timeSigTop,
-      timeSigBottom
+      timeSigBottom,
+      beatPlan
     );
   };
 
@@ -1145,7 +1149,8 @@ function GrooveUtils() {
     timeSigTop,
     timeSigBottom,
     swing_style,
-    cursor_markers
+    cursor_markers,
+    slot_spans
   ) {
     return _MIDI_from_HH_Snare_Kick_Arrays(
       root,
@@ -1162,7 +1167,8 @@ function GrooveUtils() {
       timeSigTop,
       timeSigBottom,
       swing_style,
-      cursor_markers
+      cursor_markers,
+      slot_spans
     );
   };
 
@@ -1789,7 +1795,7 @@ function GrooveUtils() {
     if (mm) {
       mm.className = mm.className.replace(' selected', '');
 
-      if (newFrequency > 0) {
+      if (metronomeIsOn(newFrequency)) {
         mm.className += ' selected';
       }
     }
@@ -1805,7 +1811,8 @@ function GrooveUtils() {
 
   // turn the metronome on and off
   root.metronomeMiniMenuClick = function () {
-    if (root.myGrooveData.metronomeFrequency > 0) root.myGrooveData.metronomeFrequency = 0;
+    if (metronomeIsOn(root.myGrooveData.metronomeFrequency))
+      root.myGrooveData.metronomeFrequency = 0;
     else root.myGrooveData.metronomeFrequency = 4;
 
     root.setMetronomeFrequencyDisplay(root.myGrooveData.metronomeFrequency);

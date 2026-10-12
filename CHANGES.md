@@ -11,6 +11,48 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-12 — Diddles, more clicks, notes beat by beat, triplets in x/8, 32nd counts
+
+- **Diddles (double strokes)** on every drum and cymbal: a note's menu has
+  "Diddle (double stroke)", which plays the note as two strokes, each half as
+  long as the note setting's notes (two 32nds for a 16th note, two 16th
+  triplets for an 8th-note triplet); an accented note's second stroke is
+  unaccented. The music shows one slash through the note's stem, written on a
+  note exactly one grid note long so the slash always means double speed, and
+  the grid a red slash on the note. A diddle rides in the note's ABC token
+  ("!/!", `js/ornaments.js`), so it goes wherever notes go (bars, copy / paste,
+  permutations, undo); links carry it on lines of its own (`SD`, `HD`, `KD`,
+  `T1D`... with `d` on a note; `js/urlSerialization.js`); the second stroke is
+  scheduled at its exact time (`js/midiFile.js`), and the music written by
+  `js/abcNotation.js`.
+- **More clicks**: the Click menu, now on every screen, adds triplets (3 a beat),
+  sextuplets (6 a beat), swung 8ths, swung 16ths and dotted quarter notes for
+  6/8 and 12/8. They are timed exactly, so they fit any groove, straight or
+  triplet (`js/metronome.js`; `MetronomeFreq=12`, `24`, `8s`, `16s`, `4d` in
+  links). The app never wrote `MetronomeFreq=12` before; it now means triplets.
+- **Notes beat by beat**: a row of beats over each bar; tapping a beat chooses
+  its notes: 8ths, 16ths, 8th triplets, 16th triplets, quarter-note triplets
+  (over that beat and the next) or 32nd-note triplets, and in x/8 bars one 8th,
+  two 16ths, a 16th-note triplet or 8th-note triplets over two 8th notes. The
+  groove changes to the Mixed note setting; the grid shows only the notes each
+  beat uses, and the music, sound, cursor and counting follow
+  (`js/beatNotes.js`, `js/groove_writer.js`, `js/viewHtml.js`). Links carry
+  each bar's beats (`Beats=ssqq,ssss`); older Mixed links get them from their
+  notes. When every beat is the same again the groove goes back to that note
+  setting. Copy / paste, adding and removing bars, bar time signatures and
+  undo keep them. A beat of 8ths or 16ths is written and counted exactly as
+  in the 8ths and 16ths settings (so older Mixed links now write, say, an 8th
+  note where they wrote a 16th and a 16th rest). Mixed no longer shows a
+  notice when chosen.
+- **Triplets in x/8 time**: 16th triplets (and Mixed) in every x/8 bar, each
+  8th note a group, beamed in the bar's classic groups (2+2+3 in 7/8); 8th
+  triplets, three over every two 8th notes, in bars of whole quarter notes
+  (6/8, 12/8...), counted "1 a & 3 a &" (`js/barMeters.js`,
+  `js/abcNotation.js`, `js/noteArrays.js`).
+- **32nd notes are counted "1 ah lee bee & ah lah bah"** (`js/noteArrays.js`).
+- A menu opened near the bottom of a short screen stays wholly on it
+  (`js/groove_utils.js`).
+
 ## 2026-10-11 — "Advanced Edit" is now "Articulations"
 
 - The touch-screen button that makes a tap open a note's menu (accent, ghost

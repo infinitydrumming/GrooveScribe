@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat). See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -6,6 +6,8 @@
 // hold no state — layout numbers and the note-grouping size come in via a small
 // context object / arguments, so GrooveWriter (which owns that state) delegates
 // its HTMLforStaffContainer / HTMLforPermutationOptions methods here.
+
+import { groupAt } from './beatNotes.js';
 
 // Whether the note at `slot` (from 0) ends a group on the grid: every
 // ctx.noteGrouping notes, or at ctx.groupEnds (the classic x/8 groups,
@@ -19,12 +21,60 @@ function endsNoteGroup(ctx, slot) {
   return (slot + 1) % ctx.noteGrouping === 0;
 }
 
+// The row of beats over a bar's notes (Infinity Drumming, 2026): one label a beat
+// (or a triplet over two beats), across its notes; tapping it chooses the beat's
+// notes.  ctx.beatHeader: [{beat, start, span, step, label, title}] for the bar.
+function beatHeaderHTML(baseindex, indexStartForNotes, ctx) {
+  if (!ctx.beatHeader) return '';
+  var html =
+    '<div class="beats-row-container"><div class="line-labels"><div class="beats-label">Beats</div></div>' +
+    '<div class="music-line-container"><div class="notes-container"><div class="beats-container">' +
+    '<div class="opening_note_space"> </div>';
+  for (var i = 0; i < ctx.notesPerMeasure; i++) {
+    html += beatSlotHTML(baseindex, indexStartForNotes + i, i, groupAt(ctx.beatHeader, i));
+    if (endsNoteGroup(ctx, i) && i < ctx.notesPerMeasure - 1)
+      html += '<div class="space_between_note_groups"> </div>';
+  }
+  return html + '<div class="end_note_space"></div></div></div></div></div>\n';
+}
+
+// One slot of the row of beats, over note `id` (slot `i` of the bar): part of
+// the band of `group`, the beat (or triplet over two beats) it is in, if any.
+function beatSlotHTML(baseindex, id, i, group) {
+  if (!group) return '<div id="beatSlot' + id + '" class="beatSlot beatSlotNone"></div>';
+  var classes = 'beatSlot';
+  var inside = '';
+  if ((i - group.start) % group.step !== 0) classes += ' beatHiddenSlot';
+  if (i == group.start) {
+    classes += ' beatSlotFirst';
+    inside = '<span class="beatLabel">' + group.label + '</span>';
+  }
+  if (i + group.step >= group.start + group.span) classes += ' beatSlotLast';
+  return (
+    '<div id="beatSlot' +
+    id +
+    '" class="' +
+    classes +
+    '" title="' +
+    group.title +
+    '" onClick="myGrooveWriter.beatHeaderClick(event, ' +
+    baseindex +
+    ', ' +
+    group.beat +
+    ')">' +
+    inside +
+    '</div>'
+  );
+}
+
 export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
   var newHTML =
     '\
 						<div class="staff-container" id="staff-container' +
     baseindex +
-    '">\
+    '">' +
+    beatHeaderHTML(baseindex, indexStartForNotes, ctx) +
+    '\
 							<div class="stickings-row-container">\
 								<div class="line-labels">\
 									<div class="stickings-label" onClick="myGrooveWriter.noteLabelClick(event, \'stickings\', ' +

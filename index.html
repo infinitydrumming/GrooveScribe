@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button, more metronome clicks, diddles, beat-by-beat notes.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
@@ -31,65 +31,67 @@
 		<script type="importmap">
 		{
 			"imports": {
-				"./js/abcNotation.js": "./js/abcNotation.js?v=20261011-1607",
-				"./js/barMeters.js": "./js/barMeters.js?v=20261011-1607",
-				"./js/browserInfo.js": "./js/browserInfo.js?v=20261011-1607",
-				"./js/constants.js": "./js/constants.js?v=20261011-1607",
-				"./js/gridState.js": "./js/gridState.js?v=20261011-1607",
-				"./js/grooveData.js": "./js/grooveData.js?v=20261011-1607",
-				"./js/groove_utils.js": "./js/groove_utils.js?v=20261011-1607",
-				"./js/groove_writer.js": "./js/groove_writer.js?v=20261011-1607",
-				"./js/grooves.js": "./js/grooves.js?v=20261011-1607",
-				"./js/midiFile.js": "./js/midiFile.js?v=20261011-1607",
-				"./js/musicMath.js": "./js/musicMath.js?v=20261011-1607",
-				"./js/myGrooves.js": "./js/myGrooves.js?v=20261011-1607",
-				"./js/noteArrays.js": "./js/noteArrays.js?v=20261011-1607",
-				"./js/ornaments.js": "./js/ornaments.js?v=20261011-1607",
-				"./js/permutations.js": "./js/permutations.js?v=20261011-1607",
-				"./js/practiceTimer.js": "./js/practiceTimer.js?v=20261011-1607",
-				"./js/screenWakeLock.js": "./js/screenWakeLock.js?v=20261011-1607",
-				"./js/updateCheck.js": "./js/updateCheck.js?v=20261011-1607",
-				"./js/urlSerialization.js": "./js/urlSerialization.js?v=20261011-1607",
-				"./js/viewHtml.js": "./js/viewHtml.js?v=20261011-1607"
+				"./js/abcNotation.js": "./js/abcNotation.js?v=20261012-1926",
+				"./js/barMeters.js": "./js/barMeters.js?v=20261012-1926",
+				"./js/beatNotes.js": "./js/beatNotes.js?v=20261012-1926",
+				"./js/browserInfo.js": "./js/browserInfo.js?v=20261012-1926",
+				"./js/constants.js": "./js/constants.js?v=20261012-1926",
+				"./js/gridState.js": "./js/gridState.js?v=20261012-1926",
+				"./js/grooveData.js": "./js/grooveData.js?v=20261012-1926",
+				"./js/groove_utils.js": "./js/groove_utils.js?v=20261012-1926",
+				"./js/groove_writer.js": "./js/groove_writer.js?v=20261012-1926",
+				"./js/grooves.js": "./js/grooves.js?v=20261012-1926",
+				"./js/metronome.js": "./js/metronome.js?v=20261012-1926",
+				"./js/midiFile.js": "./js/midiFile.js?v=20261012-1926",
+				"./js/musicMath.js": "./js/musicMath.js?v=20261012-1926",
+				"./js/myGrooves.js": "./js/myGrooves.js?v=20261012-1926",
+				"./js/noteArrays.js": "./js/noteArrays.js?v=20261012-1926",
+				"./js/ornaments.js": "./js/ornaments.js?v=20261012-1926",
+				"./js/permutations.js": "./js/permutations.js?v=20261012-1926",
+				"./js/practiceTimer.js": "./js/practiceTimer.js?v=20261012-1926",
+				"./js/screenWakeLock.js": "./js/screenWakeLock.js?v=20261012-1926",
+				"./js/updateCheck.js": "./js/updateCheck.js?v=20261012-1926",
+				"./js/urlSerialization.js": "./js/urlSerialization.js?v=20261012-1926",
+				"./js/viewHtml.js": "./js/viewHtml.js?v=20261012-1926"
 			}
 		}
 		</script>
 
-		<link rel="stylesheet" type="text/css" href="font-awesome/4.7.0/css/font-awesome.min.css?v=20261011-1607">
-		<link rel="stylesheet" type="text/css" href="css/share-button.min.css?v=20261011-1607">
-	    <link rel="stylesheet" type="text/css" href="css/groove_writer_orange.css?v=20261011-1607">
-		<link rel="stylesheet" type="text/css" href="css/groove_display_orange.css?v=20261011-1607">
-		<link rel="stylesheet" type="text/css" href="css/infinity_theme.css?v=20261011-1607">
-		<link rel="stylesheet" type="text/css" href="css/infinity_layout.css?v=20261011-1607">
+		<link rel="stylesheet" type="text/css" href="font-awesome/4.7.0/css/font-awesome.min.css?v=20261012-1926">
+		<link rel="stylesheet" type="text/css" href="css/share-button.min.css?v=20261012-1926">
+	    <link rel="stylesheet" type="text/css" href="css/groove_writer_orange.css?v=20261012-1926">
+		<link rel="stylesheet" type="text/css" href="css/groove_display_orange.css?v=20261012-1926">
+		<link rel="stylesheet" type="text/css" href="css/infinity_theme.css?v=20261012-1926">
+		<link rel="stylesheet" type="text/css" href="css/infinity_layout.css?v=20261012-1926">
 		<link href='https://fonts.googleapis.com/css?family=Lato:400,700,300,900' rel='stylesheet' type='text/css'>
 
 		<!--   Other peoples JS libraries    -->
-		<!-- <script src="./MIDI.js/js/MIDI/MIDI.JS.min.js?v=20261011-1607" type="text/javascript"></script> -->
-		<script src="./MIDI.js/js/MIDI/AudioDetect.js?v=20261011-1607" type="text/javascript"></script>
-		<script src="./MIDI.js/js/MIDI/LoadPlugin.js?v=20261011-1607" type="text/javascript"></script>
-		<script src="./MIDI.js/js/MIDI/Plugin.js?v=20261011-1607" type="text/javascript"></script>
-		<script src="./MIDI.js/js/MIDI/Player.js?v=20261011-1607" type="text/javascript"></script>
-		<script src="./MIDI.js/inc/DOMLoader.XMLHttp.js?v=20261011-1607" type="text/javascript"></script>
-		<script src="./MIDI.js/inc/jasmid/stream.js?v=20261011-1607"></script>
-		<script src="./MIDI.js/inc/jasmid/midifile.js?v=20261011-1607"></script>
-		<script src="./MIDI.js/inc/jasmid/replayer.js?v=20261011-1607"></script>
-		<script src="./MIDI.js/inc/Base64.js?v=20261011-1607"></script>
-		<script src="./MIDI.js/inc/base64binary.js?v=20261011-1607"></script>
+		<!-- <script src="./MIDI.js/js/MIDI/MIDI.JS.min.js?v=20261012-1926" type="text/javascript"></script> -->
+		<script src="./MIDI.js/js/MIDI/AudioDetect.js?v=20261012-1926" type="text/javascript"></script>
+		<script src="./MIDI.js/js/MIDI/LoadPlugin.js?v=20261012-1926" type="text/javascript"></script>
+		<script src="./MIDI.js/js/MIDI/Plugin.js?v=20261012-1926" type="text/javascript"></script>
+		<script src="./MIDI.js/js/MIDI/Player.js?v=20261012-1926" type="text/javascript"></script>
+		<script src="./MIDI.js/inc/DOMLoader.XMLHttp.js?v=20261012-1926" type="text/javascript"></script>
+		<script src="./MIDI.js/inc/jasmid/stream.js?v=20261012-1926"></script>
+		<script src="./MIDI.js/inc/jasmid/midifile.js?v=20261012-1926"></script>
+		<script src="./MIDI.js/inc/jasmid/replayer.js?v=20261012-1926"></script>
+		<script src="./MIDI.js/inc/Base64.js?v=20261012-1926"></script>
+		<script src="./MIDI.js/inc/base64binary.js?v=20261012-1926"></script>
 
 		<!-- script to render ABC to an SVG image -->
-		<script type="text/javascript" src="./js/abc2svg-1.js?v=20261011-1607"></script>
+		<script type="text/javascript" src="./js/abc2svg-1.js?v=20261012-1926"></script>
 
 		<!-- script to convert SVG to PNGs for download -->
-		<script type="text/javascript" src="./js/pablo.min.js?v=20261011-1607"></script>
+		<script type="text/javascript" src="./js/pablo.min.js?v=20261012-1926"></script>
 
 		<!-- script for sharing to social sites -->
-		<script src="js/share-button.min.js?v=20261011-1607"></script>
+		<script src="js/share-button.min.js?v=20261012-1926"></script>
 
 
-		<!-- Minified version: <script src="./js/groove_writer.min.js?v=20261011-1607" type="text/javascript"></script> -->
+		<!-- Minified version: <script src="./js/groove_writer.min.js?v=20261012-1926" type="text/javascript"></script> -->
 
 		<!-- jsmidgen for generating a midi file -->
-		<script src="./js/jsmidgen.js?v=20261011-1607" type="text/javascript"></script>
+		<script src="./js/jsmidgen.js?v=20261012-1926" type="text/javascript"></script>
 		<!--   our custom JS is loaded as an ES module at the end of <body> (js/main.js).
 		       It creates window.myGrooveWriter, builds the dynamic DOM, and runs the
 		       page-load init. -->
@@ -127,12 +129,23 @@
 						<span class="metronomeButton" id="metronome4ths" onclick="myGrooveWriter.setMetronomeFrequency(4);">4th</span>
 						<span class="metronomeButton" id="metronome8ths" onclick="myGrooveWriter.setMetronomeFrequency(8);">8th</span>
 						<span class="metronomeButton" id="metronome16ths" onclick="myGrooveWriter.setMetronomeFrequency(16);">16th</span>
-						<span class="phoneSelectWrap" id="clickSelectWrap" title="The metronome click while it plays"><svg class="clickIcon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 3h8l4 18H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 17L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="9" r="1.6" fill="currentColor"/></svg><select id="clickSelect" aria-label="Metronome click" onchange="myGrooveWriter.setMetronomeFrequency(parseInt(this.value, 10));">
+						<span class="phoneSelectWrap" id="clickSelectWrap" title="The metronome click while it plays"><svg class="clickIcon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 3h8l4 18H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 17L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="9" r="1.6" fill="currentColor"/></svg><select id="clickSelect" aria-label="Metronome click" onchange="myGrooveWriter.setMetronomeFrequency(this.value);">
 						<option value="0">Click: off</option>
-						<option value="1">Click: bar</option>
-						<option value="4">Click: 4ths</option>
-						<option value="8">Click: 8ths</option>
-						<option value="16">Click: 16ths</option>
+						<optgroup label="Straight">
+							<option value="1" title="One click per bar, on the 1">Click: bar</option>
+							<option value="4">Click: 4ths</option>
+							<option value="8">Click: 8ths</option>
+							<option value="16">Click: 16ths</option>
+						</optgroup>
+						<optgroup label="Triplets &amp; swing">
+							<option value="12" title="3 clicks per beat">Click: triplets</option>
+							<option value="24" title="6 clicks per beat">Click: sextuplets</option>
+							<option value="8s" title="On the beat and the last triplet">Click: swung 8ths</option>
+							<option value="16s" title="Swung 16ths, in triplets">Click: swung 16ths</option>
+						</optgroup>
+						<optgroup label="6/8 &amp; 12/8">
+							<option value="4d" title="Dotted quarter notes">Click: dotted 4ths</option>
+						</optgroup>
 					</select></span>
 						<span class="metronomeButton Options grooveDB_hidden" id="metronomeOptionsAnchor" onclick="myGrooveWriter.metronomeOptionsAnchorClick(event);">Options</span>
 					</span>
@@ -256,6 +269,8 @@
 
 		<!-- context menu that will pop up over notes in advaced edit mode or right click -->
 		<div class="noteContextMenu">
+			<!-- a beat's notes (the row of beats over each bar); filled in by the editor -->
+			<ul id="beatContextMenu" class="list"></ul>
 			<ul id="metronomeOptionsContextMenu" class="list">
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuSolo"      onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("Solo");'  title="Just hear the metronome." >Solo</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuSpeedUp"   onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("SpeedUp");' title="Increase the tempo automatically" >Auto speed up</li>
@@ -311,6 +326,7 @@
 				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("hh", "r");'>Ruff</li>
 				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("hh", "on");'>Grace notes on&hellip;</li>
 				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("hh", "none");'>No flam / drag / ruff</li>
+				<li class="diddleMenuItem ornamentMenuFirst" data-diddle-choice="d" title="Play the note as two strokes, each half as long" onclick='myGrooveWriter.diddlePopupClick("hh");'>Diddle (double stroke)</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -324,6 +340,7 @@
 				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("crash", "r");'>Ruff</li>
 				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("crash", "on");'>Grace notes on&hellip;</li>
 				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("crash", "none");'>No flam / drag / ruff</li>
+				<li class="diddleMenuItem ornamentMenuFirst" data-diddle-choice="d" title="Play the note as two strokes, each half as long" onclick='myGrooveWriter.diddlePopupClick("crash");'>Diddle (double stroke)</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -339,6 +356,7 @@
 				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("ride", "r");'>Ruff</li>
 				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("ride", "on");'>Grace notes on&hellip;</li>
 				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("ride", "none");'>No flam / drag / ruff</li>
+				<li class="diddleMenuItem ornamentMenuFirst" data-diddle-choice="d" title="Play the note as two strokes, each half as long" onclick='myGrooveWriter.diddlePopupClick("ride");'>Diddle (double stroke)</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -352,6 +370,7 @@
 				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("tom1", "r");'>Ruff</li>
 				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("tom1", "on");'>Grace notes on&hellip;</li>
 				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("tom1", "none");'>No flam / drag / ruff</li>
+				<li class="diddleMenuItem ornamentMenuFirst" data-diddle-choice="d" title="Play the note as two strokes, each half as long" onclick='myGrooveWriter.diddlePopupClick("tom1");'>Diddle (double stroke)</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -365,6 +384,7 @@
 				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("tom2", "r");'>Ruff</li>
 				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("tom2", "on");'>Grace notes on&hellip;</li>
 				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("tom2", "none");'>No flam / drag / ruff</li>
+				<li class="diddleMenuItem ornamentMenuFirst" data-diddle-choice="d" title="Play the note as two strokes, each half as long" onclick='myGrooveWriter.diddlePopupClick("tom2");'>Diddle (double stroke)</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -378,6 +398,7 @@
 				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("tom4", "r");'>Ruff</li>
 				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("tom4", "on");'>Grace notes on&hellip;</li>
 				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("tom4", "none");'>No flam / drag / ruff</li>
+				<li class="diddleMenuItem ornamentMenuFirst" data-diddle-choice="d" title="Play the note as two strokes, each half as long" onclick='myGrooveWriter.diddlePopupClick("tom4");'>Diddle (double stroke)</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -393,6 +414,7 @@
 				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("snare", "r");'>Ruff</li>
 				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("snare", "on");'>Grace notes on&hellip;</li>
 				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("snare", "none");'>No flam / drag / ruff</li>
+				<li class="diddleMenuItem ornamentMenuFirst" data-diddle-choice="d" title="Play the note as two strokes, each half as long" onclick='myGrooveWriter.diddlePopupClick("snare");'>Diddle (double stroke)</li>
 			</ul>
 		</div>
 		<!-- Infinity Drumming, 2026: which drum a flam / drag / ruff's grace notes are played on -->
@@ -417,6 +439,7 @@
 				<li class="ornamentMenuItem" data-orn-choice="r" onclick='myGrooveWriter.ornamentPopupClick("kick", "r");'>Ruff</li>
 				<li class="ornamentMenuItem" data-orn-choice="on" onclick='myGrooveWriter.ornamentPopupClick("kick", "on");'>Grace notes on&hellip;</li>
 				<li class="ornamentMenuItem" data-orn-choice="none" onclick='myGrooveWriter.ornamentPopupClick("kick", "none");'>No flam / drag / ruff</li>
+				<li class="diddleMenuItem ornamentMenuFirst" data-diddle-choice="d" title="Play the note as two strokes, each half as long" onclick='myGrooveWriter.diddlePopupClick("kick");'>Diddle (double stroke)</li>
 			</ul>
 		</div>
 		<div class="noteContextMenu">
@@ -701,7 +724,7 @@
 
 
 		<!-- App entry point: ES module that boots the app and runs page-load init. -->
-		<script type="module" src="js/main.js?v=20261011-1607"></script>
+		<script type="module" src="js/main.js?v=20261012-1926"></script>
 
 
 	</div>

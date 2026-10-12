@@ -93,18 +93,38 @@ describe('GrooveUtils context menu handling', () => {
       expect(gu.visible_context_menu).toBe(menuB);
     });
 
-    it('repositions the menu when it would overflow the bottom of the (jsdom) viewport', () => {
-      // jsdom leaves document.documentElement.clientHeight at 0, so any menu
-      // with offsetTop + clientHeight > 0 is considered "off the bottom" and
-      // gets repositioned to clientHeight - menuClientHeight (here, -200px).
-      document.body.innerHTML = '<div id="menuC" style="display:none;"></div>';
-      const menu = document.getElementById('menuC');
-      Object.defineProperty(menu, 'offsetTop', { value: 700, configurable: true });
-      Object.defineProperty(menu, 'clientHeight', { value: 200, configurable: true });
+    describe('keeping the menu above the bottom of the screen', () => {
+      const showMenu = (screenHeight, offsetTop, height) => {
+        Object.defineProperty(document.documentElement, 'clientHeight', {
+          value: screenHeight,
+          configurable: true,
+        });
+        document.body.innerHTML = '<div id="menuC" style="display:none;"></div>';
+        const menu = document.getElementById('menuC');
+        Object.defineProperty(menu, 'offsetTop', { value: offsetTop, configurable: true });
+        Object.defineProperty(menu, 'offsetHeight', { value: height, configurable: true });
+        gu.showContextMenu(menu);
+        return menu;
+      };
+      afterEach(() => {
+        delete document.documentElement.clientHeight; // back to jsdom's own (0)
+      });
 
-      gu.showContextMenu(menu);
+      it('moves a menu that would go off the bottom up, 4px clear of the edge', () => {
+        expect(showMenu(800, 700, 200).style.top).toBe('596px');
+      });
 
-      expect(menu.style.top).toBe('-200px');
+      it('keeps a menu taller than the screen 4px from the top', () => {
+        expect(showMenu(300, 100, 400).style.top).toBe('4px');
+      });
+
+      it('leaves a menu that fits where it is', () => {
+        expect(showMenu(800, 100, 200).style.top).toBe('');
+      });
+
+      it('leaves the menu alone when the screen height is unknown (0, as in jsdom)', () => {
+        expect(showMenu(0, 700, 200).style.top).toBe('');
+      });
     });
 
     it('wires up document.onclick after a 100ms delay, making a document click close the menu', () => {

@@ -1133,19 +1133,26 @@ body,
   vertical-align: middle;
   margin-right: 2px;
 }
+/* the Click menu replaces the metronome's row of buttons everywhere (it has more
+   choices than fit); the Notes menu replaces the Notes buttons on phones */
+#clickSelectWrap {
+  display: inline-flex;
+}
+#metronomeLabel,
+#metronomeContainer .metronomeButton:not(.Options) {
+  display: none !important;
+}
+.phoneSelectWrap select {
+  field-sizing: content;
+}
 @media (min-width: 901px) {
-  .phoneSelectWrap {
+  #notesSelectWrap {
     display: none !important;
   }
 }
 @media (max-width: 900px) {
-  #clickSelectWrap {
-    display: inline-flex;
-  }
-  /* the selectors replace the rows of buttons */
   #divisionButtonContainer .subdivision,
-  #notesToolbarLabel,
-  #metronomeContainer .metronomeButton:not(.Options) {
+  #notesToolbarLabel {
     display: none !important;
   }
 }
@@ -1211,4 +1218,117 @@ body,
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
+}
+
+/* ---------- a note's diddle: a slash through it, like the sheet music ---------- */
+#measureContainer [data-did]::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3px;
+  height: 24px;
+  margin: -12px 0 0 -1.5px;
+  border-radius: 2px;
+  background: var(--id-red);
+  box-shadow: 0 0 0 1px #fff;
+  transform: rotate(40deg);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ---------- the row of beats over each bar: tap a beat to choose its notes ---------- */
+.beats-label {
+  height: 24px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 24px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--id-text-2);
+}
+.beats-container {
+  height: 22px;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.beatSlot {
+  display: inline-block;
+  position: relative;
+  width: 29px;
+  height: 100%;
+  margin: 0 2px;
+  border: 1px solid transparent;
+  vertical-align: top;
+  cursor: pointer;
+}
+.beatSlot::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: -3px;
+  right: -3px;
+  background: var(--id-blue-tint);
+  z-index: 0;
+}
+.beatSlotFirst::before {
+  left: 0;
+  border-radius: 8px 0 0 8px;
+}
+.beatSlotLast::before {
+  right: 0;
+  border-radius: 0 8px 8px 0;
+}
+.beatSlotFirst.beatSlotLast::before {
+  border-radius: 8px;
+}
+.beatSlot:hover::before {
+  background: #cfe3f8;
+}
+.beatSlotNone {
+  cursor: default;
+}
+.beatSlotNone::before {
+  display: none;
+}
+.beatLabel {
+  position: relative;
+  z-index: 2;
+  padding-left: 7px;
+  font-family: Lato, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 20px;
+  white-space: nowrap;
+  color: var(--id-navy-900);
+  pointer-events: none;
+}
+.beatLabel small {
+  margin-left: 2px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--id-text-2);
+}
+/* the slots a beat doesn't use */
+.beatHiddenSlot {
+  display: none !important;
+}
+#beatContextMenu {
+  min-width: 13em;
+}
+#beatContextMenu .beatMenuNote {
+  white-space: nowrap;
+  color: var(--id-text-2);
+}
+#beatContextMenu .beatMenuTitle {
+  font-weight: 700;
+  color: var(--id-text-2);
+  pointer-events: none;
+}
+#beatContextMenu li.disabled {
+  color: var(--id-border);
+  pointer-events: none;
 }

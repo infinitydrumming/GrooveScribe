@@ -10,6 +10,10 @@ import {
   graceNotesForToken,
   clampGraceSpacing,
   clampGraceVolume,
+  hasDiddle,
+  withoutDiddle,
+  tokenWithDiddle,
+  diddleChar,
 } from '../js/ornaments.js';
 import { constant_ABC_SN_Flam, constant_ABC_SN_Drag } from '../js/constants.js';
 
@@ -81,5 +85,26 @@ describe('ornaments in note tokens', () => {
     expect(clampGraceVolume(undefined)).toBe(40);
     expect(clampGraceVolume(0)).toBe(5);
     expect(clampGraceVolume(150)).toBe(100);
+  });
+});
+
+describe('diddles in note tokens', () => {
+  it('ride in the token as one slash, after any grace notes', () => {
+    expect(tokenWithDiddle('c', true)).toBe('!/!c');
+    expect(tokenWithDiddle('{/c}!accent!c', true)).toBe('{/c}!/!!accent!c');
+    expect(tokenWithDiddle('!/!c', true)).toBe('!/!c'); // only ever one
+    expect(tokenWithDiddle(false, true)).toBe(false); // a rest stays a rest
+  });
+
+  it('come off again, leaving the note and its ornament', () => {
+    expect(tokenWithDiddle('{/c}!/!c', false)).toBe('{/c}c');
+    expect(withoutDiddle('!/![^g^d,]')).toBe('[^g^d,]');
+    expect(withoutDiddle(false)).toBe(false);
+    expect(withoutGrace(withoutDiddle('{/cc}!/!c'))).toBe('c');
+  });
+
+  it('are found, and written in links as "d"', () => {
+    expect([hasDiddle('!/!c'), hasDiddle('c'), hasDiddle(false)]).toEqual([true, false, false]);
+    expect([diddleChar('{/c}!/!c'), diddleChar('c'), diddleChar(false)]).toEqual(['d', '-', '-']);
   });
 });

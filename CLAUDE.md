@@ -17,10 +17,10 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **697 pass**                                                                                                                                            |
-| `npm run test:e2e`     | Playwright golden-master — **71 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
-| `npm run lint`         | ESLint — **0 errors** (~82 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                               |
-| `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~296 known errors baseline; changes should be typecheck-**neutral**                                                                      |
+| `npm test`             | Vitest unit suite — **1010 pass** (12 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                       |
+| `npm run test:e2e`     | Playwright golden-master — **95 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                               |
+| `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~175 known errors baseline; changes should be typecheck-**neutral**                                                                      |
 | `npm run knip`         | no unused exports/files                                                                                                                                                     |
 | `npm run format:check` | Prettier clean (`npm run format` to fix)                                                                                                                                    |
 | `npm run check`        | lint + typecheck + format:check + test in one shot                                                                                                                          |
@@ -68,6 +68,12 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `permutations.js` — pure permutation-mode note-array generators (+ kick-array merge/filter).
 - `viewHtml.js` — pure HTML string builders (staff container, permutation-options menu).
 - `updateCheck.js` — the "new version is ready" bar (compares its own `?v=` with `version.json`).
+- `metronome.js` — the Click menu's settings (`MetronomeFreq`) and the exactly timed clicks
+  (triplets, sextuplets, swung 8ths/16ths, dotted quarters) as ticks per bar.
+- `beatNotes.js` — notes beat by beat in the Mixed setting (`Beats=ssqq`): each beat's choice,
+  which grid slots it uses, inference from notes, counting, and the beat plan the ABC/MIDI writers take.
+- `ornaments.js` — flams/drags/ruffs (grace groups) and diddles (`!/!`) inside note tokens.
+- `barMeters.js` — a time signature per bar; which note settings fit a bar.
 - `gridState.js` — the DOM grid **read** layer: per-cell state (`is_*_on`/`get_*_state`)
   and whole-measure array readers (`get32NoteArrayFromClickableUI`, `muteArrayFromClickableUI`).
   Reads the ambient global `document`; caller state injected via ctx/callbacks.

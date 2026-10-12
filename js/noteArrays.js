@@ -1,13 +1,16 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride tabs, bar scaling for paste, tom ghosts and accents, ride accent, ornament (flam / drag / ruff) tab lines, bars of different lengths. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash and ride tabs, bar scaling for paste, tom ghosts and accents, ride accent, ornament (flam / drag / ruff) tab lines, bars of different lengths, 32nd-note counting, diddle lines, counting in x/8 triplets and beat by beat. See CHANGES.md.
 // Note-array / drum-tab conversions and default grooves (Step 2 extraction).
 // Pure module: converts between tab strings and ABC note arrays, builds default
 // grooves, and note-mapping/sticking-count helpers. GrooveUtils delegates here.
 
 import {
+  diddleChar,
   ornamentChar,
   ornamentFromChar,
   ornamentFromToken,
+  tokenWithDiddle,
   tokenWithOrnament,
+  withoutDiddle,
   withoutGrace,
 } from './ornaments.js';
 import { barTabsToArray } from './barMeters.js';
@@ -223,8 +226,9 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
 }
 
 function abcNotationToTablaturePerNote(drumType, abcChar) {
-  // a flam / drag / ruff is written on its own ornament line (ornamentTabLine)
-  abcChar = withoutGrace(abcChar);
+  // a flam / drag / ruff is written on its own ornament line (ornamentTabLine), a
+  // diddle on its diddle line (diddleTabLine)
+  abcChar = withoutDiddle(withoutGrace(abcChar));
   var tabChar = '-';
 
   switch (abcChar) {
@@ -571,6 +575,9 @@ export function create_note_mapping_array_for_highlighting(
   return mapping_array;
 }
 
+// The count of each 32nd note after the beat's number (Infinity Drumming, 2026).
+var COUNT_32NDS = [null, 'ah', 'lee', 'bee', '&', 'ah', 'lah', 'bah'];
+
 export function figure_out_sticking_count_for_index(
   index,
   notes_per_measure,
@@ -579,6 +586,7 @@ export function figure_out_sticking_count_for_index(
 ) {
   // figure out the count state by looking at the id and the subdivision
   var note_index = index % notes_per_measure;
+  /** @type {number | string} */
   var new_state = 0;
   // 4/2 time changes the implied time from 4 up to 8, etc
   // 6/8 time changes the implied time from 8 down to 4
@@ -591,6 +599,10 @@ export function figure_out_sticking_count_for_index(
       if (note_index % 2 === 0)
         new_state = Math.floor(note_index / 2) + 1; // 1,2,3,4,5, etc.
       else new_state = '&';
+      break;
+    case 6: // 8th triplets in x/8 time: three over two 8th notes, "1 a & 3 a &" (Infinity Drumming, 2026)
+      if (note_index % 3 === 0) new_state = Math.floor(note_index / 3) * 2 + 1;
+      else new_state = note_index % 3 == 1 ? 'a' : '&';
       break;
     case 12: // 8th triplets
       if (note_index % 3 === 0)
@@ -610,8 +622,10 @@ export function figure_out_sticking_count_for_index(
       else if (note_index % 3 == 1) new_state = '&';
       else new_state = 'a';
       break;
+    case 32: // 32nd notes: "1 ah lee bee & ah lah bah" (Infinity Drumming, 2026)
+      new_state = COUNT_32NDS[note_index % 8] || Math.floor(note_index / 8) + 1;
+      break;
     case 16:
-    case 32: // fall through
     default:
       var whole_note_interval = implied_sub_division / 4;
       if (note_index % 4 === 0)
@@ -715,6 +729,54 @@ export function applyOrnamentTabLine(noteArray, ornamentString) {
   ) {
     var ornament = ornamentFromChar(chars[j]);
     if (ornament && noteArray[k]) noteArray[k] = tokenWithOrnament(noteArray[k], ornament);
+  }
+  return noteArray;
+}
+
+// --- diddle lines (Infinity Drumming, 2026) --------------------------------------
+// The diddles on a line are written in links as a tab line of their own: "d" on
+// a note with a diddle, "-" elsewhere (see ornaments.js).
+
+/** The diddle tab line for a line's notes. */
+export function diddleTabLine(noteArray, maxLength, separatorDistance) {
+  var line = '';
+  if (maxLength > noteArray.length) maxLength = noteArray.length;
+  for (var i = 0; i < maxLength; i++) {
+    line += diddleChar(noteArray[i]);
+    if (separatorDistance > 0 && (i + 1) % separatorDistance === 0) line += '|';
+  }
+  return line;
+}
+
+/** Like applyDiddleTabLine, for bars of different lengths (see barMeters.js). */
+export function applyDiddleBarTabs(noteArray, diddleString, barCounts, stride) {
+  var diddles = barTabsToArray(diddleString, barCounts, stride, function (ch) {
+    return ch == 'd';
+  });
+  for (var n = 0; n < noteArray.length; n++)
+    if (diddles[n] && noteArray[n]) noteArray[n] = tokenWithDiddle(noteArray[n], true);
+  return noteArray;
+}
+
+/**
+ * Put the diddles of a diddle tab line onto a line's notes (in place), scaling
+ * the tab line to the notes like noteArraysFromURLData does.
+ */
+export function applyDiddleTabLine(noteArray, diddleString) {
+  var chars = decodeURIComponent(diddleString).replace(/[:|]/g, '');
+  if (!chars.length || !noteArray.length) return noteArray;
+  var stringScaler = 1;
+  var arrayScaler = 1;
+  if (chars.length > noteArray.length && chars.length / noteArray.length >= 2)
+    stringScaler = Math.ceil(chars.length / noteArray.length);
+  else if (chars.length < noteArray.length && noteArray.length / chars.length >= 2)
+    arrayScaler = Math.ceil(noteArray.length / chars.length);
+  for (
+    var j = 0, k = 0;
+    j < chars.length && k < noteArray.length;
+    j += stringScaler, k += arrayScaler
+  ) {
+    if (chars[j] == 'd' && noteArray[k]) noteArray[k] = tokenWithDiddle(noteArray[k], true);
   }
   return noteArray;
 }
