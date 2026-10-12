@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets). See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -112,10 +112,25 @@ import * as _grid from './gridState.js';
 import { getFeelMarkings, addFeelMarking, addMeterChange } from './abcNotation.js';
 import { barSig, barNoteCount, barStride, isMixedMeter, divisionFitsBar } from './barMeters.js';
 import { scaleTabMeasure } from './noteArrays.js';
+import { isTimedClick, parseMetronomeFrequency } from './metronome.js';
 import {
+  beatCharForDivision,
+  beatChoices,
+  beatGroups,
+  beatSlots,
+  divisionForBeats,
+  hasBeatNotes,
+  inferBeats,
+  makeBeatPlan,
+  normalizeBeats,
+  slotIsUsed,
+} from './beatNotes.js';
+import {
+  hasDiddle,
   ornamentChar,
   ornamentFromChar,
   ornamentFromToken,
+  withoutDiddle,
   withoutGrace,
   clampGraceSpacing,
   clampGraceVolume,
@@ -179,6 +194,11 @@ function GrooveWriter() {
   // Every bar keeps class_notes_per_measure note slots (the longest bar's); a
   // shorter bar hides the rest (see barMeters.js).
   var class_bar_time_sigs = [];
+  // the Mixed note setting (Div 48): each bar's beats, one character a beat ("ssqq",
+  // see beatNotes.js); the grid shows only their slots (Infinity Drumming, 2026)
+  var class_beat_notes = [];
+  // the beat whose menu is open: { bar (0-based), beat (0-based) }
+  var class_beat_menu_target = null;
   // the bar the time signature popup is for (0-based), or null for the whole groove
   var class_time_sig_popup_bar = null;
 
@@ -308,6 +328,7 @@ function GrooveWriter() {
   }
 
   var GRID_CELL_PREFIXES = [
+    'beatSlot',
     'sticking',
     'bg-highlight',
     'crash',
@@ -381,14 +402,271 @@ function GrooveWriter() {
     ],
   ];
   function clearHiddenBarSlots() {
-    if (!isMixedMeterGroove()) return;
+    if (!isMixedMeterGroove() && class_time_division != 48) return;
     for (var id = 0; id < class_notes_per_measure * class_number_of_measures; id++) {
-      if (!isHiddenSlot(id)) continue;
+      if (!isHiddenSlot(id) && !isBeatHiddenSlot(id)) continue;
       HIDDEN_SLOT_LINES.forEach(function (line) {
         if (line[0](id)) line[1](id, 'off', false);
       });
       set_sticking_state(id, 'off', false);
     }
+  }
+
+  // --- Notes beat by beat (Infinity Drumming, 2026) ------------------------------
+  // In the Mixed note setting each beat has its own notes: 8ths, 16ths, triplets,
+  // sextuplets or quarter-note triplets over two beats (see beatNotes.js).  The
+  // grid shows only the slots they use, and the row of beats over each bar
+  // chooses them.  In other note settings that row turns the groove into Mixed.
+  var BEAT_SHORT_NAMES = {
+    4: {
+      e: '8ths',
+      s: '16ths',
+      t: 'triplets',
+      x: '16th trip.',
+      q: 'quarter trip.',
+      a: '32nd trip.',
+    },
+    8: { e: '8th', s: '16ths', x: '16th trip.', t: '8th trip.', a: '32nd trip.' },
+  };
+
+  // a bar's beats in the Mixed note setting ('' in other note settings, and in
+  // x/2 and x/16 bars, which keep the plain Mixed grid)
+  function beatsOfBar(bar) {
+    if (class_time_division != 48) return '';
+    var sig = barSigOf(bar);
+    if (!hasBeatNotes(sig)) return '';
+    return normalizeBeats(class_beat_notes[bar] || '', sig);
+  }
+
+  // every bar's beats, for the groove data ([] outside the Mixed note setting)
+  function currentBeatNotes() {
+    if (class_time_division != 48) return [];
+    var bars = [];
+    for (var bar = 0; bar < class_number_of_measures; bar++) bars.push(beatsOfBar(bar));
+    return bars;
+  }
+
+  // a grid slot (note id) its beat doesn't use, in the Mixed note setting
+  function isBeatHiddenSlot(id) {
+    if (class_time_division != 48) return false;
+    var bar = Math.floor(id / class_notes_per_measure);
+    var slot = id % class_notes_per_measure;
+    var beats = beatsOfBar(bar);
+    if (!beats || slot >= barCountOf(bar)) return false;
+    return !slotIsUsed(beatGroups(beats, barSigOf(bar)), slot);
+  }
+
+  // hide the slots each beat doesn't use (the row of beats hides its own)
+  function applyBeatHiding() {
+    for (var id = 0; id < class_notes_per_measure * class_number_of_measures; id++) {
+      var hidden = isBeatHiddenSlot(id);
+      GRID_CELL_PREFIXES.forEach(function (prefix) {
+        var cell = document.getElementById(prefix + id);
+        if (cell) cell.classList.toggle('beatHiddenSlot', hidden);
+      });
+    }
+  }
+
+  // The row of beats over bar `bar`: [{beat, start, span, step, label, title}]
+  // in the bar's grid slots, or null where beats can't be chosen (32nd notes,
+  // x/2 and x/16 bars).
+  function beatHeaderOfBar(bar) {
+    var sig = barSigOf(bar);
+    if (!hasBeatNotes(sig)) return null;
+    var names = BEAT_SHORT_NAMES[sig.bottom];
+    var numbersOf = function (group) {
+      return group.beats > 1
+        ? group.beat + 1 + '\u2013' + (group.beat + group.beats)
+        : String(group.beat + 1);
+    };
+    if (class_time_division == 48) {
+      return beatGroups(beatsOfBar(bar), sig).map(function (group) {
+        var numbers = numbersOf(group);
+        return {
+          beat: group.beat,
+          start: group.start,
+          span: group.span,
+          step: group.step,
+          label: numbers + ' <small>' + names[group.char] + '</small>',
+          title: 'Beat ' + numbers + ': ' + names[group.char] + '. Tap to change',
+        };
+      });
+    }
+    var char = beatCharForDivision(class_time_division, sig);
+    if (!char) return null;
+    var ratio = barCountOf(bar) / (beatSlots(sig) * sig.top); // grid slots to 48ths
+    var plain = '';
+    for (var b = 0; b < sig.top; b++) plain += char;
+    return beatGroups(plain, sig).map(function (group) {
+      var numbers = numbersOf(group);
+      return {
+        beat: group.beat,
+        start: group.start * ratio,
+        span: group.span * ratio,
+        step: 1,
+        label: numbers,
+        title: 'Beat ' + numbers + '. Tap to give this beat its own notes',
+      };
+    });
+  }
+
+  // where the grid's note groups end in a Mixed bar: at the end of each beat (or
+  // triplet over two beats)
+  function beatGroupEndsOfBar(bar) {
+    var beats = beatsOfBar(bar);
+    if (!beats) return null;
+    return beatGroups(beats, barSigOf(bar)).map(function (group) {
+      return group.start + group.span;
+    });
+  }
+
+  // the beat plan of one bar for the music writers (null outside Mixed)
+  function beatPlanOfBar(bar) {
+    var beats = beatsOfBar(bar);
+    return beats ? makeBeatPlan([beats], [barSigOf(bar)]) : null;
+  }
+
+  // how many slots each slot's note lasts in a Mixed bar, for diddles (undefined otherwise)
+  function slotSpansOfBar(bar, slots) {
+    var plan = beatPlanOfBar(bar);
+    if (!plan) return undefined;
+    var spans = [];
+    for (var i = 0; i < slots; i++) spans.push(plan.slotsPerNoteAt(i, 0));
+    return spans;
+  }
+
+  // A Mixed bar's beats from its notes as tab lines ({HH: 'x--x...', ...}, the
+  // bar starting at `start`): the plainest that shows them all
+  function beatsFromTabLines(tabLines, start, sig) {
+    var lines = [];
+    for (var name in tabLines) {
+      if (name.indexOf('Orn') === 0 || name == 'Stickings') continue;
+      lines.push(
+        String(tabLines[name] || '')
+          .split('')
+          .map(function (ch) {
+            return ch != '-' && ch;
+          })
+      );
+    }
+    return inferBeats(lines, start, sig);
+  }
+
+  // A beat's number in the row of beats: its menu of choices
+  root.beatHeaderClick = function (event, measureNum, beat) {
+    var bar = measureNum - 1;
+    var sig = barSigOf(bar);
+    var menu = document.getElementById('beatContextMenu');
+    if (!menu || !hasBeatNotes(sig)) return;
+    class_beat_menu_target = { bar: bar, beat: beat };
+    var current = class_time_division == 48 ? beatsOfBar(bar).charAt(beat) : '';
+    var html = '<li class="beatMenuTitle">Notes for beat ' + (beat + 1) + '</li>';
+    beatChoices(sig).forEach(function (choice) {
+      var fits = beat + choice.beats <= sig.top;
+      // a triplet over two beats says which two (or that it needs the next beat)
+      var label = choice.label;
+      if (choice.beats > 1)
+        label +=
+          ' <span class="beatMenuNote">' +
+          (fits
+            ? '(beats ' + (beat + 1) + '–' + (beat + choice.beats) + ')'
+            : '(needs the next beat)') +
+          '</span>';
+      html +=
+        '<li data-beat-choice="' +
+        choice.char +
+        '" class="' +
+        (choice.char == current ? 'menuChecked' : '') +
+        (fits ? '' : ' disabled') +
+        '"' +
+        (fits ? ' onclick="myGrooveWriter.beatChoiceClick(\'' + choice.char + '\')"' : '') +
+        '>' +
+        label +
+        '</li>';
+    });
+    menu.innerHTML = html;
+    if (!event) event = window.event;
+    if (event && (event.clientX || event.clientY)) {
+      menu.style.top = event.clientY + 12 + 'px';
+      menu.style.left = event.clientX - 40 + 'px';
+    }
+    root.myGrooveUtils.toggleContextMenu(menu, event && event.currentTarget);
+  };
+
+  // A choice in a beat's menu: the beat (or this beat and the next) gets those notes
+  root.beatChoiceClick = function (char) {
+    var target = class_beat_menu_target;
+    if (!target) return;
+    var bar = target.bar;
+    var sig = barSigOf(bar);
+    var choice = beatChoices(sig).find(function (c) {
+      return c.char == char;
+    });
+    if (!choice || target.beat + choice.beats > sig.top) return;
+
+    // another note setting becomes Mixed first, every beat as it was
+    if (class_time_division != 48) {
+      if (!switchToBeatByBeat()) return;
+    }
+
+    // a beat that was part of a triplet over two beats gives the other beat back
+    // to the bar's usual notes
+    var beats = beatsOfBar(bar).split('');
+    var usual = mostCommonPlainBeat(beats);
+    beatGroups(beats.join(''), sig).forEach(function (group) {
+      var overlaps =
+        group.beat < target.beat + choice.beats && target.beat < group.beat + group.beats;
+      if (overlaps && group.beats > 1)
+        for (var k = group.beat; k < group.beat + group.beats; k++) beats[k] = usual;
+    });
+    for (var k = target.beat; k < target.beat + choice.beats; k++) beats[k] = char;
+    class_beat_notes[bar] = normalizeBeats(beats.join(''), sig, usual);
+
+    relayoutBeatByBeat();
+  };
+
+  // the bar's commonest choice that covers one beat (16ths if none)
+  function mostCommonPlainBeat(beats) {
+    var counts = {};
+    var best = 's';
+    beats.forEach(function (char) {
+      if (char == 'q' || char == 't' || char == 'a') return;
+      counts[char] = (counts[char] || 0) + 1;
+      if (counts[char] > (counts[best] || 0)) best = char;
+    });
+    return best;
+  }
+
+  // Turn the groove into the Mixed note setting, every beat with the notes it had.
+  // Returns false when that can't be done (32nd notes).
+  function switchToBeatByBeat() {
+    var fits = allBars().every(function (bar) {
+      return (
+        beatCharForDivision(class_time_division, barSigOf(bar)) &&
+        divisionFitsBar(48, barSigOf(bar))
+      );
+    });
+    if (!fits) {
+      window.alert(
+        'Beat by beat notes work with 8ths, 16ths and triplets, not 32nd notes. Change the Notes setting first.'
+      );
+      return false;
+    }
+    root.changeDivision(48); // every beat keeps the notes it had
+    return class_time_division == 48;
+  }
+
+  // lay the grid out again for the beats chosen, or go back to a plain note
+  // setting when every beat has the same plain notes (all 16ths: Notes 16ths)
+  function relayoutBeatByBeat() {
+    var sigs = allBars().map(barSigOf);
+    var division = divisionForBeats(currentBeatNotes(), sigs);
+    if (division != 48) {
+      class_beat_notes = [];
+      root.changeDivision(division);
+      return;
+    }
+    root.changeDivision(48); // keeps the notes, hides the slots no beat uses
   }
 
   function addOrRemoveKeywordFromClass(tag_class, keyword, addElseRemove) {
@@ -668,6 +946,11 @@ function GrooveWriter() {
   };
 
   function set_ornament(line, id, ornament_char) {
+    // (a diddle line: the note's diddle, "d" or "-")
+    if (_grid.DIDDLE_LINE[line]) {
+      set_diddle(_grid.DIDDLE_LINE[line], id, ornament_char == 'd');
+      return;
+    }
     var cell = document.getElementById(_grid.ORNAMENT_CELL_PREFIX[line] + id);
     if (!cell) return;
     var ornament = ornamentFromChar(ornament_char);
@@ -688,11 +971,24 @@ function GrooveWriter() {
     cell.setAttribute('title', title);
   }
 
+  // a note's flam / drag / ruff and its diddle go when the note is turned off
   function clear_ornament(line, id) {
     set_ornament(line, id, '-');
+    set_diddle(line, id, false);
+  }
+
+  // --- Diddles (Infinity Drumming, 2026) -----------------------------------------
+  // A diddle (double stroke) is kept on the note's grid cell as data-did and shown
+  // as a slash through the note.  gridState adds it to the note's ABC token.
+  function set_diddle(line, id, on) {
+    var cell = document.getElementById(_grid.ORNAMENT_CELL_PREFIX[line] + id);
+    if (!cell) return;
+    if (on) cell.setAttribute('data-did', 'd');
+    else cell.removeAttribute('data-did');
   }
 
   function is_line_note_on(line, id) {
+    if (_grid.DIDDLE_LINE[line]) line = _grid.DIDDLE_LINE[line];
     switch (line) {
       case 'H':
         return is_hh_on(id);
@@ -717,8 +1013,11 @@ function GrooveWriter() {
   // The ornaments of the grid as tab lines, one character per note, collected
   // alongside the notes' tab lines when bars are added, removed, pasted or the
   // note setting changes.
+  // (with a diddle line for each: Hd, Sd, ...)
   function emptyOrnamentLines() {
-    return { H: '', S: '', K: '', T1: '', T2: '', T4: '', C: '', R: '' };
+    var lines = { H: '', S: '', K: '', T1: '', T2: '', T4: '', C: '', R: '' };
+    for (var diddleLine in _grid.DIDDLE_LINE) lines[diddleLine] = '';
+    return lines;
   }
   function addOrnamentChars(lines, id) {
     for (var line in lines) lines[line] += _grid.get_ornament_char(line, id);
@@ -1186,6 +1485,8 @@ function GrooveWriter() {
       case 0:
       /* falls through */
       default:
+        // the newer clicks (triplets, swung, dotted) are only in the Click menu
+        if (isTimedClick(metronomeInterval)) break;
         id = 'metronomeOff';
         if (root.myGrooveUtils.getMetronomeSolo()) {
           // turn off solo if we are turning off the metronome
@@ -1202,7 +1503,7 @@ function GrooveWriter() {
       unselectButton(thisButton);
     }
 
-    selectButton(document.getElementById(id));
+    if (id) selectButton(document.getElementById(id));
     syncToolbarSelects();
 
     root.myGrooveUtils.midiNoteHasChanged(); // pretty likely the case
@@ -1214,6 +1515,8 @@ function GrooveWriter() {
   };
 
   root.setMetronomeFrequency = function (newFrequency) {
+    // (a number, or a setting from the Click menu or a link: "8", "8s", ...)
+    newFrequency = parseMetronomeFrequency(newFrequency);
     root.class_metronome_frequency = newFrequency;
     root.setMetronomeButton(newFrequency);
 
@@ -1982,6 +2285,17 @@ function GrooveWriter() {
     updateSheetMusic();
   };
 
+  // "Diddle" in a note's menu: turns its double stroke on or off (and the note on)
+  root.diddlePopupClick = function (type) {
+    var id = class_which_index_last_clicked;
+    var line = ORNAMENT_LINE_FOR_TYPE[type];
+    if (!line) return;
+    var on = !_grid.has_diddle(line, id);
+    if (on && !is_line_note_on(line, id)) NOTE_SETTERS[type](id, 'normal', true);
+    set_diddle(line, id, on);
+    updateSheetMusic();
+  };
+
   // target: 'same', or the line the grace notes are played on (S, T1, T2, T4, H)
   root.graceDrumPopupClick = function (target) {
     if (!class_grace_drum_note) return;
@@ -2006,6 +2320,9 @@ function GrooveWriter() {
         'menuChecked',
         item.getAttribute('data-orn-choice') == chosen
       );
+    });
+    contextMenu.querySelectorAll('[data-diddle-choice]').forEach(function (item) {
+      addOrRemoveKeywordFromClass(item, 'menuChecked', _grid.has_diddle(line, id));
     });
     var drum = (current && current.on) || 'same';
     document.querySelectorAll('#graceDrumContextMenu [data-grace-drum]').forEach(function (item) {
@@ -2344,7 +2661,10 @@ function GrooveWriter() {
           num_notes_for_swing,
           swingForBar(0),
           class_num_beats_per_measure,
-          class_note_value_per_measure
+          class_note_value_per_measure,
+          undefined, // the player's swing style
+          undefined, // no cursor markers
+          slotSpansOfBar(0, num_notes) // diddles beat by beat
         );
 
         for (i = 1; i < class_number_of_measures; i++) {
@@ -2385,7 +2705,10 @@ function GrooveWriter() {
             get_num_notes_for_swing(i),
             swingForBar(i),
             barSigOf(i).top,
-            barSigOf(i).bottom
+            barSigOf(i).bottom,
+            undefined, // the player's swing style
+            undefined, // no cursor markers
+            slotSpansOfBar(i, num_notes) // diddles beat by beat
           );
         }
         break;
@@ -2425,6 +2748,7 @@ function GrooveWriter() {
     for (var bar = 0; bar < class_number_of_measures; bar++)
       myGrooveData.straightBars.push(!!class_straight_bars[bar]);
     myGrooveData.barTimeSigs = currentBarTimeSigs();
+    myGrooveData.beatNotes = currentBeatNotes();
     myGrooveData.tempo = root.myGrooveUtils.getTempo();
     myGrooveData.graceSpacingMs = root.myGrooveUtils.graceSpacingMs;
     myGrooveData.graceVolume = root.myGrooveUtils.graceVolume;
@@ -2882,7 +3206,8 @@ function GrooveWriter() {
             num_notes,
             true,
             barSigOf(i).top,
-            barSigOf(i).bottom
+            barSigOf(i).bottom,
+            beatPlanOfBar(i)
           );
           fullABC += addFeelMarking(withMeterChange(barABC, i), feelMarkings[i]);
           root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
@@ -3049,6 +3374,7 @@ function GrooveWriter() {
 
     class_number_of_measures--;
     class_straight_bars.splice(measureNum - 1, 1);
+    class_beat_notes.splice(measureNum - 1, 1);
 
     root.expandAuthoringViewWhenNecessary(class_notes_per_measure, class_number_of_measures);
 
@@ -3127,9 +3453,10 @@ function GrooveWriter() {
     }
 
     class_number_of_measures++;
-    // the new bar copies the last one, its straight / swung setting too
+    // the new bar copies the last one, its straight / swung setting and beats too
     class_straight_bars[class_number_of_measures - 1] =
       !!class_straight_bars[class_number_of_measures - 2];
+    class_beat_notes[class_number_of_measures - 1] = beatsOfBar(class_number_of_measures - 2);
 
     root.expandAuthoringViewWhenNecessary(class_notes_per_measure, class_number_of_measures);
 
@@ -3227,7 +3554,12 @@ function GrooveWriter() {
   root.copyMeasureButtonClick = function (measureNum) {
     var lines = getTabLinesFromClickableUI();
     var start = (measureNum - 1) * class_notes_per_measure;
-    var copied = { triplets: usingTriplets(), lines: {} };
+    var copied = {
+      triplets: usingTriplets(),
+      lines: {},
+      sig: barSigOf(measureNum - 1),
+      beats: beatsOfBar(measureNum - 1),
+    };
     for (var name in lines) {
       copied.lines[name] = lines[name].slice(start, start + class_notes_per_measure);
     }
@@ -3259,6 +3591,23 @@ function GrooveWriter() {
   }
 
   // measureNum is indexed starting at 1, not 0
+  // the flams, drags, ruffs and diddles of tab lines ("Orn" + each line's name)
+  function ornamentLinesFromTabLines(lines) {
+    var ornaments = emptyOrnamentLines();
+    for (var line in ornaments) ornaments[line] = lines['Orn' + line];
+    return ornaments;
+  }
+
+  // beat by beat, a pasted bar gets the beats of the bar copied (if it has the
+  // same time signature), else the plainest its notes fit (Infinity Drumming, 2026)
+  function setPastedBarBeats(bar, copied, pastedBar) {
+    if (class_time_division != 48) return;
+    var sig = barSigOf(bar);
+    var sameSig = copied.sig && copied.sig.top == sig.top && copied.sig.bottom == sig.bottom;
+    class_beat_notes[bar] =
+      sameSig && copied.beats ? copied.beats : beatsFromTabLines(pastedBar, 0, sig);
+  }
+
   root.pasteMeasureButtonClick = function (measureNum) {
     var copied = getMeasureClipboard();
     if (!copied || !copied.lines) {
@@ -3277,11 +3626,14 @@ function GrooveWriter() {
     var lines = getTabLinesFromClickableUI();
     var start = (measureNum - 1) * class_notes_per_measure;
     var end = start + class_notes_per_measure;
+    var pastedBar = {};
     for (var name in lines) {
       if (copied.lines[name] === undefined) continue;
       var bar = scaleTabMeasure(copied.lines[name], class_notes_per_measure);
+      pastedBar[name] = bar;
       lines[name] = lines[name].slice(0, start) + bar + lines[name].slice(end);
     }
+    setPastedBarBeats(measureNum - 1, copied, pastedBar);
 
     changeDivisionWithNotes(
       class_time_division,
@@ -3294,16 +3646,7 @@ function GrooveWriter() {
       lines.Kick,
       lines.Crash,
       lines.Ride,
-      {
-        H: lines.OrnH,
-        S: lines.OrnS,
-        K: lines.OrnK,
-        T1: lines.OrnT1,
-        T2: lines.OrnT2,
-        T4: lines.OrnT4,
-        C: lines.OrnC,
-        R: lines.OrnR,
-      }
+      ornamentLinesFromTabLines(lines)
     );
 
     // make sure pasted toms, cymbals and stickings are visible
@@ -4410,8 +4753,8 @@ function GrooveWriter() {
       i < abcArray.length && displayIndex < topDisplay;
       i += noteStringScaler, displayIndex += displayScaler
     ) {
-      // the note itself (its flam / drag / ruff is put on below)
-      switch (withoutGrace(abcArray[i])) {
+      // the note itself (its flam / drag / ruff and diddle are put on below)
+      switch (withoutDiddle(withoutGrace(abcArray[i]))) {
         case constant_ABC_CR_Crash2:
           setFunction(displayIndex, 'crash2', false);
           break;
@@ -4539,6 +4882,7 @@ function GrooveWriter() {
     }
     if (!_grid.ORNAMENT_CELL_PREFIX[line]) return;
     set_ornament(line, id, ornamentChar(ornamentFromToken(token)));
+    set_diddle(line, id, hasDiddle(token));
   }
 
   // get a really long URL that encodes all of the notes and the rest of the state of the page.
@@ -4867,7 +5211,10 @@ function GrooveWriter() {
       get_num_notes_for_swing(bar),
       class_straight_bars[bar] ? 0 : root.myGrooveUtils.getSwing() / 100, // a straight bar plays straight
       barSigOf(bar).top,
-      barSigOf(bar).bottom
+      barSigOf(bar).bottom,
+      undefined, // the player's swing style
+      undefined, // no cursor markers
+      slotSpansOfBar(bar, num_notes) // diddles beat by beat
     );
   }
 
@@ -5064,7 +5411,13 @@ function GrooveWriter() {
   function readBarRecords() {
     var records = [];
     for (var bar = 0; bar < class_number_of_measures; bar++) {
-      var record = { sig: barSigOf(bar), straight: !!class_straight_bars[bar], lines: {} };
+      var record = {
+        sig: barSigOf(bar),
+        straight: !!class_straight_bars[bar],
+        lines: {},
+        beats: beatsOfBar(bar),
+        beatsSig: barSigOf(bar),
+      };
       var ornaments = emptyOrnamentLines();
       for (var name in BAR_LINE_READERS) record.lines[name] = '';
       for (var slot = 0; slot < barCountOf(bar); slot++) {
@@ -5107,6 +5460,18 @@ function GrooveWriter() {
     class_straight_bars = records.map(function (record) {
       return record.straight;
     });
+    // beat by beat: a bar keeps its beats, or in a new time signature gets them
+    // from its notes
+    if (class_time_division == 48)
+      class_beat_notes = records.map(function (record) {
+        var kept =
+          record.beatsSig &&
+          record.beatsSig.top == record.sig.top &&
+          record.beatsSig.bottom == record.sig.bottom;
+        if (kept && record.beats) return record.beats;
+        if (!hasBeatNotes(record.sig)) return '';
+        return beatsFromTabLines(record.lines, 0, record.sig);
+      });
     var stride = barStrideFor(class_time_division);
     var notes = {};
     for (var name in BAR_LINE_READERS) notes[name] = layOutBarLine(records, stride, 'lines', name);
@@ -5170,25 +5535,16 @@ function GrooveWriter() {
       syncToolbarSelects();
       return;
     }
-    // check for incompatible odd time signature division  9/16 and 1/8 notes for instance
-    if (((8 * class_num_beats_per_measure) / class_note_value_per_measure) % 1 != 0) {
-      addOrRemoveKeywordFromClassById('subdivision_8ths', 'disabled', true);
-    } else {
-      addOrRemoveKeywordFromClassById('subdivision_8ths', 'disabled', false);
-    }
-
-    if (class_note_value_per_measure != 4) {
-      // triplets are too complicated right now outside of x/4 time.
-      // disable them
-
-      addOrRemoveKeywordFromClassById('subdivision_12ths', 'disabled', true);
-      addOrRemoveKeywordFromClassById('subdivision_24ths', 'disabled', true);
-      addOrRemoveKeywordFromClassById('subdivision_48ths', 'disabled', true);
-    } else {
-      addOrRemoveKeywordFromClassById('subdivision_12ths', 'disabled', false);
-      addOrRemoveKeywordFromClassById('subdivision_24ths', 'disabled', false);
-      addOrRemoveKeywordFromClassById('subdivision_48ths', 'disabled', false);
-    }
+    // a note setting has to give whole notes (no 8ths in 9/16), and triplets fit
+    // only x/4 and x/8 time (8th triplets in x/8 only with whole quarter notes, 6/8)
+    var sig = { top: class_num_beats_per_measure, bottom: class_note_value_per_measure };
+    [8, 16, 32, 12, 24, 48].forEach(function (division) {
+      addOrRemoveKeywordFromClassById(
+        'subdivision_' + division + 'ths',
+        'disabled',
+        !divisionFitsBar(division, sig)
+      );
+    });
     syncToolbarSelects();
   };
 
@@ -5227,7 +5583,10 @@ function GrooveWriter() {
       var newTimeSigTop = document.getElementById('timeSigPopupTimeSigTop').value;
       var newTimeSigBottom = document.getElementById('timeSigPopupTimeSigBottom').value;
 
-      if (usingTriplets() && newTimeSigBottom != 4) {
+      if (
+        usingTriplets() &&
+        !divisionFitsBar(class_time_division, { top: newTimeSigTop, bottom: newTimeSigBottom })
+      ) {
         root.changeDivision(16); // switch to a non triplet division since they are not supported in this time signature
       }
 
@@ -5538,11 +5897,16 @@ function GrooveWriter() {
     class_bar_time_sigs = (myGrooveData.barTimeSigs || []).map(function (sig) {
       return { top: sig.top, bottom: sig.bottom };
     });
+    // the Mixed note setting's beats, bar by bar
+    var oldBeats = JSON.stringify(currentBeatNotes());
+    class_beat_notes = (myGrooveData.beatNotes || []).slice();
 
     if (
       myGrooveData.notesPerMeasure != class_notes_per_measure ||
       class_number_of_measures != myGrooveData.numberOfMeasures ||
-      oldBarSigs != JSON.stringify(class_bar_time_sigs)
+      oldBarSigs != JSON.stringify(class_bar_time_sigs) ||
+      myGrooveData.timeDivision != class_time_division ||
+      oldBeats != JSON.stringify(myGrooveData.beatNotes || [])
     ) {
       class_number_of_measures = myGrooveData.numberOfMeasures;
       changeDivisionWithNotes(myGrooveData.timeDivision);
@@ -5684,8 +6048,9 @@ function GrooveWriter() {
     // and the flams, drags and ruffs on them
     if (Ornaments) setOrnamentsFromTabLines(Ornaments, class_number_of_measures);
 
-    // hide the note slots past the end of shorter bars
+    // hide the note slots past the end of shorter bars, and those no beat uses
     hideUnusedBarSlots();
+    applyBeatHiding();
 
     // un-highlight the old div
     unselectButton(document.getElementById('subdivision_' + oldDivision + 'ths'));
@@ -5723,7 +6088,6 @@ function GrooveWriter() {
   // change the base division to something else.
   // eg  16th to 8ths or   32nds to 8th note triplets
   // need to re-layout the html notes, change any globals and then reinitialize
-  var have_shown_mixed_division_message = false;
   root.changeDivision = function (newDivision) {
     var uiStickings = '|';
     var uiHH = '|';
@@ -5735,13 +6099,6 @@ function GrooveWriter() {
     var uiSnare = '|';
     var uiKick = '|';
     var uiOrnaments = emptyOrnamentLines();
-
-    if (newDivision == 48 && !have_shown_mixed_division_message) {
-      have_shown_mixed_division_message = true;
-      alert(
-        'The MIXED subdivision allows you to create a combination of triplets and non-triplet notes in one measure.  Set every 3rd note for 16ths and every 6th note for 8th notes'
-      );
-    }
 
     var isNewDivisionTriplets = root.myGrooveUtils.isTripletDivision(newDivision);
     var new_notes_per_measure = root.myGrooveUtils.calc_notes_per_measure(
@@ -5778,18 +6135,43 @@ function GrooveWriter() {
       );
       return;
     }
-    if (isNewDivisionTriplets && class_note_value_per_measure != 4) {
+    if (
+      isNewDivisionTriplets &&
+      !divisionFitsBar(newDivision, {
+        top: class_num_beats_per_measure,
+        bottom: class_note_value_per_measure,
+      })
+    ) {
       alert(
         'Triplets are disabled in ' +
           class_num_beats_per_measure +
           '/' +
           class_note_value_per_measure +
-          ' time.  Use x/4 time for triplets.'
+          ' time.  Use x/4 or x/8 time for triplets.'
       );
       return;
     }
 
-    if (usingTriplets() === isNewDivisionTriplets) {
+    // Mixed, beat by beat (Infinity Drumming, 2026): coming from another note
+    // setting, every beat keeps the notes it had (16ths stay 16ths); going to
+    // another, the beats are dropped
+    if (newDivision == 48 && class_time_division != 48) {
+      class_beat_notes = allBars().map(function (bar) {
+        var char = beatCharForDivision(class_time_division, barSigOf(bar));
+        var beats = '';
+        for (var b = 0; char && b < barSigOf(bar).top; b++) beats += char;
+        return beats;
+      });
+    } else if (newDivision != 48) class_beat_notes = [];
+
+    // notes keep their places when one note setting's grid is a whole multiple of
+    // the other's (16ths and Mixed, 8ths and 16th triplets...)
+    var exactChange =
+      newDivision % class_time_division === 0 || class_time_division % newDivision === 0;
+    if (usingTriplets() !== isNewDivisionTriplets && exactChange)
+      root.resetMetronomeOptionsMenuOffsetClick(); // the click's offsets differ in triplets
+
+    if (usingTriplets() === isNewDivisionTriplets || exactChange) {
       // get the encoded notes out of the UI.
       // run through both measures.
       var topIndex = class_notes_per_measure * class_number_of_measures;
@@ -5891,12 +6273,17 @@ function GrooveWriter() {
       numberOfMeasures: class_number_of_measures,
       straightBar: !!class_straight_bars[baseindex - 1],
       barTimeSig: barSigLabel(baseindex - 1),
-      // x/8 bars are grouped like their beaming (5/8 = 3+2, ...)
-      groupEnds: beamGroupEnds(
-        barSigOf(baseindex - 1).top,
-        barSigOf(baseindex - 1).bottom,
-        barCountOf(baseindex - 1)
-      ),
+      // the row of beats, to choose each beat's notes
+      beatHeader: beatHeaderOfBar(baseindex - 1),
+      // x/8 bars are grouped like their beaming (5/8 = 3+2, ...); beat by beat,
+      // each beat (or triplet over two beats) is a group
+      groupEnds:
+        beatGroupEndsOfBar(baseindex - 1) ||
+        beamGroupEnds(
+          barSigOf(baseindex - 1).top,
+          barSigOf(baseindex - 1).bottom,
+          barCountOf(baseindex - 1)
+        ),
       // the beats are grouped by the bar's own time signature
       noteGrouping: root.myGrooveUtils.noteGroupingSize(
         barCountOf(baseindex - 1),

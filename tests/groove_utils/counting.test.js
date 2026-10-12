@@ -38,6 +38,22 @@ describe('counting over the notes', () => {
     ).toBe('1 2 3 1 2 3 4 5');
   });
 
+  it('counts 32nd notes "1 ah lee bee & ah lah bah"', () => {
+    const line = '|' + 'x-'.repeat(16) + '|';
+    expect(counts(`?TimeSig=4/4&Div=32&Measures=1&Count=1&H=${line}`).slice(0, 18).join(' ')).toBe(
+      '1 ah lee bee & ah lah bah 2 ah lee bee & ah lah bah 3 ah'
+    );
+  });
+
+  it('counts 8th-note triplets in 6/8 over two 8th notes each, and 16th triplets in 7/8', () => {
+    expect(counts('?TimeSig=6/8&Div=12&Measures=1&Count=1&H=|xxxxxxxxx|').join(' ')).toBe(
+      '1 a & 3 a & 5 a &'
+    );
+    expect(
+      counts('?TimeSig=7/8&Div=24&Measures=1&Count=1&H=|xxxxxxxxxxxxxxxxxxxxx|').join(' ')
+    ).toBe('1 & a 2 & a 3 & a 4 & a 5 & a 6 & a 7 & a');
+  });
+
   it('puts "Swing" / "Straight" above the counts, not between them and the music', () => {
     const abc = gu.createABCFromGrooveData(
       gu.getGrooveDataFromUrlString(

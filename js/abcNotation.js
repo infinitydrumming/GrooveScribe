@@ -1,10 +1,10 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
 // helpers below are pure. GrooveUtils delegates its ABC methods here.
 
-import { takeGraceGroups } from './ornaments.js';
+import { hasDiddle, takeGraceGroups } from './ornaments.js';
 import {
   constant_NUMBER_OF_TOMS,
   constant_ABC_STICK_COUNT,
@@ -17,7 +17,25 @@ import {
   notesPerMeasureInFullSizeArray,
   scaleNoteArrayToFullSize,
 } from './musicMath.js';
-import { fullSizeBar, isMixedMeter } from './barMeters.js';
+import { barSig, fullSizeBar, isMixedMeter } from './barMeters.js';
+import { hasBeatNotes, makeBeatPlan } from './beatNotes.js';
+
+/**
+ * The beat plan (see beatNotes.js) of bars fromBar..toBar-1 of a groove in the
+ * Mixed note setting, or null (other note settings, or a bar without one).
+ */
+function beatPlanOf(gd, fromBar, toBar) {
+  if (gd.timeDivision != 48 || !gd.beatNotes || !gd.beatNotes.length) return null;
+  var bars = [];
+  var sigs = [];
+  for (var bar = fromBar; bar < toBar; bar++) {
+    var sig = barSig(gd.barTimeSigs, bar, gd.numBeats, gd.noteValue);
+    if (!hasBeatNotes(sig) || !gd.beatNotes[bar]) return null;
+    bars.push(gd.beatNotes[bar]);
+    sigs.push(sig);
+  }
+  return makeBeatPlan(bars, sigs);
+}
 import {
   create_note_mapping_array_for_highlighting,
   convert_sticking_counts_to_actual_counts,
@@ -55,6 +73,14 @@ function testArrayOfArraysForEquality(array_of_arrays, test_index, test_value) {
   }
 
   return true;
+}
+
+// A diddle's slash goes on a chord's stem, once however many of its notes have
+// one (Infinity Drumming, 2026): "!/!" or ''.
+function moveDiddlesOutsideOfGroup(abcNoteStrings) {
+  if (!moveAccentsOrOtherModifiersOutsideOfGroup(abcNoteStrings, '!/!')) return '';
+  while (moveAccentsOrOtherModifiersOutsideOfGroup(abcNoteStrings, '!/!'));
+  return '!/!';
 }
 
 function getABCforNote(note_array_of_arrays, start_index, end_of_group, scaler) {
@@ -100,6 +126,7 @@ function getABCforNote(note_array_of_arrays, start_index, end_of_group, scaler) 
     ABC_String += moveAccentsOrOtherModifiersOutsideOfGroup(abcNoteStrings, '!plus!');
     ABC_String += moveAccentsOrOtherModifiersOutsideOfGroup(abcNoteStrings, '!open!');
     ABC_String += moveAccentsOrOtherModifiersOutsideOfGroup(abcNoteStrings, '!///!');
+    ABC_String += moveDiddlesOutsideOfGroup(abcNoteStrings);
 
     // A sub-chord such as the kick & hi-hat foot "[F^d,]4" carries its length after the ']'. Give every
     // note inside it that length before the brackets are dropped below, or all but the last note would
@@ -152,6 +179,12 @@ function getABCforRest(note_array_of_arrays, start_index, end_of_group, scaler, 
   return ABC_String;
 }
 
+// How many slots (of 12 to a quarter note) a triplet bar's beats have: 12, or 6
+// (an 8th note) in x/8 bars of 16th triplets or finer (Infinity Drumming, 2026).
+function tripletBeatSlots(sub_division, timeSigBottom) {
+  return timeSigBottom == 8 && sub_division != 12 ? 6 : 12;
+}
+
 function abc_gen_note_grouping_size(usingTriplets, timeSigTop, timeSigBottom) {
   var note_grouping;
 
@@ -186,6 +219,62 @@ function count_active_notes_in_arrays(array_of_arrays, start_index, how_far_to_m
   return num_active_notes;
 }
 
+/**
+ * Infinity Drumming, 2026: beat by beat, a beat of 8ths or 16ths written as the
+ * 8ths and 16ths note settings write it (each note, count or sticking lasting
+ * until the next), counted on each of its notes however few notes the beat has.
+ * In x/8 bars the straight beats beamed together are written together, as a
+ * note may last past its 8th note there (`endsBeam` says where groups end).
+ * Null for other beats, or one with notes between its own.
+ * @returns {{stickings: string, hands: string, feet: string, span: number} | null}
+ *   span: how many slots were written (the beats beamed together)
+ */
+function straightBeatABC(
+  sticking_array,
+  drums,
+  kick_array,
+  beatPlan,
+  start,
+  beat,
+  endsBeam,
+  notes_per_measure
+) {
+  var bar = Math.floor(start / notes_per_measure);
+  var all = drums.concat([kick_array]);
+  // the slots between the notes of the beat at `from`, if it is one of 8ths or
+  // 16ths with all its notes on them (0 otherwise)
+  var stepOfBeat = function (from) {
+    var step = beatPlan.straightStepAt(from % notes_per_measure, bar);
+    for (var slot = from; step && slot < from + beat; slot++)
+      if ((slot - from) % step && count_active_notes_in_arrays(all, slot, 1)) return 0;
+    return step;
+  };
+  var step = stepOfBeat(start);
+  if (!step) return null;
+  var end = start + beat;
+  while (!endsBeam(end - 1) && end % notes_per_measure !== 0 && stepOfBeat(end) === step)
+    end += beat;
+  var units = (step * 2) / 3; // a 16th note is 2 (of 1/32), an 8th note 4
+  var count = (end - start) / step;
+  // the beats' own notes, side by side
+  var compact = function (array) {
+    var notes = [];
+    for (var k = 0; k < count; k++) notes.push(array[start + k * step]);
+    return notes;
+  };
+  var write = function (arrays, hiddenRest) {
+    var abc = getABCforRest(arrays, 0, count, units, hiddenRest);
+    for (var k = 0; k < count; k++) abc += getABCforNote(arrays, k, count - k, units);
+    return abc;
+  };
+  return {
+    stickings: write([compact(sticking_array)], true),
+    hands: write(drums.map(compact), false),
+    feet: write([compact(kick_array)], true),
+    span: end - start,
+  };
+}
+
 function snare_HH_kick_ABC_for_triplets(
   sticking_array,
   HH_array,
@@ -199,9 +288,21 @@ function snare_HH_kick_ABC_for_triplets(
   kick_stems_up,
   timeSigTop,
   timeSigBottom,
-  numberOfMeasuresPerLine
+  numberOfMeasuresPerLine,
+  beatPlan
 ) {
   var scaler = 1; // we are always in 48 notes here, and the ABC needs to think we are in 48 since the specified division is 1/32
+  // Each beat is 12 slots (a quarter note), or in x/8 bars of 16th triplets and
+  // finer, 6 (an 8th note), beamed in the bar's classic groups (Infinity Drumming, 2026)
+  var beat = tripletBeatSlots(sub_division, timeSigBottom);
+  var x8BeamEnds =
+    beat == 6 ? beamGroupEnds(timeSigTop, timeSigBottom, notes_per_measure) || null : null;
+  var endsBeam = function (index) {
+    if (beat == 12) return index % 12 == 11;
+    var position = (index % notes_per_measure) + 1;
+    if (x8BeamEnds) return x8BeamEnds.indexOf(position) >= 0;
+    return position % 18 === 0; // 6/8, 9/8, 12/8: in dotted quarter notes
+  };
   var ABC_String = '';
   var stickings_voice_string = 'V:Stickings\n';
   var hh_snare_voice_string = 'V:Hands stem=up\n%%voicemap drum\n';
@@ -240,11 +341,109 @@ function snare_HH_kick_ABC_for_triplets(
       end_of_group = notes_per_measure - (i % num_notes);
     }
 
-    if (i % abc_gen_note_grouping_size(true, timeSigTop, timeSigBottom) === 0) {
+    if (i % beat === 0) {
       // Look for some special cases that will format beats as non triplet groups.   Quarter notes, 1/8th and 1/16th notes only.
 
-      // look for a whole beat of rests
-      if (0 == count_active_notes_in_arrays(all_drum_array_of_array, i, 12)) {
+      // beat by beat (Infinity Drumming, 2026): a beat of 8ths or 16ths, written
+      // as in the 8ths and 16ths note settings, with all its counts
+      var straightBeat = beatPlan
+        ? straightBeatABC(
+            sticking_array,
+            all_drum_array_of_array,
+            kick_array,
+            beatPlan,
+            i,
+            beat,
+            endsBeam,
+            notes_per_measure
+          )
+        : null;
+      // a triplet over two beats (Infinity Drumming, 2026): quarter-note triplets,
+      // or 8th-note triplets in an x/8 bar, from the bar's beat plan
+      var longTriplet = beatPlan
+        ? beatPlan.longTripletAt(i % notes_per_measure, Math.floor(i / notes_per_measure))
+        : null;
+      if (straightBeat) {
+        stickings_voice_string += straightBeat.stickings;
+        hh_snare_voice_string += straightBeat.hands;
+        if (kick_stems_up) kick_voice_string = '';
+        else kick_voice_string += straightBeat.feet;
+        skip_adding_more_notes = true;
+        i += straightBeat.span - 1;
+      } else if (longTriplet) {
+        var units = longTriplet.step; // each note written a quarter (8) or an 8th (4) long
+        hh_snare_voice_string += '(3:3:3';
+        for (var third = 0; third < 3; third++) {
+          var at = i + third * longTriplet.step;
+          for (si = at + 1; si < at + longTriplet.step; si++) sticking_array[si] = false;
+          stickings_voice_string +=
+            getABCforNote([sticking_array], at, units, scaler) || 'x' + units;
+          hh_snare_voice_string +=
+            getABCforNote(all_drum_array_of_array, at, units, scaler) || 'z' + units;
+          if (!kick_stems_up)
+            kick_voice_string += getABCforNote([kick_array], at, units, scaler) || 'x' + units;
+        }
+        if (kick_stems_up) kick_voice_string = '';
+        skip_adding_more_notes = true;
+        i += longTriplet.span - 1;
+      } else if (beat == 6) {
+        // an x/8 bar's 8th note (Infinity Drumming, 2026): a rest, one 8th note,
+        // two 16ths, or a 16th-note triplet (or 32nd-note sextuplet)
+        if (0 == count_active_notes_in_arrays(all_drum_array_of_array, i, 6)) {
+          skip_adding_more_notes = true;
+          stickings_voice_string += 'x4';
+          hh_snare_voice_string += 'z4'; // 8th note rest
+          if (!kick_stems_up) kick_voice_string += 'x4';
+          i += 5;
+        } else if (0 == count_active_notes_in_arrays(all_drum_array_of_array, i + 1, 5)) {
+          for (si = i + 1; si < i + 6; si++) sticking_array[si] = false;
+          stickings_voice_string += getABCforRest([sticking_array], i, 4, scaler, true);
+          stickings_voice_string += getABCforNote([sticking_array], i, 4, scaler);
+          hh_snare_voice_string += getABCforNote(all_drum_array_of_array, i, 4, scaler);
+          if (kick_stems_up) kick_voice_string = '';
+          else kick_voice_string += getABCforNote([kick_array], i, 4, scaler);
+          skip_adding_more_notes = true;
+          i += 5;
+        } else if (
+          sub_division == 48 &&
+          0 == count_active_notes_in_arrays(all_drum_array_of_array, i + 1, 2) &&
+          0 == count_active_notes_in_arrays(all_drum_array_of_array, i + 4, 2)
+        ) {
+          for (var sixteenth = i; sixteenth <= i + 3; sixteenth += 3) {
+            for (si = sixteenth + 1; si < sixteenth + 3; si++) sticking_array[si] = false;
+            stickings_voice_string += getABCforRest([sticking_array], sixteenth, 2, scaler, true);
+            stickings_voice_string += getABCforNote([sticking_array], sixteenth, 2, scaler);
+            hh_snare_voice_string += getABCforRest(
+              all_drum_array_of_array,
+              sixteenth,
+              2,
+              scaler,
+              false
+            );
+            hh_snare_voice_string += getABCforNote(all_drum_array_of_array, sixteenth, 2, scaler);
+            if (kick_stems_up) kick_voice_string = '';
+            else kick_voice_string += getABCforNote([kick_array], sixteenth, 2, scaler);
+          }
+          skip_adding_more_notes = true;
+          i += 5;
+        } else {
+          faker_sub_division = sub_division;
+          if (
+            sub_division == 48 &&
+            0 == count_active_notes_in_arrays(all_drum_array_of_array, i + 1, 1) &&
+            0 == count_active_notes_in_arrays(all_drum_array_of_array, i + 3, 1) &&
+            0 == count_active_notes_in_arrays(all_drum_array_of_array, i + 5, 1)
+          )
+            faker_sub_division = 24; // a 16th-note triplet
+          end_of_group = 48 / faker_sub_division;
+          grouping_size_for_rests = end_of_group;
+          var notes_in_eighth = faker_sub_division / 8;
+          hh_snare_voice_string +=
+            '(' + notes_in_eighth + ':' + notes_in_eighth + ':' + notes_in_eighth;
+        }
+
+        // look for a whole beat of rests
+      } else if (0 == count_active_notes_in_arrays(all_drum_array_of_array, i, 12)) {
         // there are no notes in the next beat.   Let's output a special string for a quarter note rest
         skip_adding_more_notes = true;
         stickings_voice_string += 'x8';
@@ -470,10 +669,7 @@ function snare_HH_kick_ABC_for_triplets(
       }
     }
 
-    if (
-      i % abc_gen_note_grouping_size(true, timeSigTop, timeSigBottom) ==
-      abc_gen_note_grouping_size(true, timeSigTop, timeSigBottom) - 1
-    ) {
+    if (endsBeam(i)) {
       stickings_voice_string += ' ';
       hh_snare_voice_string += ' '; // Add a space to break the bar line every group notes
       kick_voice_string += ' ';
@@ -776,6 +972,8 @@ function addCounting(sticking_array, time_division, timeSigTop, timeSigBottom) {
   );
   var step = fullSlots / ((time_division / 4) * timeSigTop * (4 / timeSigBottom));
   var beat = fullSlots / timeSigTop;
+  // 8th-note triplets in x/8 time: three over every two beats
+  if (beat % step !== 0 && (beat * 2) % step === 0) beat *= 2;
   if (step < 1 || step % 1 !== 0 || beat % step !== 0) return;
   var isEmpty = function (sticking) {
     return !sticking || sticking == constant_ABC_STICK_OFF;
@@ -784,6 +982,63 @@ function addCounting(sticking_array, time_division, timeSigTop, timeSigBottom) {
     var slots = sticking_array.slice(start, start + beat);
     if (slots.every(isEmpty))
       for (var i = start; i < start + beat; i += step) sticking_array[i] = constant_ABC_STICK_COUNT;
+  }
+}
+
+/**
+ * Infinity Drumming, 2026: a diddle's note is written exactly as long as its grid
+ * note, so its one slash means two strokes at double speed.  Where nothing else
+ * would end it there, a rest ("z") at the end of the grid note does (an extra
+ * line of "notes" for the writers below).  Returns null when there are no diddles.
+ * @param {Array<Array<string|false>>} lines  every drum line of the arrays
+ * @param {number} num_notes
+ * @param {number} notes_per_measure  slots per bar
+ * @param {function(number): number} gridSlotsAt  how many slots slot i's grid note lasts
+ */
+function diddleStops(lines, num_notes, notes_per_measure, gridSlotsAt) {
+  var stops = null;
+  for (var i = 0; i < num_notes; i++) {
+    var diddled = lines.some(function (line) {
+      return line && hasDiddle(line[i]);
+    });
+    if (!diddled) continue;
+    var stop = i + gridSlotsAt(i);
+    if (stop >= num_notes || stop % notes_per_measure === 0) continue; // the bar ends there
+    var free = lines.every(function (line) {
+      return !line || !line[stop];
+    });
+    if (!free) continue;
+    if (!stops) stops = new Array(num_notes).fill(false);
+    stops[stop] = 'z';
+  }
+  return stops;
+}
+
+/**
+ * Infinity Drumming, 2026: counting beat by beat (the Mixed note setting): over
+ * every note of each beat's choice, in beats without stickings.
+ */
+function addPlanCounting(sticking_array, beatPlan, notes_per_measure) {
+  var isEmpty = function (sticking) {
+    return !sticking || sticking == constant_ABC_STICK_OFF;
+  };
+  for (var start = 0; start < sticking_array.length; start += notes_per_measure) {
+    var groups = beatPlan.groups[start / notes_per_measure] || [];
+    groups.forEach(function (group) {
+      var from = start + group.start;
+      if (!sticking_array.slice(from, from + group.span).every(isEmpty)) return;
+      for (var at = from; at < from + group.span; at += group.step)
+        sticking_array[at] = constant_ABC_STICK_COUNT;
+    });
+  }
+}
+
+// the counts ("C" stickings and the counting above) as each beat says them
+function convertPlanCounts(sticking_array, beatPlan, notes_per_measure) {
+  for (var i = 0; i < sticking_array.length; i++) {
+    if (sticking_array[i] != constant_ABC_STICK_COUNT) continue;
+    var said = beatPlan.countAt(i % notes_per_measure, Math.floor(i / notes_per_measure));
+    sticking_array[i] = said ? '"' + said + '"x' : false;
   }
 }
 
@@ -800,18 +1055,42 @@ export function create_ABC_from_snare_HH_kick_arrays(
   notes_per_measure,
   kick_stems_up,
   timeSigTop,
-  timeSigBottom
+  timeSigBottom,
+  beatPlan
 ) {
-  if (gu.showCounts) addCounting(sticking_array, time_division, timeSigTop, timeSigBottom);
+  if (gu.showCounts) {
+    if (beatPlan) addPlanCounting(sticking_array, beatPlan, notes_per_measure);
+    else addCounting(sticking_array, time_division, timeSigTop, timeSigBottom);
+  }
 
-  // convert sticking count symbol to the actual count
-  // do this right before ABC output so it can't every get encoded into something that gets saved.
-  convert_sticking_counts_to_actual_counts(
-    sticking_array,
-    time_division,
+  // diddled notes end at their grid note (the rests go in with the toms' lines)
+  var tripletBar = isTripletDivisionFromNotesPerMeasure(
+    notes_per_measure,
     timeSigTop,
     timeSigBottom
   );
+  var stops = diddleStops(
+    [HH_array, snare_array, kick_array].concat(toms_array || []),
+    num_notes,
+    notes_per_measure,
+    function (i) {
+      if (beatPlan)
+        return beatPlan.slotsPerNoteAt(i % notes_per_measure, Math.floor(i / notes_per_measure));
+      return (tripletBar ? 48 : 32) / time_division;
+    }
+  );
+  if (stops) toms_array = (toms_array || []).concat([stops]);
+
+  // convert sticking count symbol to the actual count
+  // do this right before ABC output so it can't every get encoded into something that gets saved.
+  if (beatPlan) convertPlanCounts(sticking_array, beatPlan, notes_per_measure);
+  else
+    convert_sticking_counts_to_actual_counts(
+      sticking_array,
+      time_division,
+      timeSigTop,
+      timeSigBottom
+    );
 
   var numberOfMeasuresPerLine = 2; // Default
 
@@ -834,7 +1113,8 @@ export function create_ABC_from_snare_HH_kick_arrays(
       kick_stems_up,
       timeSigTop,
       timeSigBottom,
-      numberOfMeasuresPerLine
+      numberOfMeasuresPerLine,
+      beatPlan
     );
   } else {
     return snare_HH_kick_ABC_for_quads(
@@ -1033,7 +1313,8 @@ function grooveDataABC(gu, myGrooveData, renderWidth) {
     ), // notes_per_measure, We scaled up to 48/32 above
     myGrooveData.kickStemsUp,
     myGrooveData.numBeats,
-    myGrooveData.noteValue
+    myGrooveData.noteValue,
+    beatPlanOf(myGrooveData, 0, myGrooveData.numberOfMeasures)
   );
 
   gu.note_mapping_array = create_note_mapping_array_for_highlighting(
@@ -1092,7 +1373,8 @@ function createMeasureByMeasureABC(
         notesPerMeasure,
         myGrooveData.kickStemsUp,
         myGrooveData.numBeats,
-        myGrooveData.noteValue
+        myGrooveData.noteValue,
+        beatPlanOf(myGrooveData, measure, measure + 1)
       ),
       feelMarkings[measure]
     );
@@ -1181,7 +1463,8 @@ function createMixedMeterABC(gu, myGrooveData, renderWidth) {
       fullCount,
       gd.kickStemsUp,
       sig.top,
-      sig.bottom
+      sig.bottom,
+      beatPlanOf(gd, bar, bar + 1)
     );
     var previous = bar > 0 ? gd.barTimeSigs[bar - 1] : null;
     if (previous && (previous.top != sig.top || previous.bottom != sig.bottom))

@@ -208,6 +208,53 @@ export const coverageGrooves = [
     url: '?TimeSig=4/4&Div=12&Tempo=90&Measures=1&Count=1&H=|x-xx-xx-xx-x|&S=|---o-----o--|&K=|o-----o-----|',
   },
 
+  // ---- Infinity Drumming, 2026: diddles, the exactly timed clicks, notes beat
+  // by beat (Mixed), triplets in x/8 time and the 32nd-note count.
+  {
+    name: 'Diddles on hi-hat and snare (16ths, with an accent and a flam)',
+    url: '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&H=|x-x-x-x-x-x-x-x-|&HD=|d---------------|&S=|----O--o----O-oo|&SD=|-------d------d-|&SO=|------------f---|&K=|o-------o-------|',
+  },
+  {
+    name: 'Diddles in 8th-note triplets',
+    url: '?TimeSig=4/4&Div=12&Tempo=80&Measures=1&H=|x-xx-xx-xx-x|&S=|---o-----ooo|&SD=|---d------d-|&K=|o-----o-----|',
+  },
+  {
+    name: 'Diddles on 32nd notes, counted',
+    url: '?TimeSig=4/4&Div=32&Tempo=60&Measures=1&Count=1&H=|x---x---x---x---x---x---x---x---|&S=|--------o-o-o-----------o-ooo---|&SD=|----------d---------------d-----|&K=|o---------------o---------------|',
+  },
+  {
+    name: 'Click sextuplets over 16th triplets',
+    url: '?TimeSig=4/4&Div=24&Tempo=70&Measures=1&MetronomeFreq=24&H=|x-xx-xx-xx-xx-xx-xx-xx-x|&S=|------o-----------o-----|&K=|o-----------o-----------|',
+  },
+  {
+    name: 'Click swung 16ths over a 16ths groove',
+    url: '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&MetronomeFreq=16s&H=|xxxxxxxxxxxxxxxx|&S=|----o-------o---|&K=|o-------o-o-----|',
+  },
+  {
+    name: 'Click dotted quarters in 6/8 (2 bars)',
+    url: '?TimeSig=6/8&Div=8&Tempo=100&Measures=2&MetronomeFreq=4d&H=|xxxxxx|xxxxxx|&S=|---o--|---o--|&K=|o-----|o-----|',
+  },
+  {
+    name: 'Beat by beat - quarter-note triplet fill at the end of a 16ths groove (2 bars)',
+    url: '?TimeSig=4/4&Div=48&Tempo=80&Measures=2&Beats=ssss,ssqq&H=|x-----x-----x-----x-----x-----x-----x-----x-----|x-----x-----x-----x-----------------------------|&S=|------------o-----------------------o-----------|------------o-----------o-------o-------o-------|&K=|o-----------------------o-----o-----------------|o-----------------------o-----------------------|',
+  },
+  {
+    name: 'Beat by beat - 8ths, triplets, sextuplets, 16ths and a diddle, counted',
+    url: '?TimeSig=4/4&Div=48&Tempo=70&Measures=1&Count=1&Beats=etxs&H=|x-----x-----x---x---x---x-x-x-x-x-x-x--x--x--x--|&S=|------------o-------o---------o-----------------|&SD=|--------------------d---------------------------|&K=|o-----------------------o-----------------------|',
+  },
+  {
+    name: 'Beat by beat in 7/8 and 6/8 bars',
+    url: '?TimeSig=7/8&Div=48&Tempo=80&Measures=2&BarSigs=7/8,6/8&Beats=ssssxss,tteeee&H=|x-----x-----x-----x-----x-x-x-x-----x-----|x---x---x---x-----x-----x-----x-----|&S=|------------o-------------o-o-o-----------|--------o---------o-----------------|&K=|o-----------------------o-----------------|o-----------------------o-----------|',
+  },
+  {
+    name: 'Triplets in 7/8 (16th triplets in 2+2+3)',
+    url: '?TimeSig=7/8&Div=24&Tempo=80&Measures=1&H=|x-xx-xx-xx-xx-xx-xx-x|&S=|------O--------O-----|&K=|o-----------o--------|',
+  },
+  {
+    name: '8th-note triplets in 6/8, counted',
+    url: '?TimeSig=6/8&Div=12&Tempo=80&Measures=1&Count=1&H=|xxxxxxxxx|&S=|---o-----|&K=|o-----o--|',
+  },
+
   // ---- Voice/articulation mismatches: each character is valid for SOME voice
   // but placed in a voice where it is not, exercising every "this symbol isn't
   // valid for this drum" fall-through in tablatureToABCNotationPerNote. Such

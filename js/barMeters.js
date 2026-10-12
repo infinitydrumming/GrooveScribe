@@ -1,4 +1,4 @@
-// Infinity Drumming, 2026: a time signature for each bar.
+// Infinity Drumming, 2026: a time signature for each bar (and triplets in x/8 bars).
 //
 // A groove's TimeSig is its first bar's.  When bars differ, grooveData.barTimeSigs
 // holds every bar's ({ top, bottom }), and links carry them as
@@ -80,11 +80,12 @@ export function barStride(timeDivision, barTimeSigs, numberOfMeasures, top, bott
 
 /**
  * Whether a note setting works in a bar: whole notes per bar, and triplets only
- * in x/4 bars.
+ * in x/4 and x/8 bars (in x/8, 16th triplets fit every bar, 8th triplets only
+ * bars with whole quarter notes, like 6/8).
  */
 export function divisionFitsBar(timeDivision, sig) {
   if (barNoteCount(timeDivision, sig) % 1 !== 0) return false;
-  if (timeDivision % 12 === 0 && sig.bottom != 4) return false;
+  if (timeDivision % 12 === 0 && sig.bottom != 4 && sig.bottom != 8) return false;
   return true;
 }
 

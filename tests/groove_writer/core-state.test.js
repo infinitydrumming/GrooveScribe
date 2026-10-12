@@ -387,14 +387,13 @@ describe('GrooveWriter core state & undo/redo', () => {
       expect(gw.notesPerMeasure()).toBe(12);
     });
 
-    it('newDivision=48 (MIXED subdivision) shows a one-time informational alert() but still applies the change', () => {
+    it('newDivision=48 (Mixed, beat by beat) applies the change without an alert', () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
       gw.changeDivision(48);
 
-      expect(alertSpy).toHaveBeenCalledTimes(1);
-      expect(alertSpy.mock.calls[0][0]).toMatch(/MIXED subdivision/);
-      expect(gw.notesPerMeasure()).toBe(48); // the alert is informational only; it does not reject the change
+      expect(alertSpy).not.toHaveBeenCalled(); // the old "MIXED subdivision" notice is gone
+      expect(gw.notesPerMeasure()).toBe(48);
 
       alertSpy.mockRestore();
     });

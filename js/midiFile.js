@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar, exact tempo for swung and triplet notes. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar, exact tempo for swung and triplet notes, more metronome clicks, diddles. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -76,14 +76,87 @@ import {
   constant_OUR_MIDI_VELOCITY_NORMAL,
 } from './constants.js';
 import { isTripletDivisionFromNotesPerMeasure, scaleNoteArrayToFullSize } from './musicMath.js';
-import { fullSizeBar, isMixedMeter } from './barMeters.js';
+import { barSig, fullSizeBar, isMixedMeter } from './barMeters.js';
+import { beatGroups, groupAt, hasBeatNotes } from './beatNotes.js';
 import {
   DEFAULT_GRACE_SPACING_MS,
   DEFAULT_GRACE_VOLUME,
   DRAG_SPACING_FACTOR,
   graceNotesForToken,
+  hasDiddle,
+  withoutDiddle,
   withoutGrace,
 } from './ornaments.js';
+import { isTimedClick, timedMetronomeClicks } from './metronome.js';
+
+// --- notes between the grid's notes (Infinity Drumming, 2026) --------------------
+// The newer metronome clicks and the second strokes of diddles fall at exact
+// times that need not be on the bar's note grid.  Each bar keeps them in a list,
+// earliest first, and writes them in among its notes as it goes.
+
+// A diddle's second stroke is the note's plain sound: an accent, flam or drag
+// sound gives way to the normal one, and an accent to the normal loudness.
+var DIDDLE_PLAIN_SOUND = {};
+DIDDLE_PLAIN_SOUND[constant_OUR_MIDI_SNARE_ACCENT] = constant_OUR_MIDI_SNARE_NORMAL;
+DIDDLE_PLAIN_SOUND[constant_OUR_MIDI_SNARE_FLAM] = constant_OUR_MIDI_SNARE_NORMAL;
+DIDDLE_PLAIN_SOUND[constant_OUR_MIDI_SNARE_DRAG] = constant_OUR_MIDI_SNARE_NORMAL;
+DIDDLE_PLAIN_SOUND[constant_OUR_MIDI_HIHAT_ACCENT] = constant_OUR_MIDI_HIHAT_NORMAL;
+
+// The diddles of one bar (the slots of each line that have one), with the note
+// tokens stripped of them.
+function takeDiddles(HH_Array, Snare_Array, Kick_Array, Toms_Array, num_notes) {
+  var strip = function (array) {
+    var slots = [];
+    if (!array) return { array: array, slots: slots };
+    var copy = null;
+    for (var i = 0; i < num_notes; i++) {
+      if (!hasDiddle(array[i])) continue;
+      slots[i] = true;
+      if (!copy) copy = array.slice();
+      copy[i] = withoutDiddle(array[i]);
+    }
+    return { array: copy || array, slots: slots };
+  };
+  var hh = strip(HH_Array);
+  var snare = strip(Snare_Array);
+  var kick = strip(Kick_Array);
+  var toms = (Toms_Array || []).map(strip);
+  return {
+    hh: hh,
+    snare: snare,
+    kick: kick,
+    toms: toms,
+    tomArrays: Toms_Array
+      ? toms.map(function (tom) {
+          return tom.array;
+        })
+      : Toms_Array,
+  };
+}
+
+/**
+ * In a groove in the Mixed note setting, how many slots each note of a bar lasts
+ * on its beat's grid (for a diddle's second stroke); undefined otherwise.
+ */
+function slotSpansOf(gd, bar, slots) {
+  if (gd.timeDivision != 48 || !gd.beatNotes || !gd.beatNotes[bar]) return undefined;
+  var sig = barSig(gd.barTimeSigs, bar, gd.numBeats, gd.noteValue);
+  if (!hasBeatNotes(sig)) return undefined;
+  var groups = beatGroups(gd.beatNotes[bar], sig);
+  var spans = [];
+  for (var i = 0; i < slots; i++) {
+    var group = groupAt(groups, i);
+    spans.push(group ? group.step : 1);
+  }
+  return spans;
+}
+
+// Put a hit into a bar's list of extra hits, keeping it in time order.
+function addExtraHit(extraHits, hit) {
+  var k = extraHits.length;
+  while (k > 0 && extraHits[k - 1].at > hit.at) k--;
+  extraHits.splice(k, 0, hit);
+}
 
 // --- grace notes (flams, drags, ruffs) -------------------------------------------
 // Grace notes play a fixed number of milliseconds before their note, whatever the
@@ -339,10 +412,13 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   timeSigTop,
   timeSigBottom,
   swing_style,
-  cursor_markers
+  cursor_markers,
+  slot_spans
 ) {
   // cursor_markers (optional): per slot, true adds a silent note that only moves
   // the playback cursor
+  // slot_spans (optional): per slot, how many slots its grid note lasts (for a
+  // diddle's second stroke); else every note lasts num_notes / num_notes_for_swing
   // 'swing' (default) or 'brazilian'; callers that don't say use the player's setting
   if (swing_style === undefined) swing_style = gu.swingStyle;
   var prev_hh_note = 46; // default to open hi-hat so that the first hi-hat note also mutes any previous hh open.
@@ -369,6 +445,13 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   var offsetClickStartBeat = gu.getMetronomeOptionsOffsetClickStartRotation(isTriplets);
   var delay_for_next_note = 0;
 
+  // diddles: the drums play the first stroke, the second is added between the notes
+  var diddles = takeDiddles(HH_Array, Snare_Array, Kick_Array, Toms_Array, num_notes);
+  HH_Array = diddles.hh.array;
+  Snare_Array = diddles.snare.array;
+  Kick_Array = diddles.kick.array;
+  Toms_Array = diddles.tomArrays;
+
   // flams, drags and ruffs: the drums play the notes, the grace notes are added
   var graces = takeGraceNotes(HH_Array, Snare_Array, Kick_Array, Toms_Array, num_notes);
   HH_Array = graces.hh;
@@ -377,50 +460,59 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   Toms_Array = graces.toms;
   delay_for_next_note = startBarGraceNotes(gu, midiTrack, graces);
 
+  // how long each slot lasts, swing and all
+  var durations = [];
+  for (var slot = 0; slot < num_notes; slot++)
+    durations.push(
+      slotDuration(slot, isTriplets, num_notes, num_notes_for_swing, swing_percentage, swing_style)
+    );
+
+  // the newer metronome clicks and diddles' second strokes, at exact times
+  var extraHits = isTimedClick(metronome_frequency)
+    ? timedMetronomeClicks(metronome_frequency, timeSigTop, timeSigBottom)
+    : [];
+  var barTicks = 0; // from the start of the bar to slot i
+  var writeExtraHits = function (upTo) {
+    while (extraHits.length && extraHits[0].at <= upTo + 1e-6) {
+      var hit = extraHits.shift();
+      var since = barTicks - delay_for_next_note; // when the last event was
+      var wait = Math.max(0, hit.at - since);
+      midiTrack.addNoteOn(midi_channel, hit.note, wait, hit.velocity);
+      delay_for_next_note = Math.max(0, delay_for_next_note - wait);
+    }
+  };
+  // a diddle on slot i's note: its second stroke halfway through the note
+  var defaultSpan = num_notes / num_notes_for_swing;
+  var addDiddleStroke = function (i, note, velocity) {
+    var span = (slot_spans && slot_spans[i]) || defaultSpan;
+    var noteTicks = 0;
+    for (var k = 0; k < Math.floor(span) && i + k < num_notes; k++) noteTicks += durations[i + k];
+    if (span % 1 && i + Math.floor(span) < num_notes)
+      noteTicks += (span % 1) * durations[i + Math.floor(span)];
+    addExtraHit(extraHits, {
+      at: barTicks + noteTicks / 2,
+      note: DIDDLE_PLAIN_SOUND[note] || note,
+      velocity:
+        velocity == constant_OUR_MIDI_VELOCITY_ACCENT
+          ? constant_OUR_MIDI_VELOCITY_NORMAL
+          : velocity,
+    });
+  };
+
   for (var i = 0; i < num_notes; i++) {
-    var duration = 0;
+    var duration = durations[i];
 
-    if (isTriplets) {
-      duration = 128 / 12; // "ticks"   16 for 32nd notes.  10.67 for 48th triplets
-    } else {
-      duration = 16;
-    }
-
-    if (swing_percentage !== 0) {
-      // swing effects the note placement of the e and the a.  (1e&a)
-      // swing increases the distance between the 1 and the e ad shortens the distance between the e and the &
-      // likewise the distance between the & and the a is increased and the a and the 1 is shortened
-      //  So it sounds like this:   1-e&-a2-e&-a3-e&-a4-e&-a
-      var scaler = num_notes / num_notes_for_swing;
-      var val = i % (4 * scaler);
-
-      if (val < scaler) {
-        // this is the 1, increase the distance between this note and the e
-        duration += duration * swing_percentage;
-      } else if (val < scaler * 2) {
-        // this is the e, shorten the distance between this note and the &
-        duration -= duration * swing_percentage;
-      } else if (val < scaler * 3) {
-        // this is the &, increase the distance between this note and the a
-        // (Brazilian swing: shorten it, so the a comes early)
-        if (swing_style == 'brazilian') duration -= duration * swing_percentage;
-        else duration += duration * swing_percentage;
-      } else if (val < scaler * 4) {
-        // this is the a, shorten the distance between this note and the 2
-        // (Brazilian swing: lengthen it, so the beat lands on time: 1-e&-a2-e&-a)
-        if (swing_style == 'brazilian') duration += duration * swing_percentage;
-        else duration -= duration * swing_percentage;
-      }
-    }
-
-    // grace notes before this slot's notes (the first slot's went in above)
+    // the extra hits due by now, then grace notes before this slot's notes (the
+    // first slot's went in above)
+    writeExtraHits(barTicks);
     delay_for_next_note = slotGraceNotes(gu, midiTrack, graces, i, delay_for_next_note);
 
     // Metronome sounds.
     /** @type {number | false} */
     var metronome_note = false;
     var metronome_velocity = constant_OUR_MIDI_VELOCITY_ACCENT;
-    if (metronome_frequency > 0) {
+    // (the newer clicks are among the extra hits)
+    if (metronome_frequency > 0 && !isTimedClick(metronome_frequency)) {
       var quarterNoteFrequency = isTriplets ? 12 : 8;
       var eighthNoteFrequency = isTriplets ? 6 : 4;
       var sixteenthNoteFrequency = isTriplets ? 2 : 2;
@@ -563,6 +655,7 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
         }
         midiTrack.addNoteOn(midi_channel, hh_note, delay_for_next_note, hh_velocity);
         delay_for_next_note = 0; // zero the delay
+        if (diddles.hh.slots[i]) addDiddleStroke(i, hh_note, hh_velocity);
 
         // this if means that only the open hi-hat will get stopped on the next note
         if (HH_Array[i] == constant_ABC_HH_Open) prev_hh_note = hh_note;
@@ -628,6 +721,7 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
         midiTrack.addNoteOn(midi_channel, snare_note, delay_for_next_note, snare_velocity);
         delay_for_next_note = 0; // zero the delay
         //prev_snare_note = snare_note;
+        if (diddles.snare.slots[i]) addDiddleStroke(i, snare_note, snare_velocity);
       }
 
       var kick_note = false;
@@ -660,6 +754,7 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
         );
         delay_for_next_note = 0; // zero the delay
         //prev_kick_note = kick_note;
+        if (diddles.kick.slots[i]) addDiddleStroke(i, kick_note, constant_OUR_MIDI_VELOCITY_NORMAL);
       }
       if (kick_splash_note !== false) {
         if (prev_hh_note !== false) {
@@ -677,6 +772,8 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
         );
         delay_for_next_note = 0; // zero the delay
         //prev_kick_splash_note = kick_splash_note;
+        if (diddles.kick.slots[i])
+          addDiddleStroke(i, kick_splash_note, constant_OUR_MIDI_VELOCITY_NORMAL);
       }
 
       // Toms, plus any extra voices passed after the four toms (the crash and
@@ -768,16 +865,57 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
           if (tom_note !== false) {
             midiTrack.addNoteOn(midi_channel, tom_note, delay_for_next_note, tom_velocity);
             delay_for_next_note = 0; // zero the delay
+            if (diddles.toms[which_array] && diddles.toms[which_array].slots[i])
+              addDiddleStroke(i, tom_note, tom_velocity);
           }
         }
       }
     } // end metronomeSolo
 
     delay_for_next_note += duration;
+    barTicks += duration;
   }
 
+  writeExtraHits(barTicks); // the rest of them, before the bar ends
   if (delay_for_next_note) midiTrack.addNoteOff(0, 60, delay_for_next_note - leadBlankTicks); // add a blank note for spacing
 } // end of function
+
+// How long one slot of a bar lasts, in ticks: 16 for a 32nd note (10.67 for a
+// 32nd triplet), the 1 and & a little longer and the e and a shorter when swung.
+function slotDuration(
+  i,
+  isTriplets,
+  num_notes,
+  num_notes_for_swing,
+  swing_percentage,
+  swing_style
+) {
+  var duration = isTriplets ? 128 / 12 : 16; // "ticks"   16 for 32nd notes.  10.67 for 48th triplets
+  if (swing_percentage === 0) return duration;
+  var scaler = num_notes / num_notes_for_swing;
+  return duration + duration * swing_percentage * swingDirection(i, scaler, swing_style);
+}
+
+// swing effects the note placement of the e and the a.  (1e&a)
+// swing increases the distance between the 1 and the e ad shortens the distance between the e and the &
+// likewise the distance between the & and the a is increased and the a and the 1 is shortened
+//  So it sounds like this:   1-e&-a2-e&-a3-e&-a4-e&-a
+// Returns 1 for a note that is lengthened, -1 for one that is shortened.
+function swingDirection(i, scaler, swing_style) {
+  var val = i % (4 * scaler);
+  var brazilian = swing_style == 'brazilian';
+  // this is the 1, increase the distance between this note and the e
+  if (val < scaler) return 1;
+  // this is the e, shorten the distance between this note and the &
+  if (val < scaler * 2) return -1;
+  // this is the &, increase the distance between this note and the a
+  // (Brazilian swing: shorten it, so the a comes early)
+  if (val < scaler * 3) return brazilian ? -1 : 1;
+  // this is the a, shorten the distance between this note and the 2
+  // (Brazilian swing: lengthen it, so the beat lands on time: 1-e&-a2-e&-a)
+  if (val < scaler * 4) return brazilian ? 1 : -1;
+  return 0;
+}
 
 /**
  * Build a base64 data: URL for the MIDI rendering of a groove.
@@ -879,7 +1017,9 @@ export function create_MIDIURLFromGrooveData(gu, myGrooveData, MIDI_type) {
       myGrooveData.straightBars && myGrooveData.straightBars[measureIndex] ? 0 : swing_percentage,
       myGrooveData.numBeats,
       myGrooveData.noteValue,
-      myGrooveData.swingStyle || 'swing'
+      myGrooveData.swingStyle || 'swing',
+      undefined, // no cursor markers
+      slotSpansOf(myGrooveData, measureIndex, measure_notes)
     );
   }
 
@@ -906,7 +1046,9 @@ function addMixedMeterBars(gu, midiTrack, gd, MIDI_type, swing_percentage) {
       gd.straightBars && gd.straightBars[bar] ? 0 : swing_percentage,
       notes.sig.top,
       notes.sig.bottom,
-      gd.swingStyle || 'swing'
+      gd.swingStyle || 'swing',
+      undefined, // no cursor markers
+      slotSpansOf(gd, bar, notes.hh.length)
     );
   }
 }

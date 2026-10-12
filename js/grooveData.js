@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar, practice timer, counting. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar, practice timer, counting, more metronome clicks, diddles and beat-by-beat notes. See CHANGES.md.
 // grooveData — the central data contract for Groove Scribe.
 //
 // A GrooveData describes a single groove: its time signature, subdivision and
@@ -79,11 +79,14 @@ const EMPTY_NOTE_ARRAY = [
  *                                     (long-short-long-short) or 'brazilian' (long-short-short-long).
  * @property {number} tempo            Tempo in BPM.
  * @property {boolean} kickStemsUp     Kick note stem direction.
- * @property {number} metronomeFrequency  Metronome click subdivision (0, 1 = once per bar, 4, 8, 16).
+ * @property {number | string} metronomeFrequency  Metronome click (0, 1 = once per bar, 4, 8, 16,
+ *   12 = triplets, 24 = sextuplets, '8s' / '16s' = swung 8ths / 16ths, '4d' = dotted quarters).
  * @property {number} grooveClickGrooveBars  "Groove / click bars" practice option: bars of groove
  *   before the click-only bars; 0 = option off. URL "GrooveBars".
  * @property {number} grooveClickClickBars   Click-only bars for that option. URL "ClickBars".
  * @property {boolean} showCounts  Counting ("1 e & a") over the notes in the sheet music.
+ * @property {string[]} beatNotes  Mixed note setting (Div 48): each bar's beats, one character a
+ *   beat ('ssqq'; see beatNotes.js); [] otherwise.
  *   URL "Count=1" (only when on).
  * @property {string} practiceLimit  Practice timer: stop after this many minutes ("10m") or
  *   bars ("16b"); '' = off. URL "Practice".
@@ -140,11 +143,12 @@ export function createGrooveData(config = {}) {
     swingStyle: 'swing',
     tempo: constant_DEFAULT_TEMPO,
     kickStemsUp: true,
-    metronomeFrequency: 0, // 0, 1, 4, 8, 16
+    metronomeFrequency: 0, // see metronome.js
     grooveClickGrooveBars: 0, // 0 = "Groove / click bars" off
     grooveClickClickBars: 0,
     practiceLimit: '', // '' = practice timer off
     showCounts: false,
+    beatNotes: [], // Mixed (Div 48): each bar's beats, see beatNotes.js
     straightBars: [],
     barTimeSigs: [],
     graceSpacingMs: DEFAULT_GRACE_SPACING_MS,
