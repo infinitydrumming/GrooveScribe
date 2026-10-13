@@ -80,8 +80,8 @@ Pages keeps serving it as now.
   to disguise other links.
 - **Same groove, same link:** shortening the same groove twice gives the same
   short link.
-- **Old gscribe.com links** still go wherever they went before. On GitHub Pages
-  (before this setup), Save & Share falls back to the old Groove Scribe short
-  links, which rely on a Google service that is being shut down.
+- **Old gscribe.com links** still go wherever they went before. Infinity Scribe
+  no longer makes them: until this setup is done (on GitHub Pages), Save & Share
+  gives the full link.
 - The code is in `functions/api/shorten.js` (makes a short link) and
   `functions/s/[code].js` (opens one).
