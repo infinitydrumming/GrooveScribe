@@ -29,11 +29,13 @@ function beatHeaderHTML(baseindex, indexStartForNotes, ctx) {
   var html =
     '<div class="beats-row-container"><div class="line-labels"><div class="beats-label">Beats</div></div>' +
     '<div class="music-line-container"><div class="notes-container"><div class="beats-container">' +
-    '<div class="opening_note_space"> </div>';
+    '<div class="opening_note_space"> </div> ';
+  // spaced exactly as the note rows are (a space after each cell and group gap),
+  // so each beat's band sits over its own notes
   for (var i = 0; i < ctx.notesPerMeasure; i++) {
-    html += beatSlotHTML(baseindex, indexStartForNotes + i, i, groupAt(ctx.beatHeader, i));
+    html += beatSlotHTML(baseindex, indexStartForNotes + i, i, groupAt(ctx.beatHeader, i)) + ' \n';
     if (endsNoteGroup(ctx, i) && i < ctx.notesPerMeasure - 1)
-      html += '<div class="space_between_note_groups"> </div>';
+      html += '<div class="space_between_note_groups"> </div> ';
   }
   return html + '<div class="end_note_space"></div></div></div></div></div>\n';
 }

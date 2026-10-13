@@ -11,6 +11,13 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-13 — The row of beats lines up with its notes
+
+- Each beat's band in the row of beats now sits exactly over that beat's notes.
+  The note rows leave a small space after every cell and the row of beats
+  didn't, so the bands drifted left beat by beat, most in long bars like 6/8 and
+  7/8 (`js/viewHtml.js`, `css/infinity_layout.css`).
+
 ## 2026-10-13 — Auto-scroll follows a repeat back to the start
 
 - When a permutation (or any long groove) repeats and the cursor jumps back to
