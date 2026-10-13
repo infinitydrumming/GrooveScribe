@@ -1269,8 +1269,9 @@ body,
   position: absolute;
   top: 1px;
   bottom: 1px;
-  left: -3px;
-  right: -3px;
+  /* reach across the gap to the next slot, so a beat's band is one piece */
+  left: -6px;
+  right: -6px;
   background: var(--id-blue-tint);
   z-index: 0;
 }
