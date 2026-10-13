@@ -963,8 +963,11 @@ function GrooveUtils() {
     var view = usePage ? { top: 0, bottom: window.innerHeight } : scroller.getBoundingClientRect();
     if (view.bottom - view.top < 50) return;
 
-    // leave the page alone while the sheet music is scrolled out of sight
-    var music = note.closest ? note.closest('svg') : null;
+    // leave the page alone while the sheet music is scrolled out of sight: all of
+    // it, not just the note's line (each line is its own svg), so a repeat that
+    // jumps back to the first line still scrolls up to it
+    var line = note.closest ? note.closest('svg') : null;
+    var music = line && line.parentElement ? line.parentElement : line;
     if (music) {
       var musicBox = music.getBoundingClientRect();
       if (musicBox.bottom < view.top || musicBox.top > view.bottom) return;
