@@ -944,6 +944,13 @@ function GrooveUtils() {
   // an on/off switch in the metronome Options menu.
   root.autoScrollEnabled = true;
 
+  // All the sheet music around a note, not just its line (each line is its own
+  // svg), so a repeat that jumps back to the first line still scrolls up to it.
+  function sheetMusicOf(note) {
+    var line = note.closest ? note.closest('svg') : null;
+    return (line && line.parentElement) || line;
+  }
+
   function scrollNoteIntoView(note) {
     // the nearest scrolling box around the note (the editor's content pane), or the page
     var scroller = note.parentElement;
@@ -964,7 +971,7 @@ function GrooveUtils() {
     if (view.bottom - view.top < 50) return;
 
     // leave the page alone while the sheet music is scrolled out of sight
-    var music = note.closest ? note.closest('svg') : null;
+    var music = sheetMusicOf(note);
     if (music) {
       var musicBox = music.getBoundingClientRect();
       if (musicBox.bottom < view.top || musicBox.top > view.bottom) return;

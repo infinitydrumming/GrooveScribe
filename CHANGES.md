@@ -11,6 +11,13 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-13 — Auto-scroll follows a repeat back to the start
+
+- When a permutation (or any long groove) repeats and the cursor jumps back to
+  the first bar, auto-scroll now scrolls back up to it. It used to check only
+  the line of music the cursor was on, which was off screen by then, so it
+  stayed put (`js/groove_utils.js`).
+
 ## 2026-10-12 — Diddles, more clicks, notes beat by beat, triplets in x/8, 32nd counts
 
 - **Diddles (double strokes)** on every drum and cymbal: a note's menu has

@@ -251,6 +251,57 @@ describe('GrooveUtils ABC/SVG note highlighting', () => {
       expect(gu.abcNoteNumCurrentlyHighlighted).toBe(1);
     });
 
+    // Auto-scroll (Infinity Drumming): the sheet music is one svg per line. When a
+    // repeat jumps back to the first line, far above the screen, it still scrolls
+    // up to it, as long as some of the sheet music is on screen.
+    describe('auto-scroll to the highlighted note', () => {
+      const box = (top, bottom) => () => ({
+        top,
+        bottom,
+        left: 0,
+        right: 100,
+        width: 100,
+        height: bottom - top,
+      });
+      let scrollBy;
+      const setUp = (musicTop, musicBottom) => {
+        document.body.innerHTML =
+          '<div id="svgTarget">' +
+          `<svg id="line1"><rect id="abcNoteNum_${idx}_0"></rect></svg>` +
+          `<svg id="line2"><rect id="abcNoteNum_${idx}_1"></rect></svg>` +
+          '</div>';
+        document.getElementById('svgTarget').getBoundingClientRect = box(musicTop, musicBottom);
+        document.getElementById('line1').getBoundingClientRect = box(musicTop, musicTop + 120);
+        document.getElementById('line2').getBoundingClientRect = box(
+          musicBottom - 120,
+          musicBottom
+        );
+        document.getElementById(`abcNoteNum_${idx}_0`).getBoundingClientRect = box(
+          musicTop + 20,
+          musicTop + 40
+        );
+        scrollBy = vi.fn();
+        window.scrollBy = scrollBy;
+        gu.autoScrollEnabled = true;
+      };
+      afterEach(() => {
+        delete window.scrollBy;
+      });
+
+      it('scrolls back up to the first line when the repeat starts again', () => {
+        setUp(-520, 420); // the first line is far above; the line just played is on screen
+        gu.highlightNoteInABCSVGByIndex(0);
+        expect(scrollBy).toHaveBeenCalledTimes(1);
+        expect(scrollBy.mock.calls[0][0].top).toBeLessThan(0); // upwards
+      });
+
+      it('leaves the page alone while all of the sheet music is scrolled out of sight', () => {
+        setUp(-1520, -580);
+        gu.highlightNoteInABCSVGByIndex(0);
+        expect(scrollBy).not.toHaveBeenCalled();
+      });
+    });
+
     it('clearHighlightNoteInABCSVG removes the "highlighted" class and resets the index to -1', () => {
       document.body.innerHTML = `<div id="abcNoteNum_${idx}_0" class="note"></div>`;
       gu.highlightNoteInABCSVGByIndex(0);
