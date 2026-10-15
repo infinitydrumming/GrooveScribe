@@ -4021,9 +4021,10 @@ function GrooveWriter() {
 
     root.myGrooveUtils.oneTimeInitializeMidi();
 
-    // enable or disable swing
+    // enable or disable swing (by the note setting, not the notes in a bar: a 6/4
+    // bar of 8ths has 12, which isn't triplets)
     root.myGrooveUtils.swingEnabled(
-      root.myGrooveUtils.doesDivisionSupportSwing(class_notes_per_measure)
+      root.myGrooveUtils.doesDivisionSupportSwing(class_time_division)
     );
 
     window.onresize = root.refresh_ABC;

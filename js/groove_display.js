@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: Brazilian swing. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: Brazilian swing, swing in 6/4 and other bars of 12 or 24 notes. See CHANGES.md.
 // groove_display.js
 // utility functions to support displaying a groove on a page
 //
@@ -244,7 +244,13 @@ if (typeof GrooveDisplay === 'undefined') {
 
       myGrooveUtils.setGrooveData(myGrooveData);
 
-      myGrooveUtils.AddMidiPlayerToPage(midiPlayerTargetId, myGrooveData.notesPerMeasure, true);
+      // the player takes the note setting (it says whether swing is possible), not
+      // the notes in a bar: a 6/4 bar of 8ths has 12, which isn't triplets
+      myGrooveUtils.AddMidiPlayerToPage(
+        midiPlayerTargetId,
+        (myGrooveData.notesPerMeasure / myGrooveData.numBeats) * myGrooveData.noteValue,
+        true
+      );
       myGrooveUtils.expandOrRetractMIDI_playback(true, false); // make it small
       myGrooveUtils.setTempo(myGrooveData.tempo);
       myGrooveUtils.setSwing(myGrooveData.swingPercent);
@@ -332,7 +338,7 @@ if (typeof GrooveDisplay === 'undefined') {
         myGrooveUtils.setGrooveData(GrooveData);
         //console.log(GrooveData);
 
-        myGrooveUtils.AddMidiPlayerToPage(midiPlayerTargetId, GrooveData.notesPerMeasure, true);
+        myGrooveUtils.AddMidiPlayerToPage(midiPlayerTargetId, GrooveData.timeDivision, true);
         myGrooveUtils.expandOrRetractMIDI_playback(true, expandPlayer); // make it small
         myGrooveUtils.setTempo(GrooveData.tempo);
         myGrooveUtils.setSwing(GrooveData.swingPercent);

@@ -526,6 +526,27 @@ describe('GrooveWriter view & lifecycle', () => {
       delete globalThis.MIDI;
     });
 
+    // Infinity Drumming, 2026: swing is allowed by the note setting, not the notes
+    // in a bar (a 6/4 bar of 8ths has 12, which isn't triplets)
+    it('allows swing for a 6/4 groove of 8ths, and not for triplets', async () => {
+      const original = window.location.href;
+      try {
+        window.history.replaceState(null, '', '/?TimeSig=6/4&Div=8&Measures=1&Swing=30');
+        let gw = await setup();
+        gw.runsOnPageLoad();
+        expect(gw.myGrooveUtils.swingIsEnabled).toBe(true);
+        expect(gw.myGrooveUtils.getSwing()).toBe(30);
+
+        window.history.replaceState(null, '', '/?TimeSig=4/4&Div=12&Measures=1');
+        gw = await setup();
+        gw.runsOnPageLoad();
+        expect(gw.myGrooveUtils.swingIsEnabled).toBe(false);
+      } finally {
+        window.history.replaceState(null, '', original);
+        delete globalThis.MIDI;
+      }
+    });
+
     it('wires root.myGrooveUtils.tempoChangeCallback to root.tempoChangeCallback', async () => {
       const gw = await setup();
       gw.runsOnPageLoad();
