@@ -105,6 +105,7 @@ export default [
       'js/midiFile.js',
       'js/abcNotation.js',
       'js/screenWakeLock.js',
+      'js/audioSession.js',
       'js/ornaments.js',
       'js/barMeters.js',
       'js/practiceTimer.js',

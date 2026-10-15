@@ -11,6 +11,16 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-15 — Heard on an iPhone set to silent
+
+- On an iPhone with the ring/silent switch on silent, a groove played without a
+  sound: Safari treats a web page's sound like a notification's. While a groove
+  plays, Infinity Scribe now tells the browser it is music playback, so it is
+  heard like a music app, silent switch or not (iOS 17 and later). Like a music
+  app, pressing play pauses music playing in another app. When the groove stops
+  the page goes back to the browser's default (`js/audioSession.js`,
+  `js/groove_utils.js`).
+
 ## 2026-10-15 — Swing in 6/4
 
 - Swing works in 6/4 grooves of 8ths or 16ths (and any bar of 12 or 24 notes

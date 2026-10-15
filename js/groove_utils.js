@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up, counting over the notes, menus kept on screen, more metronome clicks, a second tap closes a menu. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, plays through an iPhone's silent switch, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up, counting over the notes, menus kept on screen, more metronome clicks, a second tap closes a menu. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -65,6 +65,7 @@ import {
 } from './browserInfo.js';
 import { createGrooveData } from './grooveData.js';
 import { createScreenWakeLock } from './screenWakeLock.js';
+import { createAudioSession } from './audioSession.js';
 import { metronomeIsOn } from './metronome.js';
 import {
   DEFAULT_GRACE_SPACING_MS,
@@ -1196,6 +1197,7 @@ function GrooveUtils() {
   };
 
   var screenWakeLock = createScreenWakeLock(); // the screen stays on while playing
+  var audioSession = createAudioSession(); // heard through an iPhone's silent switch while playing
 
   root.pauseMIDI_playback = function () {
     if (root.isMIDIPaused === false) {
@@ -1203,6 +1205,7 @@ function GrooveUtils() {
       root.midiEventCallbacks.pauseEvent(root.midiEventCallbacks.classRoot);
       MIDI.Player.pause();
       screenWakeLock.keepAwake(false);
+      audioSession.playing(false);
       root.cancelPendingCursorUpdates();
       root.midiEventCallbacks.notePlaying(root.midiEventCallbacks.classRoot, 'clear', -1);
       root.clearHighlightNoteInABCSVG();
@@ -1211,9 +1214,9 @@ function GrooveUtils() {
 
   // play button or keypress
   root.startMIDI_playback = function () {
-    if (MIDI.Player.playing) {
-      return;
-    } else if (
+    if (MIDI.Player.playing) return;
+    audioSession.playing(true); // before any sound, so it plays on silent too
+    if (
       root.isMIDIPaused &&
       false === root.midiEventCallbacks.doesMidiDataNeedRefresh(root.midiEventCallbacks.classRoot)
     ) {
@@ -1240,6 +1243,7 @@ function GrooveUtils() {
       root.isMIDIPaused = false;
       MIDI.Player.stop();
       screenWakeLock.keepAwake(false);
+      audioSession.playing(false);
       root.midiEventCallbacks.stopEvent(root.midiEventCallbacks.classRoot);
       root.cancelPendingCursorUpdates();
       root.midiEventCallbacks.notePlaying(root.midiEventCallbacks.classRoot, 'clear', -1);
@@ -1410,6 +1414,7 @@ function GrooveUtils() {
         // not repeating, so stopping
         MIDI.Player.stop();
         screenWakeLock.keepAwake(false);
+        audioSession.playing(false);
         root.midiEventCallbacks.percentProgress(root.midiEventCallbacks.classRoot, 100);
         root.midiEventCallbacks.stopEvent(root.midiEventCallbacks.classRoot);
       }

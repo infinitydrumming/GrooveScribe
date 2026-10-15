@@ -205,6 +205,28 @@ describe('GrooveUtils MIDI playback controls', () => {
     });
   });
 
+  // Infinity Drumming, 2026: heard through an iPhone's silent switch while playing
+  describe('audio session (iPhone silent switch)', () => {
+    afterEach(() => {
+      delete navigator.audioSession;
+    });
+
+    it('is "playback" from the start of play and "auto" again after pause and stop', () => {
+      navigator.audioSession = { type: 'auto' };
+      gu.startMIDI_playback();
+      expect(navigator.audioSession.type).toBe('playback');
+      globalThis.MIDI.Player.playing = true;
+      gu.pauseMIDI_playback();
+      expect(navigator.audioSession.type).toBe('auto');
+      globalThis.MIDI.Player.playing = false;
+      gu.startMIDI_playback();
+      expect(navigator.audioSession.type).toBe('playback');
+      globalThis.MIDI.Player.playing = true;
+      gu.stopMIDI_playback();
+      expect(navigator.audioSession.type).toBe('auto');
+    });
+  });
+
   describe('pauseMIDI_playback', () => {
     it('calls MIDI.Player.pause and flips isMIDIPaused when not already paused', () => {
       gu.isMIDIPaused = false;
