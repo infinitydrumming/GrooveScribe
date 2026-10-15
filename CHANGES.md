@@ -11,6 +11,23 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-15 — Swing in 6/4
+
+- Swing works in 6/4 grooves of 8ths or 16ths (and any bar of 12 or 24 notes
+  that isn't triplets). When a groove opened, swing was allowed or not by how
+  many notes a bar has, and 12 and 24 are the triplet counts, so those grooves
+  showed "N/A" and played straight. It now goes by the note setting, as it does
+  when the setting is changed (`js/groove_writer.js`, `js/groove_display.js`).
+
+## 2026-10-13 — Shared links always open Infinity Scribe
+
+- **Save & Share** no longer makes the original Groove Scribe's `gscribe.com`
+  short links. They went through a Google link service that has shut down, and
+  on iPhones they could open the original Groove Scribe instead of Infinity
+  Scribe, so a groove's click bars went silent there. Share now gives the full
+  Infinity Scribe link, or our own short link once the site is hosted with them;
+  the "Short link" box is hidden while there are none (`js/groove_writer.js`).
+
 ## 2026-10-13 — The row of beats lines up with its notes
 
 - Each beat's band in the row of beats now sits exactly over that beat's notes.

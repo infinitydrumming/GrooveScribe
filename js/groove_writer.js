@@ -4021,9 +4021,10 @@ function GrooveWriter() {
 
     root.myGrooveUtils.oneTimeInitializeMidi();
 
-    // enable or disable swing
+    // enable or disable swing (by the note setting, not the notes in a bar: a 6/4
+    // bar of 8ths has 12, which isn't triplets)
     root.myGrooveUtils.swingEnabled(
-      root.myGrooveUtils.doesDivisionSupportSwing(class_notes_per_measure)
+      root.myGrooveUtils.doesDivisionSupportSwing(class_time_division)
     );
 
     window.onresize = root.refresh_ABC;
@@ -5794,11 +5795,13 @@ function GrooveWriter() {
 
   // Infinity Drumming, 2026: our own short links (scribe.infinitydrumming.com/s/...)
   // when the site is hosted with them (functions/api/shorten.js); otherwise the
-  // original Groove Scribe short links below.
+  // full link. The original Groove Scribe's gscribe.com short links are no longer
+  // made: they went through a Google link service that has shut down, and on
+  // iPhones they could open the original Groove Scribe instead of Infinity Scribe.
   function fillInShortenedURLInFullURLPopup(fullURL, cssIdOfTextFieldToFill) {
     document.getElementById('embedCodeCheckbox').checked = false; // uncheck embedCodeCheckbox, because it is not compatible
     if (typeof fetch != 'function') {
-      fillInGScribeShortURL(fullURL, cssIdOfTextFieldToFill);
+      showFullURLWithoutShortLinks(fullURL, cssIdOfTextFieldToFill);
       return;
     }
     fetch('/api/shorten', {
@@ -5811,10 +5814,10 @@ function GrooveWriter() {
       })
       .then(function (result) {
         if (result && result.shortLink) showShortURL(result.shortLink, cssIdOfTextFieldToFill);
-        else fillInGScribeShortURL(fullURL, cssIdOfTextFieldToFill);
+        else showFullURLWithoutShortLinks(fullURL, cssIdOfTextFieldToFill);
       })
       .catch(function () {
-        fillInGScribeShortURL(fullURL, cssIdOfTextFieldToFill); // not hosted with our short links
+        showFullURLWithoutShortLinks(fullURL, cssIdOfTextFieldToFill); // not hosted with our short links
       });
   }
 
@@ -5827,30 +5830,16 @@ function GrooveWriter() {
     document.getElementById('shortenerCheckbox').checked = true;
   }
 
-  function fillInGScribeShortURL(fullURL, cssIdOfTextFieldToFill) {
-    var params = {
-      dynamicLinkInfo: {
-        domainUriPrefix: 'https://gscribe.com/share',
-        link: fullURL,
-      },
-    };
-
-    var xhr = new XMLHttpRequest();
-    xhr.open(
-      'POST',
-      'https://firebasedynamiclinks.googleapis.com/v1/shortLinks?key=AIzaSyBx4So11fGFPgTI62nP-JmxrxHmuRpJ120'
+  // no short links on this site: the full link, and no "Short link" box to tick
+  function showFullURLWithoutShortLinks(fullURL, cssIdOfTextFieldToFill) {
+    var textField = /** @type {HTMLInputElement} */ (
+      document.getElementById(cssIdOfTextFieldToFill)
     );
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        // success
-        var response = JSON.parse(xhr.responseText);
-        showShortURL(response.shortLink, cssIdOfTextFieldToFill);
-      } else {
-        document.getElementById('shortenerCheckbox').checked = false; // request failed
-      }
-    };
-    xhr.send(JSON.stringify(params));
+    var shortener = /** @type {HTMLInputElement} */ (document.getElementById('shortenerCheckbox'));
+    var label = document.getElementById('shortURLLabel');
+    if (textField) textField.value = fullURL;
+    shortener.checked = false;
+    if (label) label.style.display = 'none';
   }
 
   // embed looks something like this:
