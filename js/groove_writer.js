@@ -95,6 +95,7 @@ import {
   constant_sticking_left_on_color_rgb,
   constant_sticking_both_on_color_rgb,
   constant_sticking_count_on_color_rgb,
+  constant_MAX_MEASURES,
 } from './constants.js';
 import { beamGroupEnds } from './musicMath.js';
 import { newExactTimeTrack } from './midiFile.js';
@@ -2773,17 +2774,22 @@ function GrooveWriter() {
       myGrooveData.crash_array = [];
       myGrooveData.ride_array = [];
 
+      // which lines are shown (Infinity Drumming, 2026: asked once, not for every
+      // note: each asks the whole page, which made long grooves slow to open)
+      var stickingsShown = isStickingsVisible();
+      var cymbalsShown = isCymbalsVisible();
+      var tomsShown = isTomsVisible();
+
       // query the clickable UI and generate a arrays representing the notes of all measures
       for (i = 0; i < total_notes; i++) {
         // only grab the stickings if they are visible
-        if (isStickingsVisible()) myGrooveData.sticking_array.push(get_sticking_state(i, 'ABC'));
+        if (stickingsShown) myGrooveData.sticking_array.push(get_sticking_state(i, 'ABC'));
 
         myGrooveData.hh_array.push(_grid.ornamentToken(get_hh_state(i, 'ABC'), 'H', i));
         myGrooveData.snare_array.push(_grid.ornamentToken(get_snare_state(i, 'ABC'), 'S', i));
         myGrooveData.kick_array.push(_grid.ornamentToken(get_kick_state(i, 'ABC'), 'K', i));
 
         // like the toms, the cymbal lines only count while they are shown
-        var cymbalsShown = isCymbalsVisible();
         myGrooveData.crash_array.push(
           cymbalsShown ? _grid.ornamentToken(get_crash_state(i, 'ABC'), 'C', i) : false
         );
@@ -2791,7 +2797,7 @@ function GrooveWriter() {
           cymbalsShown ? _grid.ornamentToken(get_ride_state(i, 'ABC'), 'R', i) : false
         );
 
-        if (isTomsVisible()) {
+        if (tomsShown) {
           myGrooveData.toms_array[0].push(_grid.ornamentToken(get_tom_state(i, 1, 'ABC'), 'T1', i));
           myGrooveData.toms_array[1].push(_grid.ornamentToken(get_tom_state(i, 2, 'ABC'), 'T2', i));
           myGrooveData.toms_array[3].push(_grid.ornamentToken(get_tom_state(i, 4, 'ABC'), 'T4', i));
@@ -3399,6 +3405,7 @@ function GrooveWriter() {
   // currently always at the end of the measures
   // copy the notes from the last measure to the new measure
   root.addMeasureButtonClick = function (event) {
+    if (class_number_of_measures >= constant_MAX_MEASURES) return; // the most a link holds
     if (isMixedMeterGroove()) {
       // bars of different lengths: the new bar copies the last one, time signature too
       var records = readBarRecords();
