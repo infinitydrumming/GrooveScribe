@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat). See CHANGES.md.
+// Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -8,6 +8,7 @@
 // its HTMLforStaffContainer / HTMLforPermutationOptions methods here.
 
 import { groupAt } from './beatNotes.js';
+import { constant_MAX_MEASURES } from './constants.js';
 
 // Whether the note at `slot` (from 0) ends a group on the grid: every
 // ctx.noteGrouping notes, or at ctx.groupEnds (the classic x/8 groups,
@@ -700,7 +701,13 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
     barTimeSigButtonHTML(baseindex, ctx.barTimeSig);
   newHTML += '</span>';
 
-  if (baseindex == ctx.numberOfMeasures)
+  if (baseindex == ctx.numberOfMeasures && ctx.numberOfMeasures >= constant_MAX_MEASURES)
+    // a groove's link holds this many bars at most, so no more can be added
+    newHTML +=
+      '<span class="maxBarsNote">' +
+      constant_MAX_MEASURES +
+      ' bars is the most a groove can have</span>';
+  else if (baseindex == ctx.numberOfMeasures)
     // add new measure button
     newHTML +=
       '<span id="addMeasureButton" title="Add measure" onClick="myGrooveWriter.addMeasureButtonClick(event)"><i class="fa fa-plus"></i></span>';

@@ -784,6 +784,15 @@ body,
 #measureContainer .closeMeasureButton:hover {
   color: var(--id-navy-900);
 }
+/* in place of the add-bar button when a groove has the most bars a link holds:
+ * a line under the last bar */
+.maxBarsNote {
+  display: block;
+  margin: 6px 10px 0;
+  text-align: left;
+  font-size: 13px;
+  color: #7d8ea5;
+}
 #addMeasureButton {
   margin: 6px;
   padding: 0 14px;

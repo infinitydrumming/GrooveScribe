@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-16 — Up to 32 bars, and long grooves open faster
+
+- A groove can have up to **32 bars** (was 10). Before, the editor let you add more
+  bars than a link could hold, and a shared link quietly dropped the rest. Now
+  the add-bar button gives way to a note at 32 bars (`js/constants.js`,
+  `js/viewHtml.js`, `js/groove_writer.js`, `css/infinity_layout.css`).
+- Long grooves open much faster: reading the grid back asked the whole page
+  whether the tom, cymbal and sticking lines were shown for every single note; it
+  now asks once. An 11-bar Mixed groove opens in about 1 second instead of 6
+  (`js/groove_writer.js`).
+
 ## 2026-10-16 — Swing in the Mixed note setting
 
 - Grooves in the **Mixed** note setting (notes beat by beat) can be swung: the

@@ -3,7 +3,7 @@
 // Extracted from groove_utils.js (Step 2 of the refactor). Both groove_utils.js
 // and groove_writer.js import what they need from here.
 
-export const constant_MAX_MEASURES = 10;
+export const constant_MAX_MEASURES = 32;
 export const constant_DEFAULT_TEMPO = 80;
 export const constant_ABC_STICK_R = '"R"x';
 export const constant_ABC_STICK_L = '"L"x';

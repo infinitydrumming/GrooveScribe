@@ -133,10 +133,16 @@ describe('GrooveUtils URL serialization (extended)', () => {
       }
     });
 
-    it('clamps values above constant_MAX_MEASURES (10) down to 10', () => {
+    // Infinity Drumming, 2026: up to 32 bars (was 10)
+    it('clamps values above constant_MAX_MEASURES (32) down to 32', () => {
       const gd = gu.getGrooveDataFromUrlString('?TimeSig=4/4&Div=16&Measures=999');
-      expect(gd.numberOfMeasures).toBe(10);
-      expect(gd.hh_array).toHaveLength(160);
+      expect(gd.numberOfMeasures).toBe(32);
+      expect(gd.hh_array).toHaveLength(512);
+    });
+
+    it('keeps an 11-bar groove whole', () => {
+      const gd = gu.getGrooveDataFromUrlString('?TimeSig=4/4&Div=16&Measures=11');
+      expect(gd.numberOfMeasures).toBe(11);
     });
 
     it('defaults to 1 measure when the param is absent', () => {

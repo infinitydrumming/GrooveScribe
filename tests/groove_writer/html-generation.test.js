@@ -6,6 +6,7 @@
 // probes run through `npx vitest run`) before being written -- nothing is
 // asserted from reading the source alone.
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { buildStaffContainerHTML } from '../../js/viewHtml.js';
 import { newGrooveWriter, buildGridDOM } from '../helpers/loadGrooveWriter.js';
 
 // class_time_division is seeded from window.location.search ("Div" query
@@ -167,6 +168,26 @@ describe('HTMLforStaffContainer', () => {
       // inert "&nbsp;&nbsp;&nbsp;" placeholder, not a clickable id'd button.
       expect(html).not.toMatch(/id="closeMeasureButton\d+"/);
       expect(html).toContain('class="closeMeasureButton"><i class="fa">&nbsp;&nbsp;&nbsp;</i>');
+    });
+  });
+
+  // Infinity Drumming, 2026: a link holds 32 bars at most, so no more can be added
+  describe('at the most bars a groove can have (32)', () => {
+    const ctx = (numberOfMeasures) => ({
+      notesPerMeasure: 16,
+      numBeatsPerMeasure: 4,
+      noteValuePerMeasure: 4,
+      numberOfMeasures,
+      straightBar: false,
+      barTimeSig: '4/4',
+      noteGrouping: 4,
+    });
+
+    it('shows a note instead of the add-measure button at 32 bars, and the button below that', () => {
+      const atMost = buildStaffContainerHTML(32, 31 * 16, ctx(32));
+      expect(atMost).not.toContain('id="addMeasureButton"');
+      expect(atMost).toContain('32 bars is the most a groove can have');
+      expect(buildStaffContainerHTML(31, 30 * 16, ctx(31))).toContain('id="addMeasureButton"');
     });
   });
 
