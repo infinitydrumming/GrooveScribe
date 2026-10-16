@@ -11,6 +11,14 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-16 — Swing in the Mixed note setting
+
+- Grooves in the **Mixed** note setting (notes beat by beat) can be swung: the
+  swing slider no longer says "N/A". Beats of 8ths and 16ths swing exactly as
+  the 8ths and 16ths settings do, regular or Brazilian; triplet and
+  quarter-note-triplet beats play as written. Straight bars stay straight
+  (`js/midiFile.js`, `js/groove_utils.js`, `gscribe_help.html`).
+
 ## 2026-10-15 — Heard on an iPhone set to silent
 
 - On an iPhone with the ring/silent switch on silent, a groove played without a

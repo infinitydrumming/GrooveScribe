@@ -165,11 +165,15 @@ describe('GrooveUtils tempo & swing controls', () => {
   });
 
   describe('doesDivisionSupportSwing', () => {
-    it('is false for quarter notes and all triplet divisions', () => {
+    it('is false for quarter notes and the triplet divisions', () => {
       expect(gu.doesDivisionSupportSwing(4)).toBe(false);
       expect(gu.doesDivisionSupportSwing(12)).toBe(false); // triplet
       expect(gu.doesDivisionSupportSwing(24)).toBe(false); // triplet
-      expect(gu.doesDivisionSupportSwing(48)).toBe(false); // triplet
+    });
+
+    // Infinity Drumming, 2026: Mixed (notes beat by beat) swings its 8ths and 16ths
+    it('is true for Mixed (48)', () => {
+      expect(gu.doesDivisionSupportSwing(48)).toBe(true);
     });
 
     it('is true for straight 8th/16th-note divisions', () => {

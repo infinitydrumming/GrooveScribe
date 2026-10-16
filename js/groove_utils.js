@@ -1695,6 +1695,8 @@ function GrooveUtils() {
   };
 
   root.doesDivisionSupportSwing = function (division) {
+    // Mixed (notes beat by beat): its beats of 8ths and 16ths swing, triplets don't
+    if (division == 48) return true;
     if (root.isTripletDivision(division) || division == 4) return false;
 
     return true;
