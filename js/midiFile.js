@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar, exact tempo for swung and triplet notes, more metronome clicks, diddles. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar, exact tempo for swung and triplet notes, more metronome clicks, diddles, swing in notes beat by beat. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -418,7 +418,8 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   // cursor_markers (optional): per slot, true adds a silent note that only moves
   // the playback cursor
   // slot_spans (optional): per slot, how many slots its grid note lasts (for a
-  // diddle's second stroke); else every note lasts num_notes / num_notes_for_swing
+  // diddle's second stroke, and how a beat of notes beat by beat swings); else every
+  // note lasts num_notes / num_notes_for_swing
   // 'swing' (default) or 'brazilian'; callers that don't say use the player's setting
   if (swing_style === undefined) swing_style = gu.swingStyle;
   var prev_hh_note = 46; // default to open hi-hat so that the first hi-hat note also mutes any previous hh open.
@@ -460,11 +461,20 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   Toms_Array = graces.toms;
   delay_for_next_note = startBarGraceNotes(gu, midiTrack, graces);
 
-  // how long each slot lasts, swing and all
+  // how long each slot lasts, swing and all (notes beat by beat: each beat's own)
   var durations = [];
   for (var slot = 0; slot < num_notes; slot++)
     durations.push(
-      slotDuration(slot, isTriplets, num_notes, num_notes_for_swing, swing_percentage, swing_style)
+      slot_spans
+        ? beatSlotDuration(slot, isTriplets, slot_spans[slot], swing_percentage, swing_style)
+        : slotDuration(
+            slot,
+            isTriplets,
+            num_notes,
+            num_notes_for_swing,
+            swing_percentage,
+            swing_style
+          )
     );
 
   // the newer metronome clicks and diddles' second strokes, at exact times
@@ -894,6 +904,15 @@ function slotDuration(
   if (swing_percentage === 0) return duration;
   var scaler = num_notes / num_notes_for_swing;
   return duration + duration * swing_percentage * swingDirection(i, scaler, swing_style);
+}
+
+// How long one slot of a bar of notes beat by beat lasts: a beat of 8ths or 16ths
+// swings like the 8ths or 16ths setting (its notes `step` slots apart: 6 or 3);
+// triplets, and 32nd-note triplets, play straight.
+function beatSlotDuration(i, isTriplets, step, swing_percentage, swing_style) {
+  var duration = slotDuration(i, isTriplets, 1, 1, 0, swing_style);
+  if (swing_percentage === 0 || (step != 3 && step != 6)) return duration;
+  return duration + duration * swing_percentage * swingDirection(i, step, swing_style);
 }
 
 // swing effects the note placement of the e and the a.  (1e&a)

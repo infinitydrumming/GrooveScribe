@@ -278,3 +278,36 @@ describe('triplets in x/8 time', () => {
     ]);
   });
 });
+
+describe('swing, beat by beat (Mixed)', () => {
+  // Infinity Drumming, 2026: a Mixed bar's beats of 8ths and 16ths swing exactly as
+  // the 8ths and 16ths note settings do; its triplet beats play straight.
+  const spread = (line, step) => [...line].map((ch) => ch + '-'.repeat(step - 1)).join('');
+
+  it.each([
+    ['4/4', 8, 'eeee', 8, 6],
+    ['4/4', 16, 'ssss', 16, 3],
+    ['6/8', 8, 'eeeeee', 6, 6],
+    ['6/8', 16, 'ssssss', 12, 3],
+    ['6/4', 8, 'eeeeee', 12, 6],
+  ])('in %s, like the 1/%i setting', (sig, div, beats, slots, step) => {
+    for (const style of ['', '&SwingStyle=brazilian']) {
+      const notes = 'o'.repeat(slots);
+      const plain = `?TimeSig=${sig}&Div=${div}&Measures=1&Swing=30${style}&S=|${notes}|`;
+      const mixed = `?TimeSig=${sig}&Div=48&Measures=1&Swing=30${style}&Beats=${beats}&S=|${spread(notes, step)}|`;
+      const swung = ticks(plain, [SNARE]);
+      expect(swung).not.toEqual(ticks(plain.replace('Swing=30', 'Swing=0'), [SNARE]));
+      expect(ticks(mixed, [SNARE]).map(Math.round)).toEqual(swung.map(Math.round));
+    }
+  });
+
+  it('plays triplet beats straight next to swung 8ths', () => {
+    const snare = 'o-----o-----' + 'o---o---o---' + 'o-------o-------o-------';
+    const query = (swing) =>
+      `?TimeSig=4/4&Div=48&Measures=1&Swing=${swing}&Beats=etqq&S=|${snare}|`;
+    const straight = ticks(query(0), [SNARE]);
+    const swung = ticks(query(30), [SNARE]);
+    expect(swung[1]).toBeGreaterThan(straight[1]); // the & of the 8ths beat is late
+    expect(swung.slice(2)).toEqual(straight.slice(2)); // the triplets are not moved
+  });
+});
