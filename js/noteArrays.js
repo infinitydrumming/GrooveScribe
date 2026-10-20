@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride tabs, bar scaling for paste, tom ghosts and accents, ride accent, ornament (flam / drag / ruff) tab lines, bars of different lengths, 32nd-note counting, diddle lines, counting in x/8 triplets and beat by beat. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, crash and ride tabs, bar scaling for paste, tom ghosts and accents, ride accent, ornament (flam / drag / ruff) tab lines, bars of different lengths, 32nd-note counting, diddle lines, counting in x/8 triplets and beat by beat. See CHANGES.md.
 // Note-array / drum-tab conversions and default grooves (Step 2 extraction).
 // Pure module: converts between tab strings and ABC note arrays, builds default
 // grooves, and note-mapping/sticking-count helpers. GrooveUtils delegates here.
@@ -57,6 +57,10 @@ import {
   constant_ABC_T2_Accent,
   constant_ABC_T3_Accent,
   constant_ABC_T4_Accent,
+  constant_ABC_T1_Rim,
+  constant_ABC_T2_Rim,
+  constant_ABC_T3_Rim,
+  constant_ABC_T4_Rim,
 } from './constants.js';
 
 // tom ghost / accent tokens by tom line (T1-T4)
@@ -65,6 +69,13 @@ var TOM_GHOST = {
   T2: constant_ABC_T2_Ghost,
   T3: constant_ABC_T3_Ghost,
   T4: constant_ABC_T4_Ghost,
+};
+// tom rim clicks by tom line: "r" in a tom line (an "x" there is a plain tom hit)
+var TOM_RIM = {
+  T1: constant_ABC_T1_Rim,
+  T2: constant_ABC_T2_Rim,
+  T3: constant_ABC_T3_Rim,
+  T4: constant_ABC_T4_Rim,
 };
 var TOM_ACCENT = {
   T1: constant_ABC_T1_Accent,
@@ -157,6 +168,8 @@ function tablatureToABCNotationPerNote(drumType, tablatureChar) {
           return constant_ABC_STICK_R;
         //break;
         default:
+          // a tom rim click
+          if (tablatureChar == 'r' && TOM_RIM[drumType]) return TOM_RIM[drumType];
           break;
       }
       break;
@@ -294,6 +307,12 @@ function abcNotationToTablaturePerNote(drumType, abcChar) {
     case constant_ABC_HH_Normal:
     case constant_ABC_SN_XStick:
       tabChar = 'x';
+      break;
+    case constant_ABC_T1_Rim:
+    case constant_ABC_T2_Rim:
+    case constant_ABC_T3_Rim:
+    case constant_ABC_T4_Rim:
+      tabChar = 'r';
       break;
     case constant_ABC_SN_Ghost:
     case constant_ABC_T1_Ghost:

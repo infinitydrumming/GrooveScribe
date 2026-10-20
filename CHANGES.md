@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — Rim clicks on the toms
+
+- Each tom's note menu has **Rim Click**: an x notehead on that tom's line in the
+  music, an x in the tom's circle on the grid, and the cross-stick sound. In a link
+  it is an "r" on the tom's line ("x" there stays a plain tom hit, as in older
+  links). The rim click notes are written "_e", "_d", "_B", "_A" so they share no
+  pitch with another drum's x notehead ("^d" would be the cow bell's "^D'")
+  (`js/constants.js`, `js/abcNotation.js`, `js/noteArrays.js`, `js/gridState.js`,
+  `js/groove_writer.js`, `js/midiFile.js`, `js/viewHtml.js`, `index.html`,
+  `css/groove_writer_orange.css`, `gscribe_help.html`).
+
 ## 2026-10-20 — Speed up every so many bars: any number up to 999
 
 - The speed-up's "every so many bars" is a box to type in, from 1 to 999 bars

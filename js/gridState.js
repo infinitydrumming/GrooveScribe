@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines, separate kick / hi-hat foot muting, tom ghosts and accents, ride accent, flams / drags / ruffs, diddles. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, crash and ride lines, separate kick / hi-hat foot muting, tom ghosts and accents, ride accent, flams / drags / ruffs, diddles. See CHANGES.md.
 // Clickable-grid note state (Step 4 extraction from groove_writer.js).
 //
 // Read side of the note grid: given a cell id, report whether a voice is on and
@@ -60,6 +60,9 @@ import {
   constant_ABC_T2_Ghost,
   constant_ABC_T4_Ghost,
   constant_ABC_T1_Accent,
+  constant_ABC_T1_Rim,
+  constant_ABC_T2_Rim,
+  constant_ABC_T4_Rim,
   constant_ABC_T2_Accent,
   constant_ABC_T4_Accent,
   constant_note_on_color_rgb,
@@ -194,11 +197,11 @@ export function is_tom_on(id, tom_num) {
   return false;
 }
 
-// Tom tokens by tom number: [normal, ghost, accent]
+// Tom tokens by tom number: [normal, ghost, accent, rim click]
 var TOM_TOKENS = {
-  1: [constant_ABC_T1_Normal, constant_ABC_T1_Ghost, constant_ABC_T1_Accent],
-  2: [constant_ABC_T2_Normal, constant_ABC_T2_Ghost, constant_ABC_T2_Accent],
-  4: [constant_ABC_T4_Normal, constant_ABC_T4_Ghost, constant_ABC_T4_Accent],
+  1: [constant_ABC_T1_Normal, constant_ABC_T1_Ghost, constant_ABC_T1_Accent, constant_ABC_T1_Rim],
+  2: [constant_ABC_T2_Normal, constant_ABC_T2_Ghost, constant_ABC_T2_Accent, constant_ABC_T2_Rim],
+  4: [constant_ABC_T4_Normal, constant_ABC_T4_Ghost, constant_ABC_T4_Accent, constant_ABC_T4_Rim],
 };
 
 export function get_tom_state(id, tom_num, returnType) {
@@ -210,6 +213,8 @@ export function get_tom_state(id, tom_num, returnType) {
   var ghostOn = part('tom_ghost') && part('tom_ghost').style.color == constant_note_on_color_rgb;
   var accentOn =
     part('tom_accent') && part('tom_accent').style.color == constant_snare_accent_on_color_rgb;
+  // rim click: the x is shown (the circle stays empty)
+  var rimOn = part('tom_rim') && part('tom_rim').style.color == constant_note_on_color_rgb;
 
   if (returnType != 'ABC' && returnType != 'URL') {
     console.log('bad returnType in get_kick_state()');
@@ -222,6 +227,7 @@ export function get_tom_state(id, tom_num, returnType) {
     return returnType == 'URL' ? '-' : false;
   }
 
+  if (rimOn) return returnType == 'URL' ? 'r' : tokens[3];
   if (ghostOn) return returnType == 'URL' ? 'g' : tokens[1];
   if (accentOn) return returnType == 'URL' ? 'O' : tokens[2];
   if (tomOn) return returnType == 'URL' ? 'x' : tokens[0];

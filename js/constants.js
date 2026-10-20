@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash 2, splash, cymbal voice indexes, tom ghosts and accents, ride accent, silent cursor marker. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: tom rim clicks, crash 2, splash, cymbal voice indexes, tom ghosts and accents, ride accent, silent cursor marker. See CHANGES.md.
 // Drum-notation and MIDI constants shared across the app.
 // Extracted from groove_utils.js (Step 2 of the refactor). Both groove_utils.js
 // and groove_writer.js import what they need from here.
@@ -44,6 +44,13 @@ export const constant_ABC_T1_Accent = '!accent!e';
 export const constant_ABC_T2_Accent = '!accent!d';
 export const constant_ABC_T3_Accent = '!accent!B';
 export const constant_ABC_T4_Accent = '!accent!A';
+// Tom rim clicks: an x notehead on the tom's line (Infinity Drumming). Written
+// with "_" so no other drum's note shares their pitch ("^d" would be the cow
+// bell's "^D'"); the drum map prints them without it.
+export const constant_ABC_T1_Rim = '_e';
+export const constant_ABC_T2_Rim = '_d';
+export const constant_ABC_T3_Rim = '_B';
+export const constant_ABC_T4_Rim = '_A';
 // Crash line extras (crash 1 is constant_ABC_HH_Crash; the ride line uses the
 // existing ride / ride bell / cow bell tokens)
 export const constant_ABC_CR_Crash2 = "^a'";

@@ -133,6 +133,10 @@ describe('GrooveUtils ABC notation generation', () => {
           "%%map drum ^B' heads=Trihead print=A' % Ride Bell\n" +
           "%%map drum ^D' heads=Trihead print=g   % Cow Bell\n" +
           '%%map drum ^c heads=Xhead print=c  % Cross Stick\n' +
+          '%%map drum _e heads=Xhead print=e  % Tom 1 rim click\n' +
+          '%%map drum _d heads=Xhead print=d  % Tom 2 rim click\n' +
+          '%%map drum _B heads=Xhead print=B  % Tom 3 rim click\n' +
+          '%%map drum _A heads=Xhead print=A  % Floor tom rim click\n' +
           '%%map drum ^d, heads=Xhead print=d,  % Foot Splash\n' +
           '%%staves (Stickings Hands Feet)\n' +
           'K:C clef=perc\n'
@@ -372,6 +376,10 @@ describe('GrooveUtils ABC notation generation', () => {
           "%%map drum ^B' heads=Trihead print=A' % Ride Bell\n" +
           "%%map drum ^D' heads=Trihead print=g   % Cow Bell\n" +
           '%%map drum ^c heads=Xhead print=c  % Cross Stick\n' +
+          '%%map drum _e heads=Xhead print=e  % Tom 1 rim click\n' +
+          '%%map drum _d heads=Xhead print=d  % Tom 2 rim click\n' +
+          '%%map drum _B heads=Xhead print=B  % Tom 3 rim click\n' +
+          '%%map drum _A heads=Xhead print=A  % Floor tom rim click\n' +
           '%%map drum ^d, heads=Xhead print=d,  % Foot Splash\n' +
           '%%staves (Stickings Hands Feet)\n' +
           'K:C clef=perc\n' +

@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets). See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: tom rim clicks, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets). See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -63,6 +63,9 @@ import {
   constant_ABC_T2_Ghost,
   constant_ABC_T4_Ghost,
   constant_ABC_T1_Accent,
+  constant_ABC_T1_Rim,
+  constant_ABC_T2_Rim,
+  constant_ABC_T4_Rim,
   constant_ABC_T2_Accent,
   constant_ABC_T4_Accent,
   constant_RIDE_VOICE_INDEX,
@@ -786,8 +789,10 @@ function GrooveWriter() {
     var circle = part('tom_circle');
     var ghost = part('tom_ghost');
     var accent = part('tom_accent');
+    var rim = part('tom_rim');
     if (ghost) ghost.style.color = constant_note_hidden_color_rgb;
     if (accent) accent.style.color = constant_note_hidden_color_rgb;
+    if (rim) rim.style.color = constant_note_hidden_color_rgb;
     circle.style.borderColor = constant_note_border_color_hex;
 
     var velocity = constant_OUR_MIDI_VELOCITY_NORMAL;
@@ -810,20 +815,28 @@ function GrooveWriter() {
         if (ghost) ghost.style.color = constant_note_on_color_hex;
         velocity = constant_OUR_MIDI_VELOCITY_TOM_GHOST;
         break;
+      case 'rim':
+        // a rim click: an x, the circle left empty, like the snare's cross-stick
+        circle.style.backgroundColor = constant_note_off_color_hex;
+        if (rim) rim.style.color = constant_note_on_color_hex;
+        if (make_sound) play_single_note_for_note_setting(constant_OUR_MIDI_SNARE_XSTICK);
+        return;
       default:
         console.log('bad switch in set_tom_state');
         return;
     }
 
-    if (make_sound) {
-      var tomSounds = {
-        1: constant_OUR_MIDI_TOM1_NORMAL,
-        2: constant_OUR_MIDI_TOM2_NORMAL,
-        4: constant_OUR_MIDI_TOM4_NORMAL,
-      };
-      if (tomSounds[tom_num]) play_single_note_for_note_setting(tomSounds[tom_num], velocity);
-      else console.log('bad switch in set_tom_state. bad tom num:' + tom_num);
-    }
+    if (make_sound) play_tom_sound(tom_num, velocity);
+  }
+
+  function play_tom_sound(tom_num, velocity) {
+    var tomSounds = {
+      1: constant_OUR_MIDI_TOM1_NORMAL,
+      2: constant_OUR_MIDI_TOM2_NORMAL,
+      4: constant_OUR_MIDI_TOM4_NORMAL,
+    };
+    if (tomSounds[tom_num]) play_single_note_for_note_setting(tomSounds[tom_num], velocity);
+    else console.log('bad switch in set_tom_state. bad tom num:' + tom_num);
   }
 
   // silly helpers, but needed for argument compatibility with the other set states
@@ -4817,6 +4830,11 @@ function GrooveWriter() {
         case constant_ABC_T2_Accent:
         case constant_ABC_T4_Accent:
           setFunction(displayIndex, 'accent', false);
+          break;
+        case constant_ABC_T1_Rim:
+        case constant_ABC_T2_Rim:
+        case constant_ABC_T4_Rim:
+          setFunction(displayIndex, 'rim', false);
           break;
         case constant_ABC_CR_Splash:
           setFunction(displayIndex, 'splash', false);
