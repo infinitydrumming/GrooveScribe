@@ -102,6 +102,8 @@ describe('practice timer and speed-up in bars', () => {
   afterEach(() => {
     delete globalThis.MIDI;
     vi.restoreAllMocks();
+    // the address bar holds the practice settings now: the next test opens a fresh page
+    window.history.replaceState(null, '', '/');
   });
 
   const link = () => gw.myGrooveUtils.getUrlStringFromGrooveData(gw.grooveDataFromClickableUI());

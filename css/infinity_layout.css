@@ -913,6 +913,100 @@ body,
 .fullURLPopupCheckboxLabel {
   font-size: 13px;
 }
+/* an exercise: "Include practice settings" and the instructions (Infinity Drumming, 2026) */
+#exerciseShareOptions {
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 1px solid var(--id-border);
+  border-radius: 10px;
+  background: #f8fafd;
+}
+#includePracticeLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--id-text);
+  cursor: pointer;
+}
+#includePracticeLabel input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  accent-color: var(--id-blue);
+}
+#includePracticeLabel small,
+#exerciseInstructionsLabel small {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--id-text-2);
+}
+#exerciseInstructionsLabel {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--id-text);
+}
+#exerciseInstructionsLabel small {
+  display: inline;
+}
+#exerciseInstructions {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1.5px solid var(--id-border);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--id-text);
+  font-family: Lato, sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  resize: vertical;
+}
+/* the instructions over the music, when the link has them */
+#exerciseInstructionsCard {
+  position: relative;
+  margin: 0 0 12px;
+  padding: 12px 40px 12px 16px;
+  border: 1px solid #b9d3f5;
+  border-left: 4px solid var(--id-blue);
+  border-radius: 12px;
+  background: #eef5ff;
+  color: var(--id-text);
+}
+#exerciseInstructionsCardTitle {
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--id-blue);
+}
+#exerciseInstructionsCardText {
+  font-size: 16px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+#exerciseInstructionsCardClose {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  padding: 4px 6px;
+  color: #7d8ea5;
+  cursor: pointer;
+}
+#exerciseInstructionsCardClose:hover {
+  color: var(--id-navy-900);
+}
+@media print {
+  #exerciseInstructionsCardClose {
+    display: none;
+  }
+}
 #saveToMyGroovesButton {
   display: flex;
   align-items: center;

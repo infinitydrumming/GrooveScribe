@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar, practice timer, counting, more metronome clicks, diddles and beat-by-beat notes. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar, practice timer, counting, more metronome clicks, diddles and beat-by-beat notes, an exercise's practice settings and instructions. See CHANGES.md.
 // grooveData — the central data contract for Groove Scribe.
 //
 // A GrooveData describes a single groove: its time signature, subdivision and
@@ -9,6 +9,7 @@
 
 import { constant_DEFAULT_TEMPO } from './constants.js';
 import { DEFAULT_GRACE_SPACING_MS, DEFAULT_GRACE_VOLUME } from './ornaments.js';
+import { emptyPracticeSettings } from './practiceSettings.js';
 
 // A fresh 32-slot note lane, every slot a rest. Each note array in a GrooveData
 // is a copy of this (never a shared reference), so mutating one lane or measure
@@ -99,6 +100,13 @@ const EMPTY_NOTE_ARRAY = [
  * @property {number} graceSpacingMs  Flams, drags and ruffs: gap between the grace notes (and to
  *                                     the note), in ms. URL "GraceMs" (only when not the default).
  * @property {number} graceVolume     Grace-note volume, % of a normal hit. URL "GraceVol".
+ * @property {import('./practiceSettings.js').PracticeSettings} practice  An exercise's practice
+ *   settings: permutation, speed-up, count-in, click Solo / offset start, mutes, repeat off
+ *   (see practiceSettings.js). URL "Perm", "SpeedUp", "CountIn", ... (only those that are on).
+ * @property {boolean} includePractice  Whether the link carries the practice settings (and the
+ *   practice timer and groove / click bars); Save & Share's "Include practice settings" box.
+ * @property {string} instructions  The teacher's instructions for the exercise, shown when the
+ *   link opens. URL "Instructions".
  * @property {(boolean|number)} debugMode  Debug flag inherited from the owning GrooveUtils.
  * @property {boolean} grooveDBAuthoring   GrooveDB authoring mode flag.
  * @property {boolean} viewMode        View (vs. edit) mode flag.
@@ -153,6 +161,9 @@ export function createGrooveData(config = {}) {
     barTimeSigs: [],
     graceSpacingMs: DEFAULT_GRACE_SPACING_MS,
     graceVolume: DEFAULT_GRACE_VOLUME,
+    practice: emptyPracticeSettings(),
+    includePractice: true,
+    instructions: '',
     debugMode: config.debugMode ?? false,
     grooveDBAuthoring: config.grooveDBAuthoring ?? false,
     viewMode: config.viewMode ?? true,
