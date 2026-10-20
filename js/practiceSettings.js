@@ -12,6 +12,8 @@
 //   CountIn=1  ClickSolo=1  ClickStart=AND
 //   Mute=hh:1:2,kick:3                          a line muted in some bars (1-based)
 
+/** The most bars between speed-ups (the speed-up pop-up's bars box). */
+export var MAX_SPEED_UP_BARS = 999;
 /** The offset click starts (1 is the normal one). */
 var CLICK_STARTS = ['1', 'E', 'AND', 'A', 'ROTATE', 'TI', 'TA'];
 /** The lines that can be muted, as the mute buttons name them. */
@@ -74,7 +76,7 @@ function speedUpFromText(text) {
   };
   speedUp.every =
     speedUp.unit == 'b'
-      ? Math.round(whole(every && every[1], 4, 64, 16) / 4) * 4
+      ? whole(every && every[1], 1, MAX_SPEED_UP_BARS, 16)
       : whole(every && every[1], 1, 20, 2);
   parts.forEach(function (part) {
     if (/^to\d+$/.test(part)) speedUp.target = whole(part.slice(2), 30, 300, 0);

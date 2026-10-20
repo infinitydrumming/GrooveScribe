@@ -56,7 +56,9 @@ describe('practice settings in a link', () => {
     expect(s.speedUp).toEqual({ amount: 100, every: 20, unit: 'm', keepGoing: true, target: 300 });
     expect(s.clickStart).toBe('1');
     expect(s.mutes).toEqual({ hh: [2] });
-    expect(fromQuery('&SpeedUp=5,10b').speedUp.every).toBe(12); // bars go up in 4s
+    expect(fromQuery('&SpeedUp=5,112b').speedUp.every).toBe(112); // any number of bars
+    expect(fromQuery('&SpeedUp=5,21b').speedUp.every).toBe(21);
+    expect(fromQuery('&SpeedUp=5,5000b').speedUp.every).toBe(999);
   });
 });
 

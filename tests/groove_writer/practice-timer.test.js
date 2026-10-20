@@ -99,7 +99,9 @@ describe('practice timer and speed-up in bars', () => {
     );
     gw.runsOnPageLoad();
   });
-  afterEach(() => {
+  afterEach(async () => {
+    // a tempo change updates the address bar 300 ms later: let it, while the page is here
+    await new Promise((resolve) => setTimeout(resolve, 350));
     delete globalThis.MIDI;
     vi.restoreAllMocks();
     // the address bar holds the practice settings now: the next test opens a fresh page
@@ -108,6 +110,12 @@ describe('practice timer and speed-up in bars', () => {
 
   const link = () => gw.myGrooveUtils.getUrlStringFromGrooveData(gw.grooveDataFromClickableUI());
   const callbacks = () => gw.myGrooveUtils.midiEventCallbacks;
+  // the tempo after the groove has played once more round
+  const tempoAfterRound = () => {
+    callbacks().notePlaying(gw, 'complete', 1);
+    callbacks().loadMidiDataEvent(gw, false);
+    return gw.myGrooveUtils.getTempo();
+  };
   // play from the start, then `rounds` more times round; the notes of the last
   const playRounds = (rounds) => {
     callbacks().loadMidiDataEvent(gw, true);
@@ -172,16 +180,24 @@ describe('practice timer and speed-up in bars', () => {
     gw.speedUpUnitChange();
     document.getElementById('metronomeAutoSpeedupTempoIncreaseBars').value = '8';
     gw.close_MetronomeAutoSpeedupConfiguration('ok');
-    const tempoAfterRound = () => {
-      callbacks().notePlaying(gw, 'complete', 1);
-      callbacks().loadMidiDataEvent(gw, false);
-      return gw.myGrooveUtils.getTempo();
-    };
     callbacks().loadMidiDataEvent(gw, true);
     expect(tempoAfterRound()).toBe(80); // 4 bars
     expect(tempoAfterRound()).toBe(85); // 8 bars
     expect(tempoAfterRound()).toBe(85); // 12 bars
     expect(tempoAfterRound()).toBe(90); // 16 bars
+  });
+
+  it('speeds up after any number of bars, 112 for example', () => {
+    gw.loadNewGroove(FOUR_BARS.replace('Tempo=120', 'Tempo=80'));
+    gw.metronomeOptionsMenuPopupClick('SpeedUp');
+    document.getElementById('metronomeAutoSpeedupUnitBars').checked = true;
+    gw.speedUpUnitChange();
+    document.getElementById('metronomeAutoSpeedupTempoIncreaseBars').value = '112';
+    gw.close_MetronomeAutoSpeedupConfiguration('ok');
+    callbacks().loadMidiDataEvent(gw, true);
+    for (let round = 1; round < 28; round++) expect(tempoAfterRound()).toBe(80); // up to 108 bars
+    expect(tempoAfterRound()).toBe(85); // 112 bars
+    expect(window.location.search).toContain('SpeedUp=5,112b');
   });
 
   it('shows the bars in the speed-up pop-up only when counting bars', () => {

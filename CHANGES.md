@@ -11,6 +11,13 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-20 — Speed up every so many bars: any number up to 999
+
+- The speed-up's "every so many bars" is a box to type in, from 1 to 999 bars
+  (was a slider from 4 to 64 in 4s), so it can wait for a whole permutation run,
+  112 bars for example (`index.html`, `css/groove_writer_orange.css`,
+  `js/groove_writer.js`, `js/practiceSettings.js`).
+
 ## 2026-10-20 — Send a whole exercise in a link
 
 - A groove's link can carry its **practice settings**: the permutation (which

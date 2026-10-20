@@ -1387,10 +1387,6 @@ hr {
 #metronomeAutoSpeedupUnits {
   font-size: 13px;
 }
-#metronomeAutoSpeedupTempoIncreaseBars {
-  background: var(--highlight-color);
-  width: 365px;
-}
 #metronomeAutoSpeedupConfigurationBarsLable {
   font-size: 12px;
 }
@@ -1470,6 +1466,19 @@ hr {
 #metronomeAutoSpeedUpTargetTempo {
   width: 52px;
   font-size: 13px;
+}
+/* Infinity Drumming, 2026: the speed-up's bars, typed */
+#metronomeAutoSpeedupTempoIncreaseBars {
+  box-sizing: border-box;
+  width: 90px;
+  margin: 4px 0 0;
+  padding: 5px 8px;
+  border: 1.5px solid #c3cfdc;
+  border-radius: 8px;
+  background: #fff;
+  color: #051124;
+  font-size: 16px;
+  text-align: center;
 }
 #metronomeAutoSpeedupTargetNote {
   display: block;

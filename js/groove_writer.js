@@ -114,7 +114,7 @@ import { getFeelMarkings, addFeelMarking, addMeterChange } from './abcNotation.j
 import { barSig, barNoteCount, barStride, isMixedMeter, divisionFitsBar } from './barMeters.js';
 import { scaleTabMeasure } from './noteArrays.js';
 import { isTimedClick, parseMetronomeFrequency } from './metronome.js';
-import { MUTE_LINES } from './practiceSettings.js';
+import { MUTE_LINES, MAX_SPEED_UP_BARS } from './practiceSettings.js';
 import {
   beatCharForDivision,
   beatChoices,
@@ -4520,13 +4520,20 @@ function GrooveWriter() {
     return !!(bars && bars.checked);
   }
 
+  // the speed-up's bars box: any whole number of bars, 1 to 999 (16 if it's empty)
+  function speedUpEveryBars() {
+    var input = /** @type {HTMLInputElement | null} */ (
+      document.getElementById('metronomeAutoSpeedupTempoIncreaseBars')
+    );
+    var bars = parseInt(input ? input.value : '', 10);
+    if (isNaN(bars)) return 16;
+    return Math.min(Math.max(bars, 1), MAX_SPEED_UP_BARS);
+  }
+
   // Speed up every so many bars: called after each time round
   function speedUpAfterBars(amount, keepIncreasing, targetTempo) {
     if (class_metronome_count_in_is_playing) return; // the count-in doesn't count
-    var everyInput = /** @type {HTMLInputElement | null} */ (
-      document.getElementById('metronomeAutoSpeedupTempoIncreaseBars')
-    );
-    var every = parseInt(everyInput ? everyInput.value : '16', 10);
+    var every = speedUpEveryBars();
     class_speed_up_bars.played += class_round_bar_ms.length;
     var steps = speedUpStepsDue(class_speed_up_bars.played, class_speed_up_bars.steps, every);
     if (!keepIncreasing) steps = Math.min(steps, 1 - class_speed_up_bars.steps); // just once
@@ -5967,7 +5974,7 @@ function GrooveWriter() {
     return {
       amount: inputNumber('metronomeAutoSpeedupTempoIncreaseAmount', 5),
       every: bars
-        ? inputNumber('metronomeAutoSpeedupTempoIncreaseBars', 16)
+        ? speedUpEveryBars()
         : inputNumber('metronomeAutoSpeedupTempoIncreaseInterval', 2),
       unit: bars ? 'b' : 'm',
       keepGoing: !keepGoing || keepGoing.checked,
