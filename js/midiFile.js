@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar, exact tempo for swung and triplet notes, more metronome clicks, diddles, swing in notes beat by beat. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: tom rim clicks, crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar, exact tempo for swung and triplet notes, more metronome clicks, diddles, swing in notes beat by beat. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -38,6 +38,10 @@ import {
   constant_ABC_T3_Ghost,
   constant_ABC_T4_Ghost,
   constant_ABC_T1_Accent,
+  constant_ABC_T1_Rim,
+  constant_ABC_T2_Rim,
+  constant_ABC_T3_Rim,
+  constant_ABC_T4_Rim,
   constant_ABC_T2_Accent,
   constant_ABC_T3_Accent,
   constant_ABC_T4_Accent,
@@ -864,6 +868,13 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
               case constant_ABC_T4_Accent:
                 tom_note = constant_OUR_MIDI_TOM4_NORMAL;
                 tom_velocity = constant_OUR_MIDI_VELOCITY_ACCENT;
+                break;
+              // a rim click on a tom: the cross-stick's sound
+              case constant_ABC_T1_Rim:
+              case constant_ABC_T2_Rim:
+              case constant_ABC_T3_Rim:
+              case constant_ABC_T4_Rim:
+                tom_note = constant_OUR_MIDI_SNARE_XSTICK;
                 break;
               case false:
                 break;

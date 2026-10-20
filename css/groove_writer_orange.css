@@ -1,4 +1,4 @@
-/* Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar, speed-up target tempo, cursor timing popup, practice timer. See CHANGES.md. */
+/* Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar, speed-up target tempo, cursor timing popup, practice timer. See CHANGES.md. */
 /* this is for debugging layout issues - puts a red border around everything */
 /* body * { border: 1px solid red; }		 */
 DEBUG {
@@ -786,6 +786,15 @@ body {
 }
 .tom_ghost .dot_in_snare_ghost_note {
   font-size: 12px;
+}
+/* a tom rim click: an x in the empty circle, like the snare's cross-stick */
+.tom_rim {
+  position: absolute;
+  top: -5px;
+  left: 3px;
+  font-size: 30px;
+  color: transparent;
+  cursor: pointer;
 }
 .tom_accent {
   position: absolute;

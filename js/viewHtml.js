@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -393,6 +393,9 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 							<div class="tom_accent note_part"  id="tom_accent1-' +
       i +
       '"><i class="fa fa-chevron-right"></i></div>\
+							<div class="tom_rim note_part"  id="tom_rim1-' +
+      i +
+      '"><i class="fa fa-times"></i></div>\
 						</div>\n\
 						';
 
@@ -437,6 +440,9 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 							<div class="tom_accent note_part"  id="tom_accent2-' +
       i +
       '"><i class="fa fa-chevron-right"></i></div>\
+							<div class="tom_rim note_part"  id="tom_rim2-' +
+      i +
+      '"><i class="fa fa-times"></i></div>\
 						</div>\n\
 						';
 
@@ -576,6 +582,9 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
 							<div class="tom_accent note_part"  id="tom_accent4-' +
       i +
       '"><i class="fa fa-chevron-right"></i></div>\
+							<div class="tom_rim note_part"  id="tom_rim4-' +
+      i +
+      '"><i class="fa fa-times"></i></div>\
 						</div>\n\
 						';
 

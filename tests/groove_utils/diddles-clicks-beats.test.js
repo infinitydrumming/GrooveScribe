@@ -311,3 +311,35 @@ describe('swing, beat by beat (Mixed)', () => {
     expect(swung.slice(2)).toEqual(straight.slice(2)); // the triplets are not moved
   });
 });
+
+describe('tom rim clicks', () => {
+  // Infinity Drumming, 2026: "r" in a tom line is a rim click: an x notehead on
+  // the tom's line, played with the cross-stick sound.
+  const XSTICK = 37;
+  const TOM1 = 48;
+  const FLOOR = 43;
+  const query =
+    '?TimeSig=4/4&Div=8&Measures=1&T1=|r-o-r-o-|&T4=|--r---r-|&H=|x-x-x-x-|&K=|o-------|';
+
+  it('keeps "r" in the link and writes an x notehead on the tom line', () => {
+    expect(link(query)).toContain('&T1=|r-o-r-o-|');
+    expect(link(query)).toContain('&T4=|--r---r-|');
+    const abc = gu.createABCFromGrooveData(groove(query), 800);
+    expect(abc).toContain('%%map drum _e heads=Xhead print=e');
+    expect(abc).toContain('%%map drum _A heads=Xhead print=A');
+    expect(hands(query)).toMatch(/_e/);
+    expect(hands(query)).toMatch(/_A/);
+  });
+
+  it('plays the cross-stick sound for a rim click, the tom for a normal hit', () => {
+    expect(ticks(query, [XSTICK])).toHaveLength(4);
+    expect(ticks(query, [TOM1])).toHaveLength(2);
+    expect(ticks(query, [FLOOR])).toHaveLength(0);
+  });
+
+  it('still reads an "x" in a tom line (older links) as a plain tom hit', () => {
+    const old = '?TimeSig=4/4&Div=8&Measures=1&T1=|x-x-x-x-|';
+    expect(ticks(old, [TOM1])).toHaveLength(4);
+    expect(ticks(old, [XSTICK])).toHaveLength(0);
+  });
+});

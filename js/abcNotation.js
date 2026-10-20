@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -924,6 +924,10 @@ export function get_top_ABC_BoilerPlate(
     "%%map drum ^B' heads=Trihead print=A' % Ride Bell\n" +
     "%%map drum ^D' heads=Trihead print=g   % Cow Bell\n" +
     '%%map drum ^c heads=Xhead print=c  % Cross Stick\n' +
+    '%%map drum _e heads=Xhead print=e  % Tom 1 rim click\n' +
+    '%%map drum _d heads=Xhead print=d  % Tom 2 rim click\n' +
+    '%%map drum _B heads=Xhead print=B  % Tom 3 rim click\n' +
+    '%%map drum _A heads=Xhead print=A  % Floor tom rim click\n' +
     '%%map drum ^d, heads=Xhead print=d,  % Foot Splash\n';
 
   //if(kick_stems_up)
