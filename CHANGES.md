@@ -11,6 +11,25 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-20 — Send a whole exercise in a link
+
+- A groove's link can carry its **practice settings**: the permutation (which
+  figures are ticked, "Play each"), the auto speed-up (amount, every so many
+  minutes or bars, only once, "Stop at"), count-in, the click's Solo and offset
+  start, and muted lines, alongside the practice timer and groove / click bars it
+  already carried. Only settings that are on go into the link, so plain grooves'
+  links are unchanged, and older links open as before (`js/practiceSettings.js`,
+  `js/urlSerialization.js`, `js/grooveData.js`, `js/groove_writer.js`).
+- **Save & Share** has a clear **Include practice settings** box, ticked to start
+  with; unticked, the shared link has just the groove. The address bar (and so
+  undo and My Grooves) always keeps the settings (`index.html`,
+  `css/infinity_layout.css`).
+- An **Instructions** box in Save & Share: what the student should do. They go in
+  the link and show in a card at the top of the page when it opens (as plain text),
+  and print with the music.
+- Changing one of these settings now updates the address bar straight away, like
+  the notes, so undo never switches a setting off by surprise.
+
 ## 2026-10-16 — Up to 32 bars, and long grooves open faster
 
 - A groove can have up to **32 bars** (was 10). Before, the editor let you add more

@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets). See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets). See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -114,6 +114,7 @@ import { getFeelMarkings, addFeelMarking, addMeterChange } from './abcNotation.j
 import { barSig, barNoteCount, barStride, isMixedMeter, divisionFitsBar } from './barMeters.js';
 import { scaleTabMeasure } from './noteArrays.js';
 import { isTimedClick, parseMetronomeFrequency } from './metronome.js';
+import { MUTE_LINES } from './practiceSettings.js';
 import {
   beatCharForDivision,
   beatChoices,
@@ -1768,6 +1769,14 @@ function GrooveWriter() {
     }
 
     root.metronomeOptionsMenuSetSelectedState();
+    // these options are part of the link (the others say so themselves; a speed-up
+    // being switched on does when its settings are done)
+    if (
+      option_type == 'Solo' ||
+      option_type == 'CountIn' ||
+      (option_type == 'SpeedUp' && !class_metronome_auto_speed_up_active)
+    )
+      root.updateCurrentURL();
   };
 
   root.metronomeOptionsMenuOffsetClickPopupClick = function (option_type) {
@@ -1798,6 +1807,7 @@ function GrooveWriter() {
 
     root.myGrooveUtils.midiNoteHasChanged();
     root.metronomeOptionsMenuSetSelectedState();
+    root.updateCurrentURL(); // part of the link
   };
 
   root.resetMetronomeOptionsMenuOffsetClick = function () {
@@ -1805,12 +1815,15 @@ function GrooveWriter() {
     root.metronomeOptionsMenuOffsetClickPopupClick('1');
   };
 
+  // permutations are for 4/4 grooves whose bars are all 4/4
+  function permutationsAllowed() {
+    return (
+      class_num_beats_per_measure == 4 && class_note_value_per_measure == 4 && !isMixedMeterGroove()
+    );
+  }
+
   function setupPermutationMenu() {
-    if (
-      class_num_beats_per_measure == 4 &&
-      class_note_value_per_measure == 4 &&
-      !isMixedMeterGroove()
-    ) {
+    if (permutationsAllowed()) {
       addOrRemoveKeywordFromClassById('permutationAnchor', 'enabled', true);
     } else {
       // permutations disabled except in 4/4 time
@@ -1884,6 +1897,7 @@ function GrooveWriter() {
     else button.style.display = 'none';
 
     root.myGrooveUtils.midiNoteHasChanged();
+    root.updateCurrentURL(); // muted lines are part of the link
   };
 
   function isInstrumentMuted(instrument, measure) {
@@ -2763,6 +2777,9 @@ function GrooveWriter() {
     myGrooveData.practiceLimit = practiceLimitToText(class_practice_limit);
     myGrooveData.showCounts = root.myGrooveUtils.showCounts;
     myGrooveData.kickStemsUp = true;
+    // an exercise: its practice settings and instructions
+    myGrooveData.practice = currentPracticeSettings();
+    myGrooveData.instructions = currentInstructions();
 
     for (var i = 0; i < class_number_of_measures; i++) {
       var total_notes = class_notes_per_measure * class_number_of_measures;
@@ -3028,6 +3045,7 @@ function GrooveWriter() {
 
   // update the current URL so that reloads and history traversal and link shares and bookmarks work correctly
   root.updateCurrentURL = function () {
+    if (class_applying_link_settings) return; // the link's settings aren't all in place yet
     var newURL = get_FullURLForPage();
     var newTitle = false;
 
@@ -3812,6 +3830,19 @@ function GrooveWriter() {
     updateSheetMusic();
   };
 
+  // the instructions on the page (Infinity Drumming, 2026), for the print window
+  function instructionsForPrint() {
+    var card = document.getElementById('exerciseInstructionsCard');
+    var text = document.getElementById('exerciseInstructionsCardText');
+    if (!card || !text || card.style.display == 'none') return '';
+    return (
+      '<div style="margin: 0 0 12px; font: 16px sans-serif; text-align: left; white-space: pre-wrap">' +
+      '<b>Instructions</b>\n' +
+      text.innerHTML + // the text as the page shows it, so escaped
+      '</div>\n'
+    );
+  }
+
   root.printMusic = function () {
     var oldMethod = true;
 
@@ -3828,6 +3859,7 @@ function GrooveWriter() {
       // open a new window just for printing   (new method)
       var win = window.open('', class_app_title + ' Print');
       win.document.body.innerHTML = '<title>' + class_app_title + '</title>\n<center>\n';
+      win.document.body.innerHTML += instructionsForPrint();
       win.document.body.innerHTML += document.getElementById('svgTarget').innerHTML;
       win.document.body.innerHTML += '\n</center>';
       win.print();
@@ -4896,8 +4928,10 @@ function GrooveWriter() {
   // get a really long URL that encodes all of the notes and the rest of the state of the page.
   // this will allow us to bookmark or reference a groove and handle undo/redo.
   //
-  function get_FullURLForPage(url_destination) {
+  // includePractice false: without the practice settings (Save & Share's box)
+  function get_FullURLForPage(url_destination, includePractice) {
     var myGrooveData = root.grooveDataFromClickableUI();
+    if (includePractice === false) myGrooveData.includePractice = false;
     return root.myGrooveUtils.getUrlStringFromGrooveData(myGrooveData, url_destination);
   }
 
@@ -5344,6 +5378,7 @@ function GrooveWriter() {
     var popup = document.getElementById('metronomeAutoSpeedupConfiguration');
 
     if (popup) popup.style.display = 'none';
+    if (class_metronome_auto_speed_up_active) root.updateCurrentURL(); // part of the link
   };
 
   root.timeSigPopupOpen = function (type) {
@@ -5631,7 +5666,7 @@ function GrooveWriter() {
 
     var popup = document.getElementById('fullURLPopup');
     if (popup) {
-      var fullURL = get_FullURLForPage();
+      var fullURL = shareURL();
       var textField = document.getElementById('fullURLPopupTextField');
       textField.value = fullURL;
 
@@ -5708,7 +5743,7 @@ function GrooveWriter() {
     // open the popup with full url and try to load short in the background
     root.fillInFullURLInFullURLPopup();
     // default is to use shortened url
-    fillInShortenedURLInFullURLPopup(get_FullURLForPage(), 'fullURLPopupTextField');
+    fillInShortenedURLInFullURLPopup(shareURL(), 'fullURLPopupTextField');
   };
 
   root.copyShareURLToClipboard = function () {
@@ -5776,7 +5811,7 @@ function GrooveWriter() {
     var link = /** @type {HTMLInputElement | null} */ (
       document.getElementById('fullURLPopupTextField')
     );
-    return link && link.value ? link.value : get_FullURLForPage();
+    return link && link.value ? link.value : shareURL();
   }
 
   root.shareByWhatsApp = function () {
@@ -5868,7 +5903,7 @@ function GrooveWriter() {
 
   root.shortenerCheckboxChanged = function () {
     if (document.getElementById('shortenerCheckbox').checked) {
-      fillInShortenedURLInFullURLPopup(get_FullURLForPage(), 'fullURLPopupTextField');
+      fillInShortenedURLInFullURLPopup(shareURL(), 'fullURLPopupTextField');
     } else {
       root.fillInFullURLInFullURLPopup();
     }
@@ -5876,10 +5911,250 @@ function GrooveWriter() {
 
   root.embedCodeCheckboxChanged = function () {
     if (document.getElementById('embedCodeCheckbox').checked) {
-      fillInEmbedURLInFullURLPopup(get_FullURLForPage('display'), 'fullURLPopupTextField');
+      fillInEmbedURLInFullURLPopup(shareURL('display'), 'fullURLPopupTextField');
     } else {
-      fillInShortenedURLInFullURLPopup(get_FullURLForPage(), 'fullURLPopupTextField');
+      fillInShortenedURLInFullURLPopup(shareURL(), 'fullURLPopupTextField');
     }
+  };
+
+  // --- An exercise in its link (Infinity Drumming, 2026) --------------------------
+  // The practice settings (permutation, speed-up, count-in, the click's Solo and
+  // offset start, muted lines) go into the groove's link with its notes,
+  // so a teacher can send a whole assignment. The address bar (and so undo and
+  // My Grooves) always has them; Save & Share's "Include practice settings" box
+  // decides whether the shared link does. The instructions travel with the link
+  // and show in a card over the music when it opens.
+  var class_applying_link_settings = false; // while a link's settings are put in place
+  var class_instructions_card_hidden = false; // "hide" pressed on the card
+
+  function inputById(id) {
+    return /** @type {HTMLInputElement | null} */ (document.getElementById(id));
+  }
+
+  function permutationCheckboxes() {
+    return /** @type {NodeListOf<HTMLInputElement>} */ (
+      document.querySelectorAll('#PermutationOptions input[type="checkbox"]')
+    );
+  }
+
+  // the permutation options' ticks, in order: "1101..."
+  function permutationBoxes() {
+    var text = '';
+    permutationCheckboxes().forEach(function (box) {
+      text += box.checked ? '1' : '0';
+    });
+    return text;
+  }
+
+  function setPermutationBoxes(text) {
+    var boxes = permutationCheckboxes();
+    if (!text || text.length != boxes.length) return; // another layout: keep its own ticks
+    boxes.forEach(function (box, i) {
+      box.checked = text.charAt(i) == '1';
+    });
+  }
+
+  function inputNumber(id, fallback) {
+    var input = inputById(id);
+    var n = parseInt(input ? input.value : '', 10);
+    return isNaN(n) ? fallback : n;
+  }
+
+  function currentSpeedUp() {
+    if (!class_metronome_auto_speed_up_active) return null;
+    var bars = speedUpCountsBars();
+    var keepGoing = inputById('metronomeAutoSpeedUpKeepGoingForever');
+    return {
+      amount: inputNumber('metronomeAutoSpeedupTempoIncreaseAmount', 5),
+      every: bars
+        ? inputNumber('metronomeAutoSpeedupTempoIncreaseBars', 16)
+        : inputNumber('metronomeAutoSpeedupTempoIncreaseInterval', 2),
+      unit: bars ? 'b' : 'm',
+      keepGoing: !keepGoing || keepGoing.checked,
+      target: getAutoSpeedUpTargetTempo(),
+    };
+  }
+
+  // the muted bars of each line: {hh: [1, 3], ...}
+  function currentMutes() {
+    var mutes = {};
+    MUTE_LINES.forEach(function (line) {
+      for (var bar = 1; bar <= class_number_of_measures; bar++)
+        if (isInstrumentMuted(line, bar)) {
+          if (!mutes[line]) mutes[line] = [];
+          mutes[line].push(bar);
+        }
+    });
+    return mutes;
+  }
+
+  function currentPracticeSettings() {
+    var gu = root.myGrooveUtils;
+    return {
+      permutation:
+        class_permutation_type == 'none'
+          ? null
+          : {
+              type: class_permutation_type,
+              boxes: permutationBoxes(),
+              playEach: get_permutation_repeats(),
+            },
+      speedUp: currentSpeedUp(),
+      countIn: class_metronome_count_in_active,
+      clickSolo: !!gu.getMetronomeSolo(),
+      clickStart: gu.getMetronomeOffsetClickStart() || '1',
+      mutes: currentMutes(),
+    };
+  }
+
+  function setPermutationFromLink(perm) {
+    var allowed = !!perm && permutationsAllowed();
+    class_permutation_repeats = allowed ? perm.playEach : 1;
+    root.permutationPopupClick(allowed ? perm.type : 'none');
+    if (!allowed) return;
+    document.getElementById('PermutationOptions').innerHTML = root.HTMLforPermutationOptions();
+    setPermutationBoxes(perm.boxes);
+  }
+
+  function setSpeedUpFromLink(speedUp) {
+    class_metronome_auto_speed_up_active = !!speedUp;
+    addOrRemoveKeywordFromClassById('metronomeOptionsContextMenuSpeedUp', 'menuChecked', !!speedUp);
+    if (!speedUp) return;
+    var set = function (id, value) {
+      var input = inputById(id);
+      if (input) input.value = String(value);
+    };
+    var tick = function (id, on) {
+      var input = inputById(id);
+      if (input) input.checked = on;
+    };
+    var bars = speedUp.unit == 'b';
+    set('metronomeAutoSpeedupTempoIncreaseAmount', speedUp.amount);
+    tick('metronomeAutoSpeedupUnitBars', bars);
+    tick('metronomeAutoSpeedupUnitMinutes', !bars);
+    set(
+      bars ? 'metronomeAutoSpeedupTempoIncreaseBars' : 'metronomeAutoSpeedupTempoIncreaseInterval',
+      speedUp.every
+    );
+    tick('metronomeAutoSpeedUpKeepGoingForever', speedUp.keepGoing);
+    tick('metronomeAutoSpeedUpUseTarget', !!speedUp.target);
+    if (speedUp.target) set('metronomeAutoSpeedUpTargetTempo', speedUp.target);
+    root.speedUpUnitChange();
+    ['Amount', 'Interval', 'Bars'].forEach(function (name) {
+      var input = inputById('metronomeAutoSpeedupTempoIncrease' + name);
+      var output = document.getElementById('metronomeAutoSpeedupTempoIncrease' + name + 'Output');
+      if (input && output) output.innerHTML = input.value;
+    });
+  }
+
+  function setMutesFromLink(mutes) {
+    MUTE_LINES.forEach(function (line) {
+      for (var bar = 1; bar <= class_number_of_measures; bar++) {
+        var muted = (mutes[line] || []).indexOf(bar) >= 0;
+        if (
+          document.getElementById('unmute' + line + 'Button' + bar) &&
+          muted != isInstrumentMuted(line, bar)
+        )
+          root.muteInstrument(line, bar, muted);
+      }
+    });
+  }
+
+  // a link's practice settings, every one (off when the link doesn't have it)
+  function applyPracticeSettings(settings) {
+    if (!settings) return;
+    var gu = root.myGrooveUtils;
+    class_applying_link_settings = true;
+    try {
+      setPermutationFromLink(settings.permutation);
+      setSpeedUpFromLink(settings.speedUp);
+      class_metronome_count_in_active = settings.countIn;
+      addOrRemoveKeywordFromClassById(
+        'metronomeOptionsContextMenuCountIn',
+        'menuChecked',
+        settings.countIn
+      );
+      gu.setMetronomeSolo(settings.clickSolo);
+      addOrRemoveKeywordFromClassById(
+        'metronomeOptionsContextMenuSolo',
+        'menuChecked',
+        settings.clickSolo
+      );
+      if ((gu.getMetronomeOffsetClickStart() || '1') != settings.clickStart)
+        root.metronomeOptionsMenuOffsetClickPopupClick(settings.clickStart);
+      setMutesFromLink(settings.mutes || {});
+    } finally {
+      class_applying_link_settings = false;
+    }
+    root.metronomeOptionsMenuSetSelectedState();
+  }
+
+  // --- the instructions ---
+  function instructionsBox() {
+    return /** @type {HTMLTextAreaElement | null} */ (
+      document.getElementById('exerciseInstructions')
+    );
+  }
+
+  function currentInstructions() {
+    var box = instructionsBox();
+    return box ? box.value.trim() : '';
+  }
+
+  // the card over the music: the instructions as plain text (never as HTML)
+  function showInstructionsCard() {
+    var card = document.getElementById('exerciseInstructionsCard');
+    var text = document.getElementById('exerciseInstructionsCardText');
+    if (!card || !text) return;
+    var instructions = currentInstructions();
+    text.textContent = instructions;
+    card.style.display = instructions && !class_instructions_card_hidden ? 'block' : 'none';
+  }
+
+  function setInstructionsFromLink(instructions) {
+    var box = instructionsBox();
+    if (!box) return;
+    if (box.value.trim() != instructions) class_instructions_card_hidden = false; // new ones show
+    box.value = instructions;
+    showInstructionsCard();
+  }
+
+  // typed in Save & Share
+  root.instructionsChanged = function () {
+    class_instructions_card_hidden = false;
+    showInstructionsCard();
+    root.updateCurrentURL();
+    root.shareSettingsChanged();
+  };
+
+  root.hideInstructionsCard = function () {
+    class_instructions_card_hidden = true;
+    showInstructionsCard();
+  };
+
+  // --- Save & Share ---
+  function includePracticeInShare() {
+    var box = inputById('includePracticeCheckbox');
+    return !box || box.checked;
+  }
+
+  // the link Save & Share gives: with the practice settings if its box is ticked
+  function shareURL(url_destination) {
+    return get_FullURLForPage(url_destination, includePracticeInShare());
+  }
+
+  // the box or the instructions changed: the link in Save & Share follows
+  root.shareSettingsChanged = function () {
+    var popup = document.getElementById('fullURLPopup');
+    if (!popup || popup.style.display != 'block') return;
+    if (inputById('embedCodeCheckbox').checked) {
+      fillInEmbedURLInFullURLPopup(shareURL('display'), 'fullURLPopupTextField');
+      return;
+    }
+    var field = inputById('fullURLPopupTextField');
+    if (field) field.value = shareURL();
+    if (inputById('shortenerCheckbox').checked)
+      fillInShortenedURLInFullURLPopup(shareURL(), 'fullURLPopupTextField');
   };
 
   function set_Default_notes(encodedURLData) {
@@ -5952,6 +6227,8 @@ function GrooveWriter() {
     setGrooveClickFromLink(myGrooveData.grooveClickGrooveBars, myGrooveData.grooveClickClickBars);
     setPracticeLimit(parsePracticeLimit(myGrooveData.practiceLimit), true);
     setCounting(!!myGrooveData.showCounts);
+    applyPracticeSettings(myGrooveData.practice);
+    setInstructionsFromLink(myGrooveData.instructions || '');
     root.setMetronomeFrequency(myGrooveData.metronomeFrequency);
 
     updateSheetMusic();

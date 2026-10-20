@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting, more metronome clicks, diddle lines, beat-by-beat notes. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: an exercise's practice settings and instructions, mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting, more metronome clicks, diddle lines, beat-by-beat notes. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -15,6 +15,7 @@ import {
 import { parseTimeSigString, calc_notes_per_measure } from './musicMath.js';
 import { parsePracticeLimit, practiceLimitToText } from './practiceTimer.js';
 import { metronomeIsOn, parseMetronomeFrequency } from './metronome.js';
+import { practiceSettingsFromUrl, practiceSettingsToUrl } from './practiceSettings.js';
 import {
   beatsFromList,
   beatsToList,
@@ -250,6 +251,16 @@ function straightBarsToList(straightBars, numberOfMeasures) {
   return numbers.join(',');
 }
 
+// Text typed into a link parameter: encodeURIComponent'd ("+" may also stand
+// for a space, as in older links); a stray "%" is kept as it is
+function decodeText(value) {
+  return decodeURIComponent(
+    String(value || '')
+      .replace(/\+/g, ' ')
+      .replace(/%(?![0-9a-fA-F]{2})/g, '%25')
+  );
+}
+
 export function getQueryVariableFromString(variable, def_value, my_string) {
   // Tolerate query strings with or without a leading '?'. window.location.search
   // and share URLs include it; some callers (e.g. GrooveDisplay embeds) pass a
@@ -473,6 +484,14 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
   myGrooveData.comments = decodeURIComponent(myGrooveData.comments);
   myGrooveData.comments = myGrooveData.comments.replace(/\+/g, ' ');
 
+  // an exercise's instructions and practice settings (Infinity Drumming)
+  myGrooveData.instructions = decodeText(
+    getQueryVariableFromString('Instructions', '', encodedURLData)
+  );
+  myGrooveData.practice = practiceSettingsFromUrl(function (name, fallback) {
+    return getQueryVariableFromString(name, fallback, encodedURLData);
+  });
+
   myGrooveData.tempo = parseInt(
     getQueryVariableFromString('tempo', constant_DEFAULT_TEMPO, encodedURLData),
     10
@@ -497,6 +516,27 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
   readBeatNotes(myGrooveData, encodedURLData);
 
   return myGrooveData;
+}
+
+// "Groove / click bars", when it is on (and Save & Share includes the practice
+// settings)
+function grooveClickForUrl(myGrooveData) {
+  if (myGrooveData.includePractice === false || !myGrooveData.grooveClickGrooveBars) return '';
+  return (
+    '&GrooveBars=' +
+    myGrooveData.grooveClickGrooveBars +
+    '&ClickBars=' +
+    myGrooveData.grooveClickClickBars
+  );
+}
+
+// The practice timer and the other practice settings that are on
+// (practiceSettings.js); none when Save & Share's "Include practice settings"
+// box is unticked.
+function practiceForUrl(myGrooveData) {
+  if (myGrooveData.includePractice === false) return '';
+  var url = myGrooveData.practiceLimit ? '&Practice=' + myGrooveData.practiceLimit : '';
+  return url + practiceSettingsToUrl(myGrooveData.practice);
 }
 
 /**
@@ -560,19 +600,18 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
   if (straightList) fullURL += '&StraightBars=' + straightList;
 
   // "Groove / click bars" practice option, only when it is on
-  if (myGrooveData.grooveClickGrooveBars > 0) {
-    fullURL +=
-      '&GrooveBars=' +
-      myGrooveData.grooveClickGrooveBars +
-      '&ClickBars=' +
-      myGrooveData.grooveClickClickBars;
-  }
+  fullURL += grooveClickForUrl(myGrooveData);
 
   // counting over the notes, only when it is on
   if (myGrooveData.showCounts) fullURL += '&Count=1';
 
-  // practice timer, only when it is on
-  if (myGrooveData.practiceLimit) fullURL += '&Practice=' + myGrooveData.practiceLimit;
+  // practice timer and the other practice settings (unless Save & Share's box
+  // leaves them out)
+  fullURL += practiceForUrl(myGrooveData);
+
+  // the teacher's instructions for the exercise
+  if (myGrooveData.instructions)
+    fullURL += '&Instructions=' + encodeURIComponent(myGrooveData.instructions);
 
   // a time signature for each bar, when they differ
   fullURL += barSigsForUrl(myGrooveData);

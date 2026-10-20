@@ -17,7 +17,7 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1025 pass** (12 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                       |
+| `npm test`             | Vitest unit suite — **1036 pass** (12 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                       |
 | `npm run test:e2e`     | Playwright golden-master — **95 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                               |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~174 known errors baseline; changes should be typecheck-**neutral**                                                                      |
@@ -74,6 +74,9 @@ Pure / low-coupling core (extracted from the two big files, imported back):
   which grid slots it uses, inference from notes, counting, and the beat plan the ABC/MIDI writers take.
 - `ornaments.js` — flams/drags/ruffs (grace groups) and diddles (`!/!`) inside note tokens.
 - `barMeters.js` — a time signature per bar; which note settings fit a bar.
+- `practiceSettings.js` — an exercise's practice settings in its link (`Perm`/`PermSet`/`PlayEach`,
+  `SpeedUp`, `CountIn`, `ClickSolo`, `ClickStart`, `Mute`); only those that are on. Save & Share's
+  "Include practice settings" box sets `grooveData.includePractice`; `Instructions` always travel.
 - `audioSession.js` — while a groove plays, `navigator.audioSession.type = 'playback'` so iPhones
   play it through the silent switch; `'auto'` again on pause/stop.
 - `gridState.js` — the DOM grid **read** layer: per-cell state (`is_*_on`/`get_*_state`)
