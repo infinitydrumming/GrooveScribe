@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1087 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **101 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1106 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **103 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -121,6 +121,10 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   mid-bar (`musicLineBroken`). Triplet-grid bars are written 12 units a quarter note (their
   tuplets only labels) but plain beats 8: anything laid over them (counts, the click's count)
   must follow the writer's beats (`withCountsOver`), never assume a length.
+- **Bar copies** go to localStorage and the device clipboard (`Infinity Scribe bar {json}`, with an
+  `at` time; paste takes the newer): each origin, home-screen app and private tab has its own
+  storage. Anything that lays the grid out again (add / remove / paste / "Add a copy") goes through
+  `keepingMutes` (mutes live in the DOM and would reset), which also makes it one link update.
 
 ## Refactor status (strangler-fig, ES-module migration)
 

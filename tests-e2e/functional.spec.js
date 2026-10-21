@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures.js';
+import { test, expect, blockOutsideRequests } from './fixtures.js';
 import { grooveUrl } from './corpus.js';
 import { loadGroove, getSvg, grooveData } from './helpers.js';
 
@@ -171,5 +171,47 @@ test.describe('music lines on a phone', () => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.evaluate(() => window.myGrooveWriter.refresh_ABC());
     expect(await musicLines(page)).toBe(1);
+  });
+});
+
+// Infinity Drumming, 2026: "+ Add a copy" under every bar, and a bar copied on
+// one of the site's addresses pasted on the other: each address has its own
+// storage, so the bar goes by way of the device's clipboard.
+test.describe('copies of bars', () => {
+  const TWO_BARS =
+    '?TimeSig=4/4&Div=8&Tempo=80&Measures=2&Mute=hh:2' +
+    '&H=|xxxxxxxx|x-x-x-x-|&S=|--o---o-|-o-o-o-o|&K=|o---o---|oo--oo--|';
+  const EMPTY_8 = '?TimeSig=4/4&Div=8&Tempo=80&Measures=1&H=|--------|&S=|--------|&K=|--------|';
+  const inLink = (page, name) =>
+    page.evaluate((param) => new URLSearchParams(window.location.search).get(param), name);
+
+  test('"+ Add a copy" puts the bar right after it, and one undo takes it back', async ({
+    page,
+  }) => {
+    await loadGroove(page, grooveUrl(TWO_BARS));
+    await page.click('#duplicateMeasureButton1');
+    expect(await inLink(page, 'Measures')).toBe('3');
+    expect(await inLink(page, 'H')).toBe('|xxxxxxxx|xxxxxxxx|x-x-x-x-|');
+    expect(await inLink(page, 'Mute')).toBe('hh:3');
+
+    await page.click('#undoButton', { force: true });
+    expect(await inLink(page, 'Measures')).toBe('2');
+    expect(await inLink(page, 'Mute')).toBe('hh:2');
+  });
+
+  test('a bar copied on one address pastes on the other', async ({ page, context }) => {
+    for (const origin of ['http://localhost:8000', 'http://127.0.0.1:8000'])
+      await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin });
+    await loadGroove(page, grooveUrl(TWO_BARS));
+    await page.click('#copyMeasureButton2');
+
+    const other = await context.newPage();
+    await blockOutsideRequests(other);
+    await loadGroove(other, 'http://127.0.0.1:8000' + grooveUrl(EMPTY_8));
+    await other.bringToFront();
+    await other.click('#pasteMeasureButton1');
+    await expect.poll(() => inLink(other, 'K')).toBe('|oo--oo--|');
+    expect(await inLink(other, 'S')).toBe('|-o-o-o-o|');
+    expect(await inLink(other, 'H')).toBe('|x-x-x-x-|');
   });
 });

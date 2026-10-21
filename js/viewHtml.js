@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -709,6 +709,15 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
     straightBarButtonHTML(baseindex, ctx.straightBar) +
     barTimeSigButtonHTML(baseindex, ctx.barTimeSig);
   newHTML += '</span>';
+
+  // a copy of this bar right after it (Infinity Drumming, 2026), while there's room
+  if (ctx.numberOfMeasures < constant_MAX_MEASURES)
+    newHTML +=
+      '<span title="Add a copy of this bar right after it" id="duplicateMeasureButton' +
+      baseindex +
+      '" onClick="myGrooveWriter.duplicateMeasureButtonClick(' +
+      baseindex +
+      ')" class="duplicateMeasureButton"><i class="fa fa-plus"></i> Add a copy</span>';
 
   if (baseindex == ctx.numberOfMeasures && ctx.numberOfMeasures >= constant_MAX_MEASURES)
     // a groove's link holds this many bars at most, so no more can be added

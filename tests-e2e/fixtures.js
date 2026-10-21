@@ -8,20 +8,24 @@ import { test as base, expect } from '@playwright/test';
 // loads fast, deterministic, and independent of network conditions. The app
 // degrades gracefully (falls back to system fonts); the soundfont itself is
 // served locally, so playback still works.
+export function blockOutsideRequests(page) {
+  return page.route('**/*', (route) => {
+    const url = route.request().url();
+    if (
+      url.startsWith('http://localhost:8000') ||
+      url.startsWith('http://127.0.0.1:8000') ||
+      url.startsWith('data:') ||
+      url.startsWith('blob:')
+    ) {
+      return route.continue();
+    }
+    return route.abort();
+  });
+}
+
 export const test = base.extend({
   page: async ({ page }, use) => {
-    await page.route('**/*', (route) => {
-      const url = route.request().url();
-      if (
-        url.startsWith('http://localhost:8000') ||
-        url.startsWith('http://127.0.0.1:8000') ||
-        url.startsWith('data:') ||
-        url.startsWith('blob:')
-      ) {
-        return route.continue();
-      }
-      return route.abort();
-    });
+    await blockOutsideRequests(page);
     await use(page);
   },
 });
