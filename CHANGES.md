@@ -11,6 +11,26 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — Permutations over a multi-bar ostinato
+
+- A permutation plays over the groove's first bars, up to 4 (its ostinato),
+  instead of bar 1 only: every figure over each bar of it, and **Play each**
+  counts the times through the ostinato (×2 with a 2-bar ostinato gives each
+  figure 4 bars). Choosing a permutation closes the bars after the 4th (it
+  used to close all but the first), and with a permutation on no bar can be
+  added past the 4th.
+- The music writes each figure once over the ostinato's bars, each bar
+  numbered with its figure (the number "Practise bars" takes); the sound, the
+  cursor, the grid's highlight, groove / click bars, the practice timer and
+  the speed-up follow the run bar by bar. Each bar keeps its swing / straight
+  switch and muted lines, and fat back follows each bar's snare
+  (`js/groove_writer.js`, `js/permutations.js`, `gscribe_help.html`).
+- One-bar permutations play and look exactly as before. The golden master
+  now covers permutations: eight exercises (Ollie's routine among them) pin
+  down their music, the MIDI of their first rounds and where the cursor and
+  the grid's highlight are, before and after; three more do the same for
+  ostinatos of 2, 3 and 4 bars (`tests-e2e/`).
+
 ## 2026-10-21 — Fat back kick permutations
 
 - **Fat back** in a kick permutation's options: every figure leaves the backbeat

@@ -110,6 +110,35 @@ describe('permutation bars', () => {
     expect(getPermutationSectionABC(singles1, 2, true, 1).post).toBe('|\n');
   });
 
+  // Infinity Drumming, 2026: a permutation over a multi-bar ostinato
+  it('writes a figure over each bar of the ostinato, with the heading over its first', () => {
+    const bar1 = getPermutationSectionABC(singles1, 0, false, 2, 1, 2, false, { bar: 0, bars: 2 });
+    const bar2 = getPermutationSectionABC(singles1, 0, false, 2, 2, 2, false, { bar: 1, bars: 2 });
+    expect(bar1.pre).toContain('P: Singles   (play each ×2)');
+    expect(bar1.pre).toContain('% Singles on "1", ostinato bar 1\n');
+    expect(bar2.pre).not.toContain('P:');
+    expect(bar2.pre).toContain('% Singles on "1", ostinato bar 2\n');
+    expect(bar1.pre).toContain('%%setbarnb 1\n'); // the figure's own number over its bar 2
+    // two bars a line: here a figure a line
+    expect(bar1.post).toBe('\\\n');
+    expect(bar2.post).toBe('\n');
+    // the last figure of its group ends the group on its last bar
+    const lastBar1 = getPermutationSectionABC(singles1, 3, true, 1, 4, 2, false, {
+      bar: 0,
+      bars: 2,
+    });
+    const lastBar2 = getPermutationSectionABC(singles1, 3, true, 1, 0, 2, false, {
+      bar: 1,
+      bars: 2,
+    });
+    expect(lastBar1.post).toBe('\\\n');
+    expect(lastBar2.post).toBe('|\n');
+    // a one-bar ostinato is written as before
+    expect(
+      getPermutationSectionABC(singles1, 0, false, 2, 2, 2, false, { bar: 0, bars: 1 })
+    ).toEqual(getPermutationSectionABC(singles1, 0, false, 2, 2, 2, false));
+  });
+
   it('puts one bar on a line when the music says so (dense bars on a phone)', () => {
     expect(getPermutationSectionABC(singles1, 0, false, 1, 0, 1).post).toBe('\n');
     expect(getPermutationSectionABC(singles1, 1, false, 1, 0, 1).post).toBe('\n');

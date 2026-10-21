@@ -45,7 +45,7 @@ test.describe('golden master: permutations (music, playback rounds, cursor)', ()
       expect(svg).toMatchSnapshot(`perm-${slug(g.name)}.svg`);
 
       const playback = await permutationPlayback(page);
-      expect(playback.midi.length).toBe(4);
+      expect(playback.midi).toHaveLength(4);
       expect(JSON.stringify(playback, null, 1)).toMatchSnapshot(
         `perm-${slug(g.name)}.playback.txt`
       );

@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1111 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **103 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1116 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **114 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -125,6 +125,11 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   older links lose their ticks. A new option gets its own link setting and stays out of
   `permutationCheckboxes()` (as "Fat back" does, `FatBack=1`), or new groups go through
   `layout.groupsInOlderLinks`.
+- **Permutation runs** play over an ostinato of the groove's first bars (`get_ostinato_bars()`, up to
+  `MAX_OSTINATO_BARS`): bar `n` of the run is figure `n / (repeats × bars)` over ostinato bar
+  `n % bars`; the music writes each figure once over the bars. A one-bar run must stay
+  byte-identical: the golden master's permutation exercises (`permutationPlayback` in
+  `tests-e2e/helpers.js`) pin down their music, first playback rounds, cursor and grid highlight.
 - **Bar copies** go to localStorage and the device clipboard (`Infinity Scribe bar {json}`, with an
   `at` time; paste takes the newer): each origin, home-screen app and private tab has its own
   storage. Anything that lays the grid out again (add / remove / paste / "Add a copy") goes through

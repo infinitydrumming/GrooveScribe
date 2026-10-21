@@ -85,6 +85,33 @@ export const permutationExercises = [
       '&H=|x-x-x-x-x-x-x-x-|&S=|----------------|&K=|----------------|' +
       '&T1=|------------o---|&T4=|--------------o-|',
   },
+  // over a multi-bar ostinato: each figure over every bar of it
+  {
+    name: 'ostinato 2 bars, kick 16ths fat back, play each 2, groove 2 click 2',
+    url:
+      '?TimeSig=4/4&Div=16&Tempo=90&Measures=2&MetronomeFreq=4&GrooveBars=2&ClickBars=2' +
+      '&Perm=kick_16ths&PermSet=001111111111111111110&PlayEach=2&FatBack=1' +
+      '&H=|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|&S=|----O-------O---|----O-------O-O-|' +
+      '&K=|o-------o-------|o-------o-------|',
+  },
+  {
+    name: 'ostinato 3 bars, kick and snare 16ths, bar 2 straight, bar 3 hi-hat muted, bars 2-4, timer',
+    url:
+      '?TimeSig=4/4&Div=16&Tempo=100&Swing=35&StraightBars=2&Measures=3&Mute=hh:3&Practice=20b' +
+      '&Perm=kick_snare_kick_lead&PermBars=2-4' +
+      '&H=|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-x-|xxxxxxxxxxxxxxxx|' +
+      '&S=|----------------|----------------|----------------|' +
+      '&K=|----------------|----------------|----------------|' +
+      '&T4=|----------------|----------------|------------o-o-|',
+  },
+  {
+    name: 'ostinato 4 bars, kick 8th triplets, every note counted',
+    url:
+      '?TimeSig=4/4&Div=12&Tempo=80&Measures=4&Count=1&Perm=kick_16ths' +
+      '&H=|x--x--x--x--|x--x--x--x--|x--x--x--x--|x--x--x--o--|' +
+      '&S=|---O-----O--|---O-----O--|---O-----O--|---O-----OOO|' +
+      '&K=|------------|------------|------------|------------|',
+  },
 ];
 
 // A filesystem-safe slug for snapshot filenames.

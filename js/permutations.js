@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: fat back kick permutations, dense bars one a line on phones, practising some bars of a run, bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: multi-bar ostinatos, fat back kick permutations, dense bars one a line on phones, practising some bars of a run, bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
 // Permutation engine (Step 4 extraction from groove_writer.js).
 //
 // Pure combinatorial generators for the "permutation" practice modes: they build
@@ -369,12 +369,18 @@ function groupHeading(section, repeats, fatBack) {
   );
 }
 
+// A permutation plays over the groove's first bars, its ostinato, this many at
+// most: each figure over every bar of it (Infinity Drumming, 2026).
+export var MAX_OSTINATO_BARS = 4;
+
 // ABC that goes before / after one bar of a permutation. `shownIndex` is the
-// bar's position among the shown bars of its group; `lastInGroup` marks the last
-// one. Two bars per line; the group name is printed over its first bar.
+// figure's position among the shown figures of its group; `lastInGroup` marks
+// the last one. Two bars per line; the group name is printed over its first bar.
 // `nextBarNumber` (optional): the number in the run of the bar shown after this
 // one; the music prints it at the start of that bar (a number set in a bar takes
 // effect at its closing bar line; the first bar of the music has none).
+// `ostinato` (optional): which bar of a multi-bar ostinato this is, {bar, bars}
+// (bar from 0); the figure is written over each of them, the heading over its first.
 export function getPermutationSectionABC(
   section,
   shownIndex,
@@ -382,21 +388,29 @@ export function getPermutationSectionABC(
   repeats,
   nextBarNumber,
   barsPerLine,
-  fatBack
+  fatBack,
+  ostinato
 ) {
+  var bar = ostinato ? ostinato.bar : 0;
+  var bars = ostinato ? ostinato.bars : 1;
   var pre = '';
   if (nextBarNumber) pre += '%%setbarnb ' + nextBarNumber + '\n';
-  if (shownIndex === 0) pre += groupHeading(section, repeats, fatBack);
-  pre +=
-    '%\n% ' + section.group.name + (section.label ? ' on "' + section.label + '"' : '') + '\n%\n';
+  if (shownIndex === 0 && bar === 0) pre += groupHeading(section, repeats, fatBack);
+  pre += '%\n% ' + figureName(section) + (bars > 1 ? ', ostinato bar ' + (bar + 1) : '') + '\n%\n';
 
   // two bars a line, or one (dense bars on a phone, see abcNotation.musicLayout)
+  var place = shownIndex * bars + bar; // the bar's place in its group
   var post;
-  if (lastInGroup) post = '|\n';
-  else if (barsPerLine === 1 || shownIndex % 2 == 1) post = '\n';
+  if (lastInGroup && bar == bars - 1) post = '|\n';
+  else if (barsPerLine === 1 || place % 2 == 1) post = '\n';
   else post = '\\\n';
 
   return { pre: pre, post: post };
+}
+
+// "Singles on "e""
+function figureName(section) {
+  return section.group.name + (section.label ? ' on "' + section.label + '"' : '');
 }
 
 // One bar of kicks for a figure. "Simplify multiple kicks" (1/16 notes only)
