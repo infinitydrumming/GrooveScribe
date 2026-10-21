@@ -11,6 +11,20 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — Fat back kick permutations
+
+- **Fat back** in a kick permutation's options: every figure leaves the backbeat
+  to the snare, with no kick wherever the groove's snare plays (normally 2 and
+  4; its ghost notes aside, so kicks under them stay). The headings over the
+  figures say "fat back". Saved in links as `FatBack=1`, its own setting, so
+  the ticks of the figures (`PermSet`) and older links are as before
+  (`js/permutations.js`, `js/groove_writer.js`, `js/viewHtml.js`,
+  `js/practiceSettings.js`).
+- The help's Permutations section is shown (since the original Groove Scribe
+  it was hidden in an HTML comment, with the notes on practising some bars and
+  on 1/16 triplets), with fat back, Simplify multiple kicks and Use Accent Grid
+  (`gscribe_help.html`).
+
 ## 2026-10-21 — A copy of a bar right after it; copy and paste between windows
 
 - **Add a copy** under every bar puts the bar again right after itself,

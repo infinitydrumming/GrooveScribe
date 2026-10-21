@@ -17,7 +17,7 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1106 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm test`             | Vitest unit suite — **1111 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
 | `npm run test:e2e`     | Playwright golden-master — **103 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
@@ -74,7 +74,7 @@ Pure / low-coupling core (extracted from the two big files, imported back):
   which grid slots it uses, inference from notes, counting, and the beat plan the ABC/MIDI writers take.
 - `ornaments.js` — flams/drags/ruffs (grace groups) and diddles (`!/!`) inside note tokens.
 - `barMeters.js` — a time signature per bar; which note settings fit a bar.
-- `practiceSettings.js` — an exercise's practice settings in its link (`Perm`/`PermSet`/`PlayEach`/`PermBars`,
+- `practiceSettings.js` — an exercise's practice settings in its link (`Perm`/`PermSet`/`PlayEach`/`PermBars`/`FatBack`,
   `SpeedUp`, `CountIn`, `ClickSolo`, `ClickStart`, `Mute`); only those that are on. Save & Share's
   "Include practice settings" box sets `grooveData.includePractice`; `Instructions` always travel.
 - `countModes.js` — the Count menu's choices (`Count=1|bold|ghosts|rhythm|click`): the bold / small styling of
@@ -121,6 +121,10 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   mid-bar (`musicLineBroken`). Triplet-grid bars are written 12 units a quarter note (their
   tuplets only labels) but plain beats 8: anything laid over them (counts, the click's count)
   must follow the writer's beats (`withCountsOver`), never assume a length.
+- **Permutation ticks** (`PermSet`) are every option checkbox in DOM order: a new box shifts them and
+  older links lose their ticks. A new option gets its own link setting and stays out of
+  `permutationCheckboxes()` (as "Fat back" does, `FatBack=1`), or new groups go through
+  `layout.groupsInOlderLinks`.
 - **Bar copies** go to localStorage and the device clipboard (`Infinity Scribe bar {json}`, with an
   `at` time; paste takes the newer): each origin, home-screen app and private tab has its own
   storage. Anything that lays the grid out again (add / remove / paste / "Add a copy") goes through

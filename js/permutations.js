@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: dense bars one a line on phones, practising some bars of a run, bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: fat back kick permutations, dense bars one a line on phones, practising some bars of a run, bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
 // Permutation engine (Step 4 extraction from groove_writer.js).
 //
 // Pure combinatorial generators for the "permutation" practice modes: they build
@@ -357,6 +357,18 @@ export function getPermutationSections(layout) {
   return sections;
 }
 
+// The heading over a group's first bar: its name, and how its bars are played
+// ("Singles   (fat back, play each ×4)").
+function groupHeading(section, repeats, fatBack) {
+  if (section.groupIndex === 0) return 'P:Ostinato\n';
+  var notes = [];
+  if (fatBack) notes.push('fat back');
+  if (repeats > 1) notes.push('play each ×' + repeats);
+  return (
+    'T: \nP: ' + section.group.name + (notes.length ? '   (' + notes.join(', ') + ')' : '') + '\n'
+  );
+}
+
 // ABC that goes before / after one bar of a permutation. `shownIndex` is the
 // bar's position among the shown bars of its group; `lastInGroup` marks the last
 // one. Two bars per line; the group name is printed over its first bar.
@@ -369,19 +381,12 @@ export function getPermutationSectionABC(
   lastInGroup,
   repeats,
   nextBarNumber,
-  barsPerLine
+  barsPerLine,
+  fatBack
 ) {
   var pre = '';
   if (nextBarNumber) pre += '%%setbarnb ' + nextBarNumber + '\n';
-  if (shownIndex === 0) {
-    if (section.groupIndex === 0) pre += 'P:Ostinato\n';
-    else
-      pre +=
-        'T: \nP: ' +
-        section.group.name +
-        (repeats > 1 ? '   (play each ×' + repeats + ')' : '') +
-        '\n';
-  }
+  if (shownIndex === 0) pre += groupHeading(section, repeats, fatBack);
   pre +=
     '%\n% ' + section.group.name + (section.label ? ' on "' + section.label + '"' : '') + '\n%\n';
 
@@ -400,6 +405,22 @@ export function getPermutationKickArray(section, simplify) {
   if (simplify && section.figure.legacy16th !== undefined)
     return get_kick16th_minus_some_strait_permutation_array(section.figure.legacy16th);
   return section.figure.hits.map((hit) => (hit ? constant_ABC_KI_Normal : false));
+}
+
+/**
+ * "Fat back" (Infinity Drumming, 2026): a bar of kicks without the kicks that
+ * land with the snare's backbeat, i.e. wherever the groove's snare plays
+ * (accents, normal hits, cross sticks, buzzes, flams...), its ghost notes aside.
+ *
+ * @param {Array<string|false>} kick_array
+ * @param {Array<string|false>} snare_array  the groove's snare, the same length
+ */
+export function fatBackKickArray(kick_array, snare_array) {
+  return kick_array.map(function (kick, i) {
+    var snare = snare_array[i];
+    var backbeat = !!snare && withoutDiddle(withoutGrace(snare)) != constant_ABC_SN_Ghost;
+    return backbeat ? false : kick;
+  });
 }
 
 /**

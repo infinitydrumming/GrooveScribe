@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -2479,7 +2479,8 @@ function GrooveWriter() {
         lastInGroup,
         repeats,
         next,
-        barsPerLine || 2
+        barsPerLine || 2,
+        fatBackOn()
       );
       // the music's first bar has no bar number: with some bars chosen, its
       // heading says which bar it is
@@ -2532,6 +2533,18 @@ function GrooveWriter() {
     root.refresh_ABC();
   };
 
+  // "Fat back" (Infinity Drumming, 2026): kick permutations leave the backbeat to
+  // the snare, with no kick wherever the groove's snare plays (ghost notes aside)
+  var class_permutation_fat_back = false;
+  function fatBackOn() {
+    return class_permutation_type == 'kick_16ths' && class_permutation_fat_back;
+  }
+
+  root.permutationFatBackClick = function (event) {
+    class_permutation_fat_back = !!event.target.checked;
+    root.refresh_ABC();
+  };
+
   // One bar's kick and snare for a figure: a kick permutation replaces the kicks
   // (keeping the hi-hat foot notes), a snare permutation replaces the snare.
   function get_permutation_bar(section, Kick_Array, Snare_Array) {
@@ -2560,6 +2573,7 @@ function GrooveWriter() {
         section,
         checked('PermuationOptionsSkipSomeFirstNotes')
       );
+      if (fatBackOn()) kick = _perm.fatBackKickArray(kick, Snare_Array);
       var hhFoot = _perm.filter_kick_array_for_permutation(Kick_Array);
       return { kick: _perm.merge_kick_arrays(kick, hhFoot), snare: Snare_Array };
     }
@@ -6219,9 +6233,12 @@ function GrooveWriter() {
     return /** @type {HTMLInputElement | null} */ (document.getElementById(id));
   }
 
+  // (not "Fat back", which the link has as its own setting)
   function permutationCheckboxes() {
     return /** @type {NodeListOf<HTMLInputElement>} */ (
-      document.querySelectorAll('#PermutationOptions input[type="checkbox"]')
+      document.querySelectorAll(
+        '#PermutationOptions input[type="checkbox"]:not(#PermuationOptionsFatBack)'
+      )
     );
   }
 
@@ -6317,6 +6334,7 @@ function GrooveWriter() {
               boxes: permutationBoxes(),
               playEach: get_permutation_repeats(),
               bars: class_permutation_bars,
+              fatBack: fatBackOn(),
             },
       speedUp: currentSpeedUp(),
       countIn: class_metronome_count_in_active,
@@ -6329,6 +6347,7 @@ function GrooveWriter() {
   function setPermutationFromLink(perm) {
     var allowed = !!perm && permutationsAllowed();
     class_permutation_repeats = allowed ? perm.playEach : 1;
+    class_permutation_fat_back = allowed && !!perm.fatBack;
     root.permutationPopupClick(allowed ? perm.type : 'none');
     if (!allowed) return;
     class_permutation_bars = perm.bars || '';
@@ -6930,7 +6949,8 @@ function GrooveWriter() {
       class_permutation_type,
       get_permutation_layout(),
       get_permutation_repeats(),
-      class_permutation_bars
+      class_permutation_bars,
+      class_permutation_fat_back
     );
   };
 } // end of class

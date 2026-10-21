@@ -8,6 +8,8 @@
 //   Perm=kick_16ths&PermSet=0011..&PlayEach=2   permutation, its ticked boxes
 //                                               (in the options' order), × each
 //   PermBars=3-6,9                              just these bars of the run
+//   FatBack=1                                   kick figures without the kicks
+//                                               on the snare's backbeat
 //   SpeedUp=5,2m  SpeedUp=5,16b,once,to120      bpm, every 2 minutes / 16 bars,
 //                                               only once, stop at 120
 //   CountIn=1  ClickSolo=1  ClickStart=AND
@@ -28,9 +30,10 @@ var PERMUTATION_TYPES = [
 ];
 
 /**
- * @typedef {{type: string, boxes: string, playEach: number, bars: string}} PermutationSetting
+ * @typedef {{type: string, boxes: string, playEach: number, bars: string, fatBack?: boolean}} PermutationSetting
  *   boxes: each permutation option checkbox, in order, '1' ticked / '0' not;
- *   bars: the bars of the run to practise ("3-6, 9"), '' for all
+ *   bars: the bars of the run to practise ("3-6, 9"), '' for all;
+ *   fatBack: a kick permutation leaves out the kicks on the snare's backbeat
  * @typedef {{amount: number, every: number, unit: string, keepGoing: boolean, target: number}} SpeedUpSetting
  *   unit 'm' (minutes) or 'b' (bars); target 0 = no "Stop at"
  * @typedef {{permutation: (PermutationSetting|null), speedUp: (SpeedUpSetting|null),
@@ -119,19 +122,26 @@ function mutesFromText(text) {
 }
 
 /**
+ * The permutation as link parameters ('&Perm=...&PermSet=...'), '' for none.
+ * @param {PermutationSetting|null} perm
+ */
+function permutationToUrl(perm) {
+  if (!perm || PERMUTATION_TYPES.indexOf(perm.type) < 0) return '';
+  var url = '&Perm=' + perm.type;
+  if (perm.boxes) url += '&PermSet=' + perm.boxes;
+  if (perm.playEach > 1) url += '&PlayEach=' + perm.playEach;
+  if (perm.bars) url += '&PermBars=' + String(perm.bars).replace(/\s+/g, '');
+  if (perm.fatBack) url += '&FatBack=1';
+  return url;
+}
+
+/**
  * The practice settings that are on, as link parameters ('&Perm=...&CountIn=1').
  * @param {PracticeSettings} settings
  */
 export function practiceSettingsToUrl(settings) {
   if (!settings) return '';
-  var url = '';
-  var perm = settings.permutation;
-  if (perm && PERMUTATION_TYPES.indexOf(perm.type) >= 0) {
-    url += '&Perm=' + perm.type;
-    if (perm.boxes) url += '&PermSet=' + perm.boxes;
-    if (perm.playEach > 1) url += '&PlayEach=' + perm.playEach;
-    if (perm.bars) url += '&PermBars=' + String(perm.bars).replace(/\s+/g, '');
-  }
+  var url = permutationToUrl(settings.permutation);
   if (settings.speedUp) url += '&SpeedUp=' + speedUpToText(settings.speedUp);
   if (settings.countIn) url += '&CountIn=1';
   if (settings.clickSolo) url += '&ClickSolo=1';
@@ -160,6 +170,7 @@ export function practiceSettingsFromUrl(get) {
         .split(',')
         .filter(Boolean)
         .join(', '),
+      fatBack: get('FatBack', '0') == '1',
     };
   settings.speedUp = speedUpFromText(get('SpeedUp', ''));
   settings.countIn = get('CountIn', '0') == '1';

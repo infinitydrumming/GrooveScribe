@@ -6,6 +6,7 @@ import {
   getPermutationKickArray,
   getPermutationSnareArray,
   getPermutationAlternatingBar,
+  fatBackKickArray,
   parseBarList,
   barListToText,
 } from '../../js/permutations.js';
@@ -114,6 +115,59 @@ describe('permutation bars', () => {
     expect(getPermutationSectionABC(singles1, 1, false, 1, 0, 1).post).toBe('\n');
     expect(getPermutationSectionABC(singles1, 2, true, 1, 0, 1).post).toBe('|\n');
     expect(getPermutationSectionABC(singles1, 0, false, 1, 0, 2).post).toBe('\\\n');
+  });
+});
+
+// Infinity Drumming, 2026: "fat back" kick figures leave the backbeat to the snare
+describe('fat back: no kicks with the snare on the backbeat', () => {
+  const sixteenths = getPermutationSections(getPermutationLayout(16));
+  const figure = (name, sub) => sixteenths.find((s) => s.group.name == name && s.sub == sub);
+  const kickSlots = (kick) => kick.flatMap((k, slot) => (k ? [slot] : []));
+  // the rock groove's snare (32 slots a bar): an accent on 2, a hit on 4, and a
+  // ghost note on the "a" of 2
+  const snare = new Array(32).fill(false);
+  snare[8] = '!accent!c';
+  snare[24] = 'c';
+  snare[14] = '!(.!!).!c';
+
+  it('leaves out the kicks on 2 and 4, where the snare plays', () => {
+    const singles1 = getPermutationKickArray(figure('Singles', 1), false);
+    expect(kickSlots(fatBackKickArray(singles1, snare))).toEqual([0, 16]); // 1 and 3
+  });
+
+  it('keeps every other kick, under the ghost notes too', () => {
+    const quads = getPermutationKickArray(figure('Quads', 0), false);
+    expect(kickSlots(fatBackKickArray(quads, snare))).toEqual([
+      0, 2, 4, 6, 10, 12, 14, 16, 18, 20, 22, 26, 28, 30,
+    ]);
+    const singlesE = getPermutationKickArray(figure('Singles', 2), false);
+    expect(fatBackKickArray(singlesE, snare)).toEqual(singlesE); // no kick on a backbeat
+  });
+
+  it('takes cross sticks, flams, buzzes and diddled hits for the backbeat; diddled ghosts not', () => {
+    const quads = getPermutationKickArray(figure('Quads', 0), false);
+    const strokes = new Array(32).fill(false);
+    strokes[0] = '^c'; // cross stick
+    strokes[8] = '!accent!{/c}c'; // flam
+    strokes[16] = '!///!c'; // buzz
+    strokes[24] = '!/!c'; // diddle
+    strokes[28] = '!/!!(.!!).!c'; // diddled ghost note
+    const kept = kickSlots(fatBackKickArray(quads, strokes));
+    [0, 8, 16, 24].forEach((slot) => expect(kept).not.toContain(slot));
+    expect(kept).toContain(28);
+  });
+
+  it('says so over each group of figures', () => {
+    const singles1 = figure('Singles', 1);
+    expect(getPermutationSectionABC(singles1, 0, false, 4, 0, 2, true).pre).toContain(
+      'P: Singles   (fat back, play each ×4)'
+    );
+    expect(getPermutationSectionABC(singles1, 0, false, 1, 0, 2, true).pre).toContain(
+      'P: Singles   (fat back)\n'
+    );
+    expect(getPermutationSectionABC(singles1, 0, false, 1, 0, 2, false).pre).toContain(
+      'P: Singles\n'
+    );
   });
 });
 

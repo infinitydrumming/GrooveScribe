@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: fat back kick permutations, a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -787,7 +787,8 @@ export function straightBarButtonHTML(baseindex, straight) {
 // `layout` is permutations.getPermutationLayout(...) for the current note
 // setting; `repeats` is the current "Play each ×" value.
 // barsText: the bars of the run to practise ("3-6, 9"), '' for all
-export function buildPermutationOptionsHTML(permutationType, layout, repeats, barsText) {
+// fatBack: kick permutations leave out the kicks on the snare's backbeat
+export function buildPermutationOptionsHTML(permutationType, layout, repeats, barsText, fatBack) {
   if (permutationType == 'none') return '';
 
   var optionTypeArray = layout.groups.map(function (group) {
@@ -819,6 +820,15 @@ export function buildPermutationOptionsHTML(permutationType, layout, repeats, ba
           SubOptions: [],
           defaultOn: false,
         });
+      // (Infinity Drumming, 2026) its own link setting, not one of the ticks in PermSet
+      optionTypeArray.splice(0, 0, {
+        id: 'PermuationOptionsFatBack',
+        subid: '',
+        name: 'Fat back (no kicks on the backbeat)',
+        SubOptions: [],
+        defaultOn: !!fatBack,
+        onClick: 'permutationFatBackClick',
+      });
       break;
     case 'kick_snare_kick_lead':
     case 'kick_snare_snare_lead':
@@ -868,7 +878,9 @@ export function buildPermutationOptionsHTML(permutationType, layout, repeats, ba
       (optionTypeArray[optionType].defaultOn ? 'checked' : '') +
       ' type="checkbox" class="myCheckbox" id="' +
       optionTypeArray[optionType].id +
-      '" onClick="myGrooveWriter.permutationOptionClick(event)">' +
+      '" onClick="myGrooveWriter.' +
+      (optionTypeArray[optionType].onClick || 'permutationOptionClick') +
+      '(event)">' +
       '<label for="' +
       optionTypeArray[optionType].id +
       '">' +
