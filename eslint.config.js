@@ -107,6 +107,7 @@ export default [
       'js/screenWakeLock.js',
       'js/audioSession.js',
       'js/practiceSettings.js',
+      'js/countModes.js',
       'js/ornaments.js',
       'js/barMeters.js',
       'js/practiceTimer.js',

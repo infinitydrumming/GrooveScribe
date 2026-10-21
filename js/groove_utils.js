@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, plays through an iPhone's silent switch, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up, counting over the notes, menus kept on screen, more metronome clicks, a second tap closes a menu. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, plays through an iPhone's silent switch, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up, counting over the notes and its choices, menus kept on screen, more metronome clicks, a second tap closes a menu. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -164,6 +164,11 @@ function GrooveUtils() {
   root.shouldMIDIRepeat = true;
   root.stopAtEndOfRound = false; // stop when the tune now playing ends (the practice timer)
   root.showCounts = false; // counting ("1 e & a") over the notes in the sheet music
+  root.countMode = 'all'; // how (see countModes.js)
+  /** @type {{frequency: (number|string), start: string}} the click the 'click' count follows */
+  root.countClick = { frequency: 0, start: '1' };
+  /** @type {string[] | null} a permutation's permuted lines, the rhythm of the 'bold' count */
+  root.countRhythmLines = null;
   root.swingIsEnabled = false;
   // set by the editor: called when the swing amount or style changes
   /** @type {null | (() => void)} */

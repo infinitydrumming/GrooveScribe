@@ -171,6 +171,19 @@ describe('an exercise in its link', () => {
     expect(window.location.search).not.toContain('PermBars');
   });
 
+  it('counts the click when the Count menu says so, following the click as it changes', () => {
+    const counts = () =>
+      [...document.getElementById('ABCsource').value.matchAll(/"([^"$]+)"x/g)].map((m) => m[1]);
+    gw.setCountChoice('click');
+    expect(new URLSearchParams(window.location.search).get('Count')).toBe('click');
+    expect(counts().slice(0, 5)).toEqual(['&', '&', '&', '&', '&']); // 4ths, from the & (every bar of the permutation)
+    gw.metronomeOptionsMenuOffsetClickPopupClick('1');
+    gw.setMetronomeFrequency('12');
+    expect(counts().slice(0, 3)).toEqual(['1', '&', 'a']);
+    gw.setCountChoice('off');
+    expect(window.location.search).not.toContain('Count=');
+  });
+
   it('keeps the ticks of a 1/16 triplet link from before the per-beat figures were filled out', () => {
     const ticked = () =>
       [...document.querySelectorAll('#PermutationOptions input[type="checkbox"]')]

@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar, practice timer, counting, more metronome clicks, diddles and beat-by-beat notes, an exercise's practice settings and instructions. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar, practice timer, counting and its choices, more metronome clicks, diddles and beat-by-beat notes, an exercise's practice settings and instructions. See CHANGES.md.
 // grooveData — the central data contract for Groove Scribe.
 //
 // A GrooveData describes a single groove: its time signature, subdivision and
@@ -86,6 +86,9 @@ const EMPTY_NOTE_ARRAY = [
  *   before the click-only bars; 0 = option off. URL "GrooveBars".
  * @property {number} grooveClickClickBars   Click-only bars for that option. URL "ClickBars".
  * @property {boolean} showCounts  Counting ("1 e & a") over the notes in the sheet music.
+ * @property {string} countMode  How it counts: 'all' (every note), 'bold' (the rhythm in bold),
+ *   'rhythm' (only where something plays) or 'click' (the click's count); see countModes.js.
+ *   URL "Count=1" / "Count=bold" / "Count=rhythm" / "Count=click".
  * @property {string[]} beatNotes  Mixed note setting (Div 48): each bar's beats, one character a
  *   beat ('ssqq'; see beatNotes.js); [] otherwise.
  *   URL "Count=1" (only when on).
@@ -156,6 +159,7 @@ export function createGrooveData(config = {}) {
     grooveClickClickBars: 0,
     practiceLimit: '', // '' = practice timer off
     showCounts: false,
+    countMode: 'all',
     beatNotes: [], // Mixed (Div 48): each bar's beats, see beatNotes.js
     straightBars: [],
     barTimeSigs: [],

@@ -254,6 +254,18 @@ export const coverageGrooves = [
     name: '8th-note triplets in 6/8, counted',
     url: '?TimeSig=6/8&Div=12&Tempo=80&Measures=1&Count=1&H=|xxxxxxxxx|&S=|---o-----|&K=|o-----o--|',
   },
+  {
+    name: 'Counted with the rhythm in bold (ghost note, accent)',
+    url: '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&Count=bold&H=|x-x-X-x-x-x-x-x-|&S=|----O--g----O---|&K=|o-----o---o--o--|',
+  },
+  {
+    name: 'Counted, rhythm only (a silent beat in brackets)',
+    url: '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&Count=rhythm&H=|x---x-------x---|&S=|----O-------O---|&K=|o------o--o-----|',
+  },
+  {
+    name: 'Counting the click: triplets over 16ths',
+    url: '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&Count=click&MetronomeFreq=12&H=|x-x-x-x-x-x-x-x-|&S=|----O-------O---|&K=|o-----o---o-----|',
+  },
 
   // ---- Voice/articulation mismatches: each character is valid for SOME voice
   // but placed in a voice where it is not, exercising every "this symbol isn't

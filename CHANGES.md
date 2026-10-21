@@ -11,6 +11,25 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — Counting choices: every note, rhythm in bold, rhythm only, the click
+
+- The **Count** menu (next to Click) replaces the Counting switch:
+  - **Every note**: as the switch counted, each note of the note setting.
+  - **Rhythm in bold**: every note, with the rhythm in bold and the rest small and
+    grey. The rhythm is the kick, snare and toms (not ghost notes) and any accent;
+    the hi-hat, crash and ride lines and the hi-hat foot are the ostinato. In a
+    permutation, only the permuted line.
+  - **Rhythm only**: just where something plays (every line), with the beat
+    numbers always there, in brackets when nothing plays on them ("(3)").
+  - **The click**: what the click plays, in its own subdivision ("1 & a" for
+    triplets, "1 a li & a la" for sextuplets, "1 a" for swung 8ths, the beats
+    when it is off), over any groove; it follows the click as it changes and
+    replaces the stickings.
+    Saved in links as Count=1 (every note), Count=bold, Count=rhythm or
+    Count=click (`js/countModes.js`, `js/abcNotation.js`, `js/groove_writer.js`,
+    `js/urlSerialization.js`, `js/grooveData.js`, `js/groove_utils.js`,
+    `index.html`, `css/infinity_layout.css`, `gscribe_help.html`).
+
 ## 2026-10-21 — 1/16 triplets counted "1 a li & a la"
 
 - Counting in 1/16 triplets (and 1/16-triplet beats in the Mixed setting) says

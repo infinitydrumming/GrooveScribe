@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: an exercise's practice settings and instructions, mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting, more metronome clicks, diddle lines, beat-by-beat notes. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: an exercise's practice settings and instructions, mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting and its choices, more metronome clicks, diddle lines, beat-by-beat notes. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -16,6 +16,7 @@ import { parseTimeSigString, calc_notes_per_measure } from './musicMath.js';
 import { parsePracticeLimit, practiceLimitToText } from './practiceTimer.js';
 import { metronomeIsOn, parseMetronomeFrequency } from './metronome.js';
 import { practiceSettingsFromUrl, practiceSettingsToUrl } from './practiceSettings.js';
+import { countModeFromUrl, countModeToUrl } from './countModes.js';
 import {
   beatsFromList,
   beatsToList,
@@ -331,7 +332,9 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
   }
 
   // counting over the notes (Infinity Drumming)
-  myGrooveData.showCounts = getQueryVariableFromString('Count', '0', encodedURLData) == '1';
+  var count = countModeFromUrl(getQueryVariableFromString('Count', '0', encodedURLData));
+  myGrooveData.showCounts = count.show;
+  myGrooveData.countMode = count.mode;
 
   // practice timer (Infinity Drumming): "10m" or "16b"
   myGrooveData.practiceLimit = practiceLimitToText(
@@ -603,7 +606,7 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
   fullURL += grooveClickForUrl(myGrooveData);
 
   // counting over the notes, only when it is on
-  if (myGrooveData.showCounts) fullURL += '&Count=1';
+  fullURL += countModeToUrl(myGrooveData.showCounts, myGrooveData.countMode);
 
   // practice timer and the other practice settings (unless Save & Share's box
   // leaves them out)
