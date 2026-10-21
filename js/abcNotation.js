@@ -937,7 +937,7 @@ export function get_top_ABC_BoilerPlate(
   //else
   fullABC += '%%staves (Stickings Hands Feet)\n';
   // the bold count's fonts (Infinity Drumming, 2026)
-  if (gu.showCounts && gu.countMode == 'bold') fullABC += COUNT_FONTS;
+  if (gu.showCounts && (gu.countMode == 'bold' || gu.countMode == 'ghosts')) fullABC += COUNT_FONTS;
 
   // print comments below the legend if there is one, otherwise in the header section
   if (tuneComments !== '') {
@@ -1199,7 +1199,9 @@ function prepareCount(
     count.clickBar = clickCountBar(
       clickTicks(click.frequency, click.start, timeSigTop, timeSigBottom, tripletBar),
       timeSigTop,
-      timeSigBottom
+      timeSigBottom,
+      tripletBar,
+      time_division / timeSigBottom
     );
   }
   if (!count.mode || count.clickBar) return count;
@@ -1207,7 +1209,7 @@ function prepareCount(
   if (beatPlan) addPlanCounting(counted, beatPlan, notes_per_measure);
   else addCounting(counted, time_division, timeSigTop, timeSigBottom);
   count.sticking_array = counted;
-  if (count.mode == 'bold' || count.mode == 'rhythm')
+  if (['bold', 'ghosts', 'rhythm'].indexOf(count.mode) >= 0)
     counted.forEach(function (sticking, slot) {
       if (sticking == constant_ABC_STICK_COUNT) count.slots.push(slot);
     });

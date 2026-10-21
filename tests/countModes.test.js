@@ -14,6 +14,7 @@ describe('count modes in a link', () => {
     expect(countModeFromUrl('1')).toEqual({ show: true, mode: 'all' });
     expect(countModeFromUrl('Bold')).toEqual({ show: true, mode: 'bold' });
     expect(countModeFromUrl('rhythm')).toEqual({ show: true, mode: 'rhythm' });
+    expect(countModeFromUrl('ghosts')).toEqual({ show: true, mode: 'ghosts' });
     expect(countModeFromUrl('click')).toEqual({ show: true, mode: 'click' });
     expect(countModeFromUrl('0')).toEqual({ show: false, mode: 'all' });
     expect(countModeFromUrl('nonsense')).toEqual({ show: false, mode: 'all' });
@@ -50,6 +51,18 @@ describe('styling the counts', () => {
       null
     );
     expect(sticking).toEqual(['"$11"x', '"$2e"x', '"$1&"x', '"$1a"x']);
+  });
+
+  it('bold with ghosts: ghost notes are bold too, the ostinato still small', () => {
+    const sticking = counted();
+    styleCounts(
+      sticking,
+      [0, 1, 2, 3],
+      'ghosts',
+      lines({ hh: ['^g', '^g', '^g', '^g'], snare: [false, '!(.!!).!c', false, false] }),
+      null
+    );
+    expect(sticking).toEqual(['"$21"x', '"$1e"x', '"$2&"x', '"$2a"x']);
   });
 
   it('bold in a permutation: only the permuted line', () => {
@@ -103,14 +116,20 @@ describe("the click's count", () => {
     expect(clickTicks('4d', '1', 6, 8, false)).toEqual([0, 192]);
   });
 
-  it('writes a bar of it, each beat split as finely as the clicks need', () => {
-    expect(clickCountBar([0, 128], 2, 4)).toBe('"1"x8 "2"x8 ');
-    expect(clickCountBar([0, 64, 128], 2, 4)).toBe('"1"x4"&"x4 "2"x4x4 ');
-    expect(clickCountBar([0, 128 / 3, 256 / 3], 1, 4)).toBe('(3:2:3"1"x4"&"x4"a"x4 ');
-    expect(clickCountBar([0, 128 / 6], 1, 4)).toBe('(6:4:6"1"x2"a"x2x2x2x2x2 ');
-    expect(clickCountBar([0, 32], 1, 8)).toBe('"1"x2"&"x2 '); // an 8th-note beat
-    expect(clickCountBar([0, 8], 1, 8)).toBe('"1"x/"ah"x/x/x/x/x/x/x/ ');
-    expect(clickCountBar([0, 16], 1, 8)).toBe('"1"x1"e"x1x1x1 ');
-    expect(clickCountBar([5], 1, 4)).toBeNull(); // finer than 8 to a beat
+  it("writes a bar of it: a note on every grid note and every click, a click's syllable over it", () => {
+    // straight: 16ths grid, quarter and 8th clicks
+    expect(clickCountBar([0, 128], 2, 4, false, 1)).toBe('"1"x8 "2"x8 ');
+    expect(clickCountBar([0, 64, 128], 2, 4, false, 2)).toBe('"1"x4"&"x4 "2"x4x4 ');
+    // triplets over a quarter-note grid, and over 16ths (one tuplet over the beat)
+    expect(clickCountBar([0, 128 / 3, 256 / 3], 1, 4, false, 1)).toBe('(3:8:3"1"x1"&"x1"a"x1 ');
+    expect(clickCountBar([0, 128 / 3, 256 / 3], 1, 4, false, 4)).toBe(
+      '(12:8:6"1"x3x1"&"x2x2"a"x1x3 '
+    );
+    // the triplet grid: written half as long again, each beat a labelled tuplet
+    expect(clickCountBar([0, 128 / 6], 1, 4, true, 6)).toBe('(6:6:6"1"x2"a"x2x2x2x2x2 ');
+    // an 8th-note beat
+    expect(clickCountBar([0, 32], 1, 8, false, 2)).toBe('"1"x2"&"x2 ');
+    expect(clickCountBar([0, 8], 1, 8, false, 1)).toBe('"1"x/"ah"x7/2 ');
+    expect(clickCountBar([5], 1, 4, false, 4)).toBeNull(); // finer than 8 to a beat
   });
 });

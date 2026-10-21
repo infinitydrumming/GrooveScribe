@@ -84,6 +84,12 @@ describe('counting over the notes', () => {
       );
     });
 
+    it('with ghosts: the ghost note on the "a" of 2 is bold too', () => {
+      expect(counts(bold.replace('Count=bold', 'Count=ghosts')).join(' ')).toBe(
+        '$11 $2e $2& $2a $12 $2e $1& $1a $23 $2e $1& $2a $14 $1e $2& $2a'
+      );
+    });
+
     it('writes an accent in bold on any line', () => {
       const accents =
         '?TimeSig=4/4&Div=8&Measures=1&Count=bold&H=|X-x-X-x-|&S=|--------|&K=|--------|';
@@ -123,13 +129,14 @@ describe('counting over the notes', () => {
         gu.getGrooveDataFromUrlString(straight + '&MetronomeFreq=12'),
         800
       );
-      expect(abc).toContain('V:Stickings\n%%tuplets 1 0 0\n(3:2:3"1"x4"&"x4"a"x4 ');
+      // (a note on each 16th too, and the clicks between them: one tuplet over the beat)
+      expect(abc).toContain('V:Stickings\n%%tuplets 1 0 0\n(12:8:6"1"x3x1"&"x2x2"a"x1x3 ');
       expect(abc).toContain('%%tuplets 0 0 0\nV:Hands');
     });
   });
 
   it('is saved in the link', () => {
-    for (const mode of ['bold', 'rhythm', 'click']) {
+    for (const mode of ['bold', 'ghosts', 'rhythm', 'click']) {
       const gd = gu.getGrooveDataFromUrlString(groove + '&Count=' + mode);
       expect([gd.showCounts, gd.countMode]).toEqual([true, mode]);
       expect(gu.getUrlStringFromGrooveData(gd)).toContain('&Count=' + mode);

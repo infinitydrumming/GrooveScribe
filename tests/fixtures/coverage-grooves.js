@@ -259,6 +259,10 @@ export const coverageGrooves = [
     url: '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&Count=bold&H=|x-x-X-x-x-x-x-x-|&S=|----O--g----O---|&K=|o-----o---o--o--|',
   },
   {
+    name: 'Counted with the rhythm in bold, ghost notes too',
+    url: '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&Count=ghosts&H=|x-x-X-x-x-x-x-x-|&S=|----O--g----O---|&K=|o-----o---o--o--|',
+  },
+  {
     name: 'Counted, rhythm only (a silent beat in brackets)',
     url: '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&Count=rhythm&H=|x---x-------x---|&S=|----O-------O---|&K=|o------o--o-----|',
   },
