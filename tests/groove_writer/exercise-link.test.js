@@ -170,4 +170,38 @@ describe('an exercise in its link', () => {
     expect(numbers().slice(0, 3)).toEqual([2, 3, 4]); // the whole run again
     expect(window.location.search).not.toContain('PermBars');
   });
+
+  it('keeps the ticks of a 1/16 triplet link from before the per-beat figures were filled out', () => {
+    const ticked = () =>
+      [...document.querySelectorAll('#PermutationOptions input[type="checkbox"]')]
+        .filter((box) => box.checked)
+        .map((box) => box.id);
+    // Ostinato, Singles, Doubles, Singles/Doubles/Triples (per beat), every 2nd, every 4th
+    const OLD = '0' + '0100' + '0000' + '0000000' + '0000000' + '1111111' + '000' + '11000';
+    gw.loadNewGroove(
+      '?TimeSig=4/4&Div=24&Tempo=70&Measures=1&Perm=kick_16ths&PermSet=' +
+        OLD +
+        '&H=|------------------------|&S=|------O-----------O-----|&K=|o-----------o-----------|'
+    );
+    const tripleBoxes = ['', 1, 2, 3, 4, 5, 6].map(
+      (n) => 'PermuationOptionsTriplesBeat' + (n ? '_sub' + n : '')
+    );
+    expect(ticked()).toEqual([
+      ...tripleBoxes,
+      'PermuationOptionsSingles_sub1', // (now after the per-beat groups)
+      'PermuationOptionsEvery4th',
+      'PermuationOptionsEvery4th_sub1',
+    ]);
+
+    // a new link has a tick for every box, and opens the same
+    const permSet = new URLSearchParams(window.location.search).get('PermSet');
+    expect(permSet.length).toBe(OLD.length + 2 * 7 + 4 * 7 + 1);
+    gw.loadNewGroove(window.location.search);
+    expect(ticked()).toEqual([
+      ...tripleBoxes,
+      'PermuationOptionsSingles_sub1', // (now after the per-beat groups)
+      'PermuationOptionsEvery4th',
+      'PermuationOptionsEvery4th_sub1',
+    ]);
+  });
 });

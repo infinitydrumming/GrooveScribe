@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: practising some bars of a run, bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: practising some bars of a run, bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
 // Permutation engine (Step 4 extraction from groove_writer.js).
 //
 // Pure combinatorial generators for the "permutation" practice modes: they build
@@ -47,8 +47,53 @@ function hitsArray(slots, isHit) {
 // "Per beat" groups: Singles / Doubles / Triples lasting a whole beat, starting
 // on each of the `notesPerBeat` grid notes of the beat (1/16 triplets: 6, the
 // 8th-triplet notes and the off-beats between them; 1/32 notes: 8). Unticked by
-// default to keep the list short.
-function perBeatGroups(slots, unit, notesPerBeat) {
+// default to keep the list short. `shapes`: the groups, each with the notes its
+// figures hit, counted from the start of the figure.
+var PER_BEAT_SHAPES = [
+  { id: 'PermuationOptionsSinglesBeat', name: 'Singles (per beat)', notes: [0] },
+  { id: 'PermuationOptionsDoublesBeat', name: 'Doubles (per beat)', notes: [0, 1] },
+  { id: 'PermuationOptionsTriplesBeat', name: 'Triples (per beat)', notes: [0, 1, 2] },
+];
+
+// 1/16 triplets: every rhythm of hits on the 6 notes of a beat, repeating each
+// beat, is a figure here or in the figures that repeat inside the beat. A core
+// figure (single, double, triple) is followed by its "+ single" forms, so each
+// group builds on the one before and the hits go up one at a time.
+var SEXTUPLET_SHAPES = [
+  PER_BEAT_SHAPES[0],
+  {
+    id: 'PermuationOptionsSingleGapSingleBeat',
+    name: 'Single, gap, single (per beat)',
+    notes: [0, 2],
+  },
+  PER_BEAT_SHAPES[1],
+  {
+    id: 'PermuationOptionsDoubleGapSingleBeat',
+    name: 'Double, gap, single (per beat)',
+    notes: [0, 1, 3],
+  },
+  {
+    id: 'PermuationOptionsDouble2GapsSingleBeat',
+    name: 'Double, 2 gaps, single (per beat)',
+    notes: [0, 1, 4],
+  },
+  PER_BEAT_SHAPES[2],
+  {
+    id: 'PermuationOptionsTripleGapSingleBeat',
+    name: 'Triple, gap, single (per beat)',
+    notes: [0, 1, 2, 4],
+  },
+  { id: 'PermuationOptionsQuadsBeat', name: 'Quads (per beat)', notes: [0, 1, 2, 3] },
+  { id: 'PermuationOptionsFivesBeat', name: 'Fives (per beat)', notes: [0, 1, 2, 3, 4] },
+  {
+    id: 'PermuationOptionsSixesBeat',
+    name: 'All six (per beat)',
+    notes: [0, 1, 2, 3, 4, 5],
+    once: true,
+  },
+];
+
+function perBeatGroups(slots, unit, notesPerBeat, shapes) {
   var beat = notesPerBeat * unit;
   var labels = [];
   for (var l = 1; l <= notesPerBeat; l++) labels.push(String(l));
@@ -59,19 +104,15 @@ function perBeatGroups(slots, unit, notesPerBeat) {
       });
     };
   };
-  return [
-    { id: 'PermuationOptionsSinglesBeat', name: 'Singles (per beat)', length: 1 },
-    { id: 'PermuationOptionsDoublesBeat', name: 'Doubles (per beat)', length: 2 },
-    { id: 'PermuationOptionsTriplesBeat', name: 'Triples (per beat)', length: 3 },
-  ].map(function (spec) {
+  return (shapes || PER_BEAT_SHAPES).map(function (spec) {
+    var starts = spec.once ? [0] : labels.map((label, start) => start);
     return {
       id: spec.id,
       name: spec.name,
       defaultOn: false,
-      subLabels: labels,
-      figures: labels.map(function (label, start) {
-        var notes = [];
-        for (var n = 0; n < spec.length; n++) notes.push(start + n);
+      subLabels: spec.once ? [] : labels,
+      figures: starts.map(function (start) {
+        var notes = spec.notes.map((note) => start + note);
         return { hits: hitsArray(slots, inBeat(notes)) };
       }),
     };
@@ -186,53 +227,73 @@ function tripletLayout(mode, unit, labels, every2Labels, every4Labels) {
   };
   var positions = [0, 1, 2];
 
-  // 1/16 triplets only: the per-beat figures on all 6 notes of the beat
-  var perBeat = mode == 'triplets16' ? perBeatGroups(slots, unit, 6) : [];
-
-  return {
+  var ostinato = {
+    id: 'PermuationOptionsOstinato',
+    name: 'Ostinato',
+    defaultOn: false,
+    subLabels: [],
+    figures: [figure(() => false)],
+  };
+  var singles = {
+    id: 'PermuationOptionsSingles',
+    name: 'Singles',
+    defaultOn: true,
+    subLabels: labels,
+    figures: positions.map((p) => figure(at(p))),
+  };
+  var doubles = {
+    id: 'PermuationOptionsDoubles',
+    name: 'Doubles',
+    defaultOn: true,
+    subLabels: labels,
+    figures: positions.map((p) => figure(any([p, p + 1]))),
+  };
+  var crossRhythms = [
+    {
+      id: 'PermuationOptionsEvery2nd',
+      name: 'Cross-rhythm: every 2nd note',
+      defaultOn: true,
+      subLabels: every2Labels,
+      figures: [0, 1].map((start) => figure(everyNth(2, start))),
+    },
+    {
+      id: 'PermuationOptionsEvery4th',
+      name: 'Cross-rhythm: every 4th note',
+      defaultOn: true,
+      subLabels: every4Labels,
+      figures: [0, 1, 2, 3].map((start) => figure(everyNth(4, start))),
+    },
+  ];
+  var layout = {
     mode: mode,
     slots: slots,
     unit: unit,
     simplifyAllowed: false,
-    groups: [
-      {
-        id: 'PermuationOptionsOstinato',
-        name: 'Ostinato',
-        defaultOn: false,
-        subLabels: [],
-        figures: [figure(() => false)],
-      },
-      {
-        id: 'PermuationOptionsSingles',
-        name: 'Singles',
-        defaultOn: true,
-        subLabels: labels,
-        figures: positions.map((p) => figure(at(p))),
-      },
-      {
-        id: 'PermuationOptionsDoubles',
-        name: 'Doubles',
-        defaultOn: true,
-        subLabels: labels,
-        figures: positions.map((p) => figure(any([p, p + 1]))),
-      },
-      ...perBeat,
-      {
-        id: 'PermuationOptionsEvery2nd',
-        name: 'Cross-rhythm: every 2nd note',
-        defaultOn: true,
-        subLabels: every2Labels,
-        figures: [0, 1].map((start) => figure(everyNth(2, start))),
-      },
-      {
-        id: 'PermuationOptionsEvery4th',
-        name: 'Cross-rhythm: every 4th note',
-        defaultOn: true,
-        subLabels: every4Labels,
-        figures: [0, 1, 2, 3].map((start) => figure(everyNth(4, start))),
-      },
-    ],
+    groups: [ostinato, singles, doubles].concat(crossRhythms),
   };
+  if (mode == 'triplets16') {
+    // the figures over a whole beat (all 6 notes) first, then the ones that
+    // repeat inside the beat: twice (Singles, Doubles), three times (every 2nd note)
+    singles.name = 'Singles (twice a beat)';
+    doubles.name = 'Doubles (twice a beat)';
+    layout.groups = [ostinato]
+      .concat(perBeatGroups(slots, unit, 6, SEXTUPLET_SHAPES), [singles, doubles])
+      .concat(crossRhythms);
+    // links from before October 2026 have ticks for these groups, in this order
+    layout.groupsInOlderLinks = [
+      ostinato.id,
+      singles.id,
+      doubles.id,
+      'PermuationOptionsSinglesBeat',
+      'PermuationOptionsDoublesBeat',
+      'PermuationOptionsTriplesBeat',
+    ].concat(
+      crossRhythms.map(function (group) {
+        return group.id;
+      })
+    );
+  }
+  return layout;
 }
 
 /**

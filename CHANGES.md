@@ -11,6 +11,19 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — Every 1/16 triplet figure in the permutations
+
+- In 1/16 triplets the permutation has every rhythm of hits on the 6 notes of a
+  beat. New whole-beat figures, each on all 6 starting notes: **Single, gap,
+  single**, **Double, gap, single**, **Double, 2 gaps, single** (which also gives
+  single, gap, double), **Triple, gap, single**, **Quads**, **Fives** and **All
+  six**. The list now runs from the whole-beat figures, a hit more at a time
+  (each core figure followed by its "+ single" forms), to the ones that repeat
+  inside the beat: **Singles / Doubles (twice a beat)**, then the cross-rhythms.
+  The new figures start unticked, so a run with the menu's own ticks plays as
+  before, and links made before keep their ticks (`js/permutations.js`,
+  `js/groove_writer.js`, `gscribe_help.html`).
+
 ## 2026-10-21 — "Practise bars" follows as you type
 
 - The permutation's **Practise bars** box takes effect as you type (once typing
