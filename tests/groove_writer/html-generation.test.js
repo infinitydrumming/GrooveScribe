@@ -379,6 +379,7 @@ describe('HTMLforPermutationOptions', () => {
       // 8th notes / off-beat 16ths (formerly "Downbeats/Upbeats") come straight
       // after Singles
       expect(groupIds).toEqual([
+        'PermuationOptionsFatBack',
         'PermuationOptionsSkipSomeFirstNotes',
         'PermuationOptionsOstinato',
         'PermuationOptionsSingles',
@@ -389,6 +390,12 @@ describe('HTMLforPermutationOptions', () => {
       ]);
 
       expect(html).toContain('>Simplify multiple kicks</label>');
+      // "Fat back" (Infinity Drumming, 2026): off at first, with its own handler
+      expect(html).toContain('>Fat back (no kicks on the backbeat)</label>');
+      expect(html).toContain(
+        'id="PermuationOptionsFatBack" onClick="myGrooveWriter.permutationFatBackClick(event)"'
+      );
+      expect(html).not.toMatch(/checked type="checkbox"[^>]*id="PermuationOptionsFatBack"/);
       expect(html).toContain('>8th notes / Off-beat 16ths</label>');
       expect(html).toMatch(/<select id="PermutationRepeat"[^>]*>/);
       expect(html).toContain('<option value="1" selected>\u00d71</option>');
@@ -415,6 +422,7 @@ describe('HTMLforPermutationOptions', () => {
       const html = gw.HTMLforPermutationOptions();
       const groupIds = permutationGroupIds(html);
       expect(groupIds).toEqual([
+        'PermuationOptionsFatBack',
         'PermuationOptionsOstinato',
         'PermuationOptionsSinglesBeat',
         'PermuationOptionsSingleGapSingleBeat',
@@ -460,6 +468,7 @@ describe('HTMLforPermutationOptions', () => {
       ]);
       expect(html).toContain('>Use Accent Grid</label>');
       expect(html).not.toContain('Simplify multiple kicks');
+      expect(html).not.toContain('Fat back');
     });
   });
 

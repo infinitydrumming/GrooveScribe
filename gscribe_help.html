@@ -1,4 +1,4 @@
-<!--Modified by Infinity Drumming, 2026: Brazilian swing, straight and swung bars, speed-up target tempo, cursor timing, flams / drags / ruffs, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting, Save &amp; Share, My Grooves, student view, tap a menu's button again to close it, the Articulations button, more metronome clicks, diddles, notes beat by beat, triplets in x/8 time, the 32nd-note count, swing in Mixed, tom rim clicks, practising some bars of a permutation, sending an exercise with its practice settings and instructions, every 1/16 triplet figure, the 16th-triplet and 32nd-note counts, the counting choices, a copy of a bar right after it, copy and paste between windows.  See CHANGES.md -->
+<!--Modified by Infinity Drumming, 2026: Brazilian swing, straight and swung bars, speed-up target tempo, cursor timing, flams / drags / ruffs, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting, Save &amp; Share, My Grooves, student view, tap a menu's button again to close it, the Articulations button, more metronome clicks, diddles, notes beat by beat, triplets in x/8 time, the 32nd-note count, swing in Mixed, tom rim clicks, practising some bars of a permutation, sending an exercise with its practice settings and instructions, every 1/16 triplet figure, the 16th-triplet and 32nd-note counts, the counting choices, a copy of a bar right after it, copy and paste between windows, fat back kick permutations, the permutations help shown.  See CHANGES.md -->
 <link rel="icon" type="image/png" sizes="32x32" href="images/iscribe-icon-32.png">
 <link rel="icon" type="image/png" sizes="96x96" href="images/iscribe-icon-96.png">
 <link rel="icon" type="image/png" sizes="192x192" href="images/iscribe-icon-192.png">
@@ -155,14 +155,22 @@ and the "a" a little early, so the beat feels long-short-short-long: <b>1 - e &a
 settings exaggerate it. In grooves written in 8th notes the same feel is spread over each pair of beats.
 The setting is saved in the groove's link. The sheet music stays straight, as Brazilian music is normally written. <br>
 
-<!--
 <h3>Permutations</h3>
 
-A permutation for drumming is a method for playing all the possible combinations of given instrument for a note division.   
-The Groove Scribe can generate two types of permutations:  Kick drum and snare drum permutations in 1/16th notes.    
+A permutation for drumming is a method for playing all the possible combinations of given instrument for a note division.
+Choose one in the <b>Permutations</b> menu (in 4/4 time): the kick, the snare, or kick and snare alternating (kick lead or
+snare lead), in the groove's note setting. <b>Play each</b> plays every figure that many times before the next one.
 <p>
-If there are multiple measures present, all but the first will be closed when a permutation is activated.   
-You can use the "Undo" action in the help menu to restore the measures that were closed if necessary.
+If there are multiple measures present, all but the first will be closed when a permutation is activated.
+You can use Undo to restore the measures that were closed if necessary.
+<p>
+<b>Fat back</b>: tick it in a kick permutation's options and every figure leaves the backbeat to the snare: there is no kick
+wherever the groove's snare plays (normally 2 and 4), only the kicks around it. Ghost notes don't count, so kicks under them stay.
+The headings over the figures say "fat back", and it is saved in the link with the other practice settings.
+<p>
+<b>Simplify multiple kicks</b> (kick permutations in 1/16 notes): the kick on the "1" and the "1 e" is skipped when it
+directly follows a kick on the "4 a" of the bar before, so the figures flow when the whole run is played through.
+<b>Use Accent Grid</b> (snare permutations) accents the figure and plays ghost notes on the other notes of the grid.
 <p>
 <b>Practising some bars</b>: the bars of a permutation are numbered in the music. Type the ones to practise in
 <b>Practise bars</b>: one bar (<b>5</b>), a run of bars (<b>3-6</b>) or a list (<b>2, 5, 9-10</b>). Only those bars play
@@ -175,6 +183,7 @@ Double, gap, single; Double, 2 gaps, single (started on note 3 or 5 it is single
 Triple, gap, single; Quads; Fives; All six. Then the ones that repeat inside the beat: Singles and Doubles twice a beat,
 every 2nd note, and the every-4th-note cross-rhythm. The whole-beat figures start unticked: tick a group, or single figures,
 to add them.
+<!-- (the original Groove Scribe notes on the options)
 <p>
 <b>Permutation Options</b>
 <ul>

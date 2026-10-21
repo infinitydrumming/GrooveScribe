@@ -184,6 +184,35 @@ describe('an exercise in its link', () => {
     expect(window.location.search).not.toContain('Count=');
   });
 
+  it('plays the kick figures fat back when the link says so, as a setting of its own', () => {
+    const FAT_BACK =
+      '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&Perm=kick_16ths&PermSet=001111111111111111111' +
+      '&FatBack=1&H=|x-x-x-x-x-x-x-x-|&S=|----O-------O---|&K=|o-------o-------|';
+    const link = () => gw.myGrooveUtils.getUrlStringFromGrooveData(gw.grooveDataFromClickableUI());
+    const abc = () => document.getElementById('ABCsource').value;
+    // the kicks of the first figure, Singles on "1"
+    const kicksOn1 = () =>
+      abc().split('% Singles on "1"')[1].split('%%voicemap drum\n')[1].split('\n')[0].split('F')
+        .length - 1;
+    gw.loadNewGroove(FAT_BACK);
+    const box = document.getElementById('PermuationOptionsFatBack');
+    expect(box.checked).toBe(true);
+    expect(kicksOn1()).toBe(2); // on 1 and 3: the snare plays 2 and 4 alone
+    expect(abc()).toContain('P: Singles   (fat back)');
+    expect(link()).toContain('&PermSet=001111111111111111111&FatBack=1');
+
+    box.checked = false;
+    gw.permutationFatBackClick({ target: box });
+    expect(kicksOn1()).toBe(4);
+    expect(link()).toContain('&PermSet=001111111111111111111');
+    expect(link()).not.toContain('FatBack');
+
+    // a snare permutation has no fat back
+    gw.loadNewGroove(FAT_BACK.replace('kick_16ths', 'snare_16ths'));
+    expect(document.getElementById('PermuationOptionsFatBack')).toBeNull();
+    expect(link()).not.toContain('FatBack');
+  });
+
   it('keeps the ticks of a 1/16 triplet link from before the per-beat figures were filled out', () => {
     const ticked = () =>
       [...document.querySelectorAll('#PermutationOptions input[type="checkbox"]')]
