@@ -189,6 +189,13 @@ describe('GrooveUtils metronome & state helpers', () => {
       expect(actual).toEqual(expected);
     });
 
+    it('labels a 24/4/4 (16th-note triplet) measure as 1,a,li,&,a,la groups per beat', () => {
+      const beat = (n) => [n, 'a', 'li', '&', 'a', 'la'];
+      const expected = [...beat(1), ...beat(2), ...beat(3), ...beat(4)];
+      const actual = expected.map((_, i) => gu.figure_out_sticking_count_for_index(i, 24, 24, 4));
+      expect(actual).toEqual(expected);
+    });
+
     it('wraps the note index using notes_per_measure (index % notes_per_measure)', () => {
       // index 16 in a 16-note measure wraps back to note_index 0 -> count "1"
       expect(gu.figure_out_sticking_count_for_index(16, 16, 16, 4)).toBe(1);

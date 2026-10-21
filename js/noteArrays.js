@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, crash and ride tabs, bar scaling for paste, tom ghosts and accents, ride accent, ornament (flam / drag / ruff) tab lines, bars of different lengths, 32nd-note counting, diddle lines, counting in x/8 triplets and beat by beat. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, crash and ride tabs, bar scaling for paste, tom ghosts and accents, ride accent, ornament (flam / drag / ruff) tab lines, bars of different lengths, 32nd-note and 16th-triplet counting, diddle lines, counting in x/8 triplets and beat by beat. See CHANGES.md.
 // Note-array / drum-tab conversions and default grooves (Step 2 extraction).
 // Pure module: converts between tab strings and ABC note arrays, builds default
 // grooves, and note-mapping/sticking-count helpers. GrooveUtils delegates here.
@@ -596,6 +596,8 @@ export function create_note_mapping_array_for_highlighting(
 
 // The count of each 32nd note after the beat's number (Infinity Drumming, 2026).
 var COUNT_32NDS = [null, 'ah', 'lee', 'bee', '&', 'ah', 'lah', 'bah'];
+// ... and of each 16th triplet (Infinity Drumming, 2026).
+var COUNT_16TH_TRIPLETS = [null, 'a', 'li', '&', 'a', 'la'];
 
 export function figure_out_sticking_count_for_index(
   index,
@@ -629,11 +631,8 @@ export function figure_out_sticking_count_for_index(
       else if (note_index % 3 == 1) new_state = '&';
       else new_state = 'a';
       break;
-    case 24: // 16th triplets
-      if (note_index % 3 === 0)
-        new_state = Math.floor(note_index / 6) + 1; // 1,2,3,4,5, etc.
-      else if (note_index % 3 == 1) new_state = '&';
-      else new_state = 'a';
+    case 24: // 16th triplets: "1 a li & a la", short for "1 ah lee & ah la" (Infinity Drumming, 2026)
+      new_state = COUNT_16TH_TRIPLETS[note_index % 6] || Math.floor(note_index / 6) + 1;
       break;
     case 48: // 32nd triplets
       if (note_index % 3 === 0)

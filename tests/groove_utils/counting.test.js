@@ -68,7 +68,75 @@ describe('counting over the notes', () => {
     expect(abc).not.toContain('"^Straight"');
   });
 
+  // Infinity Drumming, 2026: the counting choices
+  describe('rhythm in bold', () => {
+    // a 16ths groove: hi-hat 8ths, snare on 2 and 4 with a ghost note on the "a" of 2,
+    // kick on 1, the & of 2, the & of 3 and the e of 4
+    const bold =
+      '?TimeSig=4/4&Div=16&Measures=1&Count=bold&H=|x-x-x-x-x-x-x-x-|&S=|----O--g----O---|&K=|o-----o---o--o--|';
+
+    it('writes the kick, snare and toms in bold, the hi-hat and ghost notes small', () => {
+      expect(counts(bold).join(' ')).toBe(
+        '$11 $2e $2& $2a $12 $2e $1& $2a $23 $2e $1& $2a $14 $1e $2& $2a'
+      );
+      expect(gu.createABCFromGrooveData(gu.getGrooveDataFromUrlString(bold), 800)).toContain(
+        '%%setfont-1 calibriBold 16'
+      );
+    });
+
+    it('writes an accent in bold on any line', () => {
+      const accents =
+        '?TimeSig=4/4&Div=8&Measures=1&Count=bold&H=|X-x-X-x-|&S=|--------|&K=|--------|';
+      expect(counts(accents).join(' ')).toBe('$11 $2& $22 $2& $13 $2& $24 $2&');
+    });
+  });
+
+  it('rhythm only: counts where something plays, the beats always, in brackets when silent', () => {
+    expect(
+      counts(
+        '?TimeSig=4/4&Div=16&Measures=1&Count=rhythm&H=|x---x-------x---|&S=|----O-------O---|&K=|o------o--o-----|'
+      ).join(' ')
+    ).toBe('1 2 a (3) & 4');
+  });
+
+  describe("the click's count", () => {
+    const straight = '?TimeSig=4/4&Div=16&Measures=1&Count=click&H=|x-x-x-x-x-x-x-x-|';
+
+    it('counts what the click plays, in its own subdivision', () => {
+      expect(counts(straight + '&MetronomeFreq=8').join(' ')).toBe('1 & 2 & 3 & 4 &');
+      expect(counts(straight + '&MetronomeFreq=12').join(' ')).toBe('1 & a 2 & a 3 & a 4 & a');
+      expect(counts(straight + '&MetronomeFreq=8s').join(' ')).toBe('1 a 2 a 3 a 4 a');
+      expect(
+        counts(straight + '&MetronomeFreq=16s')
+          .slice(0, 4)
+          .join(' ')
+      ).toBe('1 li & la');
+      expect(counts(straight + '&MetronomeFreq=4&ClickStart=AND').join(' ')).toBe('& & & &');
+      expect(counts(straight).join(' ')).toBe('1 2 3 4'); // the click off: the beats
+      expect(
+        counts('?TimeSig=6/8&Div=8&Measures=1&Count=click&MetronomeFreq=4d&H=|xxxxxx|').join(' ')
+      ).toBe('1 4');
+    });
+
+    it("writes it as the click's own triplets, with no tuplet number over them", () => {
+      const abc = gu.createABCFromGrooveData(
+        gu.getGrooveDataFromUrlString(straight + '&MetronomeFreq=12'),
+        800
+      );
+      expect(abc).toContain('V:Stickings\n%%tuplets 1 0 0\n(3:2:3"1"x4"&"x4"a"x4 ');
+      expect(abc).toContain('%%tuplets 0 0 0\nV:Hands');
+    });
+  });
+
   it('is saved in the link', () => {
+    for (const mode of ['bold', 'rhythm', 'click']) {
+      const gd = gu.getGrooveDataFromUrlString(groove + '&Count=' + mode);
+      expect([gd.showCounts, gd.countMode]).toEqual([true, mode]);
+      expect(gu.getUrlStringFromGrooveData(gd)).toContain('&Count=' + mode);
+    }
+  });
+
+  it('is saved in the link (every note)', () => {
     const gd = gu.getGrooveDataFromUrlString(groove + '&Count=1');
     expect(gd.showCounts).toBe(true);
     expect(gu.getUrlStringFromGrooveData(gd)).toContain('&Count=1');

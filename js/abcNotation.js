@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -19,6 +19,7 @@ import {
 } from './musicMath.js';
 import { barSig, fullSizeBar, isMixedMeter } from './barMeters.js';
 import { hasBeatNotes, makeBeatPlan } from './beatNotes.js';
+import { clickCountBar, clickTicks, COUNT_FONTS, styleCounts } from './countModes.js';
 
 /**
  * The beat plan (see beatNotes.js) of bars fromBar..toBar-1 of a groove in the
@@ -935,6 +936,8 @@ export function get_top_ABC_BoilerPlate(
   //fullABC += "%%staves (Stickings Hands)\n";
   //else
   fullABC += '%%staves (Stickings Hands Feet)\n';
+  // the bold count's fonts (Infinity Drumming, 2026)
+  if (gu.showCounts && gu.countMode == 'bold') fullABC += COUNT_FONTS;
 
   // print comments below the legend if there is one, otherwise in the header section
   if (tuneComments !== '') {
@@ -1063,17 +1066,27 @@ export function create_ABC_from_snare_HH_kick_arrays(
   timeSigBottom,
   beatPlan
 ) {
-  if (gu.showCounts) {
-    if (beatPlan) addPlanCounting(sticking_array, beatPlan, notes_per_measure);
-    else addCounting(sticking_array, time_division, timeSigTop, timeSigBottom);
-  }
-
-  // diddled notes end at their grid note (the rests go in with the toms' lines)
   var tripletBar = isTripletDivisionFromNotesPerMeasure(
     notes_per_measure,
     timeSigTop,
     timeSigBottom
   );
+
+  // the count (see countModes.js): over the grid's notes, or the click's own
+  var count = prepareCount(
+    gu,
+    sticking_array,
+    [HH_array, snare_array, kick_array, toms_array],
+    time_division,
+    notes_per_measure,
+    timeSigTop,
+    timeSigBottom,
+    beatPlan,
+    tripletBar
+  );
+  sticking_array = count.sticking_array;
+
+  // diddled notes end at their grid note (the rests go in with the toms' lines)
   var stops = diddleStops(
     [HH_array, snare_array, kick_array].concat(toms_array || []),
     num_notes,
@@ -1096,6 +1109,8 @@ export function create_ABC_from_snare_HH_kick_arrays(
       timeSigTop,
       timeSigBottom
     );
+  if (count.slots.length)
+    styleCounts(sticking_array, count.slots, count.mode, count.lines, gu.countRhythmLines || null);
 
   var numberOfMeasuresPerLine = 2; // Default
 
@@ -1104,8 +1119,9 @@ export function create_ABC_from_snare_HH_kick_arrays(
     numberOfMeasuresPerLine = 1;
   }
 
+  var abc;
   if (isTripletDivisionFromNotesPerMeasure(notes_per_measure, timeSigTop, timeSigBottom)) {
-    return snare_HH_kick_ABC_for_triplets(
+    abc = snare_HH_kick_ABC_for_triplets(
       sticking_array,
       HH_array,
       snare_array,
@@ -1122,7 +1138,7 @@ export function create_ABC_from_snare_HH_kick_arrays(
       beatPlan
     );
   } else {
-    return snare_HH_kick_ABC_for_quads(
+    abc = snare_HH_kick_ABC_for_quads(
       sticking_array,
       HH_array,
       snare_array,
@@ -1138,6 +1154,78 @@ export function create_ABC_from_snare_HH_kick_arrays(
       numberOfMeasuresPerLine
     );
   }
+  if (count.clickBar)
+    abc = withStickingsVoice(
+      abc,
+      count.clickBar,
+      num_notes / notes_per_measure,
+      numberOfMeasuresPerLine,
+      post_voice_abc
+    );
+  return abc;
+}
+
+// Infinity Drumming, 2026: what create_ABC_from_snare_HH_kick_arrays counts (see
+// countModes.js): the click's count as a bar of the stickings voice, or the
+// sticking array (a copy) with the counts in it, the slots whose counts a mode
+// styles and the lines they follow.
+function prepareCount(
+  gu,
+  sticking_array,
+  drums,
+  time_division,
+  notes_per_measure,
+  timeSigTop,
+  timeSigBottom,
+  beatPlan,
+  tripletBar
+) {
+  var toms = drums[3] || [];
+  var count = {
+    mode: gu.showCounts ? gu.countMode || 'all' : '',
+    sticking_array: sticking_array,
+    clickBar: null,
+    slots: [],
+    lines: {
+      hh: drums[0],
+      snare: drums[1],
+      kick: drums[2],
+      toms: toms.slice(0, constant_NUMBER_OF_TOMS),
+      cymbals: toms.slice(constant_NUMBER_OF_TOMS),
+    },
+  };
+  if (count.mode == 'click') {
+    var click = gu.countClick || {};
+    count.clickBar = clickCountBar(
+      clickTicks(click.frequency, click.start, timeSigTop, timeSigBottom, tripletBar),
+      timeSigTop,
+      timeSigBottom
+    );
+  }
+  if (!count.mode || count.clickBar) return count;
+  var counted = sticking_array.slice(); // (each call counts its own notes)
+  if (beatPlan) addPlanCounting(counted, beatPlan, notes_per_measure);
+  else addCounting(counted, time_division, timeSigTop, timeSigBottom);
+  count.sticking_array = counted;
+  if (count.mode == 'bold' || count.mode == 'rhythm')
+    counted.forEach(function (sticking, slot) {
+      if (sticking == constant_ABC_STICK_COUNT) count.slots.push(slot);
+    });
+  return count;
+}
+
+// The ABC of create_ABC_from_snare_HH_kick_arrays with its stickings voice (the
+// first) made of `bar` in every bar: the click's count (Infinity Drumming, 2026).
+function withStickingsVoice(abc, bar, bars, barsPerLine, post_voice_abc) {
+  var hands = abc.indexOf('V:Hands');
+  if (abc.indexOf('V:Stickings\n') !== 0 || hands < 0) return abc;
+  // (its triplets and sextuplets are the click's, not the notes': no "3" over them)
+  var voice = 'V:Stickings\n%%tuplets 1 0 0\n';
+  for (var b = 0; b < bars; b++) {
+    voice += bar + '|';
+    if (b < bars - 1 && (b + 1) % barsPerLine === 0) voice += '\n';
+  }
+  return voice + post_voice_abc + '%%tuplets 0 0 0\n' + abc.slice(hands);
 }
 
 /**
@@ -1192,13 +1280,20 @@ export function addFeelMarking(measureABC, text) {
  * @returns {string}
  */
 export function createABCFromGrooveData(gu, myGrooveData, renderWidth) {
-  // counting over the notes, when this groove asks for it
-  var showCounts = gu.showCounts;
+  // counting over the notes, when this groove asks for it, and how
+  var saved = { showCounts: gu.showCounts, countMode: gu.countMode, countClick: gu.countClick };
   gu.showCounts = !!myGrooveData.showCounts;
+  gu.countMode = myGrooveData.countMode || 'all';
+  gu.countClick = {
+    frequency: myGrooveData.metronomeFrequency,
+    start: (myGrooveData.practice && myGrooveData.practice.clickStart) || '1',
+  };
   try {
     return grooveDataABC(gu, myGrooveData, renderWidth);
   } finally {
-    gu.showCounts = showCounts;
+    gu.showCounts = saved.showCounts;
+    gu.countMode = saved.countMode;
+    gu.countClick = saved.countClick;
   }
 }
 

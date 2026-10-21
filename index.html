@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button, more metronome clicks, diddles, beat-by-beat notes.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, the Count menu, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button, more metronome clicks, diddles, beat-by-beat notes.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
@@ -31,69 +31,70 @@
 		<script type="importmap">
 		{
 			"imports": {
-				"./js/abcNotation.js": "./js/abcNotation.js?v=20261021-1126",
-				"./js/audioSession.js": "./js/audioSession.js?v=20261021-1126",
-				"./js/barMeters.js": "./js/barMeters.js?v=20261021-1126",
-				"./js/beatNotes.js": "./js/beatNotes.js?v=20261021-1126",
-				"./js/browserInfo.js": "./js/browserInfo.js?v=20261021-1126",
-				"./js/constants.js": "./js/constants.js?v=20261021-1126",
-				"./js/gridState.js": "./js/gridState.js?v=20261021-1126",
-				"./js/grooveData.js": "./js/grooveData.js?v=20261021-1126",
-				"./js/groove_utils.js": "./js/groove_utils.js?v=20261021-1126",
-				"./js/groove_writer.js": "./js/groove_writer.js?v=20261021-1126",
-				"./js/grooves.js": "./js/grooves.js?v=20261021-1126",
-				"./js/metronome.js": "./js/metronome.js?v=20261021-1126",
-				"./js/midiFile.js": "./js/midiFile.js?v=20261021-1126",
-				"./js/musicMath.js": "./js/musicMath.js?v=20261021-1126",
-				"./js/myGrooves.js": "./js/myGrooves.js?v=20261021-1126",
-				"./js/noteArrays.js": "./js/noteArrays.js?v=20261021-1126",
-				"./js/ornaments.js": "./js/ornaments.js?v=20261021-1126",
-				"./js/permutations.js": "./js/permutations.js?v=20261021-1126",
-				"./js/practiceSettings.js": "./js/practiceSettings.js?v=20261021-1126",
-				"./js/practiceTimer.js": "./js/practiceTimer.js?v=20261021-1126",
-				"./js/screenWakeLock.js": "./js/screenWakeLock.js?v=20261021-1126",
-				"./js/updateCheck.js": "./js/updateCheck.js?v=20261021-1126",
-				"./js/urlSerialization.js": "./js/urlSerialization.js?v=20261021-1126",
-				"./js/viewHtml.js": "./js/viewHtml.js?v=20261021-1126"
+				"./js/abcNotation.js": "./js/abcNotation.js?v=20261021-1220",
+				"./js/audioSession.js": "./js/audioSession.js?v=20261021-1220",
+				"./js/barMeters.js": "./js/barMeters.js?v=20261021-1220",
+				"./js/beatNotes.js": "./js/beatNotes.js?v=20261021-1220",
+				"./js/browserInfo.js": "./js/browserInfo.js?v=20261021-1220",
+				"./js/constants.js": "./js/constants.js?v=20261021-1220",
+				"./js/countModes.js": "./js/countModes.js?v=20261021-1220",
+				"./js/gridState.js": "./js/gridState.js?v=20261021-1220",
+				"./js/grooveData.js": "./js/grooveData.js?v=20261021-1220",
+				"./js/groove_utils.js": "./js/groove_utils.js?v=20261021-1220",
+				"./js/groove_writer.js": "./js/groove_writer.js?v=20261021-1220",
+				"./js/grooves.js": "./js/grooves.js?v=20261021-1220",
+				"./js/metronome.js": "./js/metronome.js?v=20261021-1220",
+				"./js/midiFile.js": "./js/midiFile.js?v=20261021-1220",
+				"./js/musicMath.js": "./js/musicMath.js?v=20261021-1220",
+				"./js/myGrooves.js": "./js/myGrooves.js?v=20261021-1220",
+				"./js/noteArrays.js": "./js/noteArrays.js?v=20261021-1220",
+				"./js/ornaments.js": "./js/ornaments.js?v=20261021-1220",
+				"./js/permutations.js": "./js/permutations.js?v=20261021-1220",
+				"./js/practiceSettings.js": "./js/practiceSettings.js?v=20261021-1220",
+				"./js/practiceTimer.js": "./js/practiceTimer.js?v=20261021-1220",
+				"./js/screenWakeLock.js": "./js/screenWakeLock.js?v=20261021-1220",
+				"./js/updateCheck.js": "./js/updateCheck.js?v=20261021-1220",
+				"./js/urlSerialization.js": "./js/urlSerialization.js?v=20261021-1220",
+				"./js/viewHtml.js": "./js/viewHtml.js?v=20261021-1220"
 			}
 		}
 		</script>
 
-		<link rel="stylesheet" type="text/css" href="font-awesome/4.7.0/css/font-awesome.min.css?v=20261021-1126">
-		<link rel="stylesheet" type="text/css" href="css/share-button.min.css?v=20261021-1126">
-	    <link rel="stylesheet" type="text/css" href="css/groove_writer_orange.css?v=20261021-1126">
-		<link rel="stylesheet" type="text/css" href="css/groove_display_orange.css?v=20261021-1126">
-		<link rel="stylesheet" type="text/css" href="css/infinity_theme.css?v=20261021-1126">
-		<link rel="stylesheet" type="text/css" href="css/infinity_layout.css?v=20261021-1126">
+		<link rel="stylesheet" type="text/css" href="font-awesome/4.7.0/css/font-awesome.min.css?v=20261021-1220">
+		<link rel="stylesheet" type="text/css" href="css/share-button.min.css?v=20261021-1220">
+	    <link rel="stylesheet" type="text/css" href="css/groove_writer_orange.css?v=20261021-1220">
+		<link rel="stylesheet" type="text/css" href="css/groove_display_orange.css?v=20261021-1220">
+		<link rel="stylesheet" type="text/css" href="css/infinity_theme.css?v=20261021-1220">
+		<link rel="stylesheet" type="text/css" href="css/infinity_layout.css?v=20261021-1220">
 		<link href='https://fonts.googleapis.com/css?family=Lato:400,700,300,900' rel='stylesheet' type='text/css'>
 
 		<!--   Other peoples JS libraries    -->
-		<!-- <script src="./MIDI.js/js/MIDI/MIDI.JS.min.js?v=20261021-1126" type="text/javascript"></script> -->
-		<script src="./MIDI.js/js/MIDI/AudioDetect.js?v=20261021-1126" type="text/javascript"></script>
-		<script src="./MIDI.js/js/MIDI/LoadPlugin.js?v=20261021-1126" type="text/javascript"></script>
-		<script src="./MIDI.js/js/MIDI/Plugin.js?v=20261021-1126" type="text/javascript"></script>
-		<script src="./MIDI.js/js/MIDI/Player.js?v=20261021-1126" type="text/javascript"></script>
-		<script src="./MIDI.js/inc/DOMLoader.XMLHttp.js?v=20261021-1126" type="text/javascript"></script>
-		<script src="./MIDI.js/inc/jasmid/stream.js?v=20261021-1126"></script>
-		<script src="./MIDI.js/inc/jasmid/midifile.js?v=20261021-1126"></script>
-		<script src="./MIDI.js/inc/jasmid/replayer.js?v=20261021-1126"></script>
-		<script src="./MIDI.js/inc/Base64.js?v=20261021-1126"></script>
-		<script src="./MIDI.js/inc/base64binary.js?v=20261021-1126"></script>
+		<!-- <script src="./MIDI.js/js/MIDI/MIDI.JS.min.js?v=20261021-1220" type="text/javascript"></script> -->
+		<script src="./MIDI.js/js/MIDI/AudioDetect.js?v=20261021-1220" type="text/javascript"></script>
+		<script src="./MIDI.js/js/MIDI/LoadPlugin.js?v=20261021-1220" type="text/javascript"></script>
+		<script src="./MIDI.js/js/MIDI/Plugin.js?v=20261021-1220" type="text/javascript"></script>
+		<script src="./MIDI.js/js/MIDI/Player.js?v=20261021-1220" type="text/javascript"></script>
+		<script src="./MIDI.js/inc/DOMLoader.XMLHttp.js?v=20261021-1220" type="text/javascript"></script>
+		<script src="./MIDI.js/inc/jasmid/stream.js?v=20261021-1220"></script>
+		<script src="./MIDI.js/inc/jasmid/midifile.js?v=20261021-1220"></script>
+		<script src="./MIDI.js/inc/jasmid/replayer.js?v=20261021-1220"></script>
+		<script src="./MIDI.js/inc/Base64.js?v=20261021-1220"></script>
+		<script src="./MIDI.js/inc/base64binary.js?v=20261021-1220"></script>
 
 		<!-- script to render ABC to an SVG image -->
-		<script type="text/javascript" src="./js/abc2svg-1.js?v=20261021-1126"></script>
+		<script type="text/javascript" src="./js/abc2svg-1.js?v=20261021-1220"></script>
 
 		<!-- script to convert SVG to PNGs for download -->
-		<script type="text/javascript" src="./js/pablo.min.js?v=20261021-1126"></script>
+		<script type="text/javascript" src="./js/pablo.min.js?v=20261021-1220"></script>
 
 		<!-- script for sharing to social sites -->
-		<script src="js/share-button.min.js?v=20261021-1126"></script>
+		<script src="js/share-button.min.js?v=20261021-1220"></script>
 
 
-		<!-- Minified version: <script src="./js/groove_writer.min.js?v=20261021-1126" type="text/javascript"></script> -->
+		<!-- Minified version: <script src="./js/groove_writer.min.js?v=20261021-1220" type="text/javascript"></script> -->
 
 		<!-- jsmidgen for generating a midi file -->
-		<script src="./js/jsmidgen.js?v=20261021-1126" type="text/javascript"></script>
+		<script src="./js/jsmidgen.js?v=20261021-1220" type="text/javascript"></script>
 		<!--   our custom JS is loaded as an ES module at the end of <body> (js/main.js).
 		       It creates window.myGrooveWriter, builds the dynamic DOM, and runs the
 		       page-load init. -->
@@ -151,7 +152,13 @@
 					</select></span>
 						<span class="metronomeButton Options grooveDB_hidden" id="metronomeOptionsAnchor" onclick="myGrooveWriter.metronomeOptionsAnchorClick(event);">Options</span>
 					</span>
-					<span class="toolbarToggle grooveDB_hidden" id="countingButton" onclick="myGrooveWriter.toggleCounting();" title="Show the counting (1 e &amp; a) over the notes"><span class="toolbarSwitch"></span> Counting</span>
+					<span class="phoneSelectWrap grooveDB_hidden" id="countSelectWrap" title="The counting (1 e &amp; a) over the notes"><select id="countSelect" aria-label="Counting" onchange="myGrooveWriter.setCountChoice(this.value);">
+						<option value="off">Count: off</option>
+						<option value="all" title="Every note of the note setting">Count: every note</option>
+						<option value="bold" title="Every note; the kick, snare, toms and accents in bold">Count: rhythm in bold</option>
+						<option value="rhythm" title="Only where something plays; the beats always, in brackets when silent">Count: rhythm only</option>
+						<option value="click" title="What the click plays">Count: the click</option>
+					</select></span>
 					<!-- Populated by js/main.js after load (was document.write). -->
 					<span id="viewEditSwitchSlot"></span>
 					<span id="advancedEditSlot"></span>
@@ -744,7 +751,7 @@
 
 
 		<!-- App entry point: ES module that boots the app and runs page-load init. -->
-		<script type="module" src="js/main.js?v=20261021-1126"></script>
+		<script type="module" src="js/main.js?v=20261021-1220"></script>
 
 
 	</div>

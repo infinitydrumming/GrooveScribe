@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets). See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -118,6 +118,7 @@ import { barSig, barNoteCount, barStride, isMixedMeter, divisionFitsBar } from '
 import { scaleTabMeasure } from './noteArrays.js';
 import { isTimedClick, parseMetronomeFrequency } from './metronome.js';
 import { MUTE_LINES, MAX_SPEED_UP_BARS } from './practiceSettings.js';
+import { COUNT_MODES } from './countModes.js';
 import {
   beatCharForDivision,
   beatChoices,
@@ -1534,6 +1535,7 @@ function GrooveWriter() {
     newFrequency = parseMetronomeFrequency(newFrequency);
     root.class_metronome_frequency = newFrequency;
     root.setMetronomeButton(newFrequency);
+    clickChangedForCount();
 
     // update the current URL so that reloads and history traversal and link shares and bookmarks work correctly
     root.updateCurrentURL();
@@ -1820,6 +1822,7 @@ function GrooveWriter() {
 
     root.myGrooveUtils.midiNoteHasChanged();
     root.metronomeOptionsMenuSetSelectedState();
+    clickChangedForCount();
     root.updateCurrentURL(); // part of the link
   };
 
@@ -2836,6 +2839,7 @@ function GrooveWriter() {
       : 0;
     myGrooveData.practiceLimit = practiceLimitToText(class_practice_limit);
     myGrooveData.showCounts = root.myGrooveUtils.showCounts;
+    myGrooveData.countMode = root.myGrooveUtils.countMode;
     myGrooveData.kickStemsUp = true;
     // an exercise: its practice settings and instructions
     myGrooveData.practice = currentPracticeSettings();
@@ -3164,6 +3168,19 @@ function GrooveWriter() {
     root.myGrooveUtils.isLegendVisable = showLegend;
 
     var fullABC = '';
+
+    // what the counting follows: the click, and in a permutation the permuted lines
+    root.myGrooveUtils.countClick = {
+      frequency: root.class_metronome_frequency,
+      start: root.myGrooveUtils.getMetronomeOffsetClickStart() || '1',
+    };
+    root.myGrooveUtils.countRhythmLines =
+      {
+        kick_16ths: ['kick'],
+        snare_16ths: ['snare'],
+        kick_snare_kick_lead: ['kick', 'snare'],
+        kick_snare_snare_lead: ['kick', 'snare'],
+      }[class_permutation_type] || null;
 
     switch (class_permutation_type) {
       case 'kick_16ths': // use the hh & snare from the user
@@ -4528,17 +4545,27 @@ function GrooveWriter() {
   };
 
   // --- Counting over the notes (Infinity Drumming, 2026) ---
-  function setCounting(on) {
+  // choice: 'off', or a count mode (see countModes.js)
+  function setCounting(choice) {
+    var on = COUNT_MODES.indexOf(choice) >= 0;
     root.myGrooveUtils.showCounts = on;
-    addOrRemoveKeywordFromClassById('countingButton', 'buttonSelected', on);
+    root.myGrooveUtils.countMode = on ? choice : 'all';
+    var select = /** @type {HTMLSelectElement | null} */ (document.getElementById('countSelect'));
+    if (select) select.value = on ? choice : 'off';
   }
 
-  // the COUNTING button: "1 e & a" over the notes in the sheet music, or not
-  root.toggleCounting = function () {
-    setCounting(!root.myGrooveUtils.showCounts);
+  // the Count menu: "1 e & a" over the notes in the sheet music (and how), or not
+  root.setCountChoice = function (choice) {
+    setCounting(choice);
     updateSheetMusic();
     root.updateCurrentURL(); // counting is part of the link
   };
+
+  // the click changed: the click's count follows it
+  function clickChangedForCount() {
+    if (root.myGrooveUtils.showCounts && root.myGrooveUtils.countMode == 'click')
+      updateSheetMusic();
+  }
 
   // --- Groove details in the header (Infinity Drumming, 2026) ---
   // The title, "by" the author and the comment, shown in the header; the pencil
@@ -6330,7 +6357,7 @@ function GrooveWriter() {
 
     setGrooveClickFromLink(myGrooveData.grooveClickGrooveBars, myGrooveData.grooveClickClickBars);
     setPracticeLimit(parsePracticeLimit(myGrooveData.practiceLimit), true);
-    setCounting(!!myGrooveData.showCounts);
+    setCounting(myGrooveData.showCounts ? myGrooveData.countMode || 'all' : 'off');
     applyPracticeSettings(myGrooveData.practice);
     setInstructionsFromLink(myGrooveData.instructions || '');
     root.setMetronomeFrequency(myGrooveData.metronomeFrequency);

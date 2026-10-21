@@ -640,7 +640,7 @@ body,
   #metronomeOptionsAnchor {
     order: 4;
   }
-  #countingButton {
+  #countSelectWrap {
     order: 5;
   }
   #viewEditSwitch {
@@ -1238,7 +1238,8 @@ body,
 }
 /* the Click menu replaces the metronome's row of buttons everywhere (it has more
    choices than fit); the Notes menu replaces the Notes buttons on phones */
-#clickSelectWrap {
+#clickSelectWrap,
+#countSelectWrap {
   display: inline-flex;
 }
 #metronomeLabel,

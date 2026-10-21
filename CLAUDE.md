@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                 |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1043 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                        |
-| `npm run test:e2e`     | Playwright golden-master — **95 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1073 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                        |
+| `npm run test:e2e`     | Playwright golden-master — **98 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                               |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~174 known errors baseline; changes should be typecheck-**neutral**                                                                      |
 | `npm run knip`         | no unused exports/files                                                                                                                                                     |
@@ -77,6 +77,9 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `practiceSettings.js` — an exercise's practice settings in its link (`Perm`/`PermSet`/`PlayEach`/`PermBars`,
   `SpeedUp`, `CountIn`, `ClickSolo`, `ClickStart`, `Mute`); only those that are on. Save & Share's
   "Include practice settings" box sets `grooveData.includePractice`; `Instructions` always travel.
+- `countModes.js` — the Count menu's choices (`Count=1|bold|rhythm|click`): the bold / small styling of
+  counts, rhythm-only counts with bracketed silent beats, and the click's own count as a hidden
+  stickings voice (its tuplets drawn without numbers).
 - `audioSession.js` — while a groove plays, `navigator.audioSession.type = 'playback'` so iPhones
   play it through the silent switch; `'auto'` again on pause/stop.
 - `gridState.js` — the DOM grid **read** layer: per-cell state (`is_*_on`/`get_*_state`)
