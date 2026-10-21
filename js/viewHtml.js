@@ -842,7 +842,8 @@ export function buildPermutationOptionsHTML(permutationType, layout, repeats, ba
     '<span id="PermutationBarsOption"><label for="PermutationBars">Practise bars</label> ' +
     '<input type="text" id="PermutationBars" inputmode="numeric" placeholder="all" value="' +
     String(barsText || '').replace(/[^0-9, -]/g, '') +
-    '" onchange="myGrooveWriter.permutationBarsChange(event)">' +
+    '" oninput="myGrooveWriter.permutationBarsInput(event)"' +
+    ' onchange="myGrooveWriter.permutationBarsChange(event)">' +
     ' <span id="PermutationBarsHint">e.g. 5, 3-6 or 2, 5, 9</span></span>\n';
 
   newHTML += '<span class="PermutationOptionWrapper">';

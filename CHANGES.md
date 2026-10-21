@@ -11,6 +11,13 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — "Practise bars" follows as you type
+
+- The permutation's **Practise bars** box takes effect as you type (once typing
+  pauses for a moment), so emptying it brings the whole run back without pressing
+  Enter; Enter or leaving the box still tidies it ("7-8,5" becomes "5, 7-8")
+  (`js/groove_writer.js`, `js/viewHtml.js`).
+
 ## 2026-10-21 — Practise just some bars of a permutation
 
 - A permutation's bars are numbered in the music, and **Practise bars** in the

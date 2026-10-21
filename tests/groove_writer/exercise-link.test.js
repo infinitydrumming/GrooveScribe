@@ -162,8 +162,11 @@ describe('an exercise in its link', () => {
     expect(box.value).toBe('5, 7-8');
     expect(numbers()).toEqual([7, 8]);
 
+    // emptied without Enter: the whole run comes back once typing pauses
     box.value = '';
-    gw.permutationBarsChange({ target: box });
+    gw.permutationBarsInput({ target: box });
+    expect(numbers()).toEqual([7, 8]); // not yet
+    vi.advanceTimersByTime(300);
     expect(numbers().slice(0, 3)).toEqual([2, 3, 4]); // the whole run again
     expect(window.location.search).not.toContain('PermBars');
   });
