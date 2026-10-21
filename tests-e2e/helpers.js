@@ -38,3 +38,34 @@ export function grooveData(page) {
     };
   });
 }
+
+// Infinity Drumming, 2026: what playing a permutation gives. Where the sheet
+// music's cursor and the grid's highlight are at points through the first
+// round, then the MIDI of the first rounds as playback loads them (a count-in
+// first if the groove has one, then each round reported complete).
+export function permutationPlayback(page) {
+  return page.evaluate(() => {
+    const gu = window.myGrooveWriter.myGrooveUtils;
+    const highlighted = () => {
+      const cell = [...document.querySelectorAll('[id^="bg-highlight"]')].find((el) =>
+        el.style.background.includes('50, 126, 173')
+      );
+      return cell ? cell.id : null;
+    };
+    const cursor = [];
+    for (let i = 0; i < 20; i++) {
+      const percent = i / 20 + 0.01;
+      const sheet = gu.percentForSheetMusic(percent);
+      gu.midiEventCallbacks.notePlaying(gu, 'hh', percent);
+      cursor.push([percent, Math.round(sheet * 1e6) / 1e6, highlighted()]);
+    }
+    const midi = [];
+    gu.loadMIDIFromURL = (url) => midi.push(url);
+    gu.midiEventCallbacks.loadMidiDataEvent(gu, true);
+    for (let round = 0; round < 3; round++) {
+      gu.midiEventCallbacks.notePlaying(gu, 'complete', 1);
+      gu.midiEventCallbacks.loadMidiDataEvent(gu, false);
+    }
+    return { cursor, midi };
+  });
+}

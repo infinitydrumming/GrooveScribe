@@ -1,0 +1,1631 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" color="black" width="9.22in" height="1.21in" viewBox="0 0 664 87">
+<title>abc2svg - 6.</title><style type="text/css">
+.fill {fill: currentColor}
+.stroke {stroke: currentColor; fill: none; stroke-width: .7}
+.f1_1 {font:italic 14px serif}
+.f2_1 {font:16px calibri}
+</style><defs>
+<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
+<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
+<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
+<g id="accent" class="stroke">
+	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
+</g>
+</defs><g transform="scale(0.75)"><text class="f2_1" x="38.50" y="39.34">Singles</text>
+<g transform="translate(0,71.70)">
+<text class="f1_1" x="399.09" y="-10.66">2</text>
+</g>
+<path class="stroke" d="m402.17 93.04v-24.00"></path>
+<path class="stroke" d="m885.33 93.04v-24.00"></path>
+<path class="stroke" d="m0.00 93.04
+h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33"></path>
+<use x="12.00" y="81.04" xlink:href="#pclef"></use>
+<g style="font:bold 16px serif" transform="translate(30.50,93.04) scale(1.2,1)">
+	<text y="-12" text-anchor="middle">4</text>
+	<text text-anchor="middle">4</text>
+</g>
+<path class="fill" d="m51.66 50.84
+l44.28 0.00v3.20l-44.28 0.00"></path>
+<path class="stroke" d="m52.00 90.04v-38.20"></path>
+<use x="48.50" y="90.04" xlink:href="#hd"></use>
+<use x="48.50" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_0" x="42.00" y="60.04" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m95.60 90.04v-38.20"></path>
+<use x="92.10" y="90.04" xlink:href="#hd"></use>
+<use x="92.10" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_1" x="85.60" y="60.04" width="13.00" height="42.00"></rect>
+<path class="fill" d="m143.71 50.84
+l44.28 0.00v3.20l-44.28 0.00"></path>
+<path class="stroke" d="m144.05 90.04v-38.20"></path>
+<use x="140.55" y="90.04" xlink:href="#hd"></use>
+<use x="140.55" y="78.04" xlink:href="#hd"></use>
+<use x="140.55" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_2" x="134.05" y="60.04" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m187.66 90.04v-38.20"></path>
+<use x="184.16" y="90.04" xlink:href="#hd"></use>
+<use x="184.16" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_3" x="177.66" y="60.04" width="13.00" height="42.00"></rect>
+<path class="fill" d="m235.76 50.84
+l44.28 0.00v3.20l-44.28 0.00"></path>
+<path class="stroke" d="m236.10 90.04v-38.20"></path>
+<use x="232.60" y="90.04" xlink:href="#hd"></use>
+<use x="232.60" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_4" x="226.10" y="60.04" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m279.71 90.04v-38.20"></path>
+<use x="276.21" y="90.04" xlink:href="#hd"></use>
+<use x="276.21" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_5" x="269.71" y="60.04" width="13.00" height="42.00"></rect>
+<path class="fill" d="m327.82 50.84
+l44.28 0.00v3.20l-44.28 0.00"></path>
+<path class="stroke" d="m328.16 90.04v-38.20"></path>
+<use x="324.66" y="90.04" xlink:href="#hd"></use>
+<use x="324.66" y="78.04" xlink:href="#hd"></use>
+<use x="324.66" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_6" x="318.16" y="60.04" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m371.76 90.04v-38.20"></path>
+<use x="368.26" y="90.04" xlink:href="#hd"></use>
+<use x="368.26" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_7" x="361.76" y="60.04" width="13.00" height="42.00"></rect>
+<path class="fill" d="m429.56 42.84
+l79.36 0.00v3.20l-79.36 0.00"></path>
+<path class="fill" d="m429.90 47.84
+l78.68 0.00v3.20l-78.68 0.00"></path>
+<path class="fill" d="m435.90 52.84
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m480.78 52.84
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m429.90 66.04v-22.20"></path>
+<use x="426.40" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_8" x="419.90" y="60.04" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m451.70 90.04v-46.20"></path>
+<use x="448.20" y="90.04" xlink:href="#hd"></use>
+<circle class="fill" cx="455.90" cy="90.04" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_9" x="441.70" y="60.04" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m486.78 66.04v-22.20"></path>
+<use x="483.28" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_10" x="476.78" y="60.04" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m508.58 90.04v-46.20"></path>
+<use x="505.08" y="90.04" xlink:href="#hd"></use>
+<circle class="fill" cx="512.78" cy="90.04" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_11" x="498.58" y="60.04" width="20.50" height="42.00"></rect>
+<path class="fill" d="m547.21 42.84
+l79.36 0.00v3.20l-79.36 0.00"></path>
+<path class="fill" d="m547.55 47.84
+l78.68 0.00v3.20l-78.68 0.00"></path>
+<path class="fill" d="m553.55 52.84
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m598.43 52.84
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m547.55 78.04v-34.20"></path>
+<use x="544.05" y="78.04" xlink:href="#hd"></use>
+<use x="544.05" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_12" x="537.55" y="60.04" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m569.36 90.04v-46.20"></path>
+<use x="565.86" y="90.04" xlink:href="#hd"></use>
+<circle class="fill" cx="573.56" cy="90.04" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_13" x="559.36" y="60.04" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m604.43 66.04v-22.20"></path>
+<use x="600.93" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_14" x="594.43" y="60.04" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m626.24 90.04v-46.20"></path>
+<use x="622.74" y="90.04" xlink:href="#hd"></use>
+<circle class="fill" cx="630.44" cy="90.04" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_15" x="616.24" y="60.04" width="20.50" height="42.00"></rect>
+<path class="fill" d="m664.87 42.84
+l79.36 0.00v3.20l-79.36 0.00"></path>
+<path class="fill" d="m665.21 47.84
+l78.68 0.00v3.20l-78.68 0.00"></path>
+<path class="fill" d="m671.21 52.84
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m716.09 52.84
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m665.21 66.04v-22.20"></path>
+<use x="661.71" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_16" x="655.21" y="60.04" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m687.01 90.04v-46.20"></path>
+<use x="683.51" y="90.04" xlink:href="#hd"></use>
+<circle class="fill" cx="691.21" cy="90.04" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_17" x="677.01" y="60.04" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m722.09 66.04v-22.20"></path>
+<use x="718.59" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_18" x="712.09" y="60.04" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m743.89 90.04v-46.20"></path>
+<use x="740.39" y="90.04" xlink:href="#hd"></use>
+<circle class="fill" cx="748.09" cy="90.04" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_19" x="733.89" y="60.04" width="20.50" height="42.00"></rect>
+<path class="fill" d="m782.53 42.84
+l79.36 0.00v3.20l-79.36 0.00"></path>
+<path class="fill" d="m782.87 47.84
+l78.68 0.00v3.20l-78.68 0.00"></path>
+<path class="fill" d="m788.87 52.84
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m833.75 52.84
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m782.87 78.04v-34.20"></path>
+<use x="779.37" y="78.04" xlink:href="#hd"></use>
+<use x="779.37" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_20" x="772.87" y="60.04" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m804.67 90.04v-46.20"></path>
+<use x="801.17" y="90.04" xlink:href="#hd"></use>
+<circle class="fill" cx="808.87" cy="90.04" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_21" x="794.67" y="60.04" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m839.75 66.04v-22.20"></path>
+<use x="836.25" y="66.04" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_22" x="829.75" y="60.04" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m861.55 90.04v-46.20"></path>
+<use x="858.05" y="90.04" xlink:href="#hd"></use>
+<circle class="fill" cx="865.75" cy="90.04" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_23" x="851.55" y="60.04" width="20.50" height="42.00"></rect>
+<use x="140.55" y="46.34" xlink:href="#accent"></use>
+<use x="324.66" y="46.34" xlink:href="#accent"></use>
+<use x="544.05" y="38.34" xlink:href="#accent"></use>
+<use x="779.37" y="38.34" xlink:href="#accent"></use>
+</g></svg><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" color="black" width="9.22in" height="0.94in" viewBox="0 0 664 68">
+<title>abc2svg - 6.</title><style type="text/css">
+.fill {fill: currentColor}
+.stroke {stroke: currentColor; fill: none; stroke-width: .7}
+.f1_1 {font:italic 14px serif}
+</style><defs>
+
+
+
+
+
+
+
+
+</defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
+<text class="f1_1" x="24.00" y="-53.70">3</text>
+<text class="f1_1" x="463.19" y="-32.00">4</text>
+</g>
+<path class="stroke" d="m466.27 67.70v-24.00"></path>
+<path class="stroke" d="m885.33 67.70v-24.00"></path>
+<path class="stroke" d="m882.33 67.70v-24.00"></path>
+<path class="stroke" d="m0.00 67.70
+h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33"></path>
+<use x="12.00" y="55.70" xlink:href="#pclef"></use>
+<path class="fill" d="m39.66 20.50
+l80.71 0.00v3.20l-80.71 0.00"></path>
+<path class="fill" d="m40.00 25.50
+l80.03 0.00v3.20l-80.03 0.00"></path>
+<path class="stroke" d="m40.00 40.70v-19.20"></path>
+<use x="36.50" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_24" x="30.00" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m66.68 64.70v-43.20"></path>
+<use x="63.18" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_25" x="56.68" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m93.35 40.70v-19.20"></path>
+<use x="89.85" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_26" x="83.35" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m120.03 64.70v-43.20"></path>
+<use x="116.53" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_27" x="110.03" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m149.32 20.50
+l80.71 0.00v3.20l-80.71 0.00"></path>
+<path class="fill" d="m149.66 25.50
+l80.03 0.00v3.20l-80.03 0.00"></path>
+<path class="stroke" d="m149.66 52.70v-31.20"></path>
+<use x="146.16" y="52.70" xlink:href="#hd"></use>
+<use x="146.16" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_28" x="139.66" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m176.34 64.70v-43.20"></path>
+<use x="172.84" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_29" x="166.34" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m203.01 40.70v-19.20"></path>
+<use x="199.51" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_30" x="193.01" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m229.69 64.70v-43.20"></path>
+<use x="226.19" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_31" x="219.69" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m258.99 20.50
+l80.71 0.00v3.20l-80.71 0.00"></path>
+<path class="fill" d="m259.33 25.50
+l80.03 0.00v3.20l-80.03 0.00"></path>
+<path class="stroke" d="m259.33 40.70v-19.20"></path>
+<use x="255.83" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_32" x="249.33" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m286.00 64.70v-43.20"></path>
+<use x="282.50" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_33" x="276.00" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m312.68 40.70v-19.20"></path>
+<use x="309.18" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_34" x="302.68" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m339.35 64.70v-43.20"></path>
+<use x="335.85" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_35" x="329.35" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m368.65 20.50
+l80.71 0.00v3.20l-80.71 0.00"></path>
+<path class="fill" d="m368.99 25.50
+l80.03 0.00v3.20l-80.03 0.00"></path>
+<path class="stroke" d="m368.99 52.70v-31.20"></path>
+<use x="365.49" y="52.70" xlink:href="#hd"></use>
+<use x="365.49" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_36" x="358.99" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m395.67 64.70v-43.20"></path>
+<use x="392.17" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_37" x="385.67" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m422.34 40.70v-19.20"></path>
+<use x="418.84" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_38" x="412.34" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m449.02 64.70v-43.20"></path>
+<use x="445.52" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_39" x="439.02" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m490.40 20.50
+l80.28 0.00v3.20l-80.28 0.00"></path>
+<path class="fill" d="m490.74 25.50
+l79.60 0.00v3.20l-79.60 0.00"></path>
+<path class="fill" d="m515.10 30.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="fill" d="m564.34 30.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m490.74 40.70v-19.20"></path>
+<use x="487.24" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="494.94" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_40" x="480.74" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m521.10 64.70v-43.20"></path>
+<use x="517.60" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_41" x="511.10" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m539.97 40.70v-19.20"></path>
+<use x="536.47" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="544.17" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_42" x="529.97" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m570.34 64.70v-43.20"></path>
+<use x="566.84" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_43" x="560.34" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m590.97 20.50
+l80.28 0.00v3.20l-80.28 0.00"></path>
+<path class="fill" d="m591.31 25.50
+l79.60 0.00v3.20l-79.60 0.00"></path>
+<path class="fill" d="m615.67 30.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="fill" d="m664.91 30.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m591.31 52.70v-31.20"></path>
+<use x="587.81" y="52.70" xlink:href="#hd"></use>
+<circle class="fill" cx="595.51" cy="52.70" r="1.2"></circle>
+<use x="587.81" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="595.51" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_44" x="581.31" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m621.67 64.70v-43.20"></path>
+<use x="618.17" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_45" x="611.67" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m640.55 40.70v-19.20"></path>
+<use x="637.05" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="644.75" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_46" x="630.55" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m670.91 64.70v-43.20"></path>
+<use x="667.41" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_47" x="660.91" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m691.54 20.50
+l80.28 0.00v3.20l-80.28 0.00"></path>
+<path class="fill" d="m691.88 25.50
+l79.60 0.00v3.20l-79.60 0.00"></path>
+<path class="fill" d="m716.25 30.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="fill" d="m765.48 30.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m691.88 40.70v-19.20"></path>
+<use x="688.38" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="696.08" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_48" x="681.88" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m722.25 64.70v-43.20"></path>
+<use x="718.75" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_49" x="712.25" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m741.12 40.70v-19.20"></path>
+<use x="737.62" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="745.32" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_50" x="731.12" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m771.48 64.70v-43.20"></path>
+<use x="767.98" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_51" x="761.48" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m792.11 20.50
+l80.28 0.00v3.20l-80.28 0.00"></path>
+<path class="fill" d="m792.45 25.50
+l79.60 0.00v3.20l-79.60 0.00"></path>
+<path class="fill" d="m816.82 30.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="fill" d="m866.06 30.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m792.45 52.70v-31.20"></path>
+<use x="788.95" y="52.70" xlink:href="#hd"></use>
+<circle class="fill" cx="796.65" cy="52.70" r="1.2"></circle>
+<use x="788.95" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="796.65" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_52" x="782.45" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m822.82 64.70v-43.20"></path>
+<use x="819.32" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_53" x="812.82" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m841.69 40.70v-19.20"></path>
+<use x="838.19" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="845.89" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_54" x="831.69" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m872.06 64.70v-43.20"></path>
+<use x="868.56" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_55" x="862.06" y="34.70" width="13.00" height="42.00"></rect>
+<use x="146.16" y="16.00" xlink:href="#accent"></use>
+<use x="365.49" y="16.00" xlink:href="#accent"></use>
+<use x="587.81" y="16.00" xlink:href="#accent"></use>
+<use x="788.95" y="16.00" xlink:href="#accent"></use>
+</g></svg><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" color="black" width="9.22in" height="1.16in" viewBox="0 0 664 84">
+<title>abc2svg - 6.</title><style type="text/css">
+.fill {fill: currentColor}
+.stroke {stroke: currentColor; fill: none; stroke-width: .7}
+.f1_1 {font:italic 14px serif}
+.f2_1 {font:16px calibri}
+</style><defs>
+
+
+
+
+
+
+
+
+
+
+
+
+</defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">16ths / Off-beat 32nds</text>
+<g transform="translate(0,88.70)">
+<text class="f1_1" x="24.00" y="-49.70">5</text>
+<text class="f1_1" x="409.39" y="-32.00">6</text>
+</g>
+<path class="stroke" d="m412.47 88.70v-24.00"></path>
+<path class="stroke" d="m885.33 88.70v-24.00"></path>
+<path class="stroke" d="m882.33 88.70v-24.00"></path>
+<path class="stroke" d="m0.00 88.70
+h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33"></path>
+<use x="12.00" y="76.70" xlink:href="#pclef"></use>
+<path class="fill" d="m39.66 45.50
+l70.69 0.00v3.20l-70.69 0.00"></path>
+<path class="fill" d="m40.00 50.50
+l70.01 0.00v3.20l-70.01 0.00"></path>
+<path class="stroke" d="m40.00 85.70v-39.20"></path>
+<use x="36.50" y="85.70" xlink:href="#hd"></use>
+<use x="36.50" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_56" x="30.00" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m63.34 85.70v-39.20"></path>
+<use x="59.84" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_57" x="53.34" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m86.67 85.70v-39.20"></path>
+<use x="83.17" y="85.70" xlink:href="#hd"></use>
+<use x="83.17" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_58" x="76.67" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m110.01 85.70v-39.20"></path>
+<use x="106.51" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_59" x="100.01" y="55.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m135.60 45.50
+l70.69 0.00v3.20l-70.69 0.00"></path>
+<path class="fill" d="m135.94 50.50
+l70.01 0.00v3.20l-70.01 0.00"></path>
+<path class="stroke" d="m135.94 85.70v-39.20"></path>
+<use x="132.44" y="85.70" xlink:href="#hd"></use>
+<use x="132.44" y="73.70" xlink:href="#hd"></use>
+<use x="132.44" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_60" x="125.94" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m159.27 85.70v-39.20"></path>
+<use x="155.77" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_61" x="149.27" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m182.61 85.70v-39.20"></path>
+<use x="179.11" y="85.70" xlink:href="#hd"></use>
+<use x="179.11" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_62" x="172.61" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m205.94 85.70v-39.20"></path>
+<use x="202.44" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_63" x="195.94" y="55.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m231.53 45.50
+l70.69 0.00v3.20l-70.69 0.00"></path>
+<path class="fill" d="m231.87 50.50
+l70.01 0.00v3.20l-70.01 0.00"></path>
+<path class="stroke" d="m231.87 85.70v-39.20"></path>
+<use x="228.37" y="85.70" xlink:href="#hd"></use>
+<use x="228.37" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_64" x="221.87" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m255.21 85.70v-39.20"></path>
+<use x="251.71" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_65" x="245.21" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m278.55 85.70v-39.20"></path>
+<use x="275.05" y="85.70" xlink:href="#hd"></use>
+<use x="275.05" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_66" x="268.55" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m301.88 85.70v-39.20"></path>
+<use x="298.38" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_67" x="291.88" y="55.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m327.47 45.50
+l70.69 0.00v3.20l-70.69 0.00"></path>
+<path class="fill" d="m327.81 50.50
+l70.01 0.00v3.20l-70.01 0.00"></path>
+<path class="stroke" d="m327.81 85.70v-39.20"></path>
+<use x="324.31" y="85.70" xlink:href="#hd"></use>
+<use x="324.31" y="73.70" xlink:href="#hd"></use>
+<use x="324.31" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_68" x="317.81" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m351.15 85.70v-39.20"></path>
+<use x="347.65" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_69" x="341.15" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m374.48 85.70v-39.20"></path>
+<use x="370.98" y="85.70" xlink:href="#hd"></use>
+<use x="370.98" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_70" x="364.48" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m397.82 85.70v-39.20"></path>
+<use x="394.32" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_71" x="387.82" y="55.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m433.97 38.50
+l96.88 0.00v3.20l-96.88 0.00"></path>
+<path class="fill" d="m434.31 43.50
+l96.20 0.00v3.20l-96.20 0.00"></path>
+<path class="fill" d="m440.31 48.50
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m474.16 48.50
+l16.51 0.00v3.20l-16.51 0.00"></path>
+<path class="fill" d="m524.52 48.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m434.31 61.70v-22.20"></path>
+<use x="430.81" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_72" x="424.31" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m450.82 85.70v-46.20"></path>
+<use x="447.32" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_73" x="440.82" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m474.16 85.70v-46.20"></path>
+<use x="470.66" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_74" x="464.16" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m490.67 61.70v-22.20"></path>
+<use x="487.17" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_75" x="480.67" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m507.18 85.70v-46.20"></path>
+<use x="503.68" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_76" x="497.18" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m530.52 85.70v-46.20"></path>
+<use x="527.02" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_77" x="520.52" y="55.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m548.52 38.50
+l96.88 0.00v3.20l-96.88 0.00"></path>
+<path class="fill" d="m548.86 43.50
+l96.20 0.00v3.20l-96.20 0.00"></path>
+<path class="fill" d="m554.86 48.50
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m588.71 48.50
+l16.51 0.00v3.20l-16.51 0.00"></path>
+<path class="fill" d="m639.06 48.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m548.86 73.70v-34.20"></path>
+<use x="545.36" y="73.70" xlink:href="#hd"></use>
+<use x="545.36" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_78" x="538.86" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m565.37 85.70v-46.20"></path>
+<use x="561.87" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_79" x="555.37" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m588.71 85.70v-46.20"></path>
+<use x="585.21" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_80" x="578.71" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m605.22 61.70v-22.20"></path>
+<use x="601.72" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_81" x="595.22" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m621.73 85.70v-46.20"></path>
+<use x="618.23" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_82" x="611.73" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m645.06 85.70v-46.20"></path>
+<use x="641.56" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_83" x="635.06" y="55.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m663.07 38.50
+l96.88 0.00v3.20l-96.88 0.00"></path>
+<path class="fill" d="m663.41 43.50
+l96.20 0.00v3.20l-96.20 0.00"></path>
+<path class="fill" d="m669.41 48.50
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m703.25 48.50
+l16.51 0.00v3.20l-16.51 0.00"></path>
+<path class="fill" d="m753.61 48.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m663.41 61.70v-22.20"></path>
+<use x="659.91" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_84" x="653.41" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m679.92 85.70v-46.20"></path>
+<use x="676.42" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_85" x="669.92" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m703.25 85.70v-46.20"></path>
+<use x="699.75" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_86" x="693.25" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m719.76 61.70v-22.20"></path>
+<use x="716.26" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_87" x="709.76" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m736.27 85.70v-46.20"></path>
+<use x="732.77" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_88" x="726.27" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m759.61 85.70v-46.20"></path>
+<use x="756.11" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_89" x="749.61" y="55.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m777.62 38.50
+l96.88 0.00v3.20l-96.88 0.00"></path>
+<path class="fill" d="m777.96 43.50
+l96.20 0.00v3.20l-96.20 0.00"></path>
+<path class="fill" d="m783.96 48.50
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m817.80 48.50
+l16.51 0.00v3.20l-16.51 0.00"></path>
+<path class="fill" d="m868.16 48.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m777.96 73.70v-34.20"></path>
+<use x="774.46" y="73.70" xlink:href="#hd"></use>
+<use x="774.46" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_90" x="767.96" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m794.47 85.70v-46.20"></path>
+<use x="790.97" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_91" x="784.47" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m817.80 85.70v-46.20"></path>
+<use x="814.30" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_92" x="807.80" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m834.31 61.70v-22.20"></path>
+<use x="830.81" y="61.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_93" x="824.31" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m850.82 85.70v-46.20"></path>
+<use x="847.32" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_94" x="840.82" y="55.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m874.16 85.70v-46.20"></path>
+<use x="870.66" y="85.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_95" x="864.16" y="55.70" width="13.00" height="42.00"></rect>
+<use x="132.44" y="41.00" xlink:href="#accent"></use>
+<use x="324.31" y="41.00" xlink:href="#accent"></use>
+<use x="545.36" y="34.00" xlink:href="#accent"></use>
+<use x="774.46" y="34.00" xlink:href="#accent"></use>
+</g></svg><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" color="black" width="9.22in" height="1.21in" viewBox="0 0 664 87">
+<title>abc2svg - 6.</title><style type="text/css">
+.fill {fill: currentColor}
+.stroke {stroke: currentColor; fill: none; stroke-width: .7}
+.f1_1 {font:italic 14px serif}
+.f2_1 {font:16px calibri}
+</style><defs>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Doubles</text>
+<g transform="translate(0,92.70)">
+<text class="f1_1" x="24.00" y="-53.70">7</text>
+<text class="f1_1" x="393.48" y="-32.00">8</text>
+</g>
+<path class="stroke" d="m396.56 92.70v-24.00"></path>
+<path class="stroke" d="m885.33 92.70v-24.00"></path>
+<path class="stroke" d="m0.00 92.70
+h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33"></path>
+<use x="12.00" y="80.70" xlink:href="#pclef"></use>
+<path class="fill" d="m39.66 45.50
+l62.41 0.00v3.20l-62.41 0.00"></path>
+<path class="fill" d="m40.00 50.50
+l61.73 0.00v3.20l-61.73 0.00"></path>
+<path class="fill" d="m46.00 55.50
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m78.63 55.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m40.00 89.70v-43.20"></path>
+<use x="36.50" y="89.70" xlink:href="#hd"></use>
+<use x="36.50" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_96" x="30.00" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m57.10 89.70v-43.20"></path>
+<use x="53.60" y="89.70" xlink:href="#hd"></use>
+<circle class="fill" cx="61.30" cy="89.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_97" x="47.10" y="59.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m84.63 89.70v-43.20"></path>
+<use x="81.13" y="89.70" xlink:href="#hd"></use>
+<use x="81.13" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_98" x="74.63" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m101.73 89.70v-43.20"></path>
+<use x="98.23" y="89.70" xlink:href="#hd"></use>
+<circle class="fill" cx="105.93" cy="89.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_99" x="91.73" y="59.70" width="20.50" height="42.00"></rect>
+<path class="fill" d="m131.97 45.50
+l62.41 0.00v3.20l-62.41 0.00"></path>
+<path class="fill" d="m132.31 50.50
+l61.73 0.00v3.20l-61.73 0.00"></path>
+<path class="fill" d="m138.31 55.50
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m170.93 55.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m132.31 89.70v-43.20"></path>
+<use x="128.81" y="89.70" xlink:href="#hd"></use>
+<use x="128.81" y="77.70" xlink:href="#hd"></use>
+<use x="128.81" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_100" x="122.31" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m149.41 89.70v-43.20"></path>
+<use x="145.91" y="89.70" xlink:href="#hd"></use>
+<circle class="fill" cx="153.61" cy="89.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_101" x="139.41" y="59.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m176.93 89.70v-43.20"></path>
+<use x="173.43" y="89.70" xlink:href="#hd"></use>
+<use x="173.43" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_102" x="166.93" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m194.04 89.70v-43.20"></path>
+<use x="190.54" y="89.70" xlink:href="#hd"></use>
+<circle class="fill" cx="198.24" cy="89.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_103" x="184.04" y="59.70" width="20.50" height="42.00"></rect>
+<path class="fill" d="m224.28 45.50
+l62.41 0.00v3.20l-62.41 0.00"></path>
+<path class="fill" d="m224.62 50.50
+l61.73 0.00v3.20l-61.73 0.00"></path>
+<path class="fill" d="m230.62 55.50
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m263.24 55.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m224.62 89.70v-43.20"></path>
+<use x="221.12" y="89.70" xlink:href="#hd"></use>
+<use x="221.12" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_104" x="214.62" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m241.72 89.70v-43.20"></path>
+<use x="238.22" y="89.70" xlink:href="#hd"></use>
+<circle class="fill" cx="245.92" cy="89.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_105" x="231.72" y="59.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m269.24 89.70v-43.20"></path>
+<use x="265.74" y="89.70" xlink:href="#hd"></use>
+<use x="265.74" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_106" x="259.24" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m286.35 89.70v-43.20"></path>
+<use x="282.85" y="89.70" xlink:href="#hd"></use>
+<circle class="fill" cx="290.55" cy="89.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_107" x="276.35" y="59.70" width="20.50" height="42.00"></rect>
+<path class="fill" d="m316.58 45.50
+l62.41 0.00v3.20l-62.41 0.00"></path>
+<path class="fill" d="m316.92 50.50
+l61.73 0.00v3.20l-61.73 0.00"></path>
+<path class="fill" d="m322.92 55.50
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m355.55 55.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m316.92 89.70v-43.20"></path>
+<use x="313.42" y="89.70" xlink:href="#hd"></use>
+<use x="313.42" y="77.70" xlink:href="#hd"></use>
+<use x="313.42" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_108" x="306.92" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m334.03 89.70v-43.20"></path>
+<use x="330.53" y="89.70" xlink:href="#hd"></use>
+<circle class="fill" cx="338.23" cy="89.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_109" x="324.03" y="59.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m361.55 89.70v-43.20"></path>
+<use x="358.05" y="89.70" xlink:href="#hd"></use>
+<use x="358.05" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_110" x="351.55" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m378.65 89.70v-43.20"></path>
+<use x="375.15" y="89.70" xlink:href="#hd"></use>
+<circle class="fill" cx="382.85" cy="89.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_111" x="368.65" y="59.70" width="20.50" height="42.00"></rect>
+<path class="fill" d="m418.72 42.50
+l93.27 0.00v3.20l-93.27 0.00"></path>
+<path class="fill" d="m419.06 47.50
+l92.59 0.00v3.20l-92.59 0.00"></path>
+<path class="fill" d="m419.06 52.50
+l17.10 0.00v3.20l-17.10 0.00"></path>
+<path class="fill" d="m477.45 52.50
+l17.10 0.00v3.20l-17.10 0.00"></path>
+<path class="stroke" d="m419.06 65.70v-22.20"></path>
+<use x="415.56" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_112" x="409.06" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m436.17 89.70v-46.20"></path>
+<use x="432.67" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_113" x="426.17" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m453.27 89.70v-46.20"></path>
+<use x="449.77" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_114" x="443.27" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m477.45 65.70v-22.20"></path>
+<use x="473.95" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_115" x="467.45" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m494.55 89.70v-46.20"></path>
+<use x="491.05" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_116" x="484.55" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m511.66 89.70v-46.20"></path>
+<use x="508.16" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_117" x="501.66" y="59.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m538.18 42.50
+l93.27 0.00v3.20l-93.27 0.00"></path>
+<path class="fill" d="m538.52 47.50
+l92.59 0.00v3.20l-92.59 0.00"></path>
+<path class="fill" d="m538.52 52.50
+l17.10 0.00v3.20l-17.10 0.00"></path>
+<path class="fill" d="m596.91 52.50
+l17.10 0.00v3.20l-17.10 0.00"></path>
+<path class="stroke" d="m538.52 77.70v-34.20"></path>
+<use x="535.02" y="77.70" xlink:href="#hd"></use>
+<use x="535.02" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_118" x="528.52" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m555.63 89.70v-46.20"></path>
+<use x="552.13" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_119" x="545.63" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m572.73 89.70v-46.20"></path>
+<use x="569.23" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_120" x="562.73" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m596.91 65.70v-22.20"></path>
+<use x="593.41" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_121" x="586.91" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m614.01 89.70v-46.20"></path>
+<use x="610.51" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_122" x="604.01" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m631.12 89.70v-46.20"></path>
+<use x="627.62" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_123" x="621.12" y="59.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m657.64 42.50
+l93.27 0.00v3.20l-93.27 0.00"></path>
+<path class="fill" d="m657.98 47.50
+l92.59 0.00v3.20l-92.59 0.00"></path>
+<path class="fill" d="m657.98 52.50
+l17.10 0.00v3.20l-17.10 0.00"></path>
+<path class="fill" d="m716.36 52.50
+l17.10 0.00v3.20l-17.10 0.00"></path>
+<path class="stroke" d="m657.98 65.70v-22.20"></path>
+<use x="654.48" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_124" x="647.98" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m675.08 89.70v-46.20"></path>
+<use x="671.58" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_125" x="665.08" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m692.19 89.70v-46.20"></path>
+<use x="688.69" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_126" x="682.19" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m716.36 65.70v-22.20"></path>
+<use x="712.86" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_127" x="706.36" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m733.47 89.70v-46.20"></path>
+<use x="729.97" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_128" x="723.47" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m750.57 89.70v-46.20"></path>
+<use x="747.07" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_129" x="740.57" y="59.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m777.10 42.50
+l93.27 0.00v3.20l-93.27 0.00"></path>
+<path class="fill" d="m777.44 47.50
+l92.59 0.00v3.20l-92.59 0.00"></path>
+<path class="fill" d="m777.44 52.50
+l17.10 0.00v3.20l-17.10 0.00"></path>
+<path class="fill" d="m835.82 52.50
+l17.10 0.00v3.20l-17.10 0.00"></path>
+<path class="stroke" d="m777.44 77.70v-34.20"></path>
+<use x="773.94" y="77.70" xlink:href="#hd"></use>
+<use x="773.94" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_130" x="767.44" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m794.54 89.70v-46.20"></path>
+<use x="791.04" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_131" x="784.54" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m811.64 89.70v-46.20"></path>
+<use x="808.14" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_132" x="801.64" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m835.82 65.70v-22.20"></path>
+<use x="832.32" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_133" x="825.82" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m852.93 89.70v-46.20"></path>
+<use x="849.43" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_134" x="842.93" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m870.03 89.70v-46.20"></path>
+<use x="866.53" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_135" x="860.03" y="59.70" width="13.00" height="42.00"></rect>
+<use x="128.81" y="41.00" xlink:href="#accent"></use>
+<use x="313.42" y="41.00" xlink:href="#accent"></use>
+<use x="535.02" y="38.00" xlink:href="#accent"></use>
+<use x="773.94" y="38.00" xlink:href="#accent"></use>
+</g></svg><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" color="black" width="9.22in" height="0.94in" viewBox="0 0 664 68">
+<title>abc2svg - 6.</title><style type="text/css">
+.fill {fill: currentColor}
+.stroke {stroke: currentColor; fill: none; stroke-width: .7}
+.f1_1 {font:italic 14px serif}
+</style><defs>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
+<text class="f1_1" x="24.00" y="-53.70">9</text>
+<text class="f1_1" x="499.35" y="-32.00">10</text>
+</g>
+<path class="stroke" d="m505.51 67.70v-24.00"></path>
+<path class="stroke" d="m885.33 67.70v-24.00"></path>
+<path class="stroke" d="m882.33 67.70v-24.00"></path>
+<path class="stroke" d="m0.00 67.70
+h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33"></path>
+<use x="12.00" y="55.70" xlink:href="#pclef"></use>
+<path class="fill" d="m39.66 20.50
+l100.35 0.00v3.20l-100.35 0.00"></path>
+<path class="fill" d="m40.00 25.50
+l99.67 0.00v3.20l-99.67 0.00"></path>
+<path class="fill" d="m64.18 30.50
+l17.11 0.00v3.20l-17.11 0.00"></path>
+<path class="fill" d="m122.57 30.50
+l17.11 0.00v3.20l-17.11 0.00"></path>
+<path class="stroke" d="m40.00 40.70v-19.20"></path>
+<use x="36.50" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_136" x="30.00" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m64.18 64.70v-43.20"></path>
+<use x="60.68" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_137" x="54.18" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m81.28 64.70v-43.20"></path>
+<use x="77.78" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_138" x="71.28" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m98.39 40.70v-19.20"></path>
+<use x="94.89" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_139" x="88.39" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m122.57 64.70v-43.20"></path>
+<use x="119.07" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_140" x="112.57" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m139.67 64.70v-43.20"></path>
+<use x="136.17" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_141" x="129.67" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m158.34 20.50
+l100.35 0.00v3.20l-100.35 0.00"></path>
+<path class="fill" d="m158.68 25.50
+l99.67 0.00v3.20l-99.67 0.00"></path>
+<path class="fill" d="m182.85 30.50
+l17.11 0.00v3.20l-17.11 0.00"></path>
+<path class="fill" d="m241.24 30.50
+l17.11 0.00v3.20l-17.11 0.00"></path>
+<path class="stroke" d="m158.68 52.70v-31.20"></path>
+<use x="155.18" y="52.70" xlink:href="#hd"></use>
+<use x="155.18" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_142" x="148.68" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m182.85 64.70v-43.20"></path>
+<use x="179.35" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_143" x="172.85" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m199.96 64.70v-43.20"></path>
+<use x="196.46" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_144" x="189.96" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m217.07 40.70v-19.20"></path>
+<use x="213.57" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_145" x="207.07" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m241.24 64.70v-43.20"></path>
+<use x="237.74" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_146" x="231.24" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m258.35 64.70v-43.20"></path>
+<use x="254.85" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_147" x="248.35" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m277.01 20.50
+l100.35 0.00v3.20l-100.35 0.00"></path>
+<path class="fill" d="m277.35 25.50
+l99.67 0.00v3.20l-99.67 0.00"></path>
+<path class="fill" d="m301.53 30.50
+l17.11 0.00v3.20l-17.11 0.00"></path>
+<path class="fill" d="m359.92 30.50
+l17.11 0.00v3.20l-17.11 0.00"></path>
+<path class="stroke" d="m277.35 40.70v-19.20"></path>
+<use x="273.85" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_148" x="267.35" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m301.53 64.70v-43.20"></path>
+<use x="298.03" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_149" x="291.53" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m318.64 64.70v-43.20"></path>
+<use x="315.14" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_150" x="308.64" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m335.74 40.70v-19.20"></path>
+<use x="332.24" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_151" x="325.74" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m359.92 64.70v-43.20"></path>
+<use x="356.42" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_152" x="349.92" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m377.03 64.70v-43.20"></path>
+<use x="373.53" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_153" x="367.03" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m395.69 20.50
+l100.35 0.00v3.20l-100.35 0.00"></path>
+<path class="fill" d="m396.03 25.50
+l99.67 0.00v3.20l-99.67 0.00"></path>
+<path class="fill" d="m420.21 30.50
+l17.11 0.00v3.20l-17.11 0.00"></path>
+<path class="fill" d="m478.60 30.50
+l17.11 0.00v3.20l-17.11 0.00"></path>
+<path class="stroke" d="m396.03 52.70v-31.20"></path>
+<use x="392.53" y="52.70" xlink:href="#hd"></use>
+<use x="392.53" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_154" x="386.03" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m420.21 64.70v-43.20"></path>
+<use x="416.71" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_155" x="410.21" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m437.31 64.70v-43.20"></path>
+<use x="433.81" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_156" x="427.31" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m454.42 40.70v-19.20"></path>
+<use x="450.92" y="40.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_157" x="444.42" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m478.60 64.70v-43.20"></path>
+<use x="475.10" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_158" x="468.60" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m495.70 64.70v-43.20"></path>
+<use x="492.20" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_159" x="485.70" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m527.67 24.50
+l72.83 0.00v3.20l-72.83 0.00"></path>
+<path class="fill" d="m528.01 29.50
+l72.15 0.00v3.20l-72.15 0.00"></path>
+<path class="fill" d="m549.54 34.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="fill" d="m594.16 34.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m528.01 64.70v-39.20"></path>
+<use x="524.51" y="64.70" xlink:href="#hd"></use>
+<circle class="fill" cx="532.21" cy="64.70" r="1.2"></circle>
+<use x="524.51" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="532.21" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_160" x="518.01" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m555.54 64.70v-39.20"></path>
+<use x="552.04" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_161" x="545.54" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m572.64 64.70v-39.20"></path>
+<use x="569.14" y="64.70" xlink:href="#hd"></use>
+<circle class="fill" cx="576.84" cy="64.70" r="1.2"></circle>
+<use x="569.14" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="576.84" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_162" x="562.64" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m600.16 64.70v-39.20"></path>
+<use x="596.66" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_163" x="590.16" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m618.83 24.50
+l72.83 0.00v3.20l-72.83 0.00"></path>
+<path class="fill" d="m619.17 29.50
+l72.15 0.00v3.20l-72.15 0.00"></path>
+<path class="fill" d="m640.69 34.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="fill" d="m685.32 34.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m619.17 64.70v-39.20"></path>
+<use x="615.67" y="64.70" xlink:href="#hd"></use>
+<circle class="fill" cx="623.37" cy="64.70" r="1.2"></circle>
+<use x="615.67" y="52.70" xlink:href="#hd"></use>
+<circle class="fill" cx="623.37" cy="52.70" r="1.2"></circle>
+<use x="615.67" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="623.37" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_164" x="609.17" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m646.69 64.70v-39.20"></path>
+<use x="643.19" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_165" x="636.69" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m663.80 64.70v-39.20"></path>
+<use x="660.30" y="64.70" xlink:href="#hd"></use>
+<circle class="fill" cx="668.00" cy="64.70" r="1.2"></circle>
+<use x="660.30" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="668.00" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_166" x="653.80" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m691.32 64.70v-39.20"></path>
+<use x="687.82" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_167" x="681.32" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m709.98 24.50
+l72.83 0.00v3.20l-72.83 0.00"></path>
+<path class="fill" d="m710.32 29.50
+l72.15 0.00v3.20l-72.15 0.00"></path>
+<path class="fill" d="m731.85 34.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="fill" d="m776.47 34.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m710.32 64.70v-39.20"></path>
+<use x="706.82" y="64.70" xlink:href="#hd"></use>
+<circle class="fill" cx="714.52" cy="64.70" r="1.2"></circle>
+<use x="706.82" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="714.52" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_168" x="700.32" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m737.85 64.70v-39.20"></path>
+<use x="734.35" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_169" x="727.85" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m754.95 64.70v-39.20"></path>
+<use x="751.45" y="64.70" xlink:href="#hd"></use>
+<circle class="fill" cx="759.15" cy="64.70" r="1.2"></circle>
+<use x="751.45" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="759.15" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_170" x="744.95" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m782.47 64.70v-39.20"></path>
+<use x="778.97" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_171" x="772.47" y="34.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m801.14 24.50
+l72.83 0.00v3.20l-72.83 0.00"></path>
+<path class="fill" d="m801.48 29.50
+l72.15 0.00v3.20l-72.15 0.00"></path>
+<path class="fill" d="m823.00 34.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="fill" d="m867.63 34.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m801.48 64.70v-39.20"></path>
+<use x="797.98" y="64.70" xlink:href="#hd"></use>
+<circle class="fill" cx="805.68" cy="64.70" r="1.2"></circle>
+<use x="797.98" y="52.70" xlink:href="#hd"></use>
+<circle class="fill" cx="805.68" cy="52.70" r="1.2"></circle>
+<use x="797.98" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="805.68" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_172" x="791.48" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m829.00 64.70v-39.20"></path>
+<use x="825.50" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_173" x="819.00" y="34.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m846.11 64.70v-39.20"></path>
+<use x="842.61" y="64.70" xlink:href="#hd"></use>
+<circle class="fill" cx="850.31" cy="64.70" r="1.2"></circle>
+<use x="842.61" y="40.70" xlink:href="#Xhead"></use>
+<circle class="fill" cx="850.31" cy="40.70" r="1.2"></circle>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_174" x="836.11" y="34.70" width="20.50" height="42.00"></rect>
+<path class="stroke" d="m873.63 64.70v-39.20"></path>
+<use x="870.13" y="64.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_175" x="863.63" y="34.70" width="13.00" height="42.00"></rect>
+<use x="155.18" y="16.00" xlink:href="#accent"></use>
+<use x="392.53" y="16.00" xlink:href="#accent"></use>
+<use x="615.67" y="20.00" xlink:href="#accent"></use>
+<use x="797.98" y="20.00" xlink:href="#accent"></use>
+</g></svg><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" color="black" width="9.22in" height="1.21in" viewBox="0 0 664 87">
+<title>abc2svg - 6.</title><style type="text/css">
+.fill {fill: currentColor}
+.stroke {stroke: currentColor; fill: none; stroke-width: .7}
+.f1_1 {font:italic 14px serif}
+.f2_1 {font:16px calibri}
+</style><defs>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Triples</text>
+<g transform="translate(0,92.70)">
+<text class="f1_1" x="24.00" y="-53.70">11</text>
+<text class="f1_1" x="414.49" y="-56.70">12</text>
+</g>
+<path class="stroke" d="m420.65 92.70v-24.00"></path>
+<path class="stroke" d="m885.33 92.70v-24.00"></path>
+<path class="stroke" d="m0.00 92.70
+h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33"></path>
+<use x="12.00" y="80.70" xlink:href="#pclef"></use>
+<path class="fill" d="m39.66 45.50
+l76.40 0.00v3.20l-76.40 0.00"></path>
+<path class="fill" d="m40.00 50.50
+l75.72 0.00v3.20l-75.72 0.00"></path>
+<path class="fill" d="m40.00 55.50
+l13.99 0.00v3.20l-13.99 0.00"></path>
+<path class="fill" d="m87.74 55.50
+l13.99 0.00v3.20l-13.99 0.00"></path>
+<path class="stroke" d="m40.00 89.70v-43.20"></path>
+<use x="36.50" y="89.70" xlink:href="#hd"></use>
+<use x="36.50" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_176" x="30.00" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m53.99 89.70v-43.20"></path>
+<use x="50.49" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_177" x="43.99" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m67.97 89.70v-43.20"></path>
+<use x="64.47" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_178" x="57.97" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m87.74 89.70v-43.20"></path>
+<use x="84.24" y="89.70" xlink:href="#hd"></use>
+<use x="84.24" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_179" x="77.74" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m101.73 89.70v-43.20"></path>
+<use x="98.23" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_180" x="91.73" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m115.72 89.70v-43.20"></path>
+<use x="112.22" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_181" x="105.72" y="59.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m137.34 45.50
+l76.40 0.00v3.20l-76.40 0.00"></path>
+<path class="fill" d="m137.68 50.50
+l75.72 0.00v3.20l-75.72 0.00"></path>
+<path class="fill" d="m137.68 55.50
+l13.99 0.00v3.20l-13.99 0.00"></path>
+<path class="fill" d="m185.43 55.50
+l13.99 0.00v3.20l-13.99 0.00"></path>
+<path class="stroke" d="m137.68 89.70v-43.20"></path>
+<use x="134.18" y="89.70" xlink:href="#hd"></use>
+<use x="134.18" y="77.70" xlink:href="#hd"></use>
+<use x="134.18" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_182" x="127.68" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m151.67 89.70v-43.20"></path>
+<use x="148.17" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_183" x="141.67" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m165.66 89.70v-43.20"></path>
+<use x="162.16" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_184" x="155.66" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m185.43 89.70v-43.20"></path>
+<use x="181.93" y="89.70" xlink:href="#hd"></use>
+<use x="181.93" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_185" x="175.43" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m199.42 89.70v-43.20"></path>
+<use x="195.92" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_186" x="189.42" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m213.40 89.70v-43.20"></path>
+<use x="209.90" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_187" x="203.40" y="59.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m235.03 45.50
+l76.40 0.00v3.20l-76.40 0.00"></path>
+<path class="fill" d="m235.37 50.50
+l75.72 0.00v3.20l-75.72 0.00"></path>
+<path class="fill" d="m235.37 55.50
+l13.99 0.00v3.20l-13.99 0.00"></path>
+<path class="fill" d="m283.11 55.50
+l13.99 0.00v3.20l-13.99 0.00"></path>
+<path class="stroke" d="m235.37 89.70v-43.20"></path>
+<use x="231.87" y="89.70" xlink:href="#hd"></use>
+<use x="231.87" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_188" x="225.37" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m249.36 89.70v-43.20"></path>
+<use x="245.86" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_189" x="239.36" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m263.34 89.70v-43.20"></path>
+<use x="259.84" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_190" x="253.34" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m283.11 89.70v-43.20"></path>
+<use x="279.61" y="89.70" xlink:href="#hd"></use>
+<use x="279.61" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_191" x="273.11" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m297.10 89.70v-43.20"></path>
+<use x="293.60" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_192" x="287.10" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m311.09 89.70v-43.20"></path>
+<use x="307.59" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_193" x="301.09" y="59.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m332.71 45.50
+l76.40 0.00v3.20l-76.40 0.00"></path>
+<path class="fill" d="m333.05 50.50
+l75.72 0.00v3.20l-75.72 0.00"></path>
+<path class="fill" d="m333.05 55.50
+l13.99 0.00v3.20l-13.99 0.00"></path>
+<path class="fill" d="m380.80 55.50
+l13.99 0.00v3.20l-13.99 0.00"></path>
+<path class="stroke" d="m333.05 89.70v-43.20"></path>
+<use x="329.55" y="89.70" xlink:href="#hd"></use>
+<use x="329.55" y="77.70" xlink:href="#hd"></use>
+<use x="329.55" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_194" x="323.05" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m347.04 89.70v-43.20"></path>
+<use x="343.54" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_195" x="337.04" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m361.03 89.70v-43.20"></path>
+<use x="357.53" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_196" x="351.03" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m380.80 89.70v-43.20"></path>
+<use x="377.30" y="89.70" xlink:href="#hd"></use>
+<use x="377.30" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_197" x="370.80" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m394.79 89.70v-43.20"></path>
+<use x="391.29" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_198" x="384.79" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m408.77 89.70v-43.20"></path>
+<use x="405.27" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_199" x="398.77" y="59.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m439.35 42.50
+l98.59 0.00v3.20l-98.59 0.00"></path>
+<path class="fill" d="m439.69 47.50
+l97.91 0.00v3.20l-97.91 0.00"></path>
+<path class="fill" d="m439.69 52.50
+l97.91 0.00v3.20l-97.91 0.00"></path>
+<path class="stroke" d="m439.69 65.70v-22.20"></path>
+<use x="436.19" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_200" x="429.69" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m453.68 89.70v-46.20"></path>
+<use x="450.18" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_201" x="443.68" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m467.66 89.70v-46.20"></path>
+<use x="464.16" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_202" x="457.66" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m481.65 89.70v-46.20"></path>
+<use x="478.15" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_203" x="471.65" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m495.64 65.70v-22.20"></path>
+<use x="492.14" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_204" x="485.64" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m509.63 89.70v-46.20"></path>
+<use x="506.13" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_205" x="499.63" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m523.61 89.70v-46.20"></path>
+<use x="520.11" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_206" x="513.61" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m537.60 89.70v-46.20"></path>
+<use x="534.10" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_207" x="527.60" y="59.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m552.80 42.50
+l98.59 0.00v3.20l-98.59 0.00"></path>
+<path class="fill" d="m553.14 47.50
+l97.91 0.00v3.20l-97.91 0.00"></path>
+<path class="fill" d="m553.14 52.50
+l97.91 0.00v3.20l-97.91 0.00"></path>
+<path class="stroke" d="m553.14 77.70v-34.20"></path>
+<use x="549.64" y="77.70" xlink:href="#hd"></use>
+<use x="549.64" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_208" x="543.14" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m567.13 89.70v-46.20"></path>
+<use x="563.63" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_209" x="557.13" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m581.12 89.70v-46.20"></path>
+<use x="577.62" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_210" x="571.12" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m595.10 89.70v-46.20"></path>
+<use x="591.60" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_211" x="585.10" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m609.09 65.70v-22.20"></path>
+<use x="605.59" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_212" x="599.09" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m623.08 89.70v-46.20"></path>
+<use x="619.58" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_213" x="613.08" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m637.06 89.70v-46.20"></path>
+<use x="633.56" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_214" x="627.06" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m651.05 89.70v-46.20"></path>
+<use x="647.55" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_215" x="641.05" y="59.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m666.25 42.50
+l98.59 0.00v3.20l-98.59 0.00"></path>
+<path class="fill" d="m666.59 47.50
+l97.91 0.00v3.20l-97.91 0.00"></path>
+<path class="fill" d="m666.59 52.50
+l97.91 0.00v3.20l-97.91 0.00"></path>
+<path class="stroke" d="m666.59 65.70v-22.20"></path>
+<use x="663.09" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_216" x="656.59" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m680.58 89.70v-46.20"></path>
+<use x="677.08" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_217" x="670.58" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m694.57 89.70v-46.20"></path>
+<use x="691.07" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_218" x="684.57" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m708.55 89.70v-46.20"></path>
+<use x="705.05" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_219" x="698.55" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m722.54 65.70v-22.20"></path>
+<use x="719.04" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_220" x="712.54" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m736.53 89.70v-46.20"></path>
+<use x="733.03" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_221" x="726.53" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m750.52 89.70v-46.20"></path>
+<use x="747.02" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_222" x="740.52" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m764.50 89.70v-46.20"></path>
+<use x="761.00" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_223" x="754.50" y="59.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m779.70 42.50
+l98.59 0.00v3.20l-98.59 0.00"></path>
+<path class="fill" d="m780.04 47.50
+l97.91 0.00v3.20l-97.91 0.00"></path>
+<path class="fill" d="m780.04 52.50
+l97.91 0.00v3.20l-97.91 0.00"></path>
+<path class="stroke" d="m780.04 77.70v-34.20"></path>
+<use x="776.54" y="77.70" xlink:href="#hd"></use>
+<use x="776.54" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_224" x="770.04" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m794.03 89.70v-46.20"></path>
+<use x="790.53" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_225" x="784.03" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m808.02 89.70v-46.20"></path>
+<use x="804.52" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_226" x="798.02" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m822.01 89.70v-46.20"></path>
+<use x="818.51" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_227" x="812.01" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m835.99 65.70v-22.20"></path>
+<use x="832.49" y="65.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_228" x="825.99" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m849.98 89.70v-46.20"></path>
+<use x="846.48" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_229" x="839.98" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m863.97 89.70v-46.20"></path>
+<use x="860.47" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_230" x="853.97" y="59.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m877.95 89.70v-46.20"></path>
+<use x="874.45" y="89.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_231" x="867.95" y="59.70" width="13.00" height="42.00"></rect>
+<use x="134.18" y="41.00" xlink:href="#accent"></use>
+<use x="329.55" y="41.00" xlink:href="#accent"></use>
+<use x="549.64" y="38.00" xlink:href="#accent"></use>
+<use x="776.54" y="38.00" xlink:href="#accent"></use>
+</g></svg><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" color="black" width="9.22in" height="0.90in" viewBox="0 0 664 65">
+<title>abc2svg - 6.</title><style type="text/css">
+.fill {fill: currentColor}
+.stroke {stroke: currentColor; fill: none; stroke-width: .7}
+.f1_1 {font:italic 14px serif}
+</style><defs>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</defs><g transform="scale(0.75)"><g transform="translate(0,63.70)">
+<text class="f1_1" x="24.00" y="-49.70">13</text>
+<text class="f1_1" x="445.50" y="-49.70">14</text>
+</g>
+<path class="stroke" d="m451.66 63.70v-24.00"></path>
+<path class="stroke" d="m885.33 63.70v-24.00"></path>
+<path class="stroke" d="m882.33 63.70v-24.00"></path>
+<path class="stroke" d="m0.00 63.70
+h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33m-885.33 -6h885.33"></path>
+<use x="12.00" y="51.70" xlink:href="#pclef"></use>
+<path class="fill" d="m39.66 20.50
+l88.91 0.00v3.20l-88.91 0.00"></path>
+<path class="fill" d="m40.00 25.50
+l88.23 0.00v3.20l-88.23 0.00"></path>
+<path class="fill" d="m61.40 30.50
+l15.14 0.00v3.20l-15.14 0.00"></path>
+<path class="fill" d="m113.09 30.50
+l15.14 0.00v3.20l-15.14 0.00"></path>
+<path class="stroke" d="m40.00 60.70v-39.20"></path>
+<use x="36.50" y="60.70" xlink:href="#hd"></use>
+<use x="36.50" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_232" x="30.00" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m61.40 60.70v-39.20"></path>
+<use x="57.90" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_233" x="51.40" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m76.54 60.70v-39.20"></path>
+<use x="73.04" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_234" x="66.54" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m91.69 60.70v-39.20"></path>
+<use x="88.19" y="60.70" xlink:href="#hd"></use>
+<use x="88.19" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_235" x="81.69" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m113.09 60.70v-39.20"></path>
+<use x="109.59" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_236" x="103.09" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m128.23 60.70v-39.20"></path>
+<use x="124.73" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_237" x="118.23" y="30.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m144.71 20.50
+l88.91 0.00v3.20l-88.91 0.00"></path>
+<path class="fill" d="m145.05 25.50
+l88.23 0.00v3.20l-88.23 0.00"></path>
+<path class="fill" d="m166.45 30.50
+l15.14 0.00v3.20l-15.14 0.00"></path>
+<path class="fill" d="m218.14 30.50
+l15.14 0.00v3.20l-15.14 0.00"></path>
+<path class="stroke" d="m145.05 60.70v-39.20"></path>
+<use x="141.55" y="60.70" xlink:href="#hd"></use>
+<use x="141.55" y="48.70" xlink:href="#hd"></use>
+<use x="141.55" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_238" x="135.05" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m166.45 60.70v-39.20"></path>
+<use x="162.95" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_239" x="156.45" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m181.60 60.70v-39.20"></path>
+<use x="178.10" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_240" x="171.60" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m196.74 60.70v-39.20"></path>
+<use x="193.24" y="60.70" xlink:href="#hd"></use>
+<use x="193.24" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_241" x="186.74" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m218.14 60.70v-39.20"></path>
+<use x="214.64" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_242" x="208.14" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m233.28 60.70v-39.20"></path>
+<use x="229.78" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_243" x="223.28" y="30.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m249.77 20.50
+l88.91 0.00v3.20l-88.91 0.00"></path>
+<path class="fill" d="m250.11 25.50
+l88.23 0.00v3.20l-88.23 0.00"></path>
+<path class="fill" d="m271.51 30.50
+l15.14 0.00v3.20l-15.14 0.00"></path>
+<path class="fill" d="m323.19 30.50
+l15.14 0.00v3.20l-15.14 0.00"></path>
+<path class="stroke" d="m250.11 60.70v-39.20"></path>
+<use x="246.61" y="60.70" xlink:href="#hd"></use>
+<use x="246.61" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_244" x="240.11" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m271.51 60.70v-39.20"></path>
+<use x="268.01" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_245" x="261.51" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m286.65 60.70v-39.20"></path>
+<use x="283.15" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_246" x="276.65" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m301.79 60.70v-39.20"></path>
+<use x="298.29" y="60.70" xlink:href="#hd"></use>
+<use x="298.29" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_247" x="291.79" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m323.19 60.70v-39.20"></path>
+<use x="319.69" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_248" x="313.19" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m338.33 60.70v-39.20"></path>
+<use x="334.83" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_249" x="328.33" y="30.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m354.82 20.50
+l88.91 0.00v3.20l-88.91 0.00"></path>
+<path class="fill" d="m355.16 25.50
+l88.23 0.00v3.20l-88.23 0.00"></path>
+<path class="fill" d="m376.56 30.50
+l15.14 0.00v3.20l-15.14 0.00"></path>
+<path class="fill" d="m428.24 30.50
+l15.14 0.00v3.20l-15.14 0.00"></path>
+<path class="stroke" d="m355.16 60.70v-39.20"></path>
+<use x="351.66" y="60.70" xlink:href="#hd"></use>
+<use x="351.66" y="48.70" xlink:href="#hd"></use>
+<use x="351.66" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_250" x="345.16" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m376.56 60.70v-39.20"></path>
+<use x="373.06" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_251" x="366.56" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m391.70 60.70v-39.20"></path>
+<use x="388.20" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_252" x="381.70" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m406.84 60.70v-39.20"></path>
+<use x="403.34" y="60.70" xlink:href="#hd"></use>
+<use x="403.34" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_253" x="396.84" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m428.24 60.70v-39.20"></path>
+<use x="424.74" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_254" x="418.24" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m443.39 60.70v-39.20"></path>
+<use x="439.89" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_255" x="433.39" y="30.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m471.65 16.50
+l88.91 0.00v3.20l-88.91 0.00"></path>
+<path class="fill" d="m471.99 21.50
+l88.23 0.00v3.20l-88.23 0.00"></path>
+<path class="fill" d="m477.99 26.50
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m508.53 26.50
+l15.14 0.00v3.20l-15.14 0.00"></path>
+<path class="fill" d="m554.22 26.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m471.99 60.70v-43.20"></path>
+<use x="468.49" y="60.70" xlink:href="#hd"></use>
+<use x="468.49" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_256" x="461.99" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m487.13 60.70v-43.20"></path>
+<use x="483.63" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_257" x="477.13" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m508.53 60.70v-43.20"></path>
+<use x="505.03" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_258" x="498.53" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m523.67 60.70v-43.20"></path>
+<use x="520.17" y="60.70" xlink:href="#hd"></use>
+<use x="520.17" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_259" x="513.67" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m538.81 60.70v-43.20"></path>
+<use x="535.31" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_260" x="528.81" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m560.22 60.70v-43.20"></path>
+<use x="556.72" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_261" x="550.22" y="30.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m576.70 16.50
+l88.91 0.00v3.20l-88.91 0.00"></path>
+<path class="fill" d="m577.04 21.50
+l88.23 0.00v3.20l-88.23 0.00"></path>
+<path class="fill" d="m583.04 26.50
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m613.58 26.50
+l15.14 0.00v3.20l-15.14 0.00"></path>
+<path class="fill" d="m659.27 26.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m577.04 60.70v-43.20"></path>
+<use x="573.54" y="60.70" xlink:href="#hd"></use>
+<use x="573.54" y="48.70" xlink:href="#hd"></use>
+<use x="573.54" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_262" x="567.04" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m592.18 60.70v-43.20"></path>
+<use x="588.68" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_263" x="582.18" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m613.58 60.70v-43.20"></path>
+<use x="610.08" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_264" x="603.58" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m628.73 60.70v-43.20"></path>
+<use x="625.23" y="60.70" xlink:href="#hd"></use>
+<use x="625.23" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_265" x="618.73" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m643.87 60.70v-43.20"></path>
+<use x="640.37" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_266" x="633.87" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m665.27 60.70v-43.20"></path>
+<use x="661.77" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_267" x="655.27" y="30.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m681.75 16.50
+l88.91 0.00v3.20l-88.91 0.00"></path>
+<path class="fill" d="m682.09 21.50
+l88.23 0.00v3.20l-88.23 0.00"></path>
+<path class="fill" d="m688.09 26.50
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m718.64 26.50
+l15.14 0.00v3.20l-15.14 0.00"></path>
+<path class="fill" d="m764.32 26.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m682.09 60.70v-43.20"></path>
+<use x="678.59" y="60.70" xlink:href="#hd"></use>
+<use x="678.59" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_268" x="672.09" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m697.23 60.70v-43.20"></path>
+<use x="693.73" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_269" x="687.23" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m718.64 60.70v-43.20"></path>
+<use x="715.14" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_270" x="708.64" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m733.78 60.70v-43.20"></path>
+<use x="730.28" y="60.70" xlink:href="#hd"></use>
+<use x="730.28" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_271" x="723.78" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m748.92 60.70v-43.20"></path>
+<use x="745.42" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_272" x="738.92" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m770.32 60.70v-43.20"></path>
+<use x="766.82" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_273" x="760.32" y="30.70" width="13.00" height="42.00"></rect>
+<path class="fill" d="m786.81 16.50
+l88.91 0.00v3.20l-88.91 0.00"></path>
+<path class="fill" d="m787.15 21.50
+l88.23 0.00v3.20l-88.23 0.00"></path>
+<path class="fill" d="m793.15 26.50
+l-6.00 0.00v3.20l6.00 0.00"></path>
+<path class="fill" d="m823.69 26.50
+l15.14 0.00v3.20l-15.14 0.00"></path>
+<path class="fill" d="m869.37 26.50
+l6.00 0.00v3.20l-6.00 0.00"></path>
+<path class="stroke" d="m787.15 60.70v-43.20"></path>
+<use x="783.65" y="60.70" xlink:href="#hd"></use>
+<use x="783.65" y="48.70" xlink:href="#hd"></use>
+<use x="783.65" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_274" x="777.15" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m802.29 60.70v-43.20"></path>
+<use x="798.79" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_275" x="792.29" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m823.69 60.70v-43.20"></path>
+<use x="820.19" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_276" x="813.69" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m838.83 60.70v-43.20"></path>
+<use x="835.33" y="60.70" xlink:href="#hd"></use>
+<use x="835.33" y="36.70" xlink:href="#Xhead"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_277" x="828.83" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m853.97 60.70v-43.20"></path>
+<use x="850.47" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_278" x="843.97" y="30.70" width="13.00" height="42.00"></rect>
+<path class="stroke" d="m875.37 60.70v-43.20"></path>
+<use x="871.87" y="60.70" xlink:href="#hd"></use>
+<rect style="fill: transparent;" class="abcr" id="abcNoteNum_1_279" x="865.37" y="30.70" width="13.00" height="42.00"></rect>
+<use x="141.55" y="16.00" xlink:href="#accent"></use>
+<use x="351.66" y="16.00" xlink:href="#accent"></use>
+<use x="573.54" y="12.00" xlink:href="#accent"></use>
+<use x="783.65" y="12.00" xlink:href="#accent"></use>
+</g></svg>

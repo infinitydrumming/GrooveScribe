@@ -127,14 +127,14 @@ c2.20 3.00 8.80 3.00 11.00 0.00"></path>
 .fill {fill: currentColor}
 .stroke {stroke: currentColor; fill: none; stroke-width: .7}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<use id="ghd" transform="translate(4.5,0) scale(0.5)" xlink:href="#hd"></use>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<use id="ghd" transform="translate(4.5,0) scale(0.5)" xlink:href="#hd"></use>
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><path class="stroke" d="m352.55 51.70v-24.00"></path>
 <path class="stroke" d="m885.33 51.70v-24.00"></path>
 <path class="stroke" d="m882.33 51.70v-24.00"></path>

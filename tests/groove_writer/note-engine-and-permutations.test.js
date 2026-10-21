@@ -2,6 +2,9 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { newGrooveWriter, buildFullPageDOM } from '../helpers/loadGrooveWriter.js';
 import { installMidiGlobal } from '../helpers/legacyLoader.js';
 
+// jsdom has no scrollIntoView; adding a bar scrolls to it
+if (!Element.prototype.scrollIntoView) Element.prototype.scrollIntoView = vi.fn();
+
 // A permissive MIDI.js stand-in sufficient for runsOnPageLoad / playback wiring.
 function makeMidiMock() {
   return {
@@ -379,6 +382,150 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
       expect(kicksInLoadedMidi()).toBe(2 * once);
       // the menu keeps the chosen value when it is rebuilt
       expect(gw.HTMLforPermutationOptions()).toContain('<option value="2" selected>');
+    });
+
+    // Infinity Drumming, 2026: a permutation over the groove's first bars
+    describe('over a multi-bar ostinato', () => {
+      // Singles only, over 2 bars: bar 2 has an open hi-hat on the "&" of 4
+      const TWO_BARS =
+        '?TimeSig=4/4&Div=16&Tempo=90&Measures=2&Perm=kick_16ths&PermSet=001111100000000000000&Ostinato=2' +
+        '&H=|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|&S=|----O-------O---|----O-------O---|' +
+        '&K=|o-------o-------|o-------o-------|';
+      // note-ons of a note in the loaded MIDI (channel 10: 0x99)
+      const noteOns = (note) => {
+        const url = String(globalThis.MIDI.Player.loadFile.mock.calls.at(-1)[0]);
+        const bytes = atob(url.slice('data:audio/midi;base64,'.length));
+        let count = 0;
+        for (let i = 0; i < bytes.length - 2; i++)
+          if (
+            bytes.charCodeAt(i) === 0x99 &&
+            bytes.charCodeAt(i + 1) === note &&
+            bytes.charCodeAt(i + 2)
+          )
+            count++;
+        return count;
+      };
+      const highlighted = () =>
+        [...document.querySelectorAll('[id^="bg-highlight"]')].find((el) =>
+          el.style.background.includes('50, 126, 173')
+        )?.id;
+      // the tempo's address-bar update waits 300 ms: run it before the page goes
+      beforeEach(() => vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] }));
+      afterEach(() => {
+        vi.runOnlyPendingTimers();
+        vi.useRealTimers();
+      });
+
+      it('plays each figure over both bars, "Play each" times through them', () => {
+        gw.loadNewGroove(TWO_BARS + '&PlayEach=2');
+        expect(gw.numberOfMeasures()).toBe(2);
+        loadMidi(false);
+        // 4 figures × 2 times × 2 bars = 16 bars of 4 kicks; an open hi-hat in every 2nd bar
+        expect(noteOns(35)).toBe(64);
+        expect(noteOns(46)).toBe(8);
+      });
+
+      it('writes each figure once over the bars, each bar numbered with its figure', () => {
+        gw.loadNewGroove(TWO_BARS + '&PlayEach=2');
+        const abc = document.getElementById('ABCsource').value;
+        expect(abc.match(/ostinato bar 1/g)).toHaveLength(4);
+        expect(abc.match(/ostinato bar 2/g)).toHaveLength(4);
+        expect(abc.match(/^P: /gm)).toHaveLength(1);
+        // figure 2's bars: "2" over its bar 1 (set in the bar before) and its bar 2
+        expect(abc).toContain('%%setbarnb 2\n%\n% Singles on "e", ostinato bar 1');
+        expect(abc).toContain('%%setbarnb 3\n%\n% Singles on "e", ostinato bar 2');
+      });
+
+      it('follows the run on the music and on the grid', () => {
+        gw.loadNewGroove(TWO_BARS + '&PlayEach=2');
+        // run bar -> bar of the music (8 bars: 4 figures over 2 bars)
+        const musicBar = (runBar) =>
+          Math.floor(gw.myGrooveUtils.percentForSheetMusic((runBar + 0.5) / 16) * 8);
+        expect([0, 1, 2, 3, 4, 5, 15].map(musicBar)).toEqual([0, 1, 0, 1, 2, 3, 7]);
+        // the grid highlights the ostinato's bar: bar 2 starts at note 16
+        fireNote('hi-hat', 0.01 / 16);
+        expect(highlighted()).toBe('bg-highlight0');
+        fireNote('hi-hat', 1.01 / 16);
+        expect(highlighted()).toBe('bg-highlight16');
+      });
+
+      it('keeps the first 5 bars when a permutation is chosen, and adds no more', () => {
+        const seven = '|x-x-x-x-x-x-x-x-'.repeat(7) + '|';
+        gw.loadNewGroove(`?TimeSig=4/4&Div=16&Tempo=90&Measures=7&H=${seven}`);
+        gw.permutationPopupClick('snare_16ths');
+        expect(gw.numberOfMeasures()).toBe(5);
+        const alert = vi.spyOn(window, 'alert').mockImplementation(() => {});
+        gw.addMeasureButtonClick();
+        gw.duplicateMeasureButtonClick(1);
+        expect(gw.numberOfMeasures()).toBe(5);
+        expect(alert).toHaveBeenCalledWith(
+          'A permutation plays over 5 bars at most. Turn the permutation off to add more bars.'
+        );
+        gw.permutationPopupClick('none');
+        gw.addMeasureButtonClick();
+        expect(gw.numberOfMeasures()).toBe(6);
+      });
+
+      it('keeps the ticked figures when a bar is added to the ostinato', () => {
+        gw.loadNewGroove(TWO_BARS); // Singles only (Doubles and Triples are on by default)
+        const box = (id) => document.getElementById('PermuationOptions' + id);
+        box('Quads').checked = true; // off by default
+        box('Singles_sub2').checked = false; // on by default
+        gw.addMeasureButtonClick();
+        expect(gw.numberOfMeasures()).toBe(3);
+        expect(box('Quads').checked).toBe(true);
+        expect(box('Singles_sub2').checked).toBe(false);
+        expect(box('Doubles').checked).toBe(false);
+        expect(box('Singles').checked).toBe(true);
+      });
+
+      // links from before October 2026 played bar 1 only, closing any others on opening
+      it('opens an older link with a permutation and more bars at bar 1, as it did', () => {
+        const link = () =>
+          gw.myGrooveUtils.getUrlStringFromGrooveData(gw.grooveDataFromClickableUI());
+        gw.loadNewGroove(TWO_BARS.replace('&Ostinato=2', ''));
+        expect(gw.numberOfMeasures()).toBe(1);
+        expect(link()).toContain('&Measures=1');
+        expect(link()).not.toContain('Ostinato');
+      });
+
+      it('writes its bars into the link, and an undo keeps them', () => {
+        const link = () =>
+          gw.myGrooveUtils.getUrlStringFromGrooveData(gw.grooveDataFromClickableUI());
+        gw.loadNewGroove(TWO_BARS);
+        expect(gw.numberOfMeasures()).toBe(2);
+        expect(link()).toContain('&Ostinato=2');
+        gw.updateCurrentURL();
+        gw.addMeasureButtonClick();
+        expect(link()).toContain('&Ostinato=3');
+        gw.undoCommand();
+        expect(gw.numberOfMeasures()).toBe(2);
+        expect(link()).toContain('&Ostinato=2');
+      });
+
+      it('keeps the ticked figures in a time signature with the same figures', () => {
+        gw.loadNewGroove(TWO_BARS); // Singles only
+        const box = (id) => document.getElementById('PermuationOptions' + id);
+        box('Singles_sub2').checked = false;
+        document.body.insertAdjacentHTML(
+          'beforeend',
+          '<div id="timeSigPopup"><select id="timeSigPopupTimeSigTop">' +
+            '<option>3</option><option>4</option><option>6</option></select>' +
+            '<select id="timeSigPopupTimeSigBottom"><option>4</option><option>8</option></select></div>'
+        );
+        const changeTimeSig = (top, bottom) => {
+          document.getElementById('timeSigPopupTimeSigTop').value = top;
+          document.getElementById('timeSigPopupTimeSigBottom').value = bottom;
+          gw.timeSigPopupClose('ok');
+        };
+        changeTimeSig('3', '4'); // the same figures, without "Simplify multiple kicks"
+        expect(box('SkipSomeFirstNotes')).toBeNull();
+        expect(box('Singles_sub2').checked).toBe(false);
+        expect(box('Doubles').checked).toBe(false);
+        changeTimeSig('6', '8'); // other figures: ticked as they start
+        expect(box('SinglesBeat')).not.toBeNull();
+        expect(box('Doubles').checked).toBe(true);
+      });
     });
 
     describe('"groove / click" bars, counted bar by bar', () => {

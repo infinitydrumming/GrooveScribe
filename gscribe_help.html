@@ -1,4 +1,4 @@
-<!--Modified by Infinity Drumming, 2026: Brazilian swing, straight and swung bars, speed-up target tempo, cursor timing, flams / drags / ruffs, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting, Save &amp; Share, My Grooves, student view, tap a menu's button again to close it, the Articulations button, more metronome clicks, diddles, notes beat by beat, triplets in x/8 time, the 32nd-note count, swing in Mixed, tom rim clicks, practising some bars of a permutation, sending an exercise with its practice settings and instructions, every 1/16 triplet figure, the 16th-triplet and 32nd-note counts, the counting choices, a copy of a bar right after it, copy and paste between windows, fat back kick permutations, the permutations help shown.  See CHANGES.md -->
+<!--Modified by Infinity Drumming, 2026: Brazilian swing, straight and swung bars, speed-up target tempo, cursor timing, flams / drags / ruffs, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting, Save &amp; Share, My Grooves, student view, tap a menu's button again to close it, the Articulations button, more metronome clicks, diddles, notes beat by beat, triplets in x/8 time, the 32nd-note count, swing in Mixed, tom rim clicks, practising some bars of a permutation, sending an exercise with its practice settings and instructions, every 1/16 triplet figure, the 16th-triplet and 32nd-note counts, the counting choices, a copy of a bar right after it, copy and paste between windows, fat back kick permutations, the permutations help shown, permutations over a multi-bar ostinato, permutations in more time signatures.  See CHANGES.md -->
 <link rel="icon" type="image/png" sizes="32x32" href="images/iscribe-icon-32.png">
 <link rel="icon" type="image/png" sizes="96x96" href="images/iscribe-icon-96.png">
 <link rel="icon" type="image/png" sizes="192x192" href="images/iscribe-icon-192.png">
@@ -87,7 +87,7 @@ Each bar has a small time signature button (e.g. <b>4/4</b>) under its swing / s
 <li>The time signature button at the left of the toolbar sets every bar at once.
 <li>New bars copy the last bar's time signature.
 <li>Bars in x/8 are beamed the classic way, in 8th and 16th notes alike: 3/8 as one group of three, 5/8 as 3+2, 7/8 as 2+2+3 (6/8, 9/8 and 12/8 stay in threes). The grid is spaced in the same groups.
-<li>A note setting has to fit every bar, and permutations are only for grooves in 4/4 throughout.
+<li>A note setting has to fit every bar, and permutations are only for grooves whose bars all have the same time signature (see <b>Permutations</b> for which).
 <li>Triplets work in x/4 and x/8 bars. In x/8, 16th-note triplets put three notes on every 8th note (like 8th-note triplets in 4/4), and 8th-note triplets put three over every two 8th notes (like quarter-note triplets), so they need bars of whole quarter notes such as 6/8 and 12/8, not 7/8.
 </ul>
 
@@ -158,17 +158,35 @@ The setting is saved in the groove's link. The sheet music stays straight, as Br
 <h3>Permutations</h3>
 
 A permutation for drumming is a method for playing all the possible combinations of given instrument for a note division.
-Choose one in the <b>Permutations</b> menu (in 4/4 time): the kick, the snare, or kick and snare alternating (kick lead or
+Choose one in the <b>Permutations</b> menu: the kick, the snare, or kick and snare alternating (kick lead or
 snare lead), in the groove's note setting. <b>Play each</b> plays every figure that many times before the next one.
 <p>
-If there are multiple measures present, all but the first will be closed when a permutation is activated.
-You can use Undo to restore the measures that were closed if necessary.
+<b>Time signatures</b>: permutations work in 4/4 in every note setting, and in other time signatures where the figures
+fit the beats (the Permutations button is dimmed where they don't):
+<ul>
+<li><b>x/4</b> (2/4, 3/4, 5/4, 7/4...): in 1/16 notes, 1/32 notes and both triplet settings, the 4/4 figures beat by beat.
+In 1/8 notes the figures last two beats, so only with an even number of beats (2/4, 6/4...).
+<li><b>6/8, 9/8, 12/8</b> (and 3/8, 15/8), in dotted-quarter beats: in 1/8 notes they have the 1/8 triplet figures (3 eighths
+a beat, named by the count: "Singles on 2"), in 1/16 notes the 1/16 triplet figures (6 sixteenths a beat).
+<li>The cross-rhythms (every 2nd or every 4th note) are there when they come round evenly in the bar, so not in 9/8 8ths
+or 3/4 8th triplets, for example.
+<li>Not in 5/8, 7/8 and other bars of uneven beats, x/16, or grooves whose bars have different time signatures.
+<li>Changing to another time signature with the same figures (4/4 to 3/4 in 16ths, say) keeps the ticked figures.
+</ul>
+<p>
+<b>An ostinato of more than one bar</b>: the groove's first bars, up to 5, are the permutation's ostinato (bars after the
+5th are closed when a permutation is chosen; Undo brings them back). 5 bars of 16ths leave room for a 5-note grouping to
+come round over the bar lines. Every figure is played over each bar of it, and
+<b>Play each</b> counts the times through the ostinato: ×2 with a 2-bar ostinato gives each figure 4 bars. The music writes
+each figure once over the ostinato's bars, and every bar of a figure has the figure's number, the number to type in
+<b>Practise bars</b>. Each bar keeps its own swing / straight switch and muted lines, and fat back follows each bar's snare.
+To add more bars, turn the permutation off.
 <p>
 <b>Fat back</b>: tick it in a kick permutation's options and every figure leaves the backbeat to the snare: there is no kick
 wherever the groove's snare plays (normally 2 and 4), only the kicks around it. Ghost notes don't count, so kicks under them stay.
 The headings over the figures say "fat back", and it is saved in the link with the other practice settings.
 <p>
-<b>Simplify multiple kicks</b> (kick permutations in 1/16 notes): the kick on the "1" and the "1 e" is skipped when it
+<b>Simplify multiple kicks</b> (kick permutations in 1/16 notes in 4/4): the kick on the "1" and the "1 e" is skipped when it
 directly follows a kick on the "4 a" of the bar before, so the figures flow when the whole run is played through.
 <b>Use Accent Grid</b> (snare permutations) accents the figure and plays ghost notes on the other notes of the grid.
 <p>
@@ -177,7 +195,7 @@ directly follows a kick on the "4 a" of the bar before, so the figures flow when
 (each "Play each" times), and the music shows just them with their numbers. Empty the box to play the whole run again.
 The choice is saved in the link with the other practice settings.
 <p>
-<b>1/16 triplets</b>: the permutation has every rhythm of a beat of 6 notes, in a list that builds up a hit at a time.
+<b>1/16 triplets</b> (and 16ths in 6/8, 9/8, 12/8): the permutation has every rhythm of a beat of 6 notes, in a list that builds up a hit at a time.
 First the figures over a whole beat, each starting on any of the 6 notes: Singles; Single, gap, single; Doubles;
 Double, gap, single; Double, 2 gaps, single (started on note 3 or 5 it is single, gap, double); Triples;
 Triple, gap, single; Quads; Fives; All six. Then the ones that repeat inside the beat: Singles and Doubles twice a beat,

@@ -11,6 +11,66 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — Permutations in more time signatures; 5-bar ostinatos
+
+- Permutations work outside 4/4 where the figures fit the beats: x/4 bars
+  (2/4, 3/4, 5/4, 7/4...) in 1/16 notes, 1/32 notes and both triplet settings,
+  the 4/4 figures beat by beat, and in 1/8 notes with an even number of beats
+  (the 1/8 figures last two beats); compound x/8 bars (3/8, 6/8, 9/8, 12/8,
+  15/8) in 1/8 and 1/16 notes, with the 1/8 and 1/16 triplet figures over each
+  dotted-quarter beat (the 1/8 ones named by the x/8 count: "Singles on 2").
+  The cross-rhythms (every 2nd / 4th note) are only there when they come round
+  evenly in the bar. 5/8, 7/8 and other bars of uneven beats, x/16 and mixed
+  time signatures have none, and the Permutations button stays dimmed there.
+  "Simplify multiple kicks" stays a 4/4 option (`js/permutations.js`,
+  `js/groove_writer.js`).
+- A permutation's swing goes by the bar's 16ths (12 in 3/4) as a groove's does,
+  rather than 16 a bar; changing to a time signature with the same figures
+  keeps the ticked figures (a bar added to the ostinato already did). If
+  abc2svg can't write out a very long run, the page says so instead of
+  breaking, and it still plays.
+- The ostinato can be up to 5 bars (was 4): room for 5-note groupings to come
+  round over the bar lines in 16ths.
+- 4/4 permutations play and look exactly as before (the golden master's
+  permutation exercises are unchanged); six more pin down a 5-bar ostinato and
+  permutations in 3/4, 6/8, 12/8, 5/4 and 2/4 (`tests-e2e/`).
+- Older links open exactly as before: a link's ostinato is in it as
+  `Ostinato=2` (written past one bar only), and a permutation link without it
+  plays bar 1 and closes any other bars, as before October 2026 (a bar added
+  after choosing a permutation used to be left out). Over 50 links of the kinds
+  the live version writes (every permutation, note setting and practice
+  setting, Ollie's routine among them) open the same in both versions: the
+  same link, music, playback, cursor and options (`js/practiceSettings.js`,
+  `js/groove_writer.js`).
+
+## 2026-10-21 — Permutations over a multi-bar ostinato
+
+- A permutation plays over the groove's first bars, up to 4 (its ostinato),
+  instead of bar 1 only: every figure over each bar of it, and **Play each**
+  counts the times through the ostinato (×2 with a 2-bar ostinato gives each
+  figure 4 bars). Choosing a permutation closes the bars after the 4th (it
+  used to close all but the first), and with a permutation on no bar can be
+  added past the 4th.
+- The music writes each figure once over the ostinato's bars, each bar
+  numbered with its figure (the number "Practise bars" takes); the sound, the
+  cursor, the grid's highlight, groove / click bars, the practice timer and
+  the speed-up follow the run bar by bar. Each bar keeps its swing / straight
+  switch and muted lines, and fat back follows each bar's snare
+  (`js/groove_writer.js`, `js/permutations.js`, `gscribe_help.html`).
+- One-bar permutations play and look exactly as before. The golden master
+  now covers permutations: eight exercises (Ollie's routine among them) pin
+  down their music, the MIDI of their first rounds and where the cursor and
+  the grid's highlight are, before and after; three more do the same for
+  ostinatos of 2, 3 and 4 bars (`tests-e2e/`).
+- Long music goes on the page much faster (a 4-bar ostinato with every 1/16
+  triplet figure: 0.9 s instead of 12 s on a desktop). In "fullsvg" mode the
+  bundled abc2svg writes every earlier line's glyph definitions (note heads,
+  accents, clefs) again in each line, so the page held thousands of copies;
+  the editor now puts each on the page once. A <use> took the first copy
+  anyway, so the music is drawn exactly as before: of the golden master's 172
+  snapshots, 18 changed, each to its old self minus the copies, and drawn pixel
+  for pixel the same (`js/abcNotation.js`, `js/groove_writer.js`).
+
 ## 2026-10-21 — Fat back kick permutations
 
 - **Fat back** in a kick permutation's options: every figure leaves the backbeat

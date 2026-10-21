@@ -8,6 +8,8 @@
 //   Perm=kick_16ths&PermSet=0011..&PlayEach=2   permutation, its ticked boxes
 //                                               (in the options' order), × each
 //   PermBars=3-6,9                              just these bars of the run
+//   Ostinato=2                                  the figures go over the first
+//                                               2 bars (1 if not given)
 //   FatBack=1                                   kick figures without the kicks
 //                                               on the snare's backbeat
 //   SpeedUp=5,2m  SpeedUp=5,16b,once,to120      bpm, every 2 minutes / 16 bars,
@@ -30,10 +32,13 @@ var PERMUTATION_TYPES = [
 ];
 
 /**
- * @typedef {{type: string, boxes: string, playEach: number, bars: string, fatBack?: boolean}} PermutationSetting
+ * @typedef {{type: string, boxes: string, playEach: number, bars: string, fatBack?: boolean,
+ *   ostinato?: number}} PermutationSetting
  *   boxes: each permutation option checkbox, in order, '1' ticked / '0' not;
  *   bars: the bars of the run to practise ("3-6, 9"), '' for all;
- *   fatBack: a kick permutation leaves out the kicks on the snare's backbeat
+ *   fatBack: a kick permutation leaves out the kicks on the snare's backbeat;
+ *   ostinato: the groove's first bars the figures go over (links from before
+ *   October 2026 have 1: their permutations played bar 1 only)
  * @typedef {{amount: number, every: number, unit: string, keepGoing: boolean, target: number}} SpeedUpSetting
  *   unit 'm' (minutes) or 'b' (bars); target 0 = no "Stop at"
  * @typedef {{permutation: (PermutationSetting|null), speedUp: (SpeedUpSetting|null),
@@ -132,6 +137,7 @@ function permutationToUrl(perm) {
   if (perm.playEach > 1) url += '&PlayEach=' + perm.playEach;
   if (perm.bars) url += '&PermBars=' + String(perm.bars).replace(/\s+/g, '');
   if (perm.fatBack) url += '&FatBack=1';
+  if (perm.ostinato > 1) url += '&Ostinato=' + perm.ostinato;
   return url;
 }
 
@@ -171,6 +177,7 @@ export function practiceSettingsFromUrl(get) {
         .filter(Boolean)
         .join(', '),
       fatBack: get('FatBack', '0') == '1',
+      ostinato: whole(get('Ostinato', '1'), 1, 99, 1),
     };
   settings.speedUp = speedUpFromText(get('SpeedUp', ''));
   settings.countIn = get('CountIn', '0') == '1';

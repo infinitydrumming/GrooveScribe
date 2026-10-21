@@ -170,18 +170,14 @@ l76.06 0.00v3.20l-76.06 0.00"></path>
 .stroke {stroke: currentColor; fill: none; stroke-width: .7}
 .f2_1 {font:16px calibri}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><g transform="translate(0,66.50)">
 <text class="f2_1" x="28.50" y="-54.90">Swing</text>
 <text class="f2_1" x="461.57" y="-54.90">Straight</text>

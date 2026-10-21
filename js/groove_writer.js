@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -120,6 +120,7 @@ import {
   musicLayout,
   musicLineBroken,
   notesOnALine,
+  defineGlyphsOnce,
 } from './abcNotation.js';
 import { barSig, barNoteCount, barStride, isMixedMeter, divisionFitsBar } from './barMeters.js';
 import { scaleTabMeasure } from './noteArrays.js';
@@ -164,11 +165,15 @@ function GrooveWriter() {
     percent = playingPercentToGroovePercent(percent);
     if (percent < 0) return percent; // count-in or click-only bar: nothing to follow
     if (class_permutation_type == 'none' || get_permutation_repeats() < 2) return percent;
+    // the run plays each figure "Play each" times through the ostinato's bars;
+    // the music writes it once over them
     var shown = get_numberOfActivePermutationSections();
-    var bars = shown * get_permutation_repeats();
+    var ostinato = get_ostinato_bars();
+    var bars = get_numberOfPermutationBars();
     var position = Math.min(percent * bars, bars - 1e-9);
     var bar = Math.floor(position);
-    return (Math.floor(bar / get_permutation_repeats()) + (position - bar)) / shown;
+    var figure = Math.floor(bar / (get_permutation_repeats() * ostinato));
+    return (figure * ostinato + (bar % ostinato) + (position - bar)) / (shown * ostinato);
   };
 
   var class_undo_stack = [];
@@ -1371,9 +1376,13 @@ function GrooveWriter() {
       return;
     }
 
-    // if we are in a permutation, hightlight each measure as it goes
-    if (class_permutation_type != 'none')
-      percent_complete = (percent_complete * get_numberOfPermutationBars()) % 1.0;
+    // if we are in a permutation, hightlight each measure as it goes (each bar
+    // of its ostinato)
+    if (class_permutation_type != 'none') {
+      var playing = percent_complete * get_numberOfPermutationBars();
+      percent_complete =
+        ((Math.floor(playing) % get_ostinato_bars()) + (playing % 1.0)) / class_number_of_measures;
+    }
 
     if (isMixedMeterGroove()) {
       // bars of different lengths: find the bar, then the note in it
@@ -1566,8 +1575,7 @@ function GrooveWriter() {
 
   // the user has clicked on the permutation menu
   root.permutationAnchorClick = function (event) {
-    if (class_num_beats_per_measure != 4 || class_note_value_per_measure != 4) return; // permutations disabled except in 4/4 time
-    if (isMixedMeterGroove()) return; // and in grooves whose bars have their own time signatures
+    if (!permutationsAllowed()) return; // no figures for this time signature and note setting
 
     var contextMenu = document.getElementById('permutationContextMenu');
     if (contextMenu) {
@@ -1838,18 +1846,18 @@ function GrooveWriter() {
     root.metronomeOptionsMenuOffsetClickPopupClick('1');
   };
 
-  // permutations are for 4/4 grooves whose bars are all 4/4
+  // permutations are for grooves whose bars all have the same time signature,
+  // in a note setting with figures for it (4/4 in any; Infinity Drumming, 2026:
+  // x/4 and compound x/8 too, see permutations.getPermutationLayout)
   function permutationsAllowed() {
-    return (
-      class_num_beats_per_measure == 4 && class_note_value_per_measure == 4 && !isMixedMeterGroove()
-    );
+    return !isMixedMeterGroove() && !!get_permutation_layout();
   }
 
   function setupPermutationMenu() {
     if (permutationsAllowed()) {
       addOrRemoveKeywordFromClassById('permutationAnchor', 'enabled', true);
     } else {
-      // permutations disabled except in 4/4 time
+      // no figures for this time signature and note setting
       addOrRemoveKeywordFromClassById('permutationAnchor', 'enabled', false);
       root.permutationPopupClick('none'); // make sure permutation is off
     }
@@ -1865,9 +1873,7 @@ function GrooveWriter() {
       case 'kick_16ths':
         showHideCSS_ClassVisibility('.kick-container', true, false); // hide it
         showHideCSS_ClassVisibility('.snare-container', true, true); // show it
-        while (class_number_of_measures > 1) {
-          root.closeMeasureButtonClick(2);
-        }
+        closeBarsPastOstinato();
         selectButton(document.getElementById('permutationAnchor'));
         document.getElementById('PermutationOptions').innerHTML = root.HTMLforPermutationOptions();
         document.getElementById('PermutationOptions').className += ' displayed';
@@ -1876,9 +1882,7 @@ function GrooveWriter() {
       case 'snare_16ths':
         showHideCSS_ClassVisibility('.kick-container', true, true); // show it
         showHideCSS_ClassVisibility('.snare-container', true, false); // hide it
-        while (class_number_of_measures > 1) {
-          root.closeMeasureButtonClick(2);
-        }
+        closeBarsPastOstinato();
         selectButton(document.getElementById('permutationAnchor'));
         document.getElementById('PermutationOptions').innerHTML = root.HTMLforPermutationOptions();
         document.getElementById('PermutationOptions').className += ' displayed';
@@ -1889,9 +1893,7 @@ function GrooveWriter() {
         // alternating kick and snare: the permutation replaces both lines
         showHideCSS_ClassVisibility('.kick-container', true, false); // hide it
         showHideCSS_ClassVisibility('.snare-container', true, false); // hide it
-        while (class_number_of_measures > 1) {
-          root.closeMeasureButtonClick(2);
-        }
+        closeBarsPastOstinato();
         selectButton(document.getElementById('permutationAnchor'));
         document.getElementById('PermutationOptions').innerHTML = root.HTMLforPermutationOptions();
         document.getElementById('PermutationOptions').className += ' displayed';
@@ -2440,8 +2442,13 @@ function GrooveWriter() {
   // The figures depend on the note setting (1/8, 1/16, 1/8 or 1/16 triplets);
   // each is one bar. A figure is shown when its group checkbox and (if it has
   // one) its own sub-checkbox are ticked; "Play each ×" repeats every bar.
+  // (null when there are none for the time signature and note setting)
   function get_permutation_layout() {
-    return _perm.getPermutationLayout(class_time_division);
+    return _perm.getPermutationLayout(
+      class_time_division,
+      class_num_beats_per_measure,
+      class_note_value_per_measure
+    );
   }
 
   function isPermutationSectionShown(section) {
@@ -2457,9 +2464,9 @@ function GrooveWriter() {
   // those only the bars to practise when some are chosen ("Practise bars");
   // barsPerLine: 2 (the default) or 1, for the music
   function get_shown_permutation_sections(barsPerLine) {
-    var ticked = _perm
-      .getPermutationSections(get_permutation_layout())
-      .filter(isPermutationSectionShown);
+    var layout = get_permutation_layout();
+    if (!layout) return [];
+    var ticked = _perm.getPermutationSections(layout).filter(isPermutationSectionShown);
     var chosen = _perm.parseBarList(class_permutation_bars, ticked.length);
     var shown = [];
     ticked.forEach(function (section, i) {
@@ -2467,26 +2474,34 @@ function GrooveWriter() {
         shown.push({ section: section, number: i + 1 });
     });
     var repeats = get_permutation_repeats();
-    return shown.map(function (bar, i) {
-      var section = bar.section;
+    var ostinato = get_ostinato_bars();
+    return shown.map(function (figure, i) {
+      var section = figure.section;
       var shownIndex = 0;
       for (var j = i - 1; j >= 0 && shown[j].section.group === section.group; j--) shownIndex++;
       var lastInGroup = i + 1 >= shown.length || shown[i + 1].section.group !== section.group;
-      var next = shown[i + 1] ? shown[i + 1].number : 0; // printed over the next bar
-      var abc = _perm.getPermutationSectionABC(
-        section,
-        shownIndex,
-        lastInGroup,
-        repeats,
-        next,
-        barsPerLine || 2,
-        fatBackOn()
-      );
+      var next = shown[i + 1] ? shown[i + 1].number : 0; // printed over the next figure
+      // the ABC before / after each bar of the figure (one for each bar of the
+      // ostinato); every bar of a figure has the figure's number
+      var abc = [];
+      for (var bar = 0; bar < ostinato; bar++)
+        abc.push(
+          _perm.getPermutationSectionABC(
+            section,
+            shownIndex,
+            lastInGroup,
+            repeats,
+            bar + 1 < ostinato ? figure.number : next,
+            barsPerLine || 2,
+            fatBackOn(),
+            { bar: bar, bars: ostinato }
+          )
+        );
       // the music's first bar has no bar number: with some bars chosen, its
       // heading says which bar it is
       if (i === 0 && chosen.length)
-        abc.pre = abc.pre.replace(/^(P:.*)$/m, '$1   (bar ' + bar.number + ')');
-      return { section: section, pre_abc: abc.pre, post_abc: abc.post };
+        abc[0].pre = abc[0].pre.replace(/^(P:.*)$/m, '$1   (bar ' + figure.number + ')');
+      return { section: section, abc: abc };
     });
   }
 
@@ -2497,9 +2512,10 @@ function GrooveWriter() {
   // pauses), and it's tidied up ("3-6, 9") on Enter or leaving it
   var class_permutation_bars_timer = null;
   function setPermutationBars(text) {
-    var ticked = _perm
-      .getPermutationSections(get_permutation_layout())
-      .filter(isPermutationSectionShown).length;
+    var layout = get_permutation_layout();
+    var ticked = layout
+      ? _perm.getPermutationSections(layout).filter(isPermutationSectionShown).length
+      : 0;
     var bars = _perm.barListToText(_perm.parseBarList(text, ticked));
     var changed = bars != class_permutation_bars;
     class_permutation_bars = bars;
@@ -2616,9 +2632,67 @@ function GrooveWriter() {
     return get_shown_permutation_sections().length;
   }
 
-  // bars in one full pass of the permutation, counting repeats
+  // bars in one full pass of the permutation, counting repeats and the
+  // ostinato's bars
   function get_numberOfPermutationBars() {
-    return get_numberOfActivePermutationSections() * get_permutation_repeats();
+    return (
+      get_numberOfActivePermutationSections() * get_permutation_repeats() * get_ostinato_bars()
+    );
+  }
+
+  // --- Multi-bar ostinatos (Infinity Drumming, 2026) ----------------------------
+  // A permutation plays over the groove's first bars, its ostinato (up to
+  // _perm.MAX_OSTINATO_BARS): each figure over every bar of it, "Play each" times
+  // through. Bar `n` of the run is figure floor(n / (repeats × bars)), over bar
+  // n % bars of the ostinato.
+  function get_ostinato_bars() {
+    return Math.min(class_number_of_measures, _perm.MAX_OSTINATO_BARS);
+  }
+
+  // a permutation's swing goes by 16ths, however the bar is written (16 in 4/4)
+  function permutationSwingNotes() {
+    return (16 * class_num_beats_per_measure) / class_note_value_per_measure;
+  }
+
+  // choosing a permutation closes the bars after the ostinato's
+  function closeBarsPastOstinato(bars) {
+    bars = Math.min(bars || _perm.MAX_OSTINATO_BARS, _perm.MAX_OSTINATO_BARS);
+    while (class_number_of_measures > bars) root.closeMeasureButtonClick(bars + 1);
+  }
+
+  // with a permutation on, no more bars than an ostinato has (and says so)
+  function ostinatoIsFull() {
+    if (class_permutation_type == 'none') return false;
+    if (class_number_of_measures < _perm.MAX_OSTINATO_BARS) return false;
+    window.alert(
+      'A permutation plays over ' +
+        _perm.MAX_OSTINATO_BARS +
+        ' bars at most. Turn the permutation off to add more bars.'
+    );
+    return true;
+  }
+
+  // bar `bar` of the grid, as a permutation's ostinato plays it (`muted`: its
+  // muted lines silent, for the sound)
+  function readOstinatoBar(bar, muted) {
+    var o = {
+      Sticking: get_empty_note_array_in_32nds(),
+      HH: get_empty_note_array_in_32nds(),
+      Snare: get_empty_note_array_in_32nds(),
+      Kick: get_empty_note_array_in_32nds(),
+      Toms: get_empty_voice_arrays_in_32nds(),
+      num_notes: 0,
+    };
+    o.num_notes = get32NoteArrayFromClickableUI(
+      o.Sticking,
+      o.HH,
+      o.Snare,
+      o.Kick,
+      o.Toms,
+      bar * class_notes_per_measure
+    );
+    if (muted) muteArrayFromClickableUI(o.Sticking, o.HH, o.Snare, o.Kick, o.Toms, bar);
+    return o;
   }
 
   // query the clickable UI and generate a 32 element array representing the notes of one measure
@@ -2730,24 +2804,39 @@ function GrooveWriter() {
       case 'snare_16ths':
       case 'kick_snare_kick_lead':
       case 'kick_snare_snare_lead':
-        // every shown figure, each played "Play each" times
+        num_notes_for_swing = permutationSwingNotes();
+        // every shown figure over the ostinato's bars, "Play each" times through
+        var ostinato = [
+          {
+            HH: HH_Array,
+            Snare: Snare_Array,
+            Kick: Kick_Array,
+            Toms: Toms_Array,
+            num_notes: num_notes,
+          },
+        ];
+        for (i = 1; i < get_ostinato_bars(); i++) ostinato.push(readOstinatoBar(i, true));
         get_shown_permutation_sections().forEach(function (shownSection) {
-          var bar = get_permutation_bar(shownSection.section, Kick_Array, Snare_Array);
+          var bars = ostinato.map(function (o) {
+            return get_permutation_bar(shownSection.section, o.Kick, o.Snare);
+          });
           for (var repeat = 0; repeat < get_permutation_repeats(); repeat++)
-            root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
-              midiTrack,
-              HH_Array,
-              bar.snare,
-              bar.kick,
-              Toms_Array,
-              MIDI_type,
-              metronomeFrequency,
-              num_notes,
-              num_notes_for_swing,
-              swingForBar(0),
-              class_num_beats_per_measure,
-              class_note_value_per_measure
-            );
+            ostinato.forEach(function (o, k) {
+              root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
+                midiTrack,
+                o.HH,
+                bars[k].snare,
+                bars[k].kick,
+                o.Toms,
+                MIDI_type,
+                metronomeFrequency,
+                o.num_notes,
+                num_notes_for_swing,
+                swingForBar(k),
+                class_num_beats_per_measure,
+                class_note_value_per_measure
+              );
+            });
         });
         break;
 
@@ -3262,33 +3351,47 @@ function GrooveWriter() {
         );
         root.myGrooveUtils.note_mapping_array = [];
 
-        // every shown figure, written once (marked "play each ×N" when repeated)
+        // every shown figure, written once over the ostinato's bars (marked
+        // "play each ×N" when repeated)
+        var ostinato = [
+          {
+            Sticking: Sticking_Array,
+            HH: HH_Array,
+            Snare: Snare_Array,
+            Kick: Kick_Array,
+            Toms: Toms_Array,
+            num_notes: num_notes,
+          },
+        ];
+        for (i = 1; i < get_ostinato_bars(); i++) ostinato.push(readOstinatoBar(i, false));
         get_shown_permutation_sections(layout.barsPerLine).forEach(function (shownSection) {
-          var bar = get_permutation_bar(shownSection.section, Kick_Array, Snare_Array);
-          fullABC += shownSection.pre_abc;
-          fullABC += root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
-            Sticking_Array,
-            HH_Array,
-            bar.snare,
-            bar.kick,
-            Toms_Array,
-            shownSection.post_abc,
-            num_notes,
-            class_time_division,
-            num_notes,
-            true,
-            class_num_beats_per_measure,
-            class_note_value_per_measure
-          );
-          root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
-            root.myGrooveUtils.create_note_mapping_array_for_highlighting(
-              HH_Array,
+          ostinato.forEach(function (o, k) {
+            var bar = get_permutation_bar(shownSection.section, o.Kick, o.Snare);
+            fullABC += shownSection.abc[k].pre;
+            fullABC += root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
+              o.Sticking,
+              o.HH,
               bar.snare,
               bar.kick,
-              Toms_Array,
-              num_notes
-            )
-          );
+              o.Toms,
+              shownSection.abc[k].post,
+              o.num_notes,
+              class_time_division,
+              o.num_notes,
+              true,
+              class_num_beats_per_measure,
+              class_note_value_per_measure
+            );
+            root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
+              root.myGrooveUtils.create_note_mapping_array_for_highlighting(
+                o.HH,
+                bar.snare,
+                bar.kick,
+                o.Toms,
+                o.num_notes
+              )
+            );
+          });
         });
         break;
 
@@ -3431,10 +3534,22 @@ function GrooveWriter() {
       diverr = document.getElementById('diverr');
 
     var abc_source = document.getElementById('ABCsource').value;
-    var svg_return = root.myGrooveUtils.renderABCtoSVG(abc_source);
+    var svg_return;
+    try {
+      svg_return = root.myGrooveUtils.renderABCtoSVG(abc_source);
+    } catch (err) {
+      // abc2svg gives up on a very long run of music (Infinity Drumming, 2026)
+      svg_return = {
+        svg:
+          '<p class="musicTooLong">This is more music than can be written out at once: untick ' +
+          'some figures, or use fewer bars. It still plays.</p>',
+        error_html: String(err && err.message),
+      };
+    }
 
     diverr.innerHTML = svg_return.error_html;
-    svgTarget.innerHTML = svg_return.svg;
+    // each glyph defined once on the page (abc2svg repeats them line after line)
+    svgTarget.innerHTML = defineGlyphsOnce(svg_return.svg);
     class_music_svg = svg_return.svg;
   };
 
@@ -3586,6 +3701,7 @@ function GrooveWriter() {
   // (the bars keep their muted lines, and the new bar the last one's)
   root.addMeasureButtonClick = function (event) {
     if (class_number_of_measures >= constant_MAX_MEASURES) return; // the most a link holds
+    if (ostinatoIsFull()) return;
     var last = class_number_of_measures;
     keepingMutes(
       function (bar) {
@@ -3695,6 +3811,7 @@ function GrooveWriter() {
   // measureNum is indexed starting at 1, not 0
   root.duplicateMeasureButtonClick = function (measureNum) {
     if (class_number_of_measures >= constant_MAX_MEASURES) return; // the most a link holds
+    if (ostinatoIsFull()) return;
     var laidOut = keepingMutes(
       function (bar) {
         if (bar < measureNum) return [bar];
@@ -5400,9 +5517,12 @@ function GrooveWriter() {
       : get_numberOfPermutationBars();
   }
 
-  // Does bar `bar` of that sequence play straight? (Permutations play bar 1.)
+  // Does bar `bar` of that sequence play straight? (Permutations: its bar of the
+  // ostinato.)
   function isSequenceBarStraight(bar) {
-    return !!class_straight_bars[class_permutation_type == 'none' ? bar : 0];
+    return !!class_straight_bars[
+      class_permutation_type == 'none' ? bar : bar % get_ostinato_bars()
+    ];
   }
 
   // One cycle has played: the next one starts that many groove bars later.
@@ -5474,8 +5594,12 @@ function GrooveWriter() {
         );
       return cycleBars;
     }
-    if (class_permutation_type != 'none')
-      return repeat(get_numberOfPermutationBars(), !!class_straight_bars[0]);
+    if (class_permutation_type != 'none') {
+      var runBars = [];
+      for (var b = 0; b < get_numberOfPermutationBars(); b++)
+        runBars.push(isSequenceBarStraight(b));
+      return runBars;
+    }
     return class_straight_bars
       .slice(0, class_number_of_measures)
       .map(Boolean)
@@ -5590,35 +5714,24 @@ function GrooveWriter() {
   }
 
   // Bar `index` of a permutation as it plays (figures in order, each played
-  // "Play each" times), built from bar 1 of the grid like the permutation playback.
+  // "Play each" times through the ostinato), built from its bar of the ostinato
+  // like the permutation playback.
   function addPermutationBarToMidiTrack(midiTrack, sections, index) {
-    var section = sections[Math.floor(index / get_permutation_repeats())].section;
-    var Sticking_Array = get_empty_note_array_in_32nds();
-    var HH_Array = get_empty_note_array_in_32nds();
-    var Snare_Array = get_empty_note_array_in_32nds();
-    var Kick_Array = get_empty_note_array_in_32nds();
-    var Toms_Array = get_empty_voice_arrays_in_32nds();
-    var num_notes = get32NoteArrayFromClickableUI(
-      Sticking_Array,
-      HH_Array,
-      Snare_Array,
-      Kick_Array,
-      Toms_Array,
-      0
-    );
-    muteArrayFromClickableUI(Sticking_Array, HH_Array, Snare_Array, Kick_Array, Toms_Array, 0);
-    var bar = get_permutation_bar(section, Kick_Array, Snare_Array);
+    var ostinato = get_ostinato_bars();
+    var section = sections[Math.floor(index / (get_permutation_repeats() * ostinato))].section;
+    var o = readOstinatoBar(index % ostinato, true);
+    var bar = get_permutation_bar(section, o.Kick, o.Snare);
     root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
       midiTrack,
-      HH_Array,
+      o.HH,
       bar.snare,
       bar.kick,
-      Toms_Array,
+      o.Toms,
       'our_MIDI',
       root.getMetronomeFrequency(),
-      num_notes,
-      16, // as the permutation playback groups the swing
-      class_straight_bars[0] ? 0 : root.myGrooveUtils.getSwing() / 100,
+      o.num_notes,
+      permutationSwingNotes(),
+      class_straight_bars[index % ostinato] ? 0 : root.myGrooveUtils.getSwing() / 100,
       class_num_beats_per_measure,
       class_note_value_per_measure
     );
@@ -6277,6 +6390,37 @@ function GrooveWriter() {
     return older;
   }
 
+  // the permutation options' ticks by box, to put back when the menu is drawn
+  // again with the same figures (a bar added to the ostinato, or another time
+  // signature with the same figures: "Simplify multiple kicks" is only in 4/4)
+  function permutationTicks() {
+    /** @type {Object<string, boolean>} */
+    var ticks = {};
+    permutationCheckboxes().forEach(function (box) {
+      ticks[box.id] = box.checked;
+    });
+    return ticks;
+  }
+
+  function setPermutationTicks(ticks) {
+    var figureBoxes = function (ids) {
+      return ids
+        .filter(function (id) {
+          return id != 'PermuationOptionsSkipSomeFirstNotes';
+        })
+        .sort()
+        .join();
+    };
+    var boxes = Array.prototype.slice.call(permutationCheckboxes());
+    var ids = boxes.map(function (box) {
+      return box.id;
+    });
+    if (figureBoxes(ids) != figureBoxes(Object.keys(ticks))) return;
+    boxes.forEach(function (box) {
+      if (box.id in ticks) box.checked = ticks[box.id];
+    });
+  }
+
   function setPermutationBoxes(text) {
     if (!text) return;
     var boxes = linkedPermutationBoxes(text.length);
@@ -6335,6 +6479,7 @@ function GrooveWriter() {
               playEach: get_permutation_repeats(),
               bars: class_permutation_bars,
               fatBack: fatBackOn(),
+              ostinato: get_ostinato_bars(),
             },
       speedUp: currentSpeedUp(),
       countIn: class_metronome_count_in_active,
@@ -6350,6 +6495,9 @@ function GrooveWriter() {
     class_permutation_fat_back = allowed && !!perm.fatBack;
     root.permutationPopupClick(allowed ? perm.type : 'none');
     if (!allowed) return;
+    // as many bars as the link's ostinato: links from before October 2026 played
+    // bar 1 only, and closed any others on opening (they still do)
+    closeBarsPastOstinato(perm.ostinato || 1);
     class_permutation_bars = perm.bars || '';
     document.getElementById('PermutationOptions').innerHTML = root.HTMLforPermutationOptions();
     setPermutationBoxes(perm.boxes);
@@ -6634,9 +6782,12 @@ function GrooveWriter() {
     // rewrite the HTML for the HTML note grid
     document.getElementById('measureContainer').innerHTML = newHTML;
 
-    // change the Permutation options too
+    // change the Permutation options too (keeping their ticks when the figures
+    // are the same: a bar added to the ostinato, say)
+    var ticks = permutationTicks();
     newHTML = root.HTMLforPermutationOptions();
     document.getElementById('PermutationOptions').innerHTML = newHTML;
+    setPermutationTicks(ticks);
 
     if (wasStickingsVisable) root.stickingsShowHide(true, true, true);
 
@@ -6945,9 +7096,11 @@ function GrooveWriter() {
   // baseIndex is the index for the css labels "staff-container1, staff-container2"
   // indexStartForNotes is the index for the note ids.
   root.HTMLforPermutationOptions = function () {
+    var layout = get_permutation_layout();
+    if (!layout) return ''; // (the time signature has none: the permutation goes off)
     return _view.buildPermutationOptionsHTML(
       class_permutation_type,
-      get_permutation_layout(),
+      layout,
       get_permutation_repeats(),
       class_permutation_bars,
       class_permutation_fat_back
