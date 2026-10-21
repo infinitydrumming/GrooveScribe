@@ -2474,14 +2474,33 @@ function GrooveWriter() {
   // the bars of the run to practise, as typed ("3-6, 9"); '' for all of them
   var class_permutation_bars = '';
 
-  // the "Practise bars" box: tidied up ("3-6, 9"), and the run follows
-  root.permutationBarsChange = function (event) {
+  // the "Practise bars" box: the run follows it as it's typed (once typing
+  // pauses), and it's tidied up ("3-6, 9") on Enter or leaving it
+  var class_permutation_bars_timer = null;
+  function setPermutationBars(text) {
     var ticked = _perm
       .getPermutationSections(get_permutation_layout())
       .filter(isPermutationSectionShown).length;
-    class_permutation_bars = _perm.barListToText(_perm.parseBarList(event.target.value, ticked));
-    event.target.value = class_permutation_bars;
-    root.refresh_ABC();
+    var bars = _perm.barListToText(_perm.parseBarList(text, ticked));
+    var changed = bars != class_permutation_bars;
+    class_permutation_bars = bars;
+    if (changed) root.refresh_ABC();
+    return bars;
+  }
+
+  root.permutationBarsInput = function (event) {
+    var box = event.target;
+    if (class_permutation_bars_timer) clearTimeout(class_permutation_bars_timer);
+    class_permutation_bars_timer = setTimeout(function () {
+      class_permutation_bars_timer = null;
+      setPermutationBars(box.value);
+    }, 300);
+  };
+
+  root.permutationBarsChange = function (event) {
+    if (class_permutation_bars_timer) clearTimeout(class_permutation_bars_timer);
+    class_permutation_bars_timer = null;
+    event.target.value = setPermutationBars(event.target.value);
   };
 
   var class_permutation_repeats = 1;
