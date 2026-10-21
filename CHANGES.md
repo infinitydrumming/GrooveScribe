@@ -11,6 +11,21 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — Dense bars one to a line on a phone; every count in triplet beats
+
+- Two bars go on a line of music only when they fit (a note needs about 8px,
+  10 with the count over it, a tenth more in triplets): on a phone, bars of
+  16th triplets (and counted 16ths) now go one to a line instead of being
+  squeezed until abc2svg broke them in the middle, losing their beams. A bar
+  too wide even alone is drawn a little smaller, and if abc2svg still breaks a
+  line in the middle of a bar the editor draws it wider (smaller) again. A
+  desktop's lines are as before (`js/abcNotation.js`, `js/groove_writer.js`,
+  `js/permutations.js`, `js/countModes.js`).
+- "Every note" and the bold counts in 1/8 and 1/16 triplets count every note of
+  a beat the music writes as a plain quarter, 8ths or 16ths ("2 a li & a la",
+  not "2 &"): the counts are laid over the beat as written, as the click's
+  count is (`js/abcNotation.js`, `js/countModes.js`).
+
 ## 2026-10-21 — The click's count keeps to the bars in triplet grooves
 
 - In 1/8 and 1/16 triplets the music writes a beat of plain notes (a quarter,

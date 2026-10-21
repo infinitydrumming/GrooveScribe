@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices, dense bars one a line on phones. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -17,14 +17,16 @@ import {
   notesPerMeasureInFullSizeArray,
   scaleNoteArrayToFullSize,
 } from './musicMath.js';
-import { barSig, fullSizeBar, isMixedMeter } from './barMeters.js';
+import { barSig, barStride, fullSizeBar, isMixedMeter } from './barMeters.js';
 import { hasBeatNotes, makeBeatPlan } from './beatNotes.js';
 import {
   clickCountBar,
-  clickCountOver,
+  clickCountNotes,
+  clickMarks,
   clickSplit,
   clickTicks,
   countFonts,
+  countOver,
   styleCounts,
 } from './countModes.js';
 
@@ -866,6 +868,92 @@ function snare_HH_kick_ABC_for_quads(
   return ABC_String;
 }
 
+/**
+ * Infinity Drumming, 2026: the most notes a bar's line of music holds, for
+ * musicLayout: its notes at the note setting, and with the click's count the
+ * clicks between them too.
+ * @param {*} gu
+ * @param {number} notesPerBar
+ * @param {number} top
+ * @param {number} bottom
+ * @param {boolean} triplets
+ */
+export function notesOnALine(gu, notesPerBar, top, bottom, triplets) {
+  if (!gu.showCounts || gu.countMode != 'click') return notesPerBar;
+  var click = gu.countClick || {};
+  var ticks = clickTicks(click.frequency, click.start, top, bottom, triplets);
+  return clickCountNotes(notesPerBar, ticks, top, bottom);
+}
+
+/**
+ * Infinity Drumming, 2026: how many lines of music the editor's ABC (a bar, or
+ * the legend, at a time) asks for: its stickings voices that end a line, not
+ * carry on to the next bar ("\\").
+ * @param {string} abc
+ */
+function abcMusicLines(abc) {
+  return abc
+    .split('V:Stickings')
+    .slice(1)
+    .filter(function (voice) {
+      var notes = voice
+        .split('V:')[0]
+        .split('\n')
+        .filter(function (line) {
+          return line && line.indexOf('%%') !== 0;
+        })
+        .join('');
+      return !/\\\s*$/.test(notes);
+    }).length;
+}
+
+/**
+ * Infinity Drumming, 2026: whether abc2svg broke a line of the music in the
+ * middle of a bar (it couldn't fit): more lines of notes in its SVG (one <svg>
+ * each) than the ABC asks for.
+ * @param {string} abc
+ * @param {string} svg  abc2svg's output
+ */
+export function musicLineBroken(abc, svg) {
+  var lines = String(svg)
+    .split('<svg')
+    .slice(1)
+    .filter(function (block) {
+      return block.indexOf('<use') >= 0;
+    }).length;
+  return lines > abcMusicLines(abc);
+}
+
+// Infinity Drumming, 2026: the music's page width for a render width, as
+// get_top_ABC_BoilerPlate makes it
+function musicPageWidth(renderWidth) {
+  return Math.floor(Math.min(Math.max(renderWidth, 400), 3000) * 0.75);
+}
+
+/**
+ * Infinity Drumming, 2026: how many bars go on a line of music, and how wide to
+ * draw the music. A note needs about 8px of the page (10 with a count of 16px
+ * letters over it, a tenth more in triplets): two bars go on a line when they
+ * fit, else one; and a bar too wide even alone gets a wider page (drawn smaller
+ * on the screen), as abc2svg would otherwise break it in the middle, losing its
+ * beams. So a phone gets one dense bar a line; a desktop's lines are as before.
+ * @param {number} notesPerBar  the most notes a bar has at the note setting
+ * @param {number} renderWidth
+ * @param {{counted?: boolean, triplets?: boolean, oneBar?: boolean, keepWidth?: boolean}} how
+ *   counted: a count over the notes (in 16px letters); oneBar: one bar a line
+ *   anyway; keepWidth: never a wider page (bars beat by beat, whose notes vary)
+ * @returns {{barsPerLine: number, renderWidth: number}}
+ */
+export function musicLayout(notesPerBar, renderWidth, how) {
+  var perNote = (how.counted ? 10 : 8) * (how.triplets ? 1.1 : 1);
+  var bar = notesPerBar * perNote;
+  var page = musicPageWidth(renderWidth);
+  return {
+    barsPerLine: how.oneBar || 2 * bar > page ? 1 : 2,
+    renderWidth: bar > page && !how.keepWidth ? Math.ceil(bar / 0.75) : renderWidth,
+  };
+}
+
 export function get_top_ABC_BoilerPlate(
   gu,
   isPermutation,
@@ -1131,7 +1219,10 @@ export function create_ABC_from_snare_HH_kick_arrays(
   }
 
   var abc;
-  var beatMarks = count.clickTicks ? [] : null;
+  // triplet-grid bars: where each beat starts in the stickings voice, to lay the
+  // counts over the beats as written (see withCountsOver)
+  var beatMarks = count.mode && tripletBar ? [] : null;
+  var counts = sticking_array.slice(); // (the writer leaves some out)
   if (isTripletDivisionFromNotesPerMeasure(notes_per_measure, timeSigTop, timeSigBottom)) {
     abc = snare_HH_kick_ABC_for_triplets(
       sticking_array,
@@ -1175,16 +1266,31 @@ export function create_ABC_from_snare_HH_kick_arrays(
       numberOfMeasuresPerLine,
       post_voice_abc
     );
-  if (beatMarks && beatMarks.length)
-    abc = withClickCountOver(
+  if (beatMarks && beatMarks.length) {
+    // the click's count over every beat; the other counts where the writer left
+    // some out (a plain beat of a triplet grid)
+    var marksIn = count.clickTicks
+      ? function () {
+          return clickMarks(count.clickTicks, count.clickSplit, timeSigBottom);
+        }
+      : function (from, to, bar) {
+          var marks = [];
+          for (var slot = from; slot < to; slot++) {
+            var said = /^"(.+)"x$/.exec(String(counts[slot]));
+            if (said) marks.push({ tick: ((slot - bar) * 128) / 12, name: said[1] });
+          }
+          return marks;
+        };
+    abc = withCountsOver(
       abc,
       beatMarks,
-      count,
+      marksIn,
+      !count.clickTicks,
       notes_per_measure,
       num_notes,
-      timeSigBottom,
       post_voice_abc
     );
+  }
   return abc;
 }
 
@@ -1262,48 +1368,52 @@ function withStickingsVoice(abc, bar, bars, barsPerLine, post_voice_abc) {
   return voice + post_voice_abc + '%%tuplets 0 0 0\n' + abc.slice(hands);
 }
 
+// The lengths of a stretch of the stickings voice's hidden notes ("x2", "x3/2").
+function spacerLengths(text) {
+  return (text.replace(/"[^"]*"/g, '').match(/x\d*(\/\d*)?/g) || []).map(function (token) {
+    var length = /^x(\d*)(\/(\d*))?$/.exec(token) || [];
+    return (Number(length[1]) || 1) / (length[2] ? Number(length[3]) || 2 : 1);
+  });
+}
+
 // The ABC of create_ABC_from_snare_HH_kick_arrays for a triplet-grid bar, with
-// the click's count over each beat of its stickings voice as the writer laid
-// the beats out (see clickCountOver; Infinity Drumming, 2026).
-function withClickCountOver(
+// counts laid over each beat of its stickings voice as the writer laid the beats
+// out (see countOver; Infinity Drumming, 2026): `marksIn(from, to, bar)` the
+// counts in slots [from, to); with `keep`, a beat the writer wrote every count
+// of stays as it is (and the ABC is as before when they all do).
+function withCountsOver(
   abc,
-  marks,
-  count,
+  beatMarks,
+  marksIn,
+  keep,
   notes_per_measure,
   num_notes,
-  bottom,
   post_voice_abc
 ) {
   var hands = abc.indexOf('V:Hands');
   if (abc.indexOf('V:Stickings\n') !== 0 || hands < 0) return abc;
   var end = hands - post_voice_abc.length;
   var voice = 'V:Stickings\n%%tuplets 1 0 0\n'; // (no "3" over its tuplets)
-  marks.forEach(function (mark, k) {
-    var next = marks[k + 1];
+  var rewritten = false;
+  beatMarks.forEach(function (mark, k) {
+    var next = beatMarks[k + 1];
     // a beat's hidden notes, then the spaces, bar lines and line breaks after them
     var text = abc.slice(mark.at, next ? next.at : end);
     var cut = text.search(/[ |\n\\]/);
     if (cut < 0) cut = text.length;
-    var spacers = (
-      text
-        .slice(0, cut)
-        .replace(/"[^"]*"/g, '')
-        .match(/x\d*(\/\d*)?/g) || []
-    ).map(function (token) {
-      var length = /^x(\d*)(\/(\d*))?$/.exec(token) || [];
-      return (Number(length[1]) || 1) / (length[2] ? Number(length[3]) || 2 : 1);
-    });
+    var to = next ? next.slot : num_notes;
     var bar = Math.floor(mark.slot / notes_per_measure) * notes_per_measure;
-    voice +=
-      clickCountOver(
-        spacers,
-        (next ? next.slot : num_notes) - mark.slot,
-        ((mark.slot - bar) * 128) / 12,
-        count.clickTicks,
-        count.clickSplit,
-        bottom
-      ) + text.slice(cut);
+    var beat = countOver(
+      spacerLengths(text.slice(0, cut)),
+      to - mark.slot,
+      ((mark.slot - bar) * 128) / 12,
+      marksIn(mark.slot, to, bar),
+      keep
+    );
+    if (beat !== null) rewritten = true;
+    voice += (beat === null ? text.slice(0, cut) : beat) + text.slice(cut);
   });
+  if (!rewritten) return abc;
   return voice + post_voice_abc + '%%tuplets 0 0 0\n' + abc.slice(hands);
 }
 
@@ -1446,6 +1556,22 @@ function grooveDataABC(gu, myGrooveData, renderWidth) {
     myGrooveData.numBeats,
     myGrooveData.noteValue
   );
+  var layout = musicLayout(
+    notesOnALine(
+      gu,
+      myGrooveData.notesPerMeasure,
+      myGrooveData.numBeats,
+      myGrooveData.noteValue,
+      is_triplet_division
+    ),
+    renderWidth,
+    {
+      counted: gu.showCounts && !gu.countSmall,
+      triplets: is_triplet_division,
+      oneBar: myGrooveData.notesPerMeasure >= 32,
+      keepWidth: myGrooveData.timeDivision == 48,
+    }
+  );
 
   var fullABC = gu.get_top_ABC_BoilerPlate(
     false,
@@ -1457,7 +1583,7 @@ function grooveDataABC(gu, myGrooveData, renderWidth) {
     myGrooveData.kickStemsUp,
     myGrooveData.numBeats,
     myGrooveData.noteValue,
-    renderWidth
+    layout.renderWidth
   );
 
   var feelMarkings = getFeelMarkings(
@@ -1472,6 +1598,7 @@ function grooveDataABC(gu, myGrooveData, renderWidth) {
     fullABC += createMeasureByMeasureABC(
       gu,
       myGrooveData,
+      layout.barsPerLine,
       feelMarkings,
       is_triplet_division,
       FullNoteStickingArray,
@@ -1515,11 +1642,12 @@ function grooveDataABC(gu, myGrooveData, renderWidth) {
   return fullABC;
 }
 
-// The ABC for every bar of a groove, one bar at a time (two bars per line, or one
-// for 1/32 notes, as in the editor), with each bar's "Straight" / "Swing" marking.
+// The ABC for every bar of a groove, one bar at a time (`measuresPerLine` bars to
+// a line, see musicLayout), with each bar's "Straight" / "Swing" marking.
 function createMeasureByMeasureABC(
   gu,
   myGrooveData,
+  measuresPerLine,
   feelMarkings,
   is_triplet_division,
   stickingArray,
@@ -1533,7 +1661,6 @@ function createMeasureByMeasureABC(
     myGrooveData.numBeats,
     myGrooveData.noteValue
   );
-  var measuresPerLine = myGrooveData.notesPerMeasure >= 32 ? 1 : 2;
   var abc = '';
   gu.note_mapping_array = [];
   for (var measure = 0; measure < myGrooveData.numberOfMeasures; measure++) {
@@ -1604,6 +1731,22 @@ export function addMeterChange(measureABC, sig) {
 function createMixedMeterABC(gu, myGrooveData, renderWidth) {
   var gd = myGrooveData;
   var triplets = isTripletDivision(gd.timeDivision);
+  var layout = musicLayout(
+    notesOnALine(
+      gu,
+      barStride(gd.timeDivision, gd.barTimeSigs, gd.numberOfMeasures, gd.numBeats, gd.noteValue),
+      gd.numBeats,
+      gd.noteValue,
+      triplets
+    ),
+    renderWidth,
+    {
+      counted: gu.showCounts && !gu.countSmall,
+      triplets: triplets,
+      oneBar: gd.timeDivision >= 32,
+      keepWidth: gd.timeDivision == 48,
+    }
+  );
   var abc = gu.get_top_ABC_BoilerPlate(
     false,
     gd.title,
@@ -1614,7 +1757,7 @@ function createMixedMeterABC(gu, myGrooveData, renderWidth) {
     gd.kickStemsUp,
     gd.numBeats,
     gd.noteValue,
-    renderWidth
+    layout.renderWidth
   );
   var feelMarkings = getFeelMarkings(
     gd.straightBars,
@@ -1623,7 +1766,7 @@ function createMixedMeterABC(gu, myGrooveData, renderWidth) {
     gd.swingStyle,
     triplets
   );
-  var measuresPerLine = gd.timeDivision >= 32 ? 1 : 2;
+  var measuresPerLine = layout.barsPerLine;
   gu.note_mapping_array = [];
   for (var bar = 0; bar < gd.numberOfMeasures; bar++) {
     var notes = fullSizeBar(gd, bar);

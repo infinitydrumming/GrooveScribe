@@ -201,11 +201,13 @@ describe('beats of 8ths and 16ths, beat by beat', () => {
   // A bar of them is written exactly as the 8ths and 16ths note settings write
   // it: random bars (accents, ghost notes, flams, open hi-hats, diddles, counting)
   // in 4/4, 7/8, 6/8 and 5/8, next to a bar of other beats.
+  // (directive lines aside: the counts' "%%tuplets" around a stickings voice)
   const voiceBars = (abc, voice) =>
     abc
       .split('V:' + voice)[1]
       .split('\n')
       .slice(voice == 'Hands' ? 2 : 1)
+      .filter((line) => !line.startsWith('%%tuplets'))
       .join('')
       .split('V:')[0]
       .split('|')

@@ -264,40 +264,77 @@ export function clickCountBar(ticks, top, bottom, grid) {
 }
 
 /**
- * The click's count over a stretch of a triplet-grid bar (a beat, or the two of
- * a quarter-note triplet) as the music writer laid the stretch out: `spacers`
- * are the (hidden) notes it wrote there, one wherever the music has a note.
- * The writer writes a triplet beat 12 units to a quarter note (its tuplet only a
- * label) and a plain beat (a quarter, 8ths, 16ths) 8, so the click is placed in
- * the stretch's own units, with a tuplet where it falls between them.
+ * How many notes a bar of the click's count has: one on each of the groove's
+ * grid notes and one on each click between them (the line needs room for all).
+ * @param {number} gridNotes  the bar's notes at the note setting
+ * @param {number[]} ticks  from clickTicks
+ * @param {number} top
+ * @param {number} bottom
+ */
+export function clickCountNotes(gridNotes, ticks, top, bottom) {
+  var step = (top * 512) / bottom / gridNotes;
+  return (
+    gridNotes +
+    ticks.filter(function (tick) {
+      return !whole(tick / step);
+    }).length
+  );
+}
+
+/**
+ * The click's marks for countOver: each click's tick in the bar and syllable.
+ * @param {number[]} ticks  from clickTicks
+ * @param {number} split  clickSplit
+ * @param {number} bottom
+ * @returns {{tick: number, name: string}[]}
+ */
+export function clickMarks(ticks, split, bottom) {
+  return ticks.map(function (tick) {
+    return { tick: tick, name: clickName(tick, split, 512 / bottom) };
+  });
+}
+
+/**
+ * A count over a stretch of a triplet-grid bar (a beat, or the two of a
+ * quarter-note triplet) as the music writer laid the stretch out: `spacers` are
+ * the (hidden) notes it wrote there, one wherever the music has a note. The
+ * writer writes a triplet beat 12 units to a quarter note (its tuplet only a
+ * label) and a plain beat (a quarter, 8ths, 16ths) 8, and leaves out the counts
+ * of a plain beat that fall between its notes; so the marks are placed in the
+ * stretch's own units, with a tuplet where they fall between them.
  * @param {number[]} spacers  their lengths, in the music's 1/32 units
  * @param {number} slots  the stretch, in triplet-grid slots (12 to a quarter note)
  * @param {number} startTick  where it starts in the bar (128 ticks to a quarter note)
- * @param {number[]} ticks  the bar's clicks (clickTicks)
- * @param {number} split  clickSplit
- * @param {number} bottom
+ * @param {{tick: number, name: string}[]} marks  the bar's counts (ticks from its start)
+ * @param {boolean} [keep]  null when every mark is on one of the writer's notes
+ *   (its own writing has them all)
+ * @returns {string | null}
  */
-export function clickCountOver(spacers, slots, startTick, ticks, split, bottom) {
+export function countOver(spacers, slots, startTick, marks, keep) {
   var written = spacers.reduce(function (sum, length) {
     return sum + length;
   }, 0);
   var realTicks = (slots * 128) / 12;
-  var at = []; // in written units, with the click's syllable there
+  var at = []; // in written units, with the count there
   var position = 0;
   spacers.forEach(function (length) {
     at.push({ at: position, name: '' });
     position += length;
   });
-  ticks.forEach(function (tick) {
-    if (tick < startTick - 1e-6 || tick > startTick + realTicks - 1e-6) return;
-    var where = ((tick - startTick) * written) / realTicks;
-    var name = clickName(tick, split, 512 / bottom);
+  var between = false;
+  marks.forEach(function (mark) {
+    if (mark.tick < startTick - 1e-6 || mark.tick > startTick + realTicks - 1e-6) return;
+    var where = ((mark.tick - startTick) * written) / realTicks;
     var same = at.find(function (note) {
       return Math.abs(note.at - where) < 1e-6;
     });
-    if (same) same.name = name;
-    else at.push({ at: where, name: name });
+    if (same) same.name = mark.name;
+    else {
+      at.push({ at: where, name: mark.name });
+      between = true;
+    }
   });
+  if (keep && !between) return null;
   at.sort(function (a, b) {
     return a.at - b.at;
   });

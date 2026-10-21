@@ -17,10 +17,10 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1079 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **100 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1087 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **101 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
-| `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~174 known errors baseline; changes should be typecheck-**neutral**                                                                       |
+| `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
 | `npm run format:check` | Prettier clean (`npm run format` to fix)                                                                                                                                     |
 | `npm run check`        | lint + typecheck + format:check + test in one shot                                                                                                                           |
@@ -116,6 +116,11 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   `constant_*_on_color_rgb` values in `constants.js` (setters paint the hex form; the browser
   normalizes it to rgb on readback).
 - Vendored globals (don't redefine): `Midi`, `MIDI`, `Abc`, `Share`, `ShareButton`, `Pablo`.
+- **Bars per line** come from `abcNotation.musicLayout` (two only when they fit the page; a bar too
+  wide alone gets a wider page), and the editor redraws wider if abc2svg still breaks a line
+  mid-bar (`musicLineBroken`). Triplet-grid bars are written 12 units a quarter note (their
+  tuplets only labels) but plain beats 8: anything laid over them (counts, the click's count)
+  must follow the writer's beats (`withCountsOver`), never assume a length.
 
 ## Refactor status (strangler-fig, ES-module migration)
 

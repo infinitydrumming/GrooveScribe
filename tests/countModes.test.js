@@ -4,7 +4,8 @@ import {
   countModeToUrl,
   clickTicks,
   clickCountBar,
-  clickCountOver,
+  clickMarks,
+  countOver,
   styleCounts,
 } from '../js/countModes.js';
 
@@ -131,15 +132,24 @@ describe("the click's count", () => {
   });
 
   it('writes it over a triplet-grid beat as the music writer laid the beat out', () => {
+    const quarters = clickMarks([0, 128], 1, 4);
     // a sextuplet beat (12 units to a quarter note, its tuplet a label)
-    expect(clickCountOver([2, 2, 2, 2, 2, 2], 12, 0, [0, 128], 1, 4)).toBe('(6:6:6"1"x2x2x2x2x2x2');
+    expect(countOver([2, 2, 2, 2, 2, 2], 12, 0, quarters)).toBe('(6:6:6"1"x2x2x2x2x2x2');
     // a beat of plain 8ths (8 units): a quarter click, and a sextuplet click
-    expect(clickCountOver([4, 4], 12, 128, [0, 128], 1, 4)).toBe('"2"x4x4');
-    const sextuplets = [0, 1, 2, 3, 4, 5].map((n) => (n * 128) / 6);
-    expect(clickCountOver([4, 4], 12, 0, sextuplets, 6, 4)).toBe(
-      '(6:8:6"1"x1"a"x1"li"x1"&"x1"a"x1"la"x1'
+    expect(countOver([4, 4], 12, 128, quarters)).toBe('"2"x4x4');
+    const sextuplets = clickMarks(
+      [0, 1, 2, 3, 4, 5].map((n) => (n * 128) / 6),
+      6,
+      4
     );
+    expect(countOver([4, 4], 12, 0, sextuplets)).toBe('(6:8:6"1"x1"a"x1"li"x1"&"x1"a"x1"la"x1');
     // a quarter-note triplet over two beats: the second beat's click between its notes
-    expect(clickCountOver([8, 8, 8], 24, 0, [0, 128], 1, 4)).toBe('(4:4:4"1"x8x4"2"x4x8');
+    expect(countOver([8, 8, 8], 24, 0, quarters)).toBe('(4:4:4"1"x8x4"2"x4x8');
+  });
+
+  it('keeps a beat the writer wrote every count of, and fills in one it left some out of', () => {
+    const every = [0, 1, 2, 3, 4, 5].map((n) => ({ tick: (n * 128) / 6, name: 'abcdef'[n] }));
+    expect(countOver([2, 2, 2, 2, 2, 2], 12, 0, every, true)).toBeNull();
+    expect(countOver([4, 4], 12, 0, every, true)).toBe('(6:8:6"a"x1"b"x1"c"x1"d"x1"e"x1"f"x1');
   });
 });

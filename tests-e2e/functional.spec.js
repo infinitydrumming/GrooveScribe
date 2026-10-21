@@ -144,3 +144,32 @@ test.describe('counting the click', () => {
     expect(await getSvg(page)).toContain('>li</text>');
   });
 });
+
+// Infinity Drumming, 2026: on a phone, dense bars go one to a line, and no line
+// is broken in the middle of a bar (which loses its beams); a desktop keeps two.
+test.describe('music lines on a phone', () => {
+  const SEXTUPLETS =
+    '?TimeSig=4/4&Div=24&Tempo=80&Measures=2&Count=1' +
+    '&H=|x--x--x--x--x--x--x--x--|x--x--x--x--x--x--x--x--|' +
+    '&S=|------O-----------O-----|------O-----------O-----|' +
+    '&K=|o----o-----o--o---------|o----o-----o--o---------|';
+  const musicLines = (page) =>
+    page.evaluate(
+      () =>
+        [...document.querySelectorAll('#svgTarget svg')].filter((svg) => svg.querySelector('use'))
+          .length
+    );
+
+  test('two bars of 16th triplets: a line each on a phone, one line on a desktop', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await loadGroove(page, grooveUrl(SEXTUPLETS));
+    expect(await musicLines(page)).toBe(2);
+    expect(await page.inputValue('#ABCsource')).not.toMatch(/\|\\\n/); // no bar carries on to the next
+
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.evaluate(() => window.myGrooveWriter.refresh_ABC());
+    expect(await musicLines(page)).toBe(1);
+  });
+});
