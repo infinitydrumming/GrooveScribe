@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices, dense bars one a line on phones. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices, dense bars one a line on phones, each glyph defined once in the music on the page. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -905,6 +905,62 @@ function abcMusicLines(abc) {
         .join('');
       return !/\\\s*$/.test(notes);
     }).length;
+}
+
+// The top-level elements of an SVG fragment (and the text between them), or
+// null if its tags don't nest.
+function topLevelElements(fragment) {
+  var parts = [];
+  var tag = /<(\/?)[a-zA-Z][^>]*?(\/?)>/g;
+  var depth = 0;
+  var start = 0;
+  var last = 0;
+  var m;
+  while ((m = tag.exec(fragment))) {
+    var opening = !m[1];
+    if (opening && depth === 0) {
+      parts.push({ text: fragment.slice(last, m.index) });
+      start = m.index;
+    }
+    if (!opening) depth--;
+    else if (!m[2]) depth++; // (not self-closing)
+    if (depth < 0) return null;
+    if (depth === 0) {
+      parts.push({ element: fragment.slice(start, tag.lastIndex) });
+      last = tag.lastIndex;
+    }
+  }
+  parts.push({ text: fragment.slice(last) });
+  return depth === 0 ? parts : null;
+}
+
+/**
+ * Infinity Drumming, 2026: the music with each of its glyphs (note heads,
+ * accents, clefs...) defined once. In "fullsvg" mode this abc2svg keeps every
+ * line's definitions and writes them again in each later line, so long music
+ * (a permutation run) holds thousands of copies of the same few glyphs, and the
+ * browser takes seconds to put it on the page. A glyph's <use> finds its first
+ * definition anyway, so a later copy that is exactly the same is left out (one
+ * that differs stays).
+ * @param {string} svg  abc2svg's output
+ * @returns {string}
+ */
+export function defineGlyphsOnce(svg) {
+  /** @type {Object<string, string>} */
+  var defined = {};
+  return String(svg).replace(/<defs>([\s\S]*?)<\/defs>/g, function (defs, inside) {
+    var parts = topLevelElements(inside);
+    if (!parts) return defs;
+    var kept = parts.map(function (part) {
+      if (part.text !== undefined) return part.text;
+      var id = /^<[^>]*?\sid="([^"]*)"/.exec(part.element);
+      if (!id) return part.element;
+      if (defined[id[1]] === undefined) defined[id[1]] = part.element;
+      else if (defined[id[1]] === part.element) return '';
+      return part.element;
+    });
+    return '<defs>' + kept.join('') + '</defs>';
+  });
 }
 
 /**

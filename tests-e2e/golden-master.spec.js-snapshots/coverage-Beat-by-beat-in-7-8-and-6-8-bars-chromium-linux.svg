@@ -64,12 +64,12 @@ l146.25 0.00v3.20l-146.25 0.00"></path>
 .fill {fill: currentColor}
 .stroke {stroke: currentColor; fill: none; stroke-width: .7}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><g transform="translate(0,59.70)">
 <path class="stroke" d="m47.50 -51.70v-3.00l247.60 0.00v3.00"></path>
 <rect fill="white" x="164.70" y="-60.70" width="13.20" height="12"></rect>

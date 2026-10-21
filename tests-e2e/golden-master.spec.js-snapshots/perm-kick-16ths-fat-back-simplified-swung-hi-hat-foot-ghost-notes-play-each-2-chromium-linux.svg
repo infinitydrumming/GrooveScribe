@@ -81,18 +81,14 @@ l97.95 0.00v3.20l-97.95 0.00"></path>
 .f1_1 {font:italic 14px serif}
 .f2_1 {font:16px calibri}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Singles   (fat back, play each ×2)</text>
 <g transform="translate(0,87.70)">
 <text class="f1_1" x="24.00" y="-48.70">2</text>
@@ -236,24 +232,18 @@ l31.25 0.00v3.20l-31.25 0.00"></path>
 .f1_1 {font:italic 14px serif}
 .f2_1 {font:16px calibri}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
+
+
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><g transform="translate(0,62.70)">
 <text class="f1_1" x="24.00" y="-48.70">4</text>
 <text class="f1_1" x="415.65" y="-32.00">5</text>
@@ -397,30 +387,22 @@ l31.81 0.00v3.20l-31.81 0.00"></path>
 .f1_1 {font:italic 14px serif}
 .f2_1 {font:16px calibri}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">8th notes / Off-beat 16ths   (fat back, play each ×2)</text>
 <g transform="translate(0,87.70)">
 <text class="f1_1" x="24.00" y="-48.70">6</text>
@@ -579,36 +561,26 @@ l87.74 0.00v3.20l-87.74 0.00"></path>
 .f1_1 {font:italic 14px serif}
 .f2_1 {font:16px calibri}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Doubles   (fat back, play each ×2)</text>
 <g transform="translate(0,88.70)">
 <text class="f1_1" x="24.00" y="-49.70">8</text>
@@ -774,42 +746,30 @@ l28.78 0.00v3.20l-28.78 0.00"></path>
 .f1_1 {font:italic 14px serif}
 .f2_1 {font:16px calibri}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><g transform="translate(0,63.70)">
 <text class="f1_1" x="24.00" y="-49.70">10</text>
 <text class="f1_1" x="441.37" y="-32.00">11</text>
@@ -970,48 +930,34 @@ l29.85 0.00v3.20l-29.85 0.00"></path>
 .f1_1 {font:italic 14px serif}
 .f2_1 {font:16px calibri}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Triples   (fat back, play each ×2)</text>
 <g transform="translate(0,88.70)">
 <text class="f1_1" x="24.00" y="-49.70">12</text>
@@ -1191,54 +1137,38 @@ l81.48 0.00v3.20l-81.48 0.00"></path>
 .f1_1 {font:italic 14px serif}
 .f2_1 {font:16px calibri}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><g transform="translate(0,63.70)">
 <text class="f1_1" x="24.00" y="-49.70">14</text>
 <text class="f1_1" x="417.48" y="-32.00">15</text>
@@ -1409,60 +1339,42 @@ l84.34 0.00v3.20l-84.34 0.00"></path>
 .f1_1 {font:italic 14px serif}
 .f2_1 {font:16px calibri}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Quads   (fat back, play each ×2)</text>
 <g transform="translate(0,88.70)">
 <text class="f1_1" x="24.00" y="-49.70">16</text>

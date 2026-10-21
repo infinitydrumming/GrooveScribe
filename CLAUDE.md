@@ -17,7 +17,7 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1116 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm test`             | Vitest unit suite — **1119 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
 | `npm run test:e2e`     | Playwright golden-master — **114 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
@@ -130,6 +130,11 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   `n % bars`; the music writes each figure once over the bars. A one-bar run must stay
   byte-identical: the golden master's permutation exercises (`permutationPlayback` in
   `tests-e2e/helpers.js`) pin down their music, first playback rounds, cursor and grid highlight.
+- **The editor puts each glyph on the page once** (`defineGlyphsOnce` in `displayNewSVG`): with
+  `%%fullsvg`, abc2svg 1.3.2 repeats every earlier line's `<defs>` in each line (quadratic: seconds
+  for a long permutation run). The golden master snapshots that page form; `musicLineBroken` still
+  reads abc2svg's own output. The music engine also crashes (`gchord_width ... seqst`) somewhere
+  around 500 counted bars of music, so keep runs (figures × ostinato bars) well under that.
 - **Bar copies** go to localStorage and the device clipboard (`Infinity Scribe bar {json}`, with an
   `at` time; paste takes the newer): each origin, home-screen app and private tab has its own
   storage. Anything that lays the grid out again (add / remove / paste / "Add a copy") goes through

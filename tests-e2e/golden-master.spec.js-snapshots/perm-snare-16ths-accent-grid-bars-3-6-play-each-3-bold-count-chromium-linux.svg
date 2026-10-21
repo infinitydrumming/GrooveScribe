@@ -274,18 +274,14 @@ l77.36 0.00v3.20l-77.36 0.00"></path>
 .f4_1 {font:bold 16px calibri}
 .f3_1 {font:13px calibri;fill:#8c8c8c}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<g id="accent" class="stroke">
-	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
-</g>
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">8th notes / Off-beat 16ths   (play each ×3)</text>
 <g transform="translate(0,106.70)">
 <text class="f1_1" x="24.00" y="-49.70">5</text>

@@ -30,6 +30,14 @@ The original copyright notices and credits are unchanged.
   down their music, the MIDI of their first rounds and where the cursor and
   the grid's highlight are, before and after; three more do the same for
   ostinatos of 2, 3 and 4 bars (`tests-e2e/`).
+- Long music goes on the page much faster (a 4-bar ostinato with every 1/16
+  triplet figure: 0.9 s instead of 12 s on a desktop). In "fullsvg" mode the
+  bundled abc2svg writes every earlier line's glyph definitions (note heads,
+  accents, clefs) again in each line, so the page held thousands of copies;
+  the editor now puts each on the page once. A <use> took the first copy
+  anyway, so the music is drawn exactly as before: of the golden master's 172
+  snapshots, 18 changed, each to its old self minus the copies, and drawn pixel
+  for pixel the same (`js/abcNotation.js`, `js/groove_writer.js`).
 
 ## 2026-10-21 — Fat back kick permutations
 

@@ -103,28 +103,16 @@ l46.80 0.00v3.20l-46.80 0.00"></path>
 .stroke {stroke: currentColor; fill: none; stroke-width: .7}
 .f1_1 {font:italic 14px serif}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><g transform="translate(0,62.70)">
 <text class="f1_1" x="24.00" y="-48.70">3</text>
 <text style="font:italic 12px serif" x="109.40" y="-44.20" text-anchor="middle">3</text>
@@ -182,39 +170,21 @@ l143.47 0.00v3.20l-143.47 0.00"></path>
 .f1_1 {font:italic 14px serif}
 .f2_1 {font:16px calibri}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Doubles   (play each ×3)</text>
 <g transform="translate(0,87.70)">
 <text class="f1_1" x="24.00" y="-48.70">4</text>
@@ -335,50 +305,26 @@ l71.09 0.00v3.20l-71.09 0.00"></path>
 .stroke {stroke: currentColor; fill: none; stroke-width: .7}
 .f1_1 {font:italic 14px serif}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><g transform="translate(0,62.70)">
 <text class="f1_1" x="24.00" y="-48.70">6</text>
 <text style="font:italic 12px serif" x="109.40" y="-44.20" text-anchor="middle">3</text>
@@ -440,61 +386,31 @@ l143.47 0.00v3.20l-143.47 0.00"></path>
 .f1_1 {font:italic 14px serif}
 .f2_1 {font:16px calibri}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Cross-rhythm: every 2nd note   (play each ×3)</text>
 <g transform="translate(0,87.70)">
 <text class="f1_1" x="24.00" y="-48.70">7</text>
@@ -609,72 +525,36 @@ l70.77 0.00v3.20l-70.77 0.00"></path>
 .f1_1 {font:italic 14px serif}
 .f2_1 {font:16px calibri}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Cross-rhythm: every 4th note   (play each ×3)</text>
 <g transform="translate(0,89.50)">
 <text class="f1_1" x="24.00" y="-50.50">9</text>
@@ -753,83 +633,41 @@ l95.20 0.00v3.20l-95.20 0.00"></path>
 .stroke {stroke: currentColor; fill: none; stroke-width: .7}
 .f1_1 {font:italic 14px serif}
 </style><defs>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
-<path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
-<ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
-<path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-<path id="r8e" class="fill" d="m 0 0
-	c-1.5 1.5 -2.4 2 -3.6 2
-	2.4 -2.8 -2.8 -4 -2.8 -1.2
-	0 2.7 4.3 2.4 5.9 0.6"></path>
-<g id="r8">
-	<path d="m3.3 -4l-3.4 9.6" class="stroke"></path>
-	<use x="3.4" y="-4" xlink:href="#r8e"></use>
-</g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </defs><g transform="scale(0.75)"><g transform="translate(0,62.70)">
 <text class="f1_1" x="24.00" y="-48.70">11</text>
 <text class="f1_1" x="441.87" y="-32.00">12</text>
