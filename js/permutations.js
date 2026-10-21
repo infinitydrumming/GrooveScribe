@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: practising some bars of a run, bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
 // Permutation engine (Step 4 extraction from groove_writer.js).
 //
 // Pure combinatorial generators for the "permutation" practice modes: they build
@@ -299,8 +299,12 @@ export function getPermutationSections(layout) {
 // ABC that goes before / after one bar of a permutation. `shownIndex` is the
 // bar's position among the shown bars of its group; `lastInGroup` marks the last
 // one. Two bars per line; the group name is printed over its first bar.
-export function getPermutationSectionABC(section, shownIndex, lastInGroup, repeats) {
+// `nextBarNumber` (optional): the number in the run of the bar shown after this
+// one; the music prints it at the start of that bar (a number set in a bar takes
+// effect at its closing bar line; the first bar of the music has none).
+export function getPermutationSectionABC(section, shownIndex, lastInGroup, repeats, nextBarNumber) {
   var pre = '';
+  if (nextBarNumber) pre += '%%setbarnb ' + nextBarNumber + '\n';
   if (shownIndex === 0) {
     if (section.groupIndex === 0) pre += 'P:Ostinato\n';
     else
@@ -1033,4 +1037,47 @@ export function merge_kick_arrays(primary_kick_array, secondary_kick_array) {
   }
 
   return new_kick_array;
+}
+
+// --- Practising some bars of a run (Infinity Drumming, 2026) ---------------------
+// "3-6, 9": bars 3 to 6 and bar 9 of the run (numbered like the music).
+
+/**
+ * The bars a list names, in order, only those from 1 to `count`; [] for all bars.
+ * @param {string} text  e.g. "5", "3-6", "2, 5, 9-10"
+ * @param {number} count  bars in the run
+ * @returns {number[]}
+ */
+export function parseBarList(text, count) {
+  var bars = [];
+  String(text || '')
+    .split(',')
+    .forEach(function (part) {
+      var range = /^\s*(\d+)\s*(?:-\s*(\d+)\s*)?$/.exec(part);
+      if (!range) return;
+      var from = parseInt(range[1], 10);
+      var to = range[2] ? parseInt(range[2], 10) : from;
+      var low = Math.min(from, to); // a range written backwards is fine
+      var high = Math.max(from, to);
+      for (var bar = Math.max(low, 1); bar <= Math.min(high, count); bar++)
+        if (bars.indexOf(bar) < 0) bars.push(bar);
+    });
+  return bars.sort(function (a, b) {
+    return a - b;
+  });
+}
+
+/**
+ * Bars as a list again: [3, 4, 5, 6, 9] -> "3-6, 9" ('' for none).
+ * @param {number[]} bars  in order
+ * @param {string} [separator]  between the parts (", " by default)
+ */
+export function barListToText(bars, separator) {
+  var parts = [];
+  for (var i = 0; i < bars.length; i++) {
+    var start = bars[i];
+    while (i + 1 < bars.length && bars[i + 1] == bars[i] + 1) i++;
+    parts.push(start == bars[i] ? String(start) : start + '-' + bars[i]);
+  }
+  return parts.join(separator === undefined ? ', ' : separator);
 }

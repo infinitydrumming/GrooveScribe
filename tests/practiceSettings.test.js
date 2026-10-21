@@ -26,7 +26,7 @@ describe('practice settings in a link', () => {
 
   it('round-trips every setting', () => {
     const settings = {
-      permutation: { type: 'kick_16ths', boxes: '0011110101', playEach: 2 },
+      permutation: { type: 'kick_16ths', boxes: '0011110101', playEach: 2, bars: '3-6, 9' },
       speedUp: { amount: 5, every: 16, unit: 'b', keepGoing: false, target: 120 },
       countIn: true,
       clickSolo: true,
@@ -35,7 +35,7 @@ describe('practice settings in a link', () => {
     };
     const url = practiceSettingsToUrl(settings);
     expect(url).toBe(
-      '&Perm=kick_16ths&PermSet=0011110101&PlayEach=2&SpeedUp=5,16b,once,to120' +
+      '&Perm=kick_16ths&PermSet=0011110101&PlayEach=2&PermBars=3-6,9&SpeedUp=5,16b,once,to120' +
         '&CountIn=1&ClickSolo=1&ClickStart=AND&Mute=hh:1:2,kick:3'
     );
     expect(fromQuery(url)).toEqual(settings);
@@ -82,7 +82,12 @@ describe('a groove link with practice settings and instructions', () => {
       '&H=|x-x-x-x-x-x-x-x-|';
     const gd = gu.getGrooveDataFromUrlString(query);
     expect(gd.instructions).toBe('Play each figure ×4.\nThen 5 bpm faster & again!');
-    expect(gd.practice.permutation).toEqual({ type: 'snare_16ths', boxes: '0111', playEach: 3 });
+    expect(gd.practice.permutation).toEqual({
+      type: 'snare_16ths',
+      boxes: '0111',
+      playEach: 3,
+      bars: '',
+    });
     expect(link(query)).toContain('&Perm=snare_16ths&PermSet=0111&PlayEach=3&CountIn=1');
     expect(link(link(query))).toBe(link(query));
   });

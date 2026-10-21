@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -887,7 +887,8 @@ export function get_top_ABC_BoilerPlate(
 
   fullABC += 'L:1/' + 32 + '\n'; // 4/4 = 32,  6/8 = 64
 
-  if (isPermutation) fullABC += '%%stretchlast 0\n';
+  // a permutation numbers its bars, so some can be picked to practise
+  if (isPermutation) fullABC += '%%stretchlast 0\n%%measurenb 1\n';
   else fullABC += '%%stretchlast 1\n';
 
   fullABC +=

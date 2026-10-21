@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — Practise just some bars of a permutation
+
+- A permutation's bars are numbered in the music, and **Practise bars** in the
+  Permutation Options plays just the ones typed: "5", "3-6" or "2, 5, 9-10". The
+  music shows only those, with their numbers in the whole run (the music's first
+  bar, which has no bar number, says it in its heading). "Play each", the
+  speed-up, the practice timer and groove / click bars all count just those bars.
+  Saved in links as "PermBars" (`js/permutations.js`, `js/groove_writer.js`,
+  `js/viewHtml.js`, `js/abcNotation.js`, `js/practiceSettings.js`,
+  `css/infinity_layout.css`, `gscribe_help.html`).
+
 ## 2026-10-21 — Rim clicks on the toms
 
 - Each tom's note menu has **Rim Click**: an x notehead on that tom's line in the

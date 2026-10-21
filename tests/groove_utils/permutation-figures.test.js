@@ -6,6 +6,8 @@ import {
   getPermutationKickArray,
   getPermutationSnareArray,
   getPermutationAlternatingBar,
+  parseBarList,
+  barListToText,
 } from '../../js/permutations.js';
 
 // Permutation figures per note setting (Infinity Drumming). Each figure is one
@@ -193,5 +195,24 @@ describe('alternating kick and snare', () => {
   it('snare lead is the opposite throughout', () => {
     expect(pattern('Singles', 1, false)).toBe('S---K---S---K---');
     expect(pattern('Doubles', 1, false)).toBe('SK--SK--SK--SK--');
+  });
+});
+
+// Infinity Drumming, 2026: practising some bars of a run
+describe('bar lists ("Practise bars")', () => {
+  it('reads single bars, ranges and lists, within the run', () => {
+    expect(parseBarList('5', 16)).toEqual([5]);
+    expect(parseBarList('3-6', 16)).toEqual([3, 4, 5, 6]);
+    expect(parseBarList(' 2, 5 , 9-10 ', 16)).toEqual([2, 5, 9, 10]);
+    expect(parseBarList('6-3', 16)).toEqual([3, 4, 5, 6]); // backwards is fine
+    expect(parseBarList('14-20, 2, 2', 16)).toEqual([2, 14, 15, 16]); // past the end: up to it
+    expect(parseBarList('', 16)).toEqual([]); // all bars
+    expect(parseBarList('abc, 0, 99', 16)).toEqual([]);
+  });
+
+  it('writes them back tidily', () => {
+    expect(barListToText([3, 4, 5, 6, 9])).toBe('3-6, 9');
+    expect(barListToText([2, 5, 9, 10], ',')).toBe('2,5,9-10');
+    expect(barListToText([])).toBe('');
   });
 });

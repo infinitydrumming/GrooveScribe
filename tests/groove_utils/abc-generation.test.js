@@ -102,6 +102,7 @@ describe('GrooveUtils ABC notation generation', () => {
           'T: \n' +
           'L:1/32\n' +
           '%%stretchlast 0\n' +
+          '%%measurenb 1\n' +
           '%%flatbeams 1\n' +
           '%%ornament up\n' +
           '%%pagewidth 300px\n' +

@@ -7,6 +7,7 @@
 // unchanged:
 //   Perm=kick_16ths&PermSet=0011..&PlayEach=2   permutation, its ticked boxes
 //                                               (in the options' order), × each
+//   PermBars=3-6,9                              just these bars of the run
 //   SpeedUp=5,2m  SpeedUp=5,16b,once,to120      bpm, every 2 minutes / 16 bars,
 //                                               only once, stop at 120
 //   CountIn=1  ClickSolo=1  ClickStart=AND
@@ -27,8 +28,9 @@ var PERMUTATION_TYPES = [
 ];
 
 /**
- * @typedef {{type: string, boxes: string, playEach: number}} PermutationSetting
- *   boxes: each permutation option checkbox, in order, '1' ticked / '0' not
+ * @typedef {{type: string, boxes: string, playEach: number, bars: string}} PermutationSetting
+ *   boxes: each permutation option checkbox, in order, '1' ticked / '0' not;
+ *   bars: the bars of the run to practise ("3-6, 9"), '' for all
  * @typedef {{amount: number, every: number, unit: string, keepGoing: boolean, target: number}} SpeedUpSetting
  *   unit 'm' (minutes) or 'b' (bars); target 0 = no "Stop at"
  * @typedef {{permutation: (PermutationSetting|null), speedUp: (SpeedUpSetting|null),
@@ -128,6 +130,7 @@ export function practiceSettingsToUrl(settings) {
     url += '&Perm=' + perm.type;
     if (perm.boxes) url += '&PermSet=' + perm.boxes;
     if (perm.playEach > 1) url += '&PlayEach=' + perm.playEach;
+    if (perm.bars) url += '&PermBars=' + String(perm.bars).replace(/\s+/g, '');
   }
   if (settings.speedUp) url += '&SpeedUp=' + speedUpToText(settings.speedUp);
   if (settings.countIn) url += '&CountIn=1';
@@ -152,6 +155,11 @@ export function practiceSettingsFromUrl(get) {
       type: type,
       boxes: String(get('PermSet', '')).replace(/[^01]/g, ''),
       playEach: whole(get('PlayEach', '1'), 1, 16, 1),
+      bars: String(get('PermBars', ''))
+        .replace(/[^0-9,-]/g, '')
+        .split(',')
+        .filter(Boolean)
+        .join(', '),
     };
   settings.speedUp = speedUpFromText(get('SpeedUp', ''));
   settings.countIn = get('CountIn', '0') == '1';
