@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures.js';
-import { allGrooves, slug, grooveUrl } from './corpus.js';
-import { loadGroove, getSvg, getMidi } from './helpers.js';
+import { allGrooves, permutationExercises, slug, grooveUrl } from './corpus.js';
+import { loadGroove, getSvg, getMidi, permutationPlayback } from './helpers.js';
 
 // GOLDEN MASTER — the pre-refactor safety net.
 //
@@ -28,6 +28,27 @@ test.describe('golden master: rendered SVG + generated MIDI', () => {
       const midi = await getMidi(page);
       expect(midi.startsWith('data:audio/midi;base64,')).toBe(true);
       expect(midi).toMatchSnapshot(`${slug(g.name)}.midi.txt`);
+    });
+  }
+});
+
+// Infinity Drumming, 2026: permutations play from the editor (not from the groove
+// data alone), so their playback is pinned down as it plays: the MIDI of the first
+// rounds, and where the cursor and the grid highlight are.
+test.describe('golden master: permutations (music, playback rounds, cursor)', () => {
+  for (const g of permutationExercises) {
+    test(`permutation ${g.name}`, async ({ page }) => {
+      await loadGroove(page, grooveUrl(g.url));
+
+      const svg = await getSvg(page);
+      expect(svg, 'sheet music should render as SVG').toContain('<svg');
+      expect(svg).toMatchSnapshot(`perm-${slug(g.name)}.svg`);
+
+      const playback = await permutationPlayback(page);
+      expect(playback.midi.length).toBe(4);
+      expect(JSON.stringify(playback, null, 1)).toMatchSnapshot(
+        `perm-${slug(g.name)}.playback.txt`
+      );
     });
   }
 });
