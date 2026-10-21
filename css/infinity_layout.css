@@ -732,7 +732,7 @@ body,
   counter-increment: bar;
   box-sizing: border-box;
   margin: 6px;
-  padding: 34px 10px 8px 4px;
+  padding: 34px 10px 38px 4px;
   border: 1px solid var(--id-border);
   border-radius: 12px;
   background: #fbfcfe;
@@ -747,7 +747,8 @@ body,
   font-weight: 700;
   color: var(--id-navy-900);
 }
-/* the bar's buttons along its top: time signature, swing, copy, paste, remove */
+/* the bar's buttons along its top: time signature, swing, copy, paste, remove
+ * (and "Add a copy" along its bottom) */
 #measureContainer .measureTools {
   position: absolute;
   top: 6px;
@@ -783,6 +784,26 @@ body,
 #measureContainer .pasteMeasureButton:hover,
 #measureContainer .closeMeasureButton:hover {
   color: var(--id-navy-900);
+}
+/* under each bar, on its left (in view on a phone): a copy of the bar right
+ * after it */
+#measureContainer .duplicateMeasureButton {
+  position: absolute;
+  left: 12px;
+  bottom: 8px;
+  padding: 2px 10px;
+  border: 1px dashed var(--id-border);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  color: #7d8ea5;
+  cursor: pointer;
+  user-select: none;
+}
+#measureContainer .duplicateMeasureButton:hover {
+  color: var(--id-navy-900);
+  border-color: var(--id-navy-900);
 }
 /* in place of the add-bar button when a groove has the most bars a link holds:
  * a line under the last bar */

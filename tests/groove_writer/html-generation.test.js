@@ -189,6 +189,14 @@ describe('HTMLforStaffContainer', () => {
       expect(atMost).toContain('32 bars is the most a groove can have');
       expect(buildStaffContainerHTML(31, 30 * 16, ctx(31))).toContain('id="addMeasureButton"');
     });
+
+    it('offers "+ Add a copy" under every bar until then', () => {
+      const bar5 = (bars) => buildStaffContainerHTML(5, 4 * 16, ctx(bars));
+      expect(bar5(31)).toContain(
+        'id="duplicateMeasureButton5" onClick="myGrooveWriter.duplicateMeasureButtonClick(5)"'
+      );
+      expect(bar5(32)).not.toContain('duplicateMeasureButton');
+    });
   });
 
   describe('indexStartForNotes / baseindex offsets (still a single measure, so class_number_of_measures stays 1)', () => {

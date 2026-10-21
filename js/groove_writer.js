@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -3123,8 +3123,12 @@ function GrooveWriter() {
   };
 
   // update the current URL so that reloads and history traversal and link shares and bookmarks work correctly
+  // (while bars are laid out again, the link waits for the whole change)
+  var class_holding_url = false;
+
   root.updateCurrentURL = function () {
     if (class_applying_link_settings) return; // the link's settings aren't all in place yet
+    if (class_holding_url) return;
     var newURL = get_FullURLForPage();
     var newTitle = false;
 
@@ -3483,9 +3487,21 @@ function GrooveWriter() {
     return false; // don't follow the link
   };
 
-  // remove a measure from the page
+  // remove a measure from the page (the other bars keep their muted lines)
   // measureNum is indexed starting at 1, not 0
   root.closeMeasureButtonClick = function (measureNum) {
+    keepingMutes(
+      function (bar) {
+        if (bar == measureNum) return [];
+        return [bar < measureNum ? bar : bar - 1];
+      },
+      function () {
+        removeMeasure(measureNum);
+      }
+    );
+  };
+
+  function removeMeasure(measureNum) {
     if (isMixedMeterGroove()) {
       // bars of different lengths: take the bar out and lay the rest out again
       var records = readBarRecords();
@@ -3548,13 +3564,26 @@ function GrooveWriter() {
     );
 
     updateSheetMusic();
-  };
+  }
 
   // add a measure to the page
   // currently always at the end of the measures
   // copy the notes from the last measure to the new measure
+  // (the bars keep their muted lines, and the new bar the last one's)
   root.addMeasureButtonClick = function (event) {
     if (class_number_of_measures >= constant_MAX_MEASURES) return; // the most a link holds
+    var last = class_number_of_measures;
+    keepingMutes(
+      function (bar) {
+        return bar == last ? [bar, bar + 1] : [bar];
+      },
+      function () {
+        addMeasure();
+      }
+    );
+  };
+
+  function addMeasure() {
     if (isMixedMeterGroove()) {
       // bars of different lengths: the new bar copies the last one, time signature too
       var records = readBarRecords();
@@ -3643,7 +3672,57 @@ function GrooveWriter() {
           'You can create as many measures as you want, but your browser may slow down as more measures are added.\n' +
           'There are also many notation features that would be useful for score writing that are not part of Groove Scribe'
       );
+  }
+
+  // --- A copy of a bar right after it (Infinity Drumming, 2026) ----------------
+  // The "+ Add a copy" under every bar: the bar again, right after itself, with
+  // its time signature, swing / straight, beats and muted lines; the bars after
+  // it move along one.
+  // measureNum is indexed starting at 1, not 0
+  root.duplicateMeasureButtonClick = function (measureNum) {
+    if (class_number_of_measures >= constant_MAX_MEASURES) return; // the most a link holds
+    var laidOut = keepingMutes(
+      function (bar) {
+        if (bar < measureNum) return [bar];
+        return bar == measureNum ? [bar, bar + 1] : [bar + 1];
+      },
+      function () {
+        var records = readBarRecords();
+        records.splice(measureNum, 0, JSON.parse(JSON.stringify(records[measureNum - 1])));
+        return layOutBarRecords(records);
+      }
+    );
+    var copy = document.getElementById('staff-container' + (measureNum + 1));
+    if (laidOut && copy && copy.scrollIntoView)
+      copy.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   };
+
+  // Laying the grid out again (a bar added, removed, copied or pasted) draws every
+  // bar unmuted: layOut() does it, then each bar's muted lines are muted again
+  // where the bar went (newBars(bar): its new numbers, 1-based, [] once it's
+  // gone), as one change of the link (and one step of undo). Returns what
+  // layOut() did (false: nothing changed). (Infinity Drumming, 2026)
+  function keepingMutes(newBars, layOut) {
+    var mutes = currentMutes();
+    var holding = class_holding_url;
+    class_holding_url = true;
+    var result;
+    try {
+      result = layOut();
+      if (result !== false) {
+        var moved = {};
+        for (var line in mutes)
+          moved[line] = mutes[line].reduce(function (bars, bar) {
+            return bars.concat(newBars(bar));
+          }, []);
+        setMutesFromLink(moved);
+      }
+    } finally {
+      class_holding_url = holding;
+    }
+    if (result !== false && !holding) root.updateCurrentURL();
+    return result;
+  }
 
   // --- Straight bars in a swung groove ----------------------------------------
   // Each bar has a switch under its copy / paste buttons: swung bars use the swing
@@ -3702,8 +3781,11 @@ function GrooveWriter() {
   }
 
   // Kept in localStorage as well, so a bar can be pasted into another groove
-  // (another tab, or after loading a different groove).
+  // (another tab, or after loading a different groove); and (Infinity Drumming,
+  // 2026) on the device's clipboard, which every tab, browser and home-screen app
+  // shares, on either of the site's addresses too (each has its own localStorage).
   var constant_measure_clipboard_key = 'grooveScribeMeasureClipboard';
+  var constant_measure_clipboard_text = 'Infinity Scribe bar ';
   var class_measure_clipboard = null;
 
   // measureNum is indexed starting at 1, not 0
@@ -3719,12 +3801,19 @@ function GrooveWriter() {
     for (var name in lines) {
       copied.lines[name] = lines[name].slice(start, start + class_notes_per_measure);
     }
+    copied.at = Date.now(); // (paste takes the newest copy)
     class_measure_clipboard = copied;
     try {
       window.localStorage.setItem(constant_measure_clipboard_key, JSON.stringify(copied));
     } catch (err) {
       /* storage unavailable: the in-page copy still works */
     }
+    if (navigator.clipboard && navigator.clipboard.writeText)
+      navigator.clipboard
+        .writeText(constant_measure_clipboard_text + JSON.stringify(copied))
+        .catch(function () {
+          /* not allowed: the copies above remain */
+        });
 
     // brief green flash so the click visibly did something
     var button = document.getElementById('copyMeasureButton' + measureNum);
@@ -3764,11 +3853,57 @@ function GrooveWriter() {
       sameSig && copied.beats ? copied.beats : beatsFromTabLines(pastedBar, 0, sig);
   }
 
+  // the bar on the device's clipboard ("Infinity Scribe bar {...}"), or null
+  function measureFromClipboardText(text) {
+    var prefix = constant_measure_clipboard_text.trim();
+    text = String(text || '').trim();
+    if (text.indexOf(prefix) !== 0) return null;
+    try {
+      var copied = JSON.parse(text.slice(prefix.length));
+      return copied && copied.lines ? copied : null;
+    } catch {
+      return null; // not a bar after all
+    }
+  }
+
+  // the bar to paste, to `then`: the newer of the device's clipboard's and this
+  // site's copy (straight away when there's no clipboard to read)
+  function readMeasureClipboard(then) {
+    var stored = getMeasureClipboard();
+    var clipboard = navigator.clipboard;
+    if (!clipboard || !clipboard.readText) {
+      then(stored);
+      return;
+    }
+    clipboard.readText().then(
+      function (text) {
+        var copied = measureFromClipboardText(text);
+        var newer = copied && (!stored || (copied.at || 0) >= (stored.at || 0));
+        then(newer ? copied : stored);
+      },
+      function () {
+        then(stored); // not allowed (or nothing there): this site's copy
+      }
+    );
+  }
+
   root.pasteMeasureButtonClick = function (measureNum) {
-    var copied = getMeasureClipboard();
+    readMeasureClipboard(function (copied) {
+      keepingMutes(
+        function (bar) {
+          return [bar];
+        },
+        function () {
+          return pasteMeasure(measureNum, copied);
+        }
+      );
+    });
+  };
+
+  function pasteMeasure(measureNum, copied) {
     if (!copied || !copied.lines) {
       window.alert('Copy a bar first: use the copy button under the bar you want.');
-      return;
+      return false;
     }
     if (copied.triplets !== usingTriplets()) {
       window.alert(
@@ -3776,7 +3911,7 @@ function GrooveWriter() {
           (copied.triplets ? 'triplet' : 'non-triplet') +
           ' groove and can only be pasted into one too.'
       );
-      return;
+      return false;
     }
 
     var lines = getTabLinesFromClickableUI();
@@ -3816,7 +3951,7 @@ function GrooveWriter() {
     if (hasNotes(copied.lines.Stickings)) root.stickingsShowHide(true, true, true);
 
     updateSheetMusic();
-  };
+  }
 
   function showHideCSS_ClassDisplay(className, force, showElseHide, showState) {
     var myElements = document.querySelectorAll(className);

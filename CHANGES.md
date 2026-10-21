@@ -11,6 +11,24 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — A copy of a bar right after it; copy and paste between windows
+
+- **Add a copy** under every bar puts the bar again right after itself,
+  wherever it is in the groove, with its time signature, swing / straight
+  switch, beats and muted lines; the bars after it move along one. It is one
+  step of undo (`js/groove_writer.js`, `js/viewHtml.js`,
+  `css/infinity_layout.css`, `css/groove_writer_orange.css`,
+  `gscribe_help.html`).
+- A copied bar also goes on the device's clipboard (as "Infinity Scribe bar"
+  and its data), so it pastes in any window: another browser, the home-screen
+  app, a private tab, or the site's other address, each of which keeps its
+  own storage, so pasting there had nothing to paste. A paste takes the newer
+  of the clipboard's bar and this window's own copy, and uses its own copy
+  when the clipboard can't be read (`js/groove_writer.js`).
+- Muted lines stay with their bars when a bar is added, removed, copied or
+  pasted (laying the grid out again used to unmute every bar), and each of
+  those is one change of the link (`js/groove_writer.js`).
+
 ## 2026-10-21 — Dense bars one to a line on a phone; every count in triplet beats
 
 - Two bars go on a line of music only when they fit (a note needs about 8px,

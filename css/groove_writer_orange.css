@@ -1,4 +1,4 @@
-/* Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar, speed-up target tempo, cursor timing popup, practice timer. See CHANGES.md. */
+/* Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, a copy of a bar after it, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar, speed-up target tempo, cursor timing popup, practice timer. See CHANGES.md. */
 /* this is for debugging layout issues - puts a red border around everything */
 /* body * { border: 1px solid red; }		 */
 DEBUG {
@@ -943,7 +943,8 @@ body {
   vertical-align: top;
 }
 .copyMeasureButton,
-.pasteMeasureButton {
+.pasteMeasureButton,
+.duplicateMeasureButton {
   margin-top: 10px;
   font-size: 16px;
   cursor: pointer;
