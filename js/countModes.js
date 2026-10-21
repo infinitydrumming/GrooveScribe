@@ -36,8 +36,23 @@ export function countModeToUrl(show, mode) {
   return '&Count=' + (COUNT_MODES.indexOf(mode) > 0 ? mode : '1');
 }
 
-/** The fonts of the bold count ($1 the rhythm, $2 the rest), for the ABC header. */
-export var COUNT_FONTS = '%%setfont-1 calibriBold 16\n%%setfont-2 calibri;fill:#8c8c8c 13\n';
+/**
+ * The count's fonts, for the ABC header: smaller for 32nd notes (so a bar of
+ * them fits on a phone), and for the bold counts $1 (the rhythm) and $2 (the rest).
+ * @param {string} mode
+ * @param {boolean} small
+ */
+export function countFonts(mode, small) {
+  var fonts = small ? '%%gchordfont calibri 11\n' : '';
+  if (mode == 'bold' || mode == 'ghosts')
+    fonts +=
+      '%%setfont-1 calibriBold ' +
+      (small ? 14 : 16) +
+      '\n%%setfont-2 calibri;fill:#8c8c8c ' +
+      (small ? 11 : 13) +
+      '\n';
+  return fonts;
+}
 
 var GHOST = '!(.!!).!';
 var ACCENT = '!accent!';
@@ -121,7 +136,7 @@ var SYLLABLES = {
   3: ['&', 'a'],
   4: ['e', '&', 'a'],
   6: ['a', 'li', '&', 'a', 'la'],
-  8: ['ah', 'lee', 'bee', '&', 'ah', 'lah', 'bah'],
+  8: ['a', 'li', 'bi', '&', 'a', 'la', 'ba'],
 };
 var SPLITS = [1, 2, 3, 4, 6, 8];
 // the offset click starts, in grid slots (as midiFile.js shifts them)
@@ -183,33 +198,48 @@ function gcd(a, b) {
 }
 
 /**
- * One bar of the click's count, as the (hidden) stickings voice writes it, a
- * click's syllable over its note. It has a note wherever the groove's grid has
- * one, as the other counts do: abc2svg may break a long line at any of the
+ * How finely the clicks split a beat (1, 2, 3, 4, 6 or 8), or 0 when finer.
+ * @param {number[]} ticks  from clickTicks
+ * @param {number} bottom
+ */
+export function clickSplit(ticks, bottom) {
+  var beatTicks = 512 / bottom;
+  return (
+    SPLITS.find(function (n) {
+      return ticks.every(function (tick) {
+        return whole(((tick % beatTicks) * n) / beatTicks);
+      });
+    }) || 0
+  );
+}
+
+// a click's syllable: the beat's number, or the split's syllable after it
+function clickName(tick, split, beatTicks) {
+  var beat = Math.floor(tick / beatTicks + 1e-6);
+  var part = Math.round(((tick - beat * beatTicks) * split) / beatTicks);
+  return part === 0 ? String(beat + 1) : SYLLABLES[split][part - 1];
+}
+
+/**
+ * One straight bar of the click's count, as the (hidden) stickings voice writes
+ * it, a click's syllable over its note. It has a note wherever the groove's grid
+ * has one, as the other counts do: abc2svg may break a long line at any of the
  * notes, and its bar numbers need this first voice to have one there. Null when
  * the clicks are finer than 8 to a beat.
  * @param {number[]} ticks  from clickTicks
  * @param {number} top
  * @param {number} bottom
- * @param {boolean} tripletBar  a bar of the triplet grid: written half as long
- *   again (48 1/32 units to a 4/4 bar, its tuplets only labels), each beat a
- *   tuplet as the notes' are
  * @param {number} grid  the groove's notes to a beat
  */
-export function clickCountBar(ticks, top, bottom, tripletBar, grid) {
+export function clickCountBar(ticks, top, bottom, grid) {
   var beatTicks = 512 / bottom;
-  var split = SPLITS.find(function (n) {
-    return ticks.every(function (tick) {
-      return whole(((tick % beatTicks) * n) / beatTicks);
-    });
-  });
+  var split = clickSplit(ticks, bottom);
   if (!split) return null;
-  var units = (tripletBar ? 48 : 32) / bottom; // a beat, in the music's 1/32 units
+  var units = 32 / bottom; // a beat, in the music's 1/32 units
   var gridNotes = whole(grid) && grid >= 1 ? Math.round(grid) : units;
   var parts = (split * gridNotes) / gcd(split, gridNotes); // a beat split for both
-  // straight bars: clicks in 3s or 6s are a tuplet over the beat (its parts
-  // written 1 unit long); the triplet grid's beats are only labelled tuplets
-  var ternary = !tripletBar && parts % 3 === 0;
+  // clicks in 3s or 6s: a tuplet over the beat, its parts written 1 unit long
+  var ternary = parts % 3 === 0;
   var partUnits = ternary ? 1 : units / parts;
   var abc = '';
   for (var beat = 0; beat < top; beat++) {
@@ -219,17 +249,84 @@ export function clickCountBar(ticks, top, bottom, tripletBar, grid) {
       var clicked = ticks.some(function (click) {
         return Math.abs(click - tick) < 1e-6;
       });
-      if (clicked || part % (parts / gridNotes) === 0) at.push({ part: part, clicked: clicked });
+      if (clicked || part % (parts / gridNotes) === 0)
+        at.push({ part: part, tick: tick, clicked: clicked });
     }
-    if (tripletBar) abc += '(' + at.length + ':' + at.length + ':' + at.length;
-    else if (ternary) abc += '(' + parts + ':' + units + ':' + at.length;
+    if (ternary) abc += '(' + parts + ':' + units + ':' + at.length;
     at.forEach(function (note, n) {
       var length = ((n + 1 < at.length ? at[n + 1].part : parts) - note.part) * partUnits;
-      var syllable = (note.part * split) / parts; // (whole where it clicks)
-      var name = note.part === 0 ? String(beat + 1) : SYLLABLES[split][syllable - 1];
-      abc += (note.clicked ? '"' + name + '"' : '') + spacer(length);
+      abc +=
+        (note.clicked ? '"' + clickName(note.tick, split, beatTicks) + '"' : '') + spacer(length);
     });
     abc += ' ';
   }
   return abc;
+}
+
+/**
+ * The click's count over a stretch of a triplet-grid bar (a beat, or the two of
+ * a quarter-note triplet) as the music writer laid the stretch out: `spacers`
+ * are the (hidden) notes it wrote there, one wherever the music has a note.
+ * The writer writes a triplet beat 12 units to a quarter note (its tuplet only a
+ * label) and a plain beat (a quarter, 8ths, 16ths) 8, so the click is placed in
+ * the stretch's own units, with a tuplet where it falls between them.
+ * @param {number[]} spacers  their lengths, in the music's 1/32 units
+ * @param {number} slots  the stretch, in triplet-grid slots (12 to a quarter note)
+ * @param {number} startTick  where it starts in the bar (128 ticks to a quarter note)
+ * @param {number[]} ticks  the bar's clicks (clickTicks)
+ * @param {number} split  clickSplit
+ * @param {number} bottom
+ */
+export function clickCountOver(spacers, slots, startTick, ticks, split, bottom) {
+  var written = spacers.reduce(function (sum, length) {
+    return sum + length;
+  }, 0);
+  var realTicks = (slots * 128) / 12;
+  var at = []; // in written units, with the click's syllable there
+  var position = 0;
+  spacers.forEach(function (length) {
+    at.push({ at: position, name: '' });
+    position += length;
+  });
+  ticks.forEach(function (tick) {
+    if (tick < startTick - 1e-6 || tick > startTick + realTicks - 1e-6) return;
+    var where = ((tick - startTick) * written) / realTicks;
+    var name = clickName(tick, split, 512 / bottom);
+    var same = at.find(function (note) {
+      return Math.abs(note.at - where) < 1e-6;
+    });
+    if (same) same.name = name;
+    else at.push({ at: where, name: name });
+  });
+  at.sort(function (a, b) {
+    return a.at - b.at;
+  });
+  var lead = '';
+  var scale = 1;
+  if (
+    !at.every(function (note) {
+      return whole(note.at * 4);
+    })
+  ) {
+    // between the written units: a tuplet of `parts` 1-unit notes in their time
+    var parts = 1;
+    while (
+      parts < 96 &&
+      !at.every(function (note) {
+        return whole((note.at * parts) / written);
+      })
+    )
+      parts++;
+    lead = '(' + parts + ':' + written + ':' + at.length;
+    scale = parts / written;
+  } else if (written == slots) lead = '(' + at.length + ':' + at.length + ':' + at.length; // a labelled triplet beat
+  return (
+    lead +
+    at
+      .map(function (note, n) {
+        var length = ((n + 1 < at.length ? at[n + 1].at : written) - note.at) * scale;
+        return (note.name ? '"' + note.name + '"' : '') + spacer(length);
+      })
+      .join('')
+  );
 }

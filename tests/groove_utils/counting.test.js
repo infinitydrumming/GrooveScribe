@@ -38,10 +38,10 @@ describe('counting over the notes', () => {
     ).toBe('1 2 3 1 2 3 4 5');
   });
 
-  it('counts 32nd notes "1 ah lee bee & ah lah bah"', () => {
+  it('counts 32nd notes "1 a li bi & a la ba"', () => {
     const line = '|' + 'x-'.repeat(16) + '|';
     expect(counts(`?TimeSig=4/4&Div=32&Measures=1&Count=1&H=${line}`).slice(0, 18).join(' ')).toBe(
-      '1 ah lee bee & ah lah bah 2 ah lee bee & ah lah bah 3 ah'
+      '1 a li bi & a la ba 2 a li bi & a la ba 3 a'
     );
   });
 
@@ -122,6 +122,21 @@ describe('counting over the notes', () => {
       expect(
         counts('?TimeSig=6/8&Div=8&Measures=1&Count=click&MetronomeFreq=4d&H=|xxxxxx|').join(' ')
       ).toBe('1 4');
+    });
+
+    it('lines up with a triplet groove beat by beat, its plain beats and its sextuplets', () => {
+      // 16th triplets: the hi-hat's 8ths are written as plain 8ths (8 units a beat)
+      const abc = (freq) =>
+        gu.createABCFromGrooveData(
+          gu.getGrooveDataFromUrlString(
+            '?TimeSig=4/4&Div=24&Measures=1&Count=click&MetronomeFreq=' +
+              freq +
+              '&H=|x--x--x--x--x--x--x--x--|&S=|------------------------|&K=|------------------------|'
+          ),
+          800
+        );
+      expect(abc(4)).toContain('%%tuplets 1 0 0\n"1"x4x4 "2"x4x4 "3"x4x4 "4"x4x4 |');
+      expect(abc(16)).toContain('%%tuplets 1 0 0\n(6:8:6"1"x1"a"x1"li"x1"&"x1"a"x1"la"x1 ');
     });
 
     it("writes it as the click's own triplets, with no tuplet number over them", () => {
