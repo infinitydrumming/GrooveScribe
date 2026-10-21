@@ -70,8 +70,8 @@ describe('permutation figures', () => {
 
   it('1/16 triplets: the triplet figures last an 8th note; cross-rhythms count 16th triplets', () => {
     const byName = Object.fromEntries(figures(24).map((x) => [x.name, x.tab]));
-    expect(byName['Singles 1']).toBe('o--o--o--o--o--o--o--o--');
-    expect(byName['Doubles &']).toBe('-oo-oo-oo-oo-oo-oo-oo-oo');
+    expect(byName['Singles (twice a beat) 1']).toBe('o--o--o--o--o--o--o--o--');
+    expect(byName['Doubles (twice a beat) &']).toBe('-oo-oo-oo-oo-oo-oo-oo-oo');
     expect(byName['Cross-rhythm: every 4th note 2nd']).toBe('-o---o---o---o---o---o--');
   });
 });
@@ -114,19 +114,57 @@ describe('1/16 triplets: per-beat figures on all 6 notes of the beat', () => {
   const layout = getPermutationLayout(24);
   const groups = layout.groups.map((g) => g.name);
 
-  it('adds Singles / Doubles / Triples (per beat), unticked, before the cross-rhythms', () => {
+  it('has the figures over a whole beat (unticked, a hit more at a time), then those inside it', () => {
     expect(groups).toEqual([
       'Ostinato',
-      'Singles',
-      'Doubles',
       'Singles (per beat)',
+      'Single, gap, single (per beat)',
       'Doubles (per beat)',
+      'Double, gap, single (per beat)',
+      'Double, 2 gaps, single (per beat)',
       'Triples (per beat)',
+      'Triple, gap, single (per beat)',
+      'Quads (per beat)',
+      'Fives (per beat)',
+      'All six (per beat)',
+      'Singles (twice a beat)',
+      'Doubles (twice a beat)',
       'Cross-rhythm: every 2nd note',
       'Cross-rhythm: every 4th note',
     ]);
     const perBeat = layout.groups.filter((g) => g.name.includes('per beat'));
-    expect(perBeat.every((g) => g.defaultOn === false && g.subLabels.length === 6)).toBe(true);
+    expect(perBeat.every((g) => g.defaultOn === false)).toBe(true);
+    // so the run with the menu's own ticks plays as before
+    expect(layout.groups.filter((g) => g.defaultOn).map((g) => g.id)).toEqual([
+      'PermuationOptionsSingles',
+      'PermuationOptionsDoubles',
+      'PermuationOptionsEvery2nd',
+      'PermuationOptionsEvery4th',
+    ]);
+    expect(perBeat.filter((g) => g.subLabels.length != 6).map((g) => g.name)).toEqual([
+      'All six (per beat)',
+    ]);
+  });
+
+  it('has every rhythm of a beat of 6 notes once, in some figure', () => {
+    // the figures that repeat each beat, as one beat ("o-oo--")
+    const beats = figures(24)
+      .map((x) => x.tab.slice(0, 6))
+      .filter((beat, i) => figures(24)[i].tab == beat.repeat(4));
+    expect(beats.length).toBe(64); // 2^6
+    expect(new Set(beats).size).toBe(64);
+  });
+
+  it('spells out the new figures', () => {
+    const byName = Object.fromEntries(figures(24).map((x) => [x.name, x.tab]));
+    expect(byName['Single, gap, single (per beat) 1']).toBe('o-o---'.repeat(4));
+    expect(byName['Double, gap, single (per beat) 1']).toBe('oo-o--'.repeat(4));
+    expect(byName['Double, 2 gaps, single (per beat) 1']).toBe('oo--o-'.repeat(4));
+    expect(byName['Double, 2 gaps, single (per beat) 5']).toBe('--o-oo'.repeat(4)); // single, gap, double
+    expect(byName['Triple, gap, single (per beat) 1']).toBe('ooo-o-'.repeat(4));
+    expect(byName['Quads (per beat) 3']).toBe('--oooo'.repeat(4));
+    expect(byName['Fives (per beat) 2']).toBe('-ooooo'.repeat(4));
+    expect(byName['All six (per beat)']).toBe('oooooo'.repeat(4));
   });
 
   it('covers the off-beats between the 8th-triplet notes', () => {

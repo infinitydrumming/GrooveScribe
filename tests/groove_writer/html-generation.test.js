@@ -397,7 +397,7 @@ describe('HTMLforPermutationOptions', () => {
       expect(html).not.toMatch(/checked type="checkbox"[^>]*id="PermuationOptionsQuads"/);
     });
 
-    it('1/16 triplets: Singles and Doubles (3-way), per-beat groups (6-way), then the cross-rhythms', async () => {
+    it('1/16 triplets: per-beat groups (6-way), Singles and Doubles (3-way), then the cross-rhythms', async () => {
       window.history.pushState({}, '', '/?Div=24');
       document.body.innerHTML = '';
       gw = await newGrooveWriter();
@@ -408,11 +408,18 @@ describe('HTMLforPermutationOptions', () => {
       const groupIds = permutationGroupIds(html);
       expect(groupIds).toEqual([
         'PermuationOptionsOstinato',
+        'PermuationOptionsSinglesBeat',
+        'PermuationOptionsSingleGapSingleBeat',
+        'PermuationOptionsDoublesBeat',
+        'PermuationOptionsDoubleGapSingleBeat',
+        'PermuationOptionsDouble2GapsSingleBeat',
+        'PermuationOptionsTriplesBeat',
+        'PermuationOptionsTripleGapSingleBeat',
+        'PermuationOptionsQuadsBeat',
+        'PermuationOptionsFivesBeat',
+        'PermuationOptionsSixesBeat',
         'PermuationOptionsSingles',
         'PermuationOptionsDoubles',
-        'PermuationOptionsSinglesBeat',
-        'PermuationOptionsDoublesBeat',
-        'PermuationOptionsTriplesBeat',
         'PermuationOptionsEvery2nd',
         'PermuationOptionsEvery4th',
       ]);

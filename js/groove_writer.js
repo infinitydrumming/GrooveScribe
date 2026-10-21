@@ -6018,9 +6018,39 @@ function GrooveWriter() {
     return text;
   }
 
+  // the boxes a link's ticks are for, in order: all of them, or for a link from
+  // before the layout gained groups (layout.groupsInOlderLinks), the menu's own
+  // options then the groups there were then, in their order then
+  function linkedPermutationBoxes(count) {
+    var layout = get_permutation_layout();
+    var boxes = Array.prototype.slice.call(permutationCheckboxes());
+    if (count == boxes.length || !layout.groupsInOlderLinks) return boxes;
+    var groupOf = function (box) {
+      return box.id.replace(/_sub\d+$/, '');
+    };
+    var ids = layout.groups.map(function (group) {
+      return group.id;
+    });
+    var older = boxes.filter(function (box) {
+      return ids.indexOf(groupOf(box)) < 0;
+    });
+    layout.groupsInOlderLinks.forEach(function (id) {
+      older = older.concat(
+        boxes.filter(function (box) {
+          return groupOf(box) == id;
+        })
+      );
+    });
+    return older;
+  }
+
   function setPermutationBoxes(text) {
-    var boxes = permutationCheckboxes();
-    if (!text || text.length != boxes.length) return; // another layout: keep its own ticks
+    if (!text) return;
+    var boxes = linkedPermutationBoxes(text.length);
+    if (text.length != boxes.length) return; // another layout: keep its own ticks
+    permutationCheckboxes().forEach(function (box) {
+      box.checked = false; // (a group the link has no tick for)
+    });
     boxes.forEach(function (box, i) {
       box.checked = text.charAt(i) == '1';
     });
