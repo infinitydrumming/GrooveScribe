@@ -4,6 +4,7 @@ import {
   countModeToUrl,
   clickTicks,
   clickCountBar,
+  clickCountOver,
   styleCounts,
 } from '../js/countModes.js';
 
@@ -116,20 +117,29 @@ describe("the click's count", () => {
     expect(clickTicks('4d', '1', 6, 8, false)).toEqual([0, 192]);
   });
 
-  it("writes a bar of it: a note on every grid note and every click, a click's syllable over it", () => {
-    // straight: 16ths grid, quarter and 8th clicks
-    expect(clickCountBar([0, 128], 2, 4, false, 1)).toBe('"1"x8 "2"x8 ');
-    expect(clickCountBar([0, 64, 128], 2, 4, false, 2)).toBe('"1"x4"&"x4 "2"x4x4 ');
+  it("writes a straight bar of it: a note on every grid note and every click, a click's syllable over it", () => {
+    // 16ths grid, quarter and 8th clicks
+    expect(clickCountBar([0, 128], 2, 4, 1)).toBe('"1"x8 "2"x8 ');
+    expect(clickCountBar([0, 64, 128], 2, 4, 2)).toBe('"1"x4"&"x4 "2"x4x4 ');
     // triplets over a quarter-note grid, and over 16ths (one tuplet over the beat)
-    expect(clickCountBar([0, 128 / 3, 256 / 3], 1, 4, false, 1)).toBe('(3:8:3"1"x1"&"x1"a"x1 ');
-    expect(clickCountBar([0, 128 / 3, 256 / 3], 1, 4, false, 4)).toBe(
-      '(12:8:6"1"x3x1"&"x2x2"a"x1x3 '
-    );
-    // the triplet grid: written half as long again, each beat a labelled tuplet
-    expect(clickCountBar([0, 128 / 6], 1, 4, true, 6)).toBe('(6:6:6"1"x2"a"x2x2x2x2x2 ');
+    expect(clickCountBar([0, 128 / 3, 256 / 3], 1, 4, 1)).toBe('(3:8:3"1"x1"&"x1"a"x1 ');
+    expect(clickCountBar([0, 128 / 3, 256 / 3], 1, 4, 4)).toBe('(12:8:6"1"x3x1"&"x2x2"a"x1x3 ');
     // an 8th-note beat
-    expect(clickCountBar([0, 32], 1, 8, false, 2)).toBe('"1"x2"&"x2 ');
-    expect(clickCountBar([0, 8], 1, 8, false, 1)).toBe('"1"x/"a"x7/2 ');
-    expect(clickCountBar([5], 1, 4, false, 4)).toBeNull(); // finer than 8 to a beat
+    expect(clickCountBar([0, 32], 1, 8, 2)).toBe('"1"x2"&"x2 ');
+    expect(clickCountBar([0, 8], 1, 8, 1)).toBe('"1"x/"a"x7/2 ');
+    expect(clickCountBar([5], 1, 4, 4)).toBeNull(); // finer than 8 to a beat
+  });
+
+  it('writes it over a triplet-grid beat as the music writer laid the beat out', () => {
+    // a sextuplet beat (12 units to a quarter note, its tuplet a label)
+    expect(clickCountOver([2, 2, 2, 2, 2, 2], 12, 0, [0, 128], 1, 4)).toBe('(6:6:6"1"x2x2x2x2x2x2');
+    // a beat of plain 8ths (8 units): a quarter click, and a sextuplet click
+    expect(clickCountOver([4, 4], 12, 128, [0, 128], 1, 4)).toBe('"2"x4x4');
+    const sextuplets = [0, 1, 2, 3, 4, 5].map((n) => (n * 128) / 6);
+    expect(clickCountOver([4, 4], 12, 0, sextuplets, 6, 4)).toBe(
+      '(6:8:6"1"x1"a"x1"li"x1"&"x1"a"x1"la"x1'
+    );
+    // a quarter-note triplet over two beats: the second beat's click between its notes
+    expect(clickCountOver([8, 8, 8], 24, 0, [0, 128], 1, 4)).toBe('(4:4:4"1"x8x4"2"x4x8');
   });
 });

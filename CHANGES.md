@@ -11,6 +11,15 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — The click's count keeps to the bars in triplet grooves
+
+- In 1/8 and 1/16 triplets the music writes a beat of plain notes (a quarter,
+  8ths, 16ths) shorter than a triplet beat, so "Count: the click" (which took
+  every beat as a triplet beat) drifted out of the bars, most of all in
+  permutations. The count is now written over each beat as the music writer
+  laid it out, with its click syllables placed in that beat
+  (`js/countModes.js`, `js/abcNotation.js`).
+
 ## 2026-10-21 — 32nd notes counted "1 a li bi & a la ba"
 
 - 32nd notes are counted "1 a li bi & a la ba" (short for "1 ah lee bee & ah
