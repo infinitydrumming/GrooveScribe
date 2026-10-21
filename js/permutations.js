@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: practising some bars of a run, bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: dense bars one a line on phones, practising some bars of a run, bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
 // Permutation engine (Step 4 extraction from groove_writer.js).
 //
 // Pure combinatorial generators for the "permutation" practice modes: they build
@@ -363,7 +363,14 @@ export function getPermutationSections(layout) {
 // `nextBarNumber` (optional): the number in the run of the bar shown after this
 // one; the music prints it at the start of that bar (a number set in a bar takes
 // effect at its closing bar line; the first bar of the music has none).
-export function getPermutationSectionABC(section, shownIndex, lastInGroup, repeats, nextBarNumber) {
+export function getPermutationSectionABC(
+  section,
+  shownIndex,
+  lastInGroup,
+  repeats,
+  nextBarNumber,
+  barsPerLine
+) {
   var pre = '';
   if (nextBarNumber) pre += '%%setbarnb ' + nextBarNumber + '\n';
   if (shownIndex === 0) {
@@ -378,9 +385,10 @@ export function getPermutationSectionABC(section, shownIndex, lastInGroup, repea
   pre +=
     '%\n% ' + section.group.name + (section.label ? ' on "' + section.label + '"' : '') + '\n%\n';
 
+  // two bars a line, or one (dense bars on a phone, see abcNotation.musicLayout)
   var post;
   if (lastInGroup) post = '|\n';
-  else if (shownIndex % 2 == 1) post = '\n';
+  else if (barsPerLine === 1 || shownIndex % 2 == 1) post = '\n';
   else post = '\\\n';
 
   return { pre: pre, post: post };

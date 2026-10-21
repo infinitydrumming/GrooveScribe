@@ -108,6 +108,13 @@ describe('permutation bars', () => {
     expect(second.post).toBe('\n');
     expect(getPermutationSectionABC(singles1, 2, true, 1).post).toBe('|\n');
   });
+
+  it('puts one bar on a line when the music says so (dense bars on a phone)', () => {
+    expect(getPermutationSectionABC(singles1, 0, false, 1, 0, 1).post).toBe('\n');
+    expect(getPermutationSectionABC(singles1, 1, false, 1, 0, 1).post).toBe('\n');
+    expect(getPermutationSectionABC(singles1, 2, true, 1, 0, 1).post).toBe('|\n');
+    expect(getPermutationSectionABC(singles1, 0, false, 1, 0, 2).post).toBe('\\\n');
+  });
 });
 
 describe('1/16 triplets: per-beat figures on all 6 notes of the beat', () => {

@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -113,7 +113,14 @@ import {
 import * as _perm from './permutations.js';
 import * as _view from './viewHtml.js';
 import * as _grid from './gridState.js';
-import { getFeelMarkings, addFeelMarking, addMeterChange } from './abcNotation.js';
+import {
+  getFeelMarkings,
+  addFeelMarking,
+  addMeterChange,
+  musicLayout,
+  musicLineBroken,
+  notesOnALine,
+} from './abcNotation.js';
 import { barSig, barNoteCount, barStride, isMixedMeter, divisionFitsBar } from './barMeters.js';
 import { scaleTabMeasure } from './noteArrays.js';
 import { isTimedClick, parseMetronomeFrequency } from './metronome.js';
@@ -2447,8 +2454,9 @@ function GrooveWriter() {
 
   // the shown figures in playing order, each with its ABC before / after: the
   // ticked figures, numbered 1, 2, ... as the music numbers its bars, and of
-  // those only the bars to practise when some are chosen ("Practise bars")
-  function get_shown_permutation_sections() {
+  // those only the bars to practise when some are chosen ("Practise bars");
+  // barsPerLine: 2 (the default) or 1, for the music
+  function get_shown_permutation_sections(barsPerLine) {
     var ticked = _perm
       .getPermutationSections(get_permutation_layout())
       .filter(isPermutationSectionShown);
@@ -2465,7 +2473,14 @@ function GrooveWriter() {
       for (var j = i - 1; j >= 0 && shown[j].section.group === section.group; j--) shownIndex++;
       var lastInGroup = i + 1 >= shown.length || shown[i + 1].section.group !== section.group;
       var next = shown[i + 1] ? shown[i + 1].number : 0; // printed over the next bar
-      var abc = _perm.getPermutationSectionABC(section, shownIndex, lastInGroup, repeats, next);
+      var abc = _perm.getPermutationSectionABC(
+        section,
+        shownIndex,
+        lastInGroup,
+        repeats,
+        next,
+        barsPerLine || 2
+      );
       // the music's first bar has no bar number: with some bars chosen, its
       // heading says which bar it is
       if (i === 0 && chosen.length)
@@ -3144,7 +3159,11 @@ function GrooveWriter() {
     }
   };
 
-  function generate_ABC(renderWidth) {
+  // the width the music was last drawn at (see updateSheetMusic)
+  var class_music_render_width = 0;
+
+  // atLeast: draw the music at least this wide (smaller on the screen)
+  function generate_ABC(renderWidth, atLeast) {
     var Sticking_Array = get_empty_note_array_in_32nds();
     var HH_Array = get_empty_note_array_in_32nds();
     var Snare_Array = get_empty_note_array_in_32nds();
@@ -3172,6 +3191,7 @@ function GrooveWriter() {
     // what the counting follows: the click, and in a permutation the permuted
     // lines; 32nd notes are counted in smaller letters
     root.myGrooveUtils.countSmall = class_time_division == 32;
+
     root.myGrooveUtils.countClick = {
       frequency: root.class_metronome_frequency,
       start: root.myGrooveUtils.getMetronomeOffsetClickStart() || '1',
@@ -3183,6 +3203,27 @@ function GrooveWriter() {
         kick_snare_kick_lead: ['kick', 'snare'],
         kick_snare_snare_lead: ['kick', 'snare'],
       }[class_permutation_type] || null;
+
+    // two bars a line, or one where they'd be too tight (a phone); a bar too wide
+    // even alone is drawn smaller rather than broken (see abcNotation.musicLayout)
+    var layout = musicLayout(
+      notesOnALine(
+        root.myGrooveUtils,
+        barStrideFor(class_time_division),
+        class_num_beats_per_measure,
+        class_note_value_per_measure,
+        usingTriplets()
+      ),
+      renderWidth,
+      {
+        counted: root.myGrooveUtils.showCounts && class_time_division != 32,
+        triplets: usingTriplets(),
+        oneBar: class_permutation_type == 'none' && class_notes_per_measure >= 32,
+        keepWidth: class_time_division == 48,
+      }
+    );
+    renderWidth = Math.max(layout.renderWidth, atLeast || 0);
+    class_music_render_width = Math.max(renderWidth, 400); // (the boilerplate's least)
 
     switch (class_permutation_type) {
       case 'kick_16ths': // use the hh & snare from the user
@@ -3204,7 +3245,7 @@ function GrooveWriter() {
         root.myGrooveUtils.note_mapping_array = [];
 
         // every shown figure, written once (marked "play each ×N" when repeated)
-        get_shown_permutation_sections().forEach(function (shownSection) {
+        get_shown_permutation_sections(layout.barsPerLine).forEach(function (shownSection) {
           var bar = get_permutation_bar(shownSection.section, Kick_Array, Snare_Array);
           fullABC += shownSection.pre_abc;
           fullABC += root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
@@ -3250,13 +3291,9 @@ function GrooveWriter() {
         );
         root.myGrooveUtils.note_mapping_array = [];
 
-        var numberOfMeasuresPerLine = 2;
+        // (one for 32nd notes and above, and for dense bars on a phone)
+        var numberOfMeasuresPerLine = layout.barsPerLine;
         var addon_abc;
-
-        if (class_notes_per_measure >= 32) {
-          // Only put one measure per line for 32nd notes and above because of width issues
-          numberOfMeasuresPerLine = 1;
-        }
 
         // "Straight" / "Swing" over the bars where the feel changes
         var feelMarkings = getFeelMarkings(
@@ -3344,8 +3381,9 @@ function GrooveWriter() {
     clearHiddenBarSlots();
     refreshHeaderTitle();
     var fullABC = generate_ABC(renderWidth);
+    var abcSource = /** @type {HTMLTextAreaElement} */ (document.getElementById('ABCsource'));
 
-    document.getElementById('ABCsource').value = fullABC;
+    abcSource.value = fullABC;
     root.updateGrooveDBSource();
 
     root.myGrooveUtils.midiNoteHasChanged(); // pretty likely the case
@@ -3354,7 +3392,20 @@ function GrooveWriter() {
     root.updateCurrentURL();
 
     root.displayNewSVG();
+
+    // Infinity Drumming, 2026: abc2svg broke a line in the middle of a bar (too
+    // tight even so, its beams coming apart): draw it wider, so smaller, a few
+    // times at most
+    var tries = 0;
+    for (; tries < 3 && musicLineBroken(fullABC, class_music_svg); tries++) {
+      fullABC = generate_ABC(renderWidth, Math.ceil(class_music_render_width * 1.3));
+      abcSource.value = fullABC;
+      root.displayNewSVG();
+    }
+    if (tries) root.updateGrooveDBSource();
   }
+
+  var class_music_svg = ''; // the sheet music last drawn
 
   // called by generate_ABC to remake the sheet music on the page
   root.displayNewSVG = function () {
@@ -3366,6 +3417,7 @@ function GrooveWriter() {
 
     diverr.innerHTML = svg_return.error_html;
     svgTarget.innerHTML = svg_return.svg;
+    class_music_svg = svg_return.svg;
   };
 
   // Render an SVG that is good for download.
