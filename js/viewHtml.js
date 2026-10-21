@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -777,7 +777,8 @@ export function straightBarButtonHTML(baseindex, straight) {
 
 // `layout` is permutations.getPermutationLayout(...) for the current note
 // setting; `repeats` is the current "Play each ×" value.
-export function buildPermutationOptionsHTML(permutationType, layout, repeats) {
+// barsText: the bars of the run to practise ("3-6, 9"), '' for all
+export function buildPermutationOptionsHTML(permutationType, layout, repeats, barsText) {
   if (permutationType == 'none') return '';
 
   var optionTypeArray = layout.groups.map(function (group) {
@@ -835,6 +836,14 @@ export function buildPermutationOptionsHTML(permutationType, layout, repeats) {
       '</option>';
   });
   newHTML += '</select></span>\n';
+
+  // just some bars of the run, by their numbers in the music (Infinity Drumming, 2026)
+  newHTML +=
+    '<span id="PermutationBarsOption"><label for="PermutationBars">Practise bars</label> ' +
+    '<input type="text" id="PermutationBars" inputmode="numeric" placeholder="all" value="' +
+    String(barsText || '').replace(/[^0-9, -]/g, '') +
+    '" onchange="myGrooveWriter.permutationBarsChange(event)">' +
+    ' <span id="PermutationBarsHint">e.g. 5, 3-6 or 2, 5, 9</span></span>\n';
 
   newHTML += '<span class="PermutationOptionWrapper">';
 

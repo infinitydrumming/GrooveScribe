@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: tom rim clicks, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets). See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets). See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -1849,6 +1849,7 @@ function GrooveWriter() {
     if (class_permutation_type == perm_type) return;
 
     class_permutation_type = perm_type;
+    class_permutation_bars = ''; // another run: all its bars
 
     switch (perm_type) {
       case 'kick_16ths':
@@ -2441,20 +2442,47 @@ function GrooveWriter() {
     return !!(sub && sub.checked);
   }
 
-  // the shown figures in playing order, each with its ABC before / after
+  // the shown figures in playing order, each with its ABC before / after: the
+  // ticked figures, numbered 1, 2, ... as the music numbers its bars, and of
+  // those only the bars to practise when some are chosen ("Practise bars")
   function get_shown_permutation_sections() {
-    var shown = _perm
+    var ticked = _perm
       .getPermutationSections(get_permutation_layout())
       .filter(isPermutationSectionShown);
+    var chosen = _perm.parseBarList(class_permutation_bars, ticked.length);
+    var shown = [];
+    ticked.forEach(function (section, i) {
+      if (!chosen.length || chosen.indexOf(i + 1) >= 0)
+        shown.push({ section: section, number: i + 1 });
+    });
     var repeats = get_permutation_repeats();
-    return shown.map(function (section, i) {
+    return shown.map(function (bar, i) {
+      var section = bar.section;
       var shownIndex = 0;
-      for (var j = i - 1; j >= 0 && shown[j].group === section.group; j--) shownIndex++;
-      var lastInGroup = i + 1 >= shown.length || shown[i + 1].group !== section.group;
-      var abc = _perm.getPermutationSectionABC(section, shownIndex, lastInGroup, repeats);
+      for (var j = i - 1; j >= 0 && shown[j].section.group === section.group; j--) shownIndex++;
+      var lastInGroup = i + 1 >= shown.length || shown[i + 1].section.group !== section.group;
+      var next = shown[i + 1] ? shown[i + 1].number : 0; // printed over the next bar
+      var abc = _perm.getPermutationSectionABC(section, shownIndex, lastInGroup, repeats, next);
+      // the music's first bar has no bar number: with some bars chosen, its
+      // heading says which bar it is
+      if (i === 0 && chosen.length)
+        abc.pre = abc.pre.replace(/^(P:.*)$/m, '$1   (bar ' + bar.number + ')');
       return { section: section, pre_abc: abc.pre, post_abc: abc.post };
     });
   }
+
+  // the bars of the run to practise, as typed ("3-6, 9"); '' for all of them
+  var class_permutation_bars = '';
+
+  // the "Practise bars" box: tidied up ("3-6, 9"), and the run follows
+  root.permutationBarsChange = function (event) {
+    var ticked = _perm
+      .getPermutationSections(get_permutation_layout())
+      .filter(isPermutationSectionShown).length;
+    class_permutation_bars = _perm.barListToText(_perm.parseBarList(event.target.value, ticked));
+    event.target.value = class_permutation_bars;
+    root.refresh_ABC();
+  };
 
   var class_permutation_repeats = 1;
   function get_permutation_repeats() {
@@ -6023,6 +6051,7 @@ function GrooveWriter() {
               type: class_permutation_type,
               boxes: permutationBoxes(),
               playEach: get_permutation_repeats(),
+              bars: class_permutation_bars,
             },
       speedUp: currentSpeedUp(),
       countIn: class_metronome_count_in_active,
@@ -6037,6 +6066,7 @@ function GrooveWriter() {
     class_permutation_repeats = allowed ? perm.playEach : 1;
     root.permutationPopupClick(allowed ? perm.type : 'none');
     if (!allowed) return;
+    class_permutation_bars = perm.bars || '';
     document.getElementById('PermutationOptions').innerHTML = root.HTMLforPermutationOptions();
     setPermutationBoxes(perm.boxes);
   }
@@ -6634,7 +6664,8 @@ function GrooveWriter() {
     return _view.buildPermutationOptionsHTML(
       class_permutation_type,
       get_permutation_layout(),
-      get_permutation_repeats()
+      get_permutation_repeats(),
+      class_permutation_bars
     );
   };
 } // end of class

@@ -139,4 +139,32 @@ describe('an exercise in its link', () => {
     );
     expect(new URLSearchParams(window.location.search).get('Instructions')).toBe('Slowly first');
   });
+
+  it('practises just the chosen bars of a permutation, numbered as in the whole run', () => {
+    window.history.replaceState(
+      null,
+      '',
+      '/' + EXERCISE.replace('&PlayEach=3', '&PlayEach=3&PermBars=3-4')
+    );
+    gw.loadNewGroove(window.location.search);
+    const numbers = () =>
+      [...document.getElementById('ABCsource').value.matchAll(/%%setbarnb (\d+)/g)].map(
+        (m) => +m[1]
+      );
+    expect(document.getElementById('PermutationBars').value).toBe('3-4');
+    expect(numbers()).toEqual([4]); // bar 3 opens the music; bar 4 is numbered
+    expect(document.getElementById('ABCsource').value).toMatch(/P:.*\(bar 3\)/);
+    expect(window.location.search).toContain('PermBars=3-4');
+
+    const box = document.getElementById('PermutationBars');
+    box.value = ' 7-8,5 ';
+    gw.permutationBarsChange({ target: box });
+    expect(box.value).toBe('5, 7-8');
+    expect(numbers()).toEqual([7, 8]);
+
+    box.value = '';
+    gw.permutationBarsChange({ target: box });
+    expect(numbers().slice(0, 3)).toEqual([2, 3, 4]); // the whole run again
+    expect(window.location.search).not.toContain('PermBars');
+  });
 });
