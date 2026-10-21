@@ -388,7 +388,7 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
     describe('over a multi-bar ostinato', () => {
       // Singles only, over 2 bars: bar 2 has an open hi-hat on the "&" of 4
       const TWO_BARS =
-        '?TimeSig=4/4&Div=16&Tempo=90&Measures=2&Perm=kick_16ths&PermSet=001111100000000000000' +
+        '?TimeSig=4/4&Div=16&Tempo=90&Measures=2&Perm=kick_16ths&PermSet=001111100000000000000&Ostinato=2' +
         '&H=|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|&S=|----O-------O---|----O-------O---|' +
         '&K=|o-------o-------|o-------o-------|';
       // note-ons of a note in the loaded MIDI (channel 10: 0x99)
@@ -477,6 +477,30 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
         expect(box('Singles_sub2').checked).toBe(false);
         expect(box('Doubles').checked).toBe(false);
         expect(box('Singles').checked).toBe(true);
+      });
+
+      // links from before October 2026 played bar 1 only, closing any others on opening
+      it('opens an older link with a permutation and more bars at bar 1, as it did', () => {
+        const link = () =>
+          gw.myGrooveUtils.getUrlStringFromGrooveData(gw.grooveDataFromClickableUI());
+        gw.loadNewGroove(TWO_BARS.replace('&Ostinato=2', ''));
+        expect(gw.numberOfMeasures()).toBe(1);
+        expect(link()).toContain('&Measures=1');
+        expect(link()).not.toContain('Ostinato');
+      });
+
+      it('writes its bars into the link, and an undo keeps them', () => {
+        const link = () =>
+          gw.myGrooveUtils.getUrlStringFromGrooveData(gw.grooveDataFromClickableUI());
+        gw.loadNewGroove(TWO_BARS);
+        expect(gw.numberOfMeasures()).toBe(2);
+        expect(link()).toContain('&Ostinato=2');
+        gw.updateCurrentURL();
+        gw.addMeasureButtonClick();
+        expect(link()).toContain('&Ostinato=3');
+        gw.undoCommand();
+        expect(gw.numberOfMeasures()).toBe(2);
+        expect(link()).toContain('&Ostinato=2');
       });
 
       it('keeps the ticked figures in a time signature with the same figures', () => {

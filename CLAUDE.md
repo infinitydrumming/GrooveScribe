@@ -17,7 +17,7 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1127 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm test`             | Vitest unit suite — **1130 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
 | `npm run test:e2e`     | Playwright golden-master — **120 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
@@ -75,7 +75,7 @@ Pure / low-coupling core (extracted from the two big files, imported back):
   which grid slots it uses, inference from notes, counting, and the beat plan the ABC/MIDI writers take.
 - `ornaments.js` — flams/drags/ruffs (grace groups) and diddles (`!/!`) inside note tokens.
 - `barMeters.js` — a time signature per bar; which note settings fit a bar.
-- `practiceSettings.js` — an exercise's practice settings in its link (`Perm`/`PermSet`/`PlayEach`/`PermBars`/`FatBack`,
+- `practiceSettings.js` — an exercise's practice settings in its link (`Perm`/`PermSet`/`PlayEach`/`PermBars`/`FatBack`/`Ostinato`,
   `SpeedUp`, `CountIn`, `ClickSolo`, `ClickStart`, `Mute`); only those that are on. Save & Share's
   "Include practice settings" box sets `grooveData.includePractice`; `Instructions` always travel.
 - `countModes.js` — the Count menu's choices (`Count=1|bold|ghosts|rhythm|click`): the bold / small styling of
@@ -128,7 +128,9 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   `layout.groupsInOlderLinks`.
 - **Permutation runs** play over an ostinato of the groove's first bars (`get_ostinato_bars()`, up to
   `MAX_OSTINATO_BARS`): bar `n` of the run is figure `n / (repeats × bars)` over ostinato bar
-  `n % bars`; the music writes each figure once over the bars. A one-bar run must stay
+  `n % bars`; the music writes each figure once over the bars. A link says its ostinato's bars
+  (`Ostinato=N`, past one bar only); a permutation link without it closes every bar after the
+  first on opening, as links did before multi-bar ostinatos. A one-bar run must stay
   byte-identical: the golden master's permutation exercises (`permutationPlayback` in
   `tests-e2e/helpers.js`) pin down their music, first playback rounds, cursor and grid highlight.
 - **Permutation time signatures**: `getPermutationLayout` returns null where the figures don't fit

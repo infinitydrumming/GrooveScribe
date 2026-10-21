@@ -32,6 +32,7 @@ describe('practice settings in a link', () => {
         playEach: 2,
         bars: '3-6, 9',
         fatBack: true,
+        ostinato: 2,
       },
       speedUp: { amount: 5, every: 16, unit: 'b', keepGoing: false, target: 120 },
       countIn: true,
@@ -41,11 +42,25 @@ describe('practice settings in a link', () => {
     };
     const url = practiceSettingsToUrl(settings);
     expect(url).toBe(
-      '&Perm=kick_16ths&PermSet=0011110101&PlayEach=2&PermBars=3-6,9&FatBack=1' +
+      '&Perm=kick_16ths&PermSet=0011110101&PlayEach=2&PermBars=3-6,9&FatBack=1&Ostinato=2' +
         '&SpeedUp=5,16b,once,to120' +
         '&CountIn=1&ClickSolo=1&ClickStart=AND&Mute=hh:1:2,kick:3'
     );
     expect(fromQuery(url)).toEqual(settings);
+  });
+
+  // links from before multi-bar ostinatos (October 2026) played bar 1 only
+  it('writes the ostinato only past one bar, and reads 1 bar when a link has none', () => {
+    const perm = { type: 'kick_16ths', boxes: '', playEach: 1, bars: '', fatBack: false };
+    const settings = (ostinato) => ({
+      ...emptyPracticeSettings(),
+      permutation: { ...perm, ostinato },
+    });
+    expect(practiceSettingsToUrl(settings(1))).toBe('&Perm=kick_16ths');
+    expect(practiceSettingsToUrl(settings(3))).toBe('&Perm=kick_16ths&Ostinato=3');
+    expect(fromQuery('&Perm=kick_16ths').permutation.ostinato).toBe(1);
+    expect(fromQuery('&Perm=kick_16ths&Ostinato=x').permutation.ostinato).toBe(1);
+    expect(fromQuery('&Perm=kick_16ths&Ostinato=0').permutation.ostinato).toBe(1);
   });
 
   it('keeps a speed-up in minutes that keeps going', () => {
@@ -95,6 +110,7 @@ describe('a groove link with practice settings and instructions', () => {
       playEach: 3,
       bars: '',
       fatBack: false,
+      ostinato: 1,
     });
     expect(link(query)).toContain('&Perm=snare_16ths&PermSet=0111&PlayEach=3&CountIn=1');
     expect(link(link(query))).toBe(link(query));

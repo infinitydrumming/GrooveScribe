@@ -2655,9 +2655,9 @@ function GrooveWriter() {
   }
 
   // choosing a permutation closes the bars after the ostinato's
-  function closeBarsPastOstinato() {
-    while (class_number_of_measures > _perm.MAX_OSTINATO_BARS)
-      root.closeMeasureButtonClick(_perm.MAX_OSTINATO_BARS + 1);
+  function closeBarsPastOstinato(bars) {
+    bars = Math.min(bars || _perm.MAX_OSTINATO_BARS, _perm.MAX_OSTINATO_BARS);
+    while (class_number_of_measures > bars) root.closeMeasureButtonClick(bars + 1);
   }
 
   // with a permutation on, no more bars than an ostinato has (and says so)
@@ -6479,6 +6479,7 @@ function GrooveWriter() {
               playEach: get_permutation_repeats(),
               bars: class_permutation_bars,
               fatBack: fatBackOn(),
+              ostinato: get_ostinato_bars(),
             },
       speedUp: currentSpeedUp(),
       countIn: class_metronome_count_in_active,
@@ -6494,6 +6495,9 @@ function GrooveWriter() {
     class_permutation_fat_back = allowed && !!perm.fatBack;
     root.permutationPopupClick(allowed ? perm.type : 'none');
     if (!allowed) return;
+    // as many bars as the link's ostinato: links from before October 2026 played
+    // bar 1 only, and closed any others on opening (they still do)
+    closeBarsPastOstinato(perm.ostinato || 1);
     class_permutation_bars = perm.bars || '';
     document.getElementById('PermutationOptions').innerHTML = root.HTMLforPermutationOptions();
     setPermutationBoxes(perm.boxes);

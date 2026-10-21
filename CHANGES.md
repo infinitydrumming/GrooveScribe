@@ -34,6 +34,14 @@ The original copyright notices and credits are unchanged.
 - 4/4 permutations play and look exactly as before (the golden master's
   permutation exercises are unchanged); six more pin down a 5-bar ostinato and
   permutations in 3/4, 6/8, 12/8, 5/4 and 2/4 (`tests-e2e/`).
+- Older links open exactly as before: a link's ostinato is in it as
+  `Ostinato=2` (written past one bar only), and a permutation link without it
+  plays bar 1 and closes any other bars, as before October 2026 (a bar added
+  after choosing a permutation used to be left out). Over 50 links of the kinds
+  the live version writes (every permutation, note setting and practice
+  setting, Ollie's routine among them) open the same in both versions: the
+  same link, music, playback, cursor and options (`js/practiceSettings.js`,
+  `js/groove_writer.js`).
 
 ## 2026-10-21 — Permutations over a multi-bar ostinato
 

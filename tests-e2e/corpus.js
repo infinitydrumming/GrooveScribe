@@ -95,7 +95,7 @@ export const permutationExercises = [
     name: 'ostinato 2 bars, kick 16ths fat back, play each 2, groove 2 click 2',
     url:
       '?TimeSig=4/4&Div=16&Tempo=90&Measures=2&MetronomeFreq=4&GrooveBars=2&ClickBars=2' +
-      '&Perm=kick_16ths&PermSet=001111111111111111110&PlayEach=2&FatBack=1' +
+      '&Perm=kick_16ths&PermSet=001111111111111111110&PlayEach=2&FatBack=1&Ostinato=2' +
       '&H=|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-o-|&S=|----O-------O---|----O-------O-O-|' +
       '&K=|o-------o-------|o-------o-------|',
   },
@@ -103,7 +103,7 @@ export const permutationExercises = [
     name: 'ostinato 3 bars, kick and snare 16ths, bar 2 straight, bar 3 hi-hat muted, bars 2-4, timer',
     url:
       '?TimeSig=4/4&Div=16&Tempo=100&Swing=35&StraightBars=2&Measures=3&Mute=hh:3&Practice=20b' +
-      '&Perm=kick_snare_kick_lead&PermBars=2-4' +
+      '&Perm=kick_snare_kick_lead&PermBars=2-4&Ostinato=3' +
       '&H=|x-x-x-x-x-x-x-x-|x-x-x-x-x-x-x-x-|xxxxxxxxxxxxxxxx|' +
       '&S=|----------------|----------------|----------------|' +
       '&K=|----------------|----------------|----------------|' +
@@ -112,7 +112,7 @@ export const permutationExercises = [
   {
     name: 'ostinato 4 bars, kick 8th triplets, every note counted',
     url:
-      '?TimeSig=4/4&Div=12&Tempo=80&Measures=4&Count=1&Perm=kick_16ths' +
+      '?TimeSig=4/4&Div=12&Tempo=80&Measures=4&Count=1&Perm=kick_16ths&Ostinato=4' +
       '&H=|x--x--x--x--|x--x--x--x--|x--x--x--x--|x--x--x--o--|' +
       '&S=|---O-----O--|---O-----O--|---O-----O--|---O-----OOO|' +
       '&K=|------------|------------|------------|------------|',
@@ -121,6 +121,7 @@ export const permutationExercises = [
     name: 'ostinato 5 bars, 5s over the bar line, kick 16ths singles',
     url:
       '?TimeSig=4/4&Div=16&Tempo=90&Measures=5&Perm=kick_16ths&PermSet=001111100000000000000' +
+      '&Ostinato=5' +
       '&H=' +
       FIVES_OVER_THE_BAR_LINE +
       '&S=' +
@@ -132,7 +133,7 @@ export const permutationExercises = [
     name: '3/4 kick 16ths, ostinato 2 bars, fat back, swung, play each 2',
     url:
       '?TimeSig=3/4&Div=16&Tempo=80&Swing=30&Measures=2&Perm=kick_16ths' +
-      '&PermSet=01111111100000000000&PlayEach=2&FatBack=1' +
+      '&PermSet=01111111100000000000&PlayEach=2&FatBack=1&Ostinato=2' +
       '&H=|x-x-x-x-x-x-|x-x-x-x-x-o-|&S=|----O---O---|----O---O---|&K=|o-----------|o-----------|',
   },
   {
