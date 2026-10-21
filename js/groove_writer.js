@@ -3169,7 +3169,9 @@ function GrooveWriter() {
 
     var fullABC = '';
 
-    // what the counting follows: the click, and in a permutation the permuted lines
+    // what the counting follows: the click, and in a permutation the permuted
+    // lines; 32nd notes are counted in smaller letters
+    root.myGrooveUtils.countSmall = class_time_division == 32;
     root.myGrooveUtils.countClick = {
       frequency: root.class_metronome_frequency,
       start: root.myGrooveUtils.getMetronomeOffsetClickStart() || '1',

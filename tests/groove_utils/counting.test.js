@@ -38,10 +38,10 @@ describe('counting over the notes', () => {
     ).toBe('1 2 3 1 2 3 4 5');
   });
 
-  it('counts 32nd notes "1 ah lee bee & ah lah bah"', () => {
+  it('counts 32nd notes "1 a li bi & a la ba"', () => {
     const line = '|' + 'x-'.repeat(16) + '|';
     expect(counts(`?TimeSig=4/4&Div=32&Measures=1&Count=1&H=${line}`).slice(0, 18).join(' ')).toBe(
-      '1 ah lee bee & ah lah bah 2 ah lee bee & ah lah bah 3 ah'
+      '1 a li bi & a la ba 2 a li bi & a la ba 3 a'
     );
   });
 

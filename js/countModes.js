@@ -36,8 +36,23 @@ export function countModeToUrl(show, mode) {
   return '&Count=' + (COUNT_MODES.indexOf(mode) > 0 ? mode : '1');
 }
 
-/** The fonts of the bold count ($1 the rhythm, $2 the rest), for the ABC header. */
-export var COUNT_FONTS = '%%setfont-1 calibriBold 16\n%%setfont-2 calibri;fill:#8c8c8c 13\n';
+/**
+ * The count's fonts, for the ABC header: smaller for 32nd notes (so a bar of
+ * them fits on a phone), and for the bold counts $1 (the rhythm) and $2 (the rest).
+ * @param {string} mode
+ * @param {boolean} small
+ */
+export function countFonts(mode, small) {
+  var fonts = small ? '%%gchordfont calibri 11\n' : '';
+  if (mode == 'bold' || mode == 'ghosts')
+    fonts +=
+      '%%setfont-1 calibriBold ' +
+      (small ? 14 : 16) +
+      '\n%%setfont-2 calibri;fill:#8c8c8c ' +
+      (small ? 11 : 13) +
+      '\n';
+  return fonts;
+}
 
 var GHOST = '!(.!!).!';
 var ACCENT = '!accent!';
@@ -121,7 +136,7 @@ var SYLLABLES = {
   3: ['&', 'a'],
   4: ['e', '&', 'a'],
   6: ['a', 'li', '&', 'a', 'la'],
-  8: ['ah', 'lee', 'bee', '&', 'ah', 'lah', 'bah'],
+  8: ['a', 'li', 'bi', '&', 'a', 'la', 'ba'],
 };
 var SPLITS = [1, 2, 3, 4, 6, 8];
 // the offset click starts, in grid slots (as midiFile.js shifts them)

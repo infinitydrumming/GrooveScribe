@@ -169,6 +169,7 @@ function GrooveUtils() {
   root.countClick = { frequency: 0, start: '1' };
   /** @type {string[] | null} a permutation's permuted lines, the rhythm of the 'bold' count */
   root.countRhythmLines = null;
+  root.countSmall = false; // the count in smaller letters (32nd notes)
   root.swingIsEnabled = false;
   // set by the editor: called when the swing amount or style changes
   /** @type {null | (() => void)} */

@@ -19,7 +19,7 @@ import {
 } from './musicMath.js';
 import { barSig, fullSizeBar, isMixedMeter } from './barMeters.js';
 import { hasBeatNotes, makeBeatPlan } from './beatNotes.js';
-import { clickCountBar, clickTicks, COUNT_FONTS, styleCounts } from './countModes.js';
+import { clickCountBar, clickTicks, countFonts, styleCounts } from './countModes.js';
 
 /**
  * The beat plan (see beatNotes.js) of bars fromBar..toBar-1 of a groove in the
@@ -937,7 +937,7 @@ export function get_top_ABC_BoilerPlate(
   //else
   fullABC += '%%staves (Stickings Hands Feet)\n';
   // the bold count's fonts (Infinity Drumming, 2026)
-  if (gu.showCounts && (gu.countMode == 'bold' || gu.countMode == 'ghosts')) fullABC += COUNT_FONTS;
+  if (gu.showCounts) fullABC += countFonts(gu.countMode, !!gu.countSmall);
 
   // print comments below the legend if there is one, otherwise in the header section
   if (tuneComments !== '') {
@@ -1283,9 +1283,15 @@ export function addFeelMarking(measureABC, text) {
  */
 export function createABCFromGrooveData(gu, myGrooveData, renderWidth) {
   // counting over the notes, when this groove asks for it, and how
-  var saved = { showCounts: gu.showCounts, countMode: gu.countMode, countClick: gu.countClick };
+  var saved = {
+    showCounts: gu.showCounts,
+    countMode: gu.countMode,
+    countClick: gu.countClick,
+    countSmall: gu.countSmall,
+  };
   gu.showCounts = !!myGrooveData.showCounts;
   gu.countMode = myGrooveData.countMode || 'all';
+  gu.countSmall = myGrooveData.timeDivision == 32;
   gu.countClick = {
     frequency: myGrooveData.metronomeFrequency,
     start: (myGrooveData.practice && myGrooveData.practice.clickStart) || '1',
@@ -1296,6 +1302,7 @@ export function createABCFromGrooveData(gu, myGrooveData, renderWidth) {
     gu.showCounts = saved.showCounts;
     gu.countMode = saved.countMode;
     gu.countClick = saved.countClick;
+    gu.countSmall = saved.countSmall;
   }
 }
 

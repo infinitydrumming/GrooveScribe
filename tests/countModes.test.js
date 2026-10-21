@@ -129,7 +129,7 @@ describe("the click's count", () => {
     expect(clickCountBar([0, 128 / 6], 1, 4, true, 6)).toBe('(6:6:6"1"x2"a"x2x2x2x2x2 ');
     // an 8th-note beat
     expect(clickCountBar([0, 32], 1, 8, false, 2)).toBe('"1"x2"&"x2 ');
-    expect(clickCountBar([0, 8], 1, 8, false, 1)).toBe('"1"x/"ah"x7/2 ');
+    expect(clickCountBar([0, 8], 1, 8, false, 1)).toBe('"1"x/"a"x7/2 ');
     expect(clickCountBar([5], 1, 4, false, 4)).toBeNull(); // finer than 8 to a beat
   });
 });

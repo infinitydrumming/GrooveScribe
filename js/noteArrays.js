@@ -594,8 +594,9 @@ export function create_note_mapping_array_for_highlighting(
   return mapping_array;
 }
 
-// The count of each 32nd note after the beat's number (Infinity Drumming, 2026).
-var COUNT_32NDS = [null, 'ah', 'lee', 'bee', '&', 'ah', 'lah', 'bah'];
+// The count of each 32nd note after the beat's number (Infinity Drumming, 2026),
+// short so a bar fits on a phone.
+var COUNT_32NDS = [null, 'a', 'li', 'bi', '&', 'a', 'la', 'ba'];
 // ... and of each 16th triplet (Infinity Drumming, 2026).
 var COUNT_16TH_TRIPLETS = [null, 'a', 'li', '&', 'a', 'la'];
 
@@ -640,7 +641,7 @@ export function figure_out_sticking_count_for_index(
       else if (note_index % 3 == 1) new_state = '&';
       else new_state = 'a';
       break;
-    case 32: // 32nd notes: "1 ah lee bee & ah lah bah" (Infinity Drumming, 2026)
+    case 32: // 32nd notes: "1 a li bi & a la ba", short for "1 ah lee bee & ah lah bah" (Infinity Drumming, 2026)
       new_state = COUNT_32NDS[note_index % 8] || Math.floor(note_index / 8) + 1;
       break;
     case 16:
