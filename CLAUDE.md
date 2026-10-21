@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1119 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **114 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1127 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **120 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -65,7 +65,8 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `midiFile.js` — grooveData → MIDI (takes a GrooveUtils `gu`).
 - `abcNotation.js` — grooveData → ABC (takes `gu`).
 - `browserInfo.js` — user-agent / touch probes.
-- `permutations.js` — pure permutation-mode note-array generators (+ kick-array merge/filter).
+- `permutations.js` — pure permutation-mode note-array generators (+ kick-array merge/filter), and the
+  figure layouts per note setting and time signature (`getPermutationLayout(division, top, bottom)`).
 - `viewHtml.js` — pure HTML string builders (staff container, permutation-options menu).
 - `updateCheck.js` — the "new version is ready" bar (compares its own `?v=` with `version.json`).
 - `metronome.js` — the Click menu's settings (`MetronomeFreq`) and the exactly timed clicks
@@ -130,6 +131,12 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   `n % bars`; the music writes each figure once over the bars. A one-bar run must stay
   byte-identical: the golden master's permutation exercises (`permutationPlayback` in
   `tests-e2e/helpers.js`) pin down their music, first playback rounds, cursor and grid highlight.
+- **Permutation time signatures**: `getPermutationLayout` returns null where the figures don't fit
+  (that greys out the menu and turns a permutation off). 4/4 is any note setting; x/4 is 16ths, 32nds
+  and both triplets, 8ths only with even beats; compound x/8 is 8ths / 16ths with the triplet figures
+  per dotted-quarter beat. Cross-rhythm groups exist only when they divide the bar, so a group list
+  (and `PermSet`) depends on the meter too. After the time-signature popup the beats can be strings
+  ("3"): keep layout maths to `*`, `%` and `==`.
 - **The editor puts each glyph on the page once** (`defineGlyphsOnce` in `displayNewSVG`): with
   `%%fullsvg`, abc2svg 1.3.2 repeats every earlier line's `<defs>` in each line (quadratic: seconds
   for a long permutation run). The golden master snapshots that page form; `musicLineBroken` still

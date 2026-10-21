@@ -28,6 +28,11 @@ export const allGrooves = [...builtIn, ...coverage];
 // make them: the golden master pins down their music, the MIDI of their first
 // rounds and where the cursor and the grid highlight are as they play.
 const PER_BEAT_SINGLES_24 = '0' + '1'.repeat(7) + '0'.repeat(57) + '1'.repeat(16); // 1/16 triplets
+// 5 bars of hi-hat 16ths accented in 5s, over the bar lines
+const FIVES_OVER_THE_BAR_LINE =
+  Array.from({ length: 80 }, (_, i) => (i % 5 ? 'x' : 'X'))
+    .join('')
+    .replace(/.{16}/g, '|$&') + '|';
 export const permutationExercises = [
   {
     name: 'kick 16ths, Ollie routine',
@@ -111,6 +116,49 @@ export const permutationExercises = [
       '&H=|x--x--x--x--|x--x--x--x--|x--x--x--x--|x--x--x--o--|' +
       '&S=|---O-----O--|---O-----O--|---O-----O--|---O-----OOO|' +
       '&K=|------------|------------|------------|------------|',
+  },
+  {
+    name: 'ostinato 5 bars, 5s over the bar line, kick 16ths singles',
+    url:
+      '?TimeSig=4/4&Div=16&Tempo=90&Measures=5&Perm=kick_16ths&PermSet=001111100000000000000' +
+      '&H=' +
+      FIVES_OVER_THE_BAR_LINE +
+      '&S=' +
+      '|----O-------O---'.repeat(5) +
+      '|',
+  },
+  // in other time signatures: x/4, and compound x/8 with dotted-quarter beats
+  {
+    name: '3/4 kick 16ths, ostinato 2 bars, fat back, swung, play each 2',
+    url:
+      '?TimeSig=3/4&Div=16&Tempo=80&Swing=30&Measures=2&Perm=kick_16ths' +
+      '&PermSet=01111111100000000000&PlayEach=2&FatBack=1' +
+      '&H=|x-x-x-x-x-x-|x-x-x-x-x-o-|&S=|----O---O---|----O---O---|&K=|o-----------|o-----------|',
+  },
+  {
+    name: '6/8 snare 16ths, every note counted',
+    url:
+      '?TimeSig=6/8&Div=16&Tempo=70&Measures=1&Count=1&Perm=snare_16ths' +
+      '&PermSet=' +
+      '0'.repeat(66) +
+      '1111000011100000' +
+      '&H=|x-x-x-x-x-x-|&S=|------------|&K=|o-----o-----|',
+  },
+  {
+    name: '12/8 kick 8ths, dotted-quarter click, groove 2 click 2',
+    url:
+      '?TimeSig=12/8&Div=8&Tempo=60&Measures=1&MetronomeFreq=4d&GrooveBars=2&ClickBars=2' +
+      '&Perm=kick_16ths&H=|xxxxxxxxxxxx|&S=|---O-----O--|&K=|o-----------|',
+  },
+  {
+    name: '5/4 kick and snare 16th triplets, kick lead',
+    url:
+      '?TimeSig=5/4&Div=24&Tempo=60&Measures=1&Perm=kick_snare_kick_lead' +
+      '&H=|x-x-x-x-x-x-x-x-x-x-x-x-x-x-x-|',
+  },
+  {
+    name: '2/4 kick 8ths, bold count',
+    url: '?TimeSig=2/4&Div=8&Tempo=100&Measures=1&Count=bold&Perm=kick_16ths&H=|xxxx|&S=|--O-|',
   },
 ];
 

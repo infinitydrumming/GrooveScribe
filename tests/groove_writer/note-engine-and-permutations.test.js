@@ -449,21 +449,58 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
         expect(highlighted()).toBe('bg-highlight16');
       });
 
-      it('keeps the first 4 bars when a permutation is chosen, and adds no more', () => {
-        const six = '|x-x-x-x-x-x-x-x-'.repeat(6) + '|';
-        gw.loadNewGroove(`?TimeSig=4/4&Div=16&Tempo=90&Measures=6&H=${six}`);
+      it('keeps the first 5 bars when a permutation is chosen, and adds no more', () => {
+        const seven = '|x-x-x-x-x-x-x-x-'.repeat(7) + '|';
+        gw.loadNewGroove(`?TimeSig=4/4&Div=16&Tempo=90&Measures=7&H=${seven}`);
         gw.permutationPopupClick('snare_16ths');
-        expect(gw.numberOfMeasures()).toBe(4);
+        expect(gw.numberOfMeasures()).toBe(5);
         const alert = vi.spyOn(window, 'alert').mockImplementation(() => {});
         gw.addMeasureButtonClick();
         gw.duplicateMeasureButtonClick(1);
-        expect(gw.numberOfMeasures()).toBe(4);
+        expect(gw.numberOfMeasures()).toBe(5);
         expect(alert).toHaveBeenCalledWith(
-          'A permutation plays over 4 bars at most. Turn the permutation off to add more bars.'
+          'A permutation plays over 5 bars at most. Turn the permutation off to add more bars.'
         );
         gw.permutationPopupClick('none');
         gw.addMeasureButtonClick();
-        expect(gw.numberOfMeasures()).toBe(5);
+        expect(gw.numberOfMeasures()).toBe(6);
+      });
+
+      it('keeps the ticked figures when a bar is added to the ostinato', () => {
+        gw.loadNewGroove(TWO_BARS); // Singles only (Doubles and Triples are on by default)
+        const box = (id) => document.getElementById('PermuationOptions' + id);
+        box('Quads').checked = true; // off by default
+        box('Singles_sub2').checked = false; // on by default
+        gw.addMeasureButtonClick();
+        expect(gw.numberOfMeasures()).toBe(3);
+        expect(box('Quads').checked).toBe(true);
+        expect(box('Singles_sub2').checked).toBe(false);
+        expect(box('Doubles').checked).toBe(false);
+        expect(box('Singles').checked).toBe(true);
+      });
+
+      it('keeps the ticked figures in a time signature with the same figures', () => {
+        gw.loadNewGroove(TWO_BARS); // Singles only
+        const box = (id) => document.getElementById('PermuationOptions' + id);
+        box('Singles_sub2').checked = false;
+        document.body.insertAdjacentHTML(
+          'beforeend',
+          '<div id="timeSigPopup"><select id="timeSigPopupTimeSigTop">' +
+            '<option>3</option><option>4</option><option>6</option></select>' +
+            '<select id="timeSigPopupTimeSigBottom"><option>4</option><option>8</option></select></div>'
+        );
+        const changeTimeSig = (top, bottom) => {
+          document.getElementById('timeSigPopupTimeSigTop').value = top;
+          document.getElementById('timeSigPopupTimeSigBottom').value = bottom;
+          gw.timeSigPopupClose('ok');
+        };
+        changeTimeSig('3', '4'); // the same figures, without "Simplify multiple kicks"
+        expect(box('SkipSomeFirstNotes')).toBeNull();
+        expect(box('Singles_sub2').checked).toBe(false);
+        expect(box('Doubles').checked).toBe(false);
+        changeTimeSig('6', '8'); // other figures: ticked as they start
+        expect(box('SinglesBeat')).not.toBeNull();
+        expect(box('Doubles').checked).toBe(true);
       });
     });
 

@@ -200,6 +200,73 @@ describe('fat back: no kicks with the snare on the backbeat', () => {
   });
 });
 
+// Infinity Drumming, 2026: figures in other time signatures
+describe('permutation figures in other time signatures', () => {
+  const groupIds = (layout) => layout.groups.map((g) => g.id.replace('PermuationOptions', ''));
+  const tabsOf = (layout, name) =>
+    getPermutationSections(layout)
+      .filter((s) => s.group.name == name)
+      .map((s) => tab(layout, s));
+
+  it('x/4 in 1/16 notes: the 4/4 figures beat by beat, without Simplify', () => {
+    const threeFour = getPermutationLayout(16, 3, 4);
+    expect(threeFour.slots).toBe(24);
+    expect(threeFour.simplifyAllowed).toBe(false);
+    expect(groupIds(threeFour)).toEqual(groupIds(getPermutationLayout(16)));
+    expect(tabsOf(threeFour, 'Singles')[0]).toBe('o---o---o---'); // 1, 2 and 3
+    expect(getPermutationLayout(32, 7, 4).slots).toBe(56);
+  });
+
+  it('x/4 in 1/8 notes only with an even number of beats (the figures last two beats)', () => {
+    expect(getPermutationLayout(8, 3, 4)).toBeNull();
+    expect(getPermutationLayout(8, 6, 4).slots).toBe(48);
+    expect(tabsOf(getPermutationLayout(8, 2, 4), 'Singles')).toEqual([
+      'o---',
+      '-o--',
+      '--o-',
+      '---o',
+    ]);
+  });
+
+  it('x/4 triplets: cross-rhythms only where they repeat evenly in the bar', () => {
+    expect(groupIds(getPermutationLayout(12, 3, 4))).toEqual(['Ostinato', 'Singles', 'Doubles']); // 9 notes
+    const sixteenths = groupIds(getPermutationLayout(24, 5, 4)); // 30 notes
+    expect(sixteenths).toContain('Every2nd');
+    expect(sixteenths).not.toContain('Every4th');
+    expect(groupIds(getPermutationLayout(12, 2, 4))).toContain('Every2nd'); // 6 notes
+    expect(getPermutationLayout(24, 3, 4).groupsInOlderLinks).toBeUndefined();
+  });
+
+  it('compound x/8: the triplet figures over dotted-quarter beats', () => {
+    const sixEight = getPermutationLayout(8, 6, 8); // 3 eighths a beat
+    expect(sixEight.slots).toBe(24);
+    expect(tabsOf(sixEight, 'Singles')).toEqual(['o--o--', '-o--o-', '--o--o']);
+    expect(sixEight.groups[1].subLabels).toEqual(['1', '2', '3']); // as x/8 eighths are counted
+    expect(groupIds(sixEight)).toEqual(['Ostinato', 'Singles', 'Doubles', 'Every2nd']);
+    expect(groupIds(getPermutationLayout(8, 9, 8))).toEqual(['Ostinato', 'Singles', 'Doubles']);
+
+    const twelveEight = getPermutationLayout(16, 12, 8); // 6 sixteenths a beat
+    expect(twelveEight.slots).toBe(48);
+    expect(groupIds(twelveEight)).toEqual(groupIds(getPermutationLayout(24))); // as 1/16 triplets in 4/4
+    expect(tabsOf(twelveEight, 'Singles (per beat)')[1]).toBe('-o----'.repeat(4)); // on the 2nd 16th of each beat
+    expect(
+      getPermutationSections(twelveEight).find((s) => s.group.name == 'Singles (twice a beat)')
+        .label
+    ).toBe('1st');
+    expect(getPermutationLayout(16, 3, 8).slots).toBe(12);
+  });
+
+  it('has no figures for uneven x/8 beats, x/16, triplets in x/8, or Mixed outside 4/4', () => {
+    expect(getPermutationLayout(16, 7, 8)).toBeNull();
+    expect(getPermutationLayout(8, 5, 8)).toBeNull();
+    expect(getPermutationLayout(12, 6, 8)).toBeNull();
+    expect(getPermutationLayout(32, 6, 8)).toBeNull();
+    expect(getPermutationLayout(16, 4, 16)).toBeNull();
+    expect(getPermutationLayout(48, 3, 4)).toBeNull();
+    expect(getPermutationLayout(48, 4, 4).slots).toBe(48); // 4/4: every note setting
+  });
+});
+
 describe('1/16 triplets: per-beat figures on all 6 notes of the beat', () => {
   const layout = getPermutationLayout(24);
   const groups = layout.groups.map((g) => g.name);

@@ -11,6 +11,30 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — Permutations in more time signatures; 5-bar ostinatos
+
+- Permutations work outside 4/4 where the figures fit the beats: x/4 bars
+  (2/4, 3/4, 5/4, 7/4...) in 1/16 notes, 1/32 notes and both triplet settings,
+  the 4/4 figures beat by beat, and in 1/8 notes with an even number of beats
+  (the 1/8 figures last two beats); compound x/8 bars (3/8, 6/8, 9/8, 12/8,
+  15/8) in 1/8 and 1/16 notes, with the 1/8 and 1/16 triplet figures over each
+  dotted-quarter beat (the 1/8 ones named by the x/8 count: "Singles on 2").
+  The cross-rhythms (every 2nd / 4th note) are only there when they come round
+  evenly in the bar. 5/8, 7/8 and other bars of uneven beats, x/16 and mixed
+  time signatures have none, and the Permutations button stays dimmed there.
+  "Simplify multiple kicks" stays a 4/4 option (`js/permutations.js`,
+  `js/groove_writer.js`).
+- A permutation's swing goes by the bar's 16ths (12 in 3/4) as a groove's does,
+  rather than 16 a bar; changing to a time signature with the same figures
+  keeps the ticked figures (a bar added to the ostinato already did). If
+  abc2svg can't write out a very long run, the page says so instead of
+  breaking, and it still plays.
+- The ostinato can be up to 5 bars (was 4): room for 5-note groupings to come
+  round over the bar lines in 16ths.
+- 4/4 permutations play and look exactly as before (the golden master's
+  permutation exercises are unchanged); six more pin down a 5-bar ostinato and
+  permutations in 3/4, 6/8, 12/8, 5/4 and 2/4 (`tests-e2e/`).
+
 ## 2026-10-21 — Permutations over a multi-bar ostinato
 
 - A permutation plays over the groove's first bars, up to 4 (its ostinato),

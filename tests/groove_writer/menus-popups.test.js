@@ -157,16 +157,29 @@ describe('anchor openers', () => {
     expect(menu.style.display).toBe('block');
   });
 
-  it('permutationAnchorClick is a no-op outside 4/4 time (guard clause)', () => {
+  it('permutationAnchorClick is a no-op in a time signature without figures (guard clause)', () => {
     buildGridDOM(gw, 1);
     buildRenderPipelineFixtures();
-    document.getElementById('timeSigPopupTimeSigTop').value = '3';
-    document.getElementById('timeSigPopupTimeSigBottom').value = '4';
-    gw.timeSigPopupClose('ok'); // now in 3/4 time; permutations only work in 4/4
+    document.getElementById('timeSigPopupTimeSigTop').value = '7';
+    document.getElementById('timeSigPopupTimeSigBottom').value = '8';
+    gw.timeSigPopupClose('ok'); // now in 7/8: its beats differ, so no figures
 
     const menu = document.getElementById('permutationContextMenu');
     gw.permutationAnchorClick({});
     expect(menu.style.display).toBe(''); // never shown
+  });
+
+  // Infinity Drumming, 2026: x/4 and compound x/8 have figures too
+  it('permutationAnchorClick opens the menu in 3/4 time', () => {
+    buildGridDOM(gw, 1);
+    buildRenderPipelineFixtures();
+    document.getElementById('timeSigPopupTimeSigTop').value = '3';
+    document.getElementById('timeSigPopupTimeSigBottom').value = '4';
+    gw.timeSigPopupClose('ok');
+
+    const menu = document.getElementById('permutationContextMenu');
+    gw.permutationAnchorClick({});
+    expect(menu.style.display).toBe('block');
   });
 
   it('groovesAnchorClick shows the grooves list', () => {

@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: multi-bar ostinatos, fat back kick permutations, dense bars one a line on phones, practising some bars of a run, bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: more time signatures, multi-bar ostinatos, fat back kick permutations, dense bars one a line on phones, practising some bars of a run, bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
 // Permutation engine (Step 4 extraction from groove_writer.js).
 //
 // Pure combinatorial generators for the "permutation" practice modes: they build
@@ -120,10 +120,12 @@ function perBeatGroups(slots, unit, notesPerBeat, shapes) {
 }
 
 // Straight figures: `unit` slots per grid note, 4 grid notes per pattern.
-// `labels` names the 4 positions. Only the 16ths layout keeps a link to the
-// original section numbers, for the hand-written "Simplify multiple kicks" bars.
-function straightLayout(mode, unit, labels, pairName, pairLabels, extraGroups) {
-  var slots = 32;
+// `labels` names the 4 positions. Only the 16ths layout in 4/4 keeps a link to
+// the original section numbers, for the hand-written "Simplify multiple kicks"
+// bars. `slots`: the bar's 32nd notes (32 in 4/4).
+function straightLayout(mode, unit, labels, pairName, pairLabels, extraGroups, slots) {
+  slots = slots || 32;
+  var simplifiable = mode == 'sixteenths' && slots == 32;
   var group = 4 * unit;
   var at = function (position) {
     return function (slot) {
@@ -138,7 +140,7 @@ function straightLayout(mode, unit, labels, pairName, pairLabels, extraGroups) {
     };
   };
   var legacy = function (section) {
-    return mode == 'sixteenths' ? section : undefined;
+    return simplifiable ? section : undefined;
   };
   var figure = function (isHit, legacySection) {
     return { hits: hitsArray(slots, isHit), legacy16th: legacy(legacySection) };
@@ -149,7 +151,7 @@ function straightLayout(mode, unit, labels, pairName, pairLabels, extraGroups) {
     mode: mode,
     slots: slots,
     unit: unit,
-    simplifyAllowed: mode == 'sixteenths',
+    simplifyAllowed: simplifiable,
     groups: [
       {
         id: 'PermuationOptionsOstinato',
@@ -201,9 +203,12 @@ function straightLayout(mode, unit, labels, pairName, pairLabels, extraGroups) {
 
 // Triplet figures: `unit` slots per triplet note, 3 notes per pattern, then
 // cross-rhythms that run across the bar: every 2nd note (2 starting points)
-// and every 4th note (4 starting points).
-function tripletLayout(mode, unit, labels, every2Labels, every4Labels) {
-  var slots = 48;
+// and every 4th note (4 starting points), where they repeat evenly in the bar.
+// `slots`: the bar's slots (48 in 4/4). Compound x/8 bars ("compound8",
+// "compound16") have the same figures over their dotted-quarter beats.
+function tripletLayout(mode, unit, labels, every2Labels, every4Labels, slots) {
+  slots = slots || 48;
+  var notes = slots / unit;
   var group = 3 * unit;
   var at = function (position) {
     return function (slot) {
@@ -248,22 +253,23 @@ function tripletLayout(mode, unit, labels, every2Labels, every4Labels) {
     subLabels: labels,
     figures: positions.map((p) => figure(any([p, p + 1]))),
   };
-  var crossRhythms = [
-    {
+  var crossRhythms = [];
+  if (notes % 2 === 0)
+    crossRhythms.push({
       id: 'PermuationOptionsEvery2nd',
       name: 'Cross-rhythm: every 2nd note',
       defaultOn: true,
       subLabels: every2Labels,
       figures: [0, 1].map((start) => figure(everyNth(2, start))),
-    },
-    {
+    });
+  if (notes % 4 === 0)
+    crossRhythms.push({
       id: 'PermuationOptionsEvery4th',
       name: 'Cross-rhythm: every 4th note',
       defaultOn: true,
       subLabels: every4Labels,
       figures: [0, 1, 2, 3].map((start) => figure(everyNth(4, start))),
-    },
-  ];
+    });
   var layout = {
     mode: mode,
     slots: slots,
@@ -271,7 +277,7 @@ function tripletLayout(mode, unit, labels, every2Labels, every4Labels) {
     simplifyAllowed: false,
     groups: [ostinato, singles, doubles].concat(crossRhythms),
   };
-  if (mode == 'triplets16') {
+  if (mode == 'triplets16' || mode == 'compound16') {
     // the figures over a whole beat (all 6 notes) first, then the ones that
     // repeat inside the beat: twice (Singles, Doubles), three times (every 2nd note)
     singles.name = 'Singles (twice a beat)';
@@ -279,6 +285,8 @@ function tripletLayout(mode, unit, labels, every2Labels, every4Labels) {
     layout.groups = [ostinato]
       .concat(perBeatGroups(slots, unit, 6, SEXTUPLET_SHAPES), [singles, doubles])
       .concat(crossRhythms);
+  }
+  if (mode == 'triplets16' && slots == 48) {
     // links from before October 2026 have ticks for these groups, in this order
     layout.groupsInOlderLinks = [
       ostinato.id,
@@ -297,22 +305,55 @@ function tripletLayout(mode, unit, labels, every2Labels, every4Labels) {
 }
 
 /**
- * The permutation figure groups for a note setting (time division).
+ * The permutation figure groups for a note setting (time division) in a time
+ * signature, or null when there are none for it (Infinity Drumming, 2026: x/4
+ * bars in 1/16 and 1/32 notes and both triplet settings, and in 8ths with an
+ * even number of beats; compound x/8 bars (3/8, 6/8, 9/8, 12/8, 15/8) in 8ths and
+ * 16ths, their dotted-quarter beats having the triplet figures; 4/4 in every
+ * note setting).
  *
  * @param {number} timeDivision  4, 8, 16, 32, or triplet forms 12, 24, 48.
+ * @param {number} [top]  the time signature (4/4 if not given)
+ * @param {number} [bottom]
  */
-export function getPermutationLayout(timeDivision) {
+export function getPermutationLayout(timeDivision, top, bottom) {
+  top = top || 4;
+  bottom = bottom || 4;
+  if (top == 4 && bottom == 4) timeDivision = fourFourDivision(timeDivision);
+  if (bottom == 4) return quarterBeatsLayout(timeDivision, top);
+  if (bottom == 8 && top % 3 === 0) return compoundLayout(timeDivision, top);
+  return null;
+}
+
+// 4/4 has figures in every note setting: 1/4 notes have the 1/8 figures, the
+// Mixed setting the 1/8 triplet ones, and any other the 1/16 ones
+function fourFourDivision(timeDivision) {
+  if (timeDivision == 4) return 8;
+  if (timeDivision == 48) return 12;
+  return [8, 12, 16, 24, 32].indexOf(timeDivision) >= 0 ? timeDivision : 16;
+}
+
+// x/4 bars: the figures go beat by beat (the 1/8 ones two beats at a time)
+function quarterBeatsLayout(timeDivision, top) {
+  var straight = top * 8; // the bar's 32nd notes
   switch (timeDivision) {
     case 12:
-    case 48:
-      return tripletLayout('triplets8', 4, ['1', '&', 'a'], ['1', '&'], ['1', '&', 'a', '2']);
+      return tripletLayout(
+        'triplets8',
+        4,
+        ['1', '&', 'a'],
+        ['1', '&'],
+        ['1', '&', 'a', '2'],
+        top * 12
+      );
     case 24:
       return tripletLayout(
         'triplets16',
         2,
         ['1', '&', 'a'],
         ['1st', '2nd'],
-        ['1st', '2nd', '3rd', '4th']
+        ['1st', '2nd', '3rd', '4th'],
+        top * 12
       );
     case 32:
       return straightLayout(
@@ -321,20 +362,52 @@ export function getPermutationLayout(timeDivision) {
         ['1st', '2nd', '3rd', '4th'],
         '16ths / Off-beat 32nds',
         ['16ths', 'off 32nds'],
-        perBeatGroups(32, 1, 8)
+        perBeatGroups(straight, 1, 8),
+        straight
       );
-    case 4:
     case 8:
-      return straightLayout('eighths', 4, ['1', '&', '2', '&'], 'Quarter notes / Off-beat 8ths', [
-        '4ths',
-        'off 8ths',
-      ]);
+      if (top % 2) return null;
+      return straightLayout(
+        'eighths',
+        4,
+        ['1', '&', '2', '&'],
+        'Quarter notes / Off-beat 8ths',
+        ['4ths', 'off 8ths'],
+        undefined,
+        straight
+      );
+    case 16:
+      return straightLayout(
+        'sixteenths',
+        2,
+        ['1', 'e', '&', 'a'],
+        '8th notes / Off-beat 16ths',
+        ['8ths', 'off 16ths'],
+        undefined,
+        straight
+      );
     default:
-      return straightLayout('sixteenths', 2, ['1', 'e', '&', 'a'], '8th notes / Off-beat 16ths', [
-        '8ths',
-        'off 16ths',
-      ]);
+      return null;
   }
+}
+
+// compound x/8 bars: dotted-quarter beats of 3 eighths or 6 sixteenths, with the
+// 1/8 and 1/16 triplet figures beat for beat
+function compoundLayout(timeDivision, top) {
+  var slots = top * 4; // the bar's 32nd notes
+  if (timeDivision == 8)
+    // labelled as x/8 eighths are counted: 1 2 3 4 5 6
+    return tripletLayout('compound8', 4, ['1', '2', '3'], ['1', '2'], ['1', '2', '3', '4'], slots);
+  if (timeDivision == 16)
+    return tripletLayout(
+      'compound16',
+      2,
+      ['1st', '2nd', '3rd'],
+      ['1st', '2nd'],
+      ['1st', '2nd', '3rd', '4th'],
+      slots
+    );
+  return null;
 }
 
 /**
@@ -371,7 +444,7 @@ function groupHeading(section, repeats, fatBack) {
 
 // A permutation plays over the groove's first bars, its ostinato, this many at
 // most: each figure over every bar of it (Infinity Drumming, 2026).
-export var MAX_OSTINATO_BARS = 4;
+export var MAX_OSTINATO_BARS = 5;
 
 // ABC that goes before / after one bar of a permutation. `shownIndex` is the
 // figure's position among the shown figures of its group; `lastInGroup` marks
