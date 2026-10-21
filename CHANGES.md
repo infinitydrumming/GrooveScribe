@@ -11,6 +11,13 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — 1/16 triplets counted "1 a li & a la"
+
+- Counting in 1/16 triplets (and 1/16-triplet beats in the Mixed setting) says
+  each note of the beat, "1 a li & a la" (short for "1 ah lee & ah la"), instead
+  of "1 & a 1 & a", which said the beat's number twice (`js/noteArrays.js`,
+  `js/beatNotes.js`).
+
 ## 2026-10-21 — Every 1/16 triplet figure in the permutations
 
 - In 1/16 triplets the permutation has every rhythm of hits on the 6 notes of a

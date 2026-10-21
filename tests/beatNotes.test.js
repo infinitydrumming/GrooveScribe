@@ -116,7 +116,7 @@ describe('a groove of beats', () => {
       '&',
     ]);
     expect([24, 26, 28, 30, 32, 34].map((slot) => plan.countAt(slot, 1)).join(' ')).toBe(
-      '3 & a 3 & a'
+      '3 a li & a la'
     );
     expect(plan.countAt(1, 0)).toBeNull();
     expect([0, 12, 24, 36].map((slot) => plan.straightStepAt(slot, 1))).toEqual([6, 0, 0, 3]);
