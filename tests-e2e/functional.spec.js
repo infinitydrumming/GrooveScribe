@@ -117,3 +117,30 @@ test.describe('export', () => {
     await expect(page.locator('#downloadContextMenu')).toBeVisible();
   });
 });
+
+// Infinity Drumming, 2026: the click's count in a 16th-triplet permutation on a
+// phone-wide page, where abc2svg breaks lines inside bars (it once crashed there).
+test.describe('counting the click', () => {
+  test('a 16th-triplet permutation counts the click on a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await loadGroove(
+      page,
+      grooveUrl(
+        '?TimeSig=4/4&Div=24&Tempo=80&Measures=1&MetronomeFreq=4&Count=click' +
+          '&H=|x--x--x--x--x--x--x--x--|&S=|------O-----------O-----|&K=|o-----------o-----------|'
+      )
+    );
+    await page.evaluate(() => {
+      const gw = window.myGrooveWriter;
+      gw.permutationPopupClick('kick_16ths');
+      const box = document.getElementById('PermuationOptionsSinglesBeat');
+      box.checked = true;
+      gw.permutationOptionClick({ target: box });
+      gw.setMetronomeFrequency('16'); // sextuplets on the triplet grid
+    });
+    expect(errors).toEqual([]);
+    expect(await getSvg(page)).toContain('>li</text>');
+  });
+});

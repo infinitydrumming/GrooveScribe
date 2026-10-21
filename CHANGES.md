@@ -11,6 +11,19 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-21 — Count: bold with ghosts; the click's count fixed in triplets
+
+- **The click** count in 1/16 or 1/8 triplets (and permutations of them, where on
+  a phone the music stopped redrawing and kept an old count) lines up with the
+  notes: triplet bars are written half as long again, and the count now is too,
+  with a (hidden) note on every note of the grid as the other counts have
+  (`js/countModes.js`, `js/abcNotation.js`).
+
+- **Bold with ghosts** in the Count menu: as "rhythm in bold", with ghost notes
+  in bold too (the hi-hat / ride ostinato stays small and grey). Saved in links
+  as Count=ghosts (`js/countModes.js`, `js/abcNotation.js`, `index.html`,
+  `gscribe_help.html`).
+
 ## 2026-10-21 — Counting choices: every note, rhythm in bold, rhythm only, the click
 
 - The **Count** menu (next to Click) replaces the Counting switch:

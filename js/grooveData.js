@@ -87,8 +87,9 @@ const EMPTY_NOTE_ARRAY = [
  * @property {number} grooveClickClickBars   Click-only bars for that option. URL "ClickBars".
  * @property {boolean} showCounts  Counting ("1 e & a") over the notes in the sheet music.
  * @property {string} countMode  How it counts: 'all' (every note), 'bold' (the rhythm in bold),
- *   'rhythm' (only where something plays) or 'click' (the click's count); see countModes.js.
- *   URL "Count=1" / "Count=bold" / "Count=rhythm" / "Count=click".
+ *   'ghosts' (the same, ghost notes bold too), 'rhythm' (only where something plays) or 'click'
+ *   (the click's count); see countModes.js. URL "Count=1" / "Count=bold" / "Count=ghosts" /
+ *   "Count=rhythm" / "Count=click".
  * @property {string[]} beatNotes  Mixed note setting (Div 48): each bar's beats, one character a
  *   beat ('ssqq'; see beatNotes.js); [] otherwise.
  *   URL "Count=1" (only when on).

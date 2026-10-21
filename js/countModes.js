@@ -5,16 +5,18 @@
 //           The rhythm is the kick, snare and toms (not their ghost notes) and any
 //           accent; the hi-hat, crash and ride lines and the hi-hat foot are the
 //           ostinato. In a permutation, the permuted line only.
+//   ghosts  as bold, with ghost notes bold too
 //   rhythm  only where something plays (any line), and always the beat numbers,
 //           in brackets when nothing plays on them: "1 e & (2) & a"
 //   click   the click's own count: where it clicks, in its subdivision ("1 & a"
 //           for triplets, "1 a li & a la" for sextuplets); the beats when it is off
-// A link says Count=1 (every note), Count=bold, Count=rhythm or Count=click.
+// A link says Count=1 (every note), Count=bold, Count=ghosts, Count=rhythm or
+// Count=click.
 
 import { isTimedClick, metronomeIsOn, timedMetronomeClicks } from './metronome.js';
 
 /** The count modes, as links say them (Count=1 is "all"). */
-export var COUNT_MODES = ['all', 'bold', 'rhythm', 'click'];
+export var COUNT_MODES = ['all', 'bold', 'ghosts', 'rhythm', 'click'];
 
 /**
  * A link's Count value: whether to count, and how.
@@ -59,47 +61,38 @@ function playedAt(lines, slot) {
     });
 }
 
-// a note of the rhythm: played, not a ghost note
-function rhythmNote(line, slot) {
-  return noteAt(line, slot) && String(line[slot]).indexOf(GHOST) < 0;
-}
-
-function kickNote(lines, slot) {
-  // (not the hi-hat foot alone, which is on the kick's line)
-  return rhythmNote(lines.kick, slot) && String(lines.kick[slot]).indexOf('F') >= 0;
-}
-
 /**
  * Whether the rhythm plays at a slot.
  * @param {CountLines} lines
  * @param {number} slot
  * @param {string[] | null} only  in a permutation, the permuted lines ('kick', 'snare')
+ * @param {boolean} ghosts  ghost notes are of the rhythm too
  */
-function rhythmAt(lines, slot, only) {
+function rhythmAt(lines, slot, only, ghosts) {
+  // a note of the rhythm: played, and not a ghost note unless they count
+  var rhythmNote = function (line) {
+    return noteAt(line, slot) && (ghosts || String(line[slot]).indexOf(GHOST) < 0);
+  };
+  // (not the hi-hat foot alone, which is on the kick's line)
+  var kickNote = rhythmNote(lines.kick) && String(lines.kick[slot]).indexOf('F') >= 0;
   if (only)
     return (
-      (only.indexOf('kick') >= 0 && kickNote(lines, slot)) ||
-      (only.indexOf('snare') >= 0 && rhythmNote(lines.snare, slot))
+      (only.indexOf('kick') >= 0 && kickNote) ||
+      (only.indexOf('snare') >= 0 && rhythmNote(lines.snare))
     );
   var accented = [lines.hh, lines.snare, lines.kick]
     .concat(lines.toms, lines.cymbals)
     .some(function (line) {
       return noteAt(line, slot) && String(line[slot]).indexOf(ACCENT) >= 0;
     });
-  return (
-    accented ||
-    kickNote(lines, slot) ||
-    rhythmNote(lines.snare, slot) ||
-    lines.toms.some(function (line) {
-      return rhythmNote(line, slot);
-    })
-  );
+  return accented || kickNote || rhythmNote(lines.snare) || lines.toms.some(rhythmNote);
 }
 
 /**
  * The counts at `slots` ('"e"x', as written in the music) as a count mode says
- * them: bold or small for "bold", only where something plays for "rhythm" (the
- * beat numbers always, in brackets when silent). Changes sticking_array.
+ * them: bold or small for "bold" and "ghosts", only where something plays for
+ * "rhythm" (the beat numbers always, in brackets when silent). Changes
+ * sticking_array.
  * @param {Array} sticking_array
  * @param {number[]} slots
  * @param {string} mode
@@ -111,8 +104,9 @@ export function styleCounts(sticking_array, slots, mode, lines, only) {
     var said = /^"(.*)"x$/.exec(String(sticking_array[slot]));
     if (!said) return;
     var text = said[1];
-    if (mode == 'bold')
-      sticking_array[slot] = '"' + (rhythmAt(lines, slot, only) ? '$1' : '$2') + text + '"x';
+    if (mode == 'bold' || mode == 'ghosts')
+      sticking_array[slot] =
+        '"' + (rhythmAt(lines, slot, only, mode == 'ghosts') ? '$1' : '$2') + text + '"x';
     else if (mode == 'rhythm' && !playedAt(lines, slot))
       sticking_array[slot] = /^\d+$/.test(text) ? '"(' + text + ')"x' : false;
   });
@@ -177,20 +171,32 @@ function whole(number) {
   return Math.abs(number - Math.round(number)) < 1e-6;
 }
 
-// a note length in the music's 1/32 units ("x2", "x/" for half of one)
+// a note length in the music's 1/32 units ("x2", "x3/2", "x/" for half of one)
 function spacer(units) {
-  return 'x' + (units == 0.5 ? '/' : String(units));
+  if (whole(units)) return 'x' + Math.round(units);
+  if (whole(units * 2)) return 'x' + (units == 0.5 ? '/' : Math.round(units * 2) + '/2');
+  return 'x' + Math.round(units * 4) + '/4';
+}
+
+function gcd(a, b) {
+  return b ? gcd(b, a % b) : a;
 }
 
 /**
- * One bar of the click's count, as the (hidden) stickings voice writes it: each
- * beat split as finely as the clicks need, a click's syllable over its note.
- * Null when the clicks are finer than 8 to a beat.
+ * One bar of the click's count, as the (hidden) stickings voice writes it, a
+ * click's syllable over its note. It has a note wherever the groove's grid has
+ * one, as the other counts do: abc2svg may break a long line at any of the
+ * notes, and its bar numbers need this first voice to have one there. Null when
+ * the clicks are finer than 8 to a beat.
  * @param {number[]} ticks  from clickTicks
  * @param {number} top
  * @param {number} bottom
+ * @param {boolean} tripletBar  a bar of the triplet grid: written half as long
+ *   again (48 1/32 units to a 4/4 bar, its tuplets only labels), each beat a
+ *   tuplet as the notes' are
+ * @param {number} grid  the groove's notes to a beat
  */
-export function clickCountBar(ticks, top, bottom) {
+export function clickCountBar(ticks, top, bottom, tripletBar, grid) {
   var beatTicks = 512 / bottom;
   var split = SPLITS.find(function (n) {
     return ticks.every(function (tick) {
@@ -198,21 +204,31 @@ export function clickCountBar(ticks, top, bottom) {
     });
   });
   if (!split) return null;
-  var units = 32 / bottom; // a beat, in 1/32 notes
-  var tuplet = { 3: '(3:2:3', 6: '(6:4:6' }[split] || '';
-  // (a tuplet of 3 or 6 notes in the time of 2 or 4)
-  var noteUnits = tuplet ? units / ((split * 2) / 3) : units / split;
+  var units = (tripletBar ? 48 : 32) / bottom; // a beat, in the music's 1/32 units
+  var gridNotes = whole(grid) && grid >= 1 ? Math.round(grid) : units;
+  var parts = (split * gridNotes) / gcd(split, gridNotes); // a beat split for both
+  // straight bars: clicks in 3s or 6s are a tuplet over the beat (its parts
+  // written 1 unit long); the triplet grid's beats are only labelled tuplets
+  var ternary = !tripletBar && parts % 3 === 0;
+  var partUnits = ternary ? 1 : units / parts;
   var abc = '';
   for (var beat = 0; beat < top; beat++) {
-    abc += tuplet;
-    for (var part = 0; part < split; part++) {
-      var tick = beat * beatTicks + (part * beatTicks) / split;
-      var clicked = ticks.some(function (at) {
-        return Math.abs(at - tick) < 1e-6;
+    var at = [];
+    for (var part = 0; part < parts; part++) {
+      var tick = beat * beatTicks + (part * beatTicks) / parts;
+      var clicked = ticks.some(function (click) {
+        return Math.abs(click - tick) < 1e-6;
       });
-      var name = part === 0 ? String(beat + 1) : SYLLABLES[split][part - 1];
-      abc += (clicked ? '"' + name + '"' : '') + spacer(noteUnits);
+      if (clicked || part % (parts / gridNotes) === 0) at.push({ part: part, clicked: clicked });
     }
+    if (tripletBar) abc += '(' + at.length + ':' + at.length + ':' + at.length;
+    else if (ternary) abc += '(' + parts + ':' + units + ':' + at.length;
+    at.forEach(function (note, n) {
+      var length = ((n + 1 < at.length ? at[n + 1].part : parts) - note.part) * partUnits;
+      var syllable = (note.part * split) / parts; // (whole where it clicks)
+      var name = note.part === 0 ? String(beat + 1) : SYLLABLES[split][syllable - 1];
+      abc += (note.clicked ? '"' + name + '"' : '') + spacer(length);
+    });
     abc += ' ';
   }
   return abc;
