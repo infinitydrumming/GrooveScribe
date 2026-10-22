@@ -464,6 +464,79 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
         gw.permutationPopupClick('none');
         gw.addMeasureButtonClick();
         expect(gw.numberOfMeasures()).toBe(6);
+      }, 20_000); // (lays out up to 7 bars several times over)
+
+      // Infinity Drumming, 2026: which bar and rep is playing
+      it('shows the bar and rep playing when the rep counter is on, outside the link', () => {
+        localStorage.removeItem('grooveScribeRepCounter');
+        gw.loadNewGroove(TWO_BARS + '&PlayEach=3'); // Singles: 4 figures, each 3 times over 2 bars
+        const counter = () => {
+          const element = document.getElementById('repCounter');
+          return element && element.style.display != 'none' ? element.textContent : null;
+        };
+        loadMidi(false);
+        fireNote('hi-hat', 0.5 / 24);
+        expect(counter()).toBeNull(); // off to start with
+
+        const link = gw.myGrooveUtils.getUrlStringFromGrooveData(gw.grooveDataFromClickableUI());
+        const box = document.getElementById('PermutationRepCounter');
+        box.checked = true;
+        gw.repCounterChange({ target: box });
+        expect(localStorage.getItem('grooveScribeRepCounter')).toBe('on');
+        expect(gw.myGrooveUtils.getUrlStringFromGrooveData(gw.grooveDataFromClickableUI())).toBe(
+          link
+        ); // not one of the figures' ticks
+
+        fireNote('hi-hat', 0.5 / 24); // run bar 0
+        expect(counter()).toBe('Bar 1 \u00b7 Rep 1 of 3 \u00b7 ostinato 1/2');
+        fireNote('hi-hat', 3.5 / 24); // run bar 3
+        expect(counter()).toBe('Bar 1 \u00b7 Rep 2 of 3 \u00b7 ostinato 2/2');
+        fireNote('hi-hat', 23.5 / 24); // the last bar
+        expect(counter()).toBe('Bar 4 \u00b7 Rep 3 of 3 \u00b7 ostinato 2/2');
+        gw.myGrooveUtils.midiEventCallbacks.stopEvent(gw.myGrooveUtils);
+        expect(counter()).toBeNull();
+        // the menu is drawn with the switch on, from now on
+        expect(gw.HTMLforPermutationOptions()).toMatch(/id="PermutationRepCounter" checked/);
+        localStorage.removeItem('grooveScribeRepCounter');
+      });
+
+      it('counts the bars to practise by their numbers in the music', () => {
+        gw.loadNewGroove(TWO_BARS + '&PermBars=3-4');
+        const box = document.getElementById('PermutationRepCounter');
+        box.checked = true;
+        gw.repCounterChange({ target: box });
+        loadMidi(false);
+        fireNote('hi-hat', 2.5 / 4); // the 3rd of 4 run bars: figure 4's first bar
+        expect(document.getElementById('repCounter').textContent).toBe(
+          'Bar 4 \u00b7 Rep 1 of 1 \u00b7 ostinato 1/2'
+        );
+        localStorage.removeItem('grooveScribeRepCounter');
+      });
+
+      // a tempo change while playing is heard from the next bar line
+      it('hands the round, built again at the new tempo, to the player for the next bar line', () => {
+        gw.loadNewGroove(TWO_BARS + '&PlayEach=2'); // 90 bpm: 16 bars of 2666.7 ms
+        loadMidi(false);
+        const gu = gw.myGrooveUtils;
+        vi.spyOn(gu, 'isPlaying').mockReturnValue(true);
+        vi.spyOn(gu, 'loadedTempo').mockReturnValue(90);
+        const handOver = vi.spyOn(gu, 'switchTempoAtNextBar').mockReturnValue(true);
+        gu.setTempo(60);
+        gu.setTempo(45); // the slider still moving: only where it stops counts
+        vi.advanceTimersByTime(300);
+        expect(handOver).toHaveBeenCalledTimes(1);
+        const [url, oldBarMs, newBarMs] = handOver.mock.calls[0];
+        expect(url).toMatch(/^data:audio\/midi;base64,/);
+        expect(oldBarMs).toHaveLength(16);
+        expect(oldBarMs[0]).toBeCloseTo(8000 / 3);
+        expect(newBarMs[0]).toBeCloseTo(16000 / 3);
+
+        // not when the playing round has the tempo already (a speed-up builds it at its end)
+        handOver.mockClear();
+        gu.loadedTempo.mockReturnValue(45);
+        gu.setTempo(45);
+        vi.advanceTimersByTime(300);
+        expect(handOver).not.toHaveBeenCalled();
       });
 
       it('keeps the ticked figures when a bar is added to the ostinato', () => {

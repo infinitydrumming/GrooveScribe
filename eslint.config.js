@@ -75,6 +75,8 @@ export default [
         // here (doing so would trip no-redeclare in the file that defines them).
         Midi: 'readonly',
         MIDI: 'readonly',
+        MidiFile: 'readonly',
+        Replayer: 'readonly',
         Abc: 'readonly',
         Share: 'readonly',
         ShareButton: 'readonly',
@@ -94,6 +96,7 @@ export default [
   {
     files: [
       'js/constants.js',
+      'js/tempoSwitch.js',
       'js/musicMath.js',
       'js/noteArrays.js',
       'js/browserInfo.js',

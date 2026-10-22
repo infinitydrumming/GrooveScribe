@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, plays through an iPhone's silent switch, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up, counting over the notes and its choices, menus kept on screen, more metronome clicks, a second tap closes a menu. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, plays through an iPhone's silent switch, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up, counting over the notes and its choices, menus kept on screen, more metronome clicks, a second tap closes a menu, a typed tempo kept to 30-300, tempo changes heard from the next bar line. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -67,6 +67,7 @@ import { createGrooveData } from './grooveData.js';
 import { createScreenWakeLock } from './screenWakeLock.js';
 import { createAudioSession } from './audioSession.js';
 import { metronomeIsOn } from './metronome.js';
+import { eventTimes, planTempoSwitch, catchUp } from './tempoSwitch.js';
 import {
   DEFAULT_GRACE_SPACING_MS,
   DEFAULT_GRACE_VOLUME,
@@ -1192,10 +1193,98 @@ function GrooveUtils() {
   };
 
   root.loadMIDIFromURL = function (midiURL) {
+    tempoSwitch = null; // (planned for the MIDI that was playing)
     MIDI.Player.timeWarp = 1; // speed the song is played back
     MIDI.Player.BPM = root.getTempo();
     MIDI.Player.loadFile(midiURL, midiLoaderCallback());
   };
+
+  // the tempo the playing MIDI was made at
+  root.loadedTempo = function () {
+    return MIDI.Player.BPM;
+  };
+
+  // --- Tempo changes while playing (Infinity Drumming, 2026) ------------------
+  // Each time round plays from one MIDI file (a whole permutation run can last
+  // minutes), so a new tempo used to wait for the round's end. Now the round is
+  // built again at the new tempo, and just after the last note before the next
+  // bar line the player carries on in the new MIDI from the same place (the sums
+  // are in tempoSwitch.js).
+  var tempoSwitch = null;
+
+  /**
+   * Move the playing round to `url`, the same round at the new tempo, at its next
+   * bar line. `oldBarMs` / `newBarMs`: the round's bars at the playing and the new
+   * tempo; `onSwitched(bar)` is called once it has moved, `bar` being the bar line
+   * (1: the line after the first bar). Returns false when no bar line is left in
+   * the round (its end takes the new tempo anyway).
+   */
+  root.switchTempoAtNextBar = function (url, oldBarMs, newBarMs, onSwitched) {
+    tempoSwitch = null;
+    if (!MIDI.Player.playing || !MIDI.Player.data || url.indexOf('base64,') < 0) return false;
+    var midiData = window.atob(url.split(',')[1]);
+    var newData = new Replayer(MidiFile(midiData), MIDI.Player.timeWarp).getData();
+    tempoSwitch = {
+      playing: eventTimes(MIDI.Player.data),
+      next: eventTimes(newData),
+      newData: newData,
+      midiData: midiData,
+      oldBarMs: oldBarMs,
+      newBarMs: newBarMs,
+      onSwitched: onSwitched,
+    };
+    return planTheTempoSwitch();
+  };
+
+  // the next bar line whose last note before it is still to come
+  function planTheTempoSwitch() {
+    var plan = tempoSwitch;
+    var where = planTempoSwitch(
+      plan.playing,
+      plan.next,
+      plan.oldBarMs,
+      plan.newBarMs,
+      MIDI.Player.currentTime
+    );
+    if (!where) {
+      tempoSwitch = null;
+      return false;
+    }
+    plan.where = where;
+    plan.due = 0;
+    return true;
+  }
+
+  // every note as it plays: is it the last one before the bar line?
+  function tempoSwitchNote(now) {
+    var plan = tempoSwitch;
+    if (!plan || plan.due) return;
+    if (Math.abs(now - plan.where.oldTrigger) < 0.01) {
+      plan.due = performance.now();
+      // once the player has finished with this note (and any played with it)
+      window.setTimeout(switchTempoNow, 0);
+    } else if (now > plan.where.oldTrigger) planTheTempoSwitch(); // missed: the next line
+  }
+
+  function switchTempoNow() {
+    var plan = tempoSwitch;
+    tempoSwitch = null;
+    if (!plan || !MIDI.Player.playing) return;
+    var data = plan.newData;
+    catchUp(data, plan.next.times, plan.where.newTrigger, performance.now() - plan.due);
+    MIDI.Player.stop(); // (the old MIDI's notes still to come)
+    MIDI.Player.currentData = plan.midiData;
+    MIDI.Player.replayer = {
+      getData: function () {
+        return data;
+      },
+    };
+    MIDI.Player.data = data;
+    MIDI.Player.BPM = root.getTempo();
+    MIDI.Player.currentTime = plan.where.newTrigger + 0.25; // just after that note
+    MIDI.Player.resume();
+    if (plan.onSwitched) plan.onSwitched(plan.where.bar);
+  }
 
   root.MIDISaveAs = function (midiURL) {
     // save as
@@ -1207,6 +1296,7 @@ function GrooveUtils() {
 
   root.pauseMIDI_playback = function () {
     if (root.isMIDIPaused === false) {
+      tempoSwitch = null;
       root.isMIDIPaused = true;
       root.midiEventCallbacks.pauseEvent(root.midiEventCallbacks.classRoot);
       MIDI.Player.pause();
@@ -1246,6 +1336,7 @@ function GrooveUtils() {
   // stop button or keypress
   root.stopMIDI_playback = function () {
     if (MIDI.Player.playing || root.isMIDIPaused) {
+      tempoSwitch = null;
       root.isMIDIPaused = false;
       MIDI.Player.stop();
       screenWakeLock.keepAwake(false);
@@ -1277,7 +1368,7 @@ function GrooveUtils() {
   };
 
   root.isPlaying = function () {
-    return MIDI.Player.playing;
+    return typeof MIDI != 'undefined' && !!MIDI.Player && !!MIDI.Player.playing;
   };
 
   root.repeatMIDI_playback = function () {
@@ -1370,6 +1461,7 @@ function GrooveUtils() {
   // This is different from the callbacks that we use for the midi code in this library to
   // do events.   (Double chaining)
   function ourMIDICallback(data) {
+    tempoSwitchNote(data.now);
     var percentComplete = data.now / data.end;
     root.midiEventCallbacks.percentProgress(
       root.midiEventCallbacks.classRoot,
@@ -1662,12 +1754,31 @@ function GrooveUtils() {
     if (root.tempoChangeCallback) root.tempoChangeCallback(tempo);
   };
 
+  // a tempo typed in the BPM box (Infinity Drumming, 2026: kept to the slider's
+  // 30-300; anything that isn't a number puts the tempo back as it was)
   root.tempoUpdateFromTextField = function (event) {
-    var newTempo = event.target.value;
-
+    var typed = parseInt(String(event.target.value).trim(), 10);
+    if (isNaN(typed)) {
+      event.target.value = '' + root.getTempo();
+      return;
+    }
+    var newTempo = Math.min(Math.max(typed, 30), 300);
     document.getElementById('tempoInput' + root.grooveUtilsUniqueIndex).value = newTempo;
     root.tempoUpdate(newTempo);
   };
+
+  // the BPM box: typing replaces the tempo, and Enter (or Done on a phone) sets it
+  function tempoTextFieldFocus(event) {
+    event.target.select();
+  }
+  function tempoTextFieldKey(event) {
+    if (event.key == 'Enter')
+      event.target.blur(); // (blurring sends the change)
+    else if (event.key == 'Escape') {
+      event.target.value = '' + root.getTempo();
+      event.target.blur();
+    }
+  }
 
   // update the tempo string display
   root.tempoUpdateFromSlider = function (event) {
@@ -1969,7 +2080,9 @@ function GrooveUtils() {
       '">' +
       '			<div class="tempoRow">' +
       '				<span class="tempoLabel">BPM</span>' +
-      '				<input type="text" for="tempo" class="tempoTextField" pattern="\\d+" id="tempoTextField' +
+      '				<input type="text" for="tempo" class="tempoTextField" pattern="[0-9]*" inputmode="numeric"' +
+      ' maxlength="3" enterkeyhint="done" autocomplete="off" aria-label="Tempo (beats per minute)"' +
+      ' title="Type a tempo" id="tempoTextField' +
       root.grooveUtilsUniqueIndex +
       '" value="80"></input>' +
       '				<input type=range min=30 max=300 value=90 class="tempoInput' +
@@ -2029,6 +2142,8 @@ function GrooveUtils() {
     html_element = document.getElementById('tempoTextField' + root.grooveUtilsUniqueIndex);
     if (html_element) {
       html_element.addEventListener('change', root.tempoUpdateFromTextField, false);
+      html_element.addEventListener('focus', tempoTextFieldFocus, false);
+      html_element.addEventListener('keydown', tempoTextFieldKey, false);
     }
 
     html_element = document.getElementById('swingInput' + root.grooveUtilsUniqueIndex);

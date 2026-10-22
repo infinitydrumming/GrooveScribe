@@ -399,6 +399,10 @@ describe('HTMLforPermutationOptions', () => {
       expect(html).toContain('>8th notes / Off-beat 16ths</label>');
       expect(html).toMatch(/<select id="PermutationRepeat"[^>]*>/);
       expect(html).toContain('<option value="1" selected>\u00d71</option>');
+      // Infinity Drumming, 2026: each figure up to 16 times; the rep counter's switch
+      expect(html.match(/<option value="\d+"( selected)?>\u00d7\d+<\/option>/g)).toHaveLength(16);
+      expect(html).toContain('<option value="16">\u00d716</option>');
+      expect(html).toMatch(/<input type="checkbox" id="PermutationRepCounter"[^>]*> Rep counter/);
       expect(html).toContain('>Quads</label>');
       // Kick permutation does NOT add the snare-only "Use Accent Grid" option.
       expect(html).not.toContain('Use Accent Grid');
