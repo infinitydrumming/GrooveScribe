@@ -11,6 +11,16 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-22 — The Alphabet
+
+- Infinity Drumming's students know the permutations as the Alphabet, so that's
+  what the app calls them: the header button ("ABC Alphabet"), its menu ("Kick
+  Alphabet", "Snare Alphabet"), the options panel ("Alphabet Options"), its
+  messages, the Save & Share note and the help, whose section is "The Alphabet
+  (permutations)". Links and the code keep "permutation" (`Perm=...`), so every
+  link opens as before (`index.html`, `js/viewHtml.js`, `js/groove_writer.js`,
+  `gscribe_help.html`).
+
 ## 2026-10-22 — Typing a tempo, tempo changes while playing, the rep counter
 
 - The BPM number in the play bar looks like the box it is: tap it and type a

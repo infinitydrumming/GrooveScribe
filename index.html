@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, the Count menu, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button, more metronome clicks, diddles, beat-by-beat notes.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, the Count menu, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button, more metronome clicks, diddles, beat-by-beat notes, the permutations called the Alphabet.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
@@ -177,7 +177,7 @@
 					<span id="headerTitleSub"></span>
 				</span>
 				<span id="upperRight">
-					<span class="rightButtons grooveDB_hidden" id="permutationAnchor" onclick="myGrooveWriter.permutationAnchorClick(event);"><span class="abcIcon" aria-hidden="true">ABC</span><span class="headerButtonText"> Permutations</span></span>
+					<span class="rightButtons grooveDB_hidden" id="permutationAnchor" onclick="myGrooveWriter.permutationAnchorClick(event);"><span class="abcIcon" aria-hidden="true">ABC</span><span class="headerButtonText"> Alphabet</span></span>
 					<span class="rightButtons" id="groovesAnchor" onclick="myGrooveWriter.groovesAnchorClick(event);"><i class="fa fa-book"></i><span class="headerButtonText"> Grooves</span></span>
 					<span class="rightButtons" id="helpAnchor" onclick="myGrooveWriter.helpAnchorClick(event);"><i class="fa fa-question-circle"></i><span class="headerButtonText"> Help</span></span>
 					<span class="headerDivider"></span>
@@ -563,8 +563,8 @@
 		<div class="noteContextMenu">
 			<ul id="permutationContextMenu" class="list">
 				<li onclick='myGrooveWriter.permutationPopupClick("none");'><b>None</b></li>
-				<li onclick='myGrooveWriter.permutationPopupClick("kick_16ths");'><b>Kick</b> Permutation</li>
-				<li onclick='myGrooveWriter.permutationPopupClick("snare_16ths");'><b>Snare</b> Permutation</li>
+				<li onclick='myGrooveWriter.permutationPopupClick("kick_16ths");'><b>Kick</b> Alphabet</li>
+				<li onclick='myGrooveWriter.permutationPopupClick("snare_16ths");'><b>Snare</b> Alphabet</li>
 				<li onclick='myGrooveWriter.permutationPopupClick("kick_snare_kick_lead");'><b>Kick &amp; Snare</b> (kick lead)</li>
 				<li onclick='myGrooveWriter.permutationPopupClick("kick_snare_snare_lead");'><b>Kick &amp; Snare</b> (snare lead)</li>
 			</ul>
@@ -653,7 +653,7 @@
 			</div>
 			<!-- an exercise (Infinity Drumming, 2026): its practice settings and instructions go in the link -->
 			<div id="exerciseShareOptions">
-				<label id="includePracticeLabel"><input type="checkbox" id="includePracticeCheckbox" checked onchange="myGrooveWriter.shareSettingsChanged();"><span><b>Include practice settings</b><small>Click options, speed-up, permutations, practice timer, groove / click bars and muted lines</small></span></label>
+				<label id="includePracticeLabel"><input type="checkbox" id="includePracticeCheckbox" checked onchange="myGrooveWriter.shareSettingsChanged();"><span><b>Include practice settings</b><small>Click options, speed-up, the alphabet, practice timer, groove / click bars and muted lines</small></span></label>
 				<label id="exerciseInstructionsLabel" for="exerciseInstructions">Instructions <small>(optional, shown when the link is opened)</small></label>
 				<textarea id="exerciseInstructions" rows="3" maxlength="1000" placeholder="e.g. Play each figure 4 times. Speed up 5 bpm every 2 minutes until 120." onchange="myGrooveWriter.instructionsChanged();"></textarea>
 			</div>

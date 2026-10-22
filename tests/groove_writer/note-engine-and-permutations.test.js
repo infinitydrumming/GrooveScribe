@@ -459,7 +459,7 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
         gw.duplicateMeasureButtonClick(1);
         expect(gw.numberOfMeasures()).toBe(5);
         expect(alert).toHaveBeenCalledWith(
-          'A permutation plays over 5 bars at most. Turn the permutation off to add more bars.'
+          'The alphabet plays over 5 bars at most. Turn the alphabet off to add more bars.'
         );
         gw.permutationPopupClick('none');
         gw.addMeasureButtonClick();
