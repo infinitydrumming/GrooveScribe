@@ -569,7 +569,21 @@ body,
   left: 50%;
   transform: translateX(-50%);
   max-width: calc(100vw - 32px);
+  /* never past the bottom of the screen: a tall one scrolls inside */
+  max-height: calc(100vh - var(--layout-header-h) - var(--layout-toolbar-h) - 16px);
+  max-height: calc(100dvh - var(--layout-header-h) - var(--layout-toolbar-h) - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   box-sizing: border-box;
+}
+/* phones and short screens: Save & Share opens just below the header, over the
+ * toolbar, to have the screen's height for all it holds */
+@media (max-width: 900px), (max-height: 520px) {
+  #fullURLPopup {
+    top: calc(var(--layout-header-h) + 8px);
+    max-height: calc(100vh - var(--layout-header-h) - 16px);
+    max-height: calc(100dvh - var(--layout-header-h) - 16px);
+  }
 }
 
 /* ---------- phones and narrow windows ---------- */

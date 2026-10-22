@@ -11,6 +11,16 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-22 — Save & Share on phones
+
+- The pop-ups (Save & Share, the time signature, speed-up, practice timer,
+  groove / click bars, flams, cursor timing and title boxes) end at the bottom
+  of the screen and scroll inside when they hold more: on a phone the bottom of
+  Save & Share (Save to My Grooves, WhatsApp, Email, Print, MIDI) was off the
+  screen with no way to reach it. On phones and short screens Save & Share
+  opens just below the header, over the toolbar, to show more of it at once
+  (`css/infinity_layout.css`).
+
 ## 2026-10-21 — Permutations in more time signatures; 5-bar ostinatos
 
 - Permutations work outside 4/4 where the figures fit the beats: x/4 bars
