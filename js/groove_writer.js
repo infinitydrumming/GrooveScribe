@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -1482,7 +1482,39 @@ function GrooveWriter() {
       // update the Main URL to show the new tempo
       root.updateCurrentURL();
     }, 300);
+    scheduleTempoAtNextBar();
   };
+
+  // Infinity Drumming, 2026: a tempo change while playing is heard from the next
+  // bar line, not when the time round ends (a whole permutation run can take
+  // minutes). Once the slider or the box settles, the round is built again at
+  // the new tempo and the player moves into it (groove_utils.switchTempoAtNextBar).
+  var class_tempo_at_next_bar_timeout = null;
+  function scheduleTempoAtNextBar() {
+    if (class_tempo_at_next_bar_timeout != null)
+      window.clearTimeout(class_tempo_at_next_bar_timeout);
+    class_tempo_at_next_bar_timeout = window.setTimeout(function () {
+      class_tempo_at_next_bar_timeout = null;
+      tempoAtNextBar();
+    }, 250);
+  }
+
+  function tempoAtNextBar() {
+    var gu = root.myGrooveUtils;
+    // (the count-in and the practice timer's last round take it when they end)
+    if (!gu.isPlaying() || class_metronome_count_in_is_playing || class_practice_ending) return;
+    if (gu.loadedTempo() == gu.getTempo()) return; // (a speed-up: the round was just built)
+    var oldBarMs = class_round_bar_ms.slice();
+    var newBarMs = playingRoundBars().map(roundBarMs);
+    if (newBarMs.length < 2 || newBarMs.length != oldBarMs.length) return; // (bars came or went)
+    gu.switchTempoAtNextBar(buildGrooveMidiUrl(), oldBarMs, newBarMs, function (bar) {
+      // the practice timer counts the bars before the line at the old tempo
+      if (class_practice_limit)
+        class_practice_played.ms += sumOf(oldBarMs.slice(0, bar)) - sumOf(newBarMs.slice(0, bar));
+      class_round_bar_ms = newBarMs;
+      class_round_full_ms = sumOf(newBarMs);
+    });
+  }
 
   // The phone toolbar shows "Notes" and "Click" as selectors instead of rows of
   // buttons (Infinity Drumming, 2026): keep them showing the current settings.
@@ -2638,6 +2670,89 @@ function GrooveWriter() {
     return (
       get_numberOfActivePermutationSections() * get_permutation_repeats() * get_ostinato_bars()
     );
+  }
+
+  // --- The rep counter (Infinity Drumming, 2026) ------------------------------
+  // While a permutation plays, which bar of the music it's on (its number there)
+  // and which time through it ("Bar 7 · Rep 2 of 4"), and with a multi-bar
+  // ostinato which bar of that ("· ostinato 2/3"). A switch in the Permutation Options that this
+  // device remembers (off to start with).
+  var constant_rep_counter_key = 'grooveScribeRepCounter';
+  var class_rep_counter = storedRepCounter();
+  var class_rep_counter_numbers = []; // the playing round's figures' numbers, in order
+
+  function storedRepCounter() {
+    try {
+      return window.localStorage.getItem(constant_rep_counter_key) == 'on';
+    } catch {
+      return false; // storage unavailable: off
+    }
+  }
+
+  root.repCounterChange = function (event) {
+    class_rep_counter = !!event.target.checked;
+    try {
+      window.localStorage.setItem(constant_rep_counter_key, class_rep_counter ? 'on' : 'off');
+    } catch {
+      /* storage unavailable: the switch just lasts for this visit */
+    }
+    if (!class_rep_counter) showRepCounter('');
+  };
+
+  // the shown figures' numbers in the music, in playing order (as
+  // get_shown_permutation_sections numbers them, without building their music)
+  function shownPermutationNumbers() {
+    if (class_permutation_type == 'none') return [];
+    var layout = get_permutation_layout();
+    if (!layout) return [];
+    var ticked = _perm.getPermutationSections(layout).filter(isPermutationSectionShown).length;
+    var chosen = _perm.parseBarList(class_permutation_bars, ticked);
+    var numbers = [];
+    for (var n = 1; n <= ticked; n++) if (!chosen.length || chosen.indexOf(n) >= 0) numbers.push(n);
+    return numbers;
+  }
+
+  // over the play bar ('' hides it)
+  function showRepCounter(text) {
+    var element = document.getElementById('repCounter');
+    if (!element && text) {
+      var player = document.getElementById('midiPlayer');
+      if (!player) return;
+      element = document.createElement('div');
+      element.id = 'repCounter';
+      element.setAttribute('aria-live', 'off');
+      player.appendChild(element);
+    }
+    if (!element) return;
+    if (element.textContent != text) element.textContent = text;
+    element.style.display = text ? '' : 'none';
+  }
+
+  // `groovePercent`: how far through the run playing is (as the cursor has it)
+  function updateRepCounter(note_type, groovePercent) {
+    if (!class_rep_counter || class_permutation_type == 'none') {
+      showRepCounter('');
+      return;
+    }
+    if (class_metronome_count_in_is_playing) {
+      showRepCounter('Count-in');
+      return;
+    }
+    if (note_type == 'complete' || note_type == 'clear' || groovePercent < 0) return; // as it was
+    var bars = get_ostinato_bars();
+    var repeats = get_permutation_repeats();
+    var total = class_rep_counter_numbers.length * repeats * bars;
+    if (!total) return;
+    var bar = Math.min(Math.floor(groovePercent * total), total - 1);
+    var text =
+      'Bar ' +
+      class_rep_counter_numbers[Math.floor(bar / (repeats * bars))] +
+      ' \u00b7 Rep ' +
+      ((Math.floor(bar / bars) % repeats) + 1) +
+      ' of ' +
+      repeats;
+    if (bars > 1) text += ' \u00b7 ostinato ' + ((bar % bars) + 1) + '/' + bars;
+    showRepCounter(text);
   }
 
   // --- Multi-bar ostinatos (Infinity Drumming, 2026) ----------------------------
@@ -4413,6 +4528,7 @@ function GrooveWriter() {
         }
         midiURL = buildPlayingRoundMidiUrl();
         class_loaded_midi_straight_bars = loadedMidiStraightBars();
+        class_rep_counter_numbers = shownPermutationNumbers();
         root.myGrooveUtils.midiResetNoteHasChanged();
       }
       root.myGrooveUtils.loadMIDIFromURL(midiURL);
@@ -4445,6 +4561,7 @@ function GrooveWriter() {
 
       if (note_type != 'complete' && note_type != 'clear')
         percent_complete = playingPercentToGroovePercent(percent_complete);
+      updateRepCounter(note_type, percent_complete);
       hilight_note(note_type, percent_complete);
     };
 
@@ -4453,6 +4570,7 @@ function GrooveWriter() {
     root.myGrooveUtils.midiEventCallbacks.stopEvent = function (myroot) {
       stopEvent.call(this, myroot);
       showPracticeStatus(-1);
+      showRepCounter('');
     };
 
     root.myGrooveUtils.oneTimeInitializeMidi();
@@ -6350,7 +6468,7 @@ function GrooveWriter() {
   function permutationCheckboxes() {
     return /** @type {NodeListOf<HTMLInputElement>} */ (
       document.querySelectorAll(
-        '#PermutationOptions input[type="checkbox"]:not(#PermuationOptionsFatBack)'
+        '#PermutationOptions input[type="checkbox"]:not(#PermuationOptionsFatBack):not(#PermutationRepCounter)'
       )
     );
   }
@@ -7103,7 +7221,8 @@ function GrooveWriter() {
       layout,
       get_permutation_repeats(),
       class_permutation_bars,
-      class_permutation_fat_back
+      class_permutation_fat_back,
+      class_rep_counter
     );
   };
 } // end of class

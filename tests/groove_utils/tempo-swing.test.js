@@ -145,8 +145,23 @@ describe('GrooveUtils tempo & swing controls', () => {
       expect(document.getElementById('tempoTextField' + gu.grooveUtilsUniqueIndex).value).toBe(
         '133'
       );
-      // the value is forwarded as-is (string), not coerced to a number.
-      expect(callbackValue).toBe('133');
+      expect(callbackValue).toBe(133);
+    });
+
+    // Infinity Drumming, 2026
+    it('keeps a typed tempo to 30-300, and puts it back when what is typed is not a number', () => {
+      const field = document.getElementById('tempoTextField' + gu.grooveUtilsUniqueIndex);
+      const slider = document.getElementById('tempoInput' + gu.grooveUtilsUniqueIndex);
+      field.value = '500';
+      gu.tempoUpdateFromTextField({ target: field });
+      expect([slider.value, field.value]).toEqual(['300', '300']);
+      field.value = ' 12 ';
+      gu.tempoUpdateFromTextField({ target: field });
+      expect([slider.value, field.value]).toEqual(['30', '30']);
+      slider.value = '96';
+      field.value = 'abc';
+      gu.tempoUpdateFromTextField({ target: field });
+      expect([slider.value, field.value]).toEqual(['96', '96']);
     });
 
     it('tempoUpdateFromSlider forwards the slider value straight to tempoUpdate', () => {

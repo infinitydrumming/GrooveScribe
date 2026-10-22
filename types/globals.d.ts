@@ -1,11 +1,13 @@
 // Ambient declarations for vendored third-party globals. These libraries are
 // loaded via <script> tags (not ES imports), so tsc's checkJs otherwise flags
 // every use as "Cannot find name". Their real definitions live in the vendored
-// sources: MIDI.js (MIDI), jsmidgen (Midi), abc2svg (Abc), pablo (Pablo), and
+// sources: MIDI.js (MIDI, and its jasmid MidiFile / Replayer), jsmidgen (Midi), abc2svg (Abc), pablo (Pablo), and
 // share-button (Share / ShareButton). Typed as `any` — we only need tsc to know
 // they exist, not to type-check third-party APIs.
 
 declare var MIDI: any;
+declare var MidiFile: any;
+declare var Replayer: any;
 declare var Midi: any;
 declare var Abc: any;
 declare var Pablo: any;

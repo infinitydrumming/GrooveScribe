@@ -11,6 +11,28 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-22 — Typing a tempo, tempo changes while playing, the rep counter
+
+- The BPM number in the play bar looks like the box it is: tap it and type a
+  tempo (a number keypad on phones; Enter or Done sets it, Esc puts it back). It
+  keeps to the slider's 30-300; anything that isn't a number puts the tempo
+  back (letters used to send it to 165, and 500 showed 500 at 300 bpm)
+  (`js/groove_utils.js`, `css/infinity_layout.css`).
+- A tempo change while playing is heard from the next bar line. Each time round
+  plays from one MIDI file, and a whole permutation run is one round, so a new
+  tempo used to wait for the run to end (minutes). Now, once the slider or the box
+  settles, the round is built again at the new tempo and just after the last note
+  before the next bar line the player carries on in it from the same place: no
+  note is cut, played twice or moved but those after the line (the sums are in
+  the new `js/tempoSwitch.js`; `js/groove_utils.js`, `js/groove_writer.js`). The
+  count-in and the practice timer's last round take it when they end, as before.
+- Permutations: **Play each** goes up to ×16 (it was 1, 2, 3, 4, 6, 8; links
+  already allowed 16), and a **Rep counter** switch next to it shows, just above
+  the play bar while the permutation plays, the bar of the music and the time
+  through it ("Bar 7 · Rep 2 of 4", "· ostinato 2/3" over a multi-bar ostinato).
+  The device remembers the switch; it isn't one of the figures' ticks, so links
+  are unchanged (`js/viewHtml.js`, `js/groove_writer.js`, `gscribe_help.html`).
+
 ## 2026-10-22 — Save & Share on phones
 
 - The pop-ups (Save & Share, the time signature, speed-up, practice timer,

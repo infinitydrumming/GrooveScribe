@@ -495,14 +495,28 @@ body,
   color: var(--id-text-on-dark-2);
 }
 #midiPlayer .tempoTextField {
-  width: 46px;
-  height: 30px;
+  width: 58px;
+  height: 34px;
   margin: 0;
-  border-radius: 6px;
+  box-sizing: border-box;
+  padding: 0 4px;
+  /* a box to type in, not just a label */
+  border: 1.5px solid var(--id-text-on-dark-3);
+  border-radius: 8px;
   font-size: 22px;
   font-weight: 700;
+  text-align: center;
   color: var(--id-text-on-dark);
   background: var(--id-navy-700);
+  cursor: text;
+}
+#midiPlayer .tempoTextField:hover {
+  border-color: var(--id-text-on-dark);
+}
+#midiPlayer .tempoTextField:focus {
+  outline: none;
+  border-color: var(--id-amber);
+  box-shadow: 0 0 0 2px rgba(254, 159, 19, 0.35);
 }
 #midiPlayer .swingOutput {
   width: auto;
@@ -1470,6 +1484,43 @@ body,
 }
 #beatContextMenu li.disabled {
   color: var(--id-border);
+  pointer-events: none;
+}
+
+/* the rep counter's switch, by "Play each" (Infinity Drumming, 2026) */
+#PermutationRepCounterOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 4px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#PermutationRepCounter {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--id-blue);
+}
+/* the rep counter itself, just above the play bar while a permutation plays */
+#repCounter {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 24px);
+  box-sizing: border-box;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: var(--id-navy-900);
+  color: var(--id-text-on-dark);
+  font-family: Lato, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 4px 14px rgba(5, 17, 36, 0.3);
   pointer-events: none;
 }
 

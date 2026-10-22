@@ -81,6 +81,8 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `countModes.js` — the Count menu's choices (`Count=1|bold|ghosts|rhythm|click`): the bold / small styling of
   counts, rhythm-only counts with bracketed silent beats, and the click's own count as a hidden
   stickings voice (its tuplets drawn without numbers).
+- `tempoSwitch.js` — the sums for a tempo change while playing: the next bar line whose last note
+  before it is still to come, in the playing MIDI and in the round built again at the new tempo.
 - `audioSession.js` — while a groove plays, `navigator.audioSession.type = 'playback'` so iPhones
   play it through the silent switch; `'auto'` again on pause/stop.
 - `gridState.js` — the DOM grid **read** layer: per-cell state (`is_*_on`/`get_*_state`)
@@ -124,7 +126,8 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   must follow the writer's beats (`withCountsOver`), never assume a length.
 - **Permutation ticks** (`PermSet`) are every option checkbox in DOM order: a new box shifts them and
   older links lose their ticks. A new option gets its own link setting and stays out of
-  `permutationCheckboxes()` (as "Fat back" does, `FatBack=1`), or new groups go through
+  `permutationCheckboxes()` (as "Fat back" does, `FatBack=1`, and the device's "Rep counter"
+  switch), or new groups go through
   `layout.groupsInOlderLinks`.
 - **Permutation runs** play over an ostinato of the groove's first bars (`get_ostinato_bars()`, up to
   `MAX_OSTINATO_BARS`): bar `n` of the run is figure `n / (repeats × bars)` over ostinato bar
@@ -144,6 +147,12 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   for a long permutation run). The golden master snapshots that page form; `musicLineBroken` still
   reads abc2svg's own output. The music engine also crashes (`gchord_width ... seqst`) somewhere
   around 500 counted bars of music, so keep runs (figures × ostinato bars) well under that.
+- **Tempo changes while playing** (`switchTempoAtNextBar` in groove_utils): a time round is one
+  MIDI file (a permutation run is one round), so the editor builds the round again at the new tempo
+  and the player moves into it just after the last note before the next bar line: `MIDI.Player.stop()`,
+  then its `replayer` / `data` / `currentTime` set and `resume()`, from a `setTimeout(0)` after that
+  note's callback (inside it, `stop()` would cut the note still in MIDI.js's queue). The golden master
+  doesn't cover it (no tempo changes); check it in a real browser by recording `MIDI.noteOn` times.
 - **Bar copies** go to localStorage and the device clipboard (`Infinity Scribe bar {json}`, with an
   `at` time; paste takes the newer): each origin, home-screen app and private tab has its own
   storage. Anything that lays the grid out again (add / remove / paste / "Add a copy") goes through
