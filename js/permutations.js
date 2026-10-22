@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: more time signatures, multi-bar ostinatos, fat back kick permutations, dense bars one a line on phones, practising some bars of a run, bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: more time signatures, multi-bar ostinatos, fat back kick permutations, dense bars one a line on phones, practising some bars of a run (or a groove), bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
 // Permutation engine (Step 4 extraction from groove_writer.js).
 //
 // Pure combinatorial generators for the "permutation" practice modes: they build
@@ -1216,8 +1216,10 @@ export function merge_kick_arrays(primary_kick_array, secondary_kick_array) {
   return new_kick_array;
 }
 
-// --- Practising some bars of a run (Infinity Drumming, 2026) ---------------------
-// "3-6, 9": bars 3 to 6 and bar 9 of the run (numbered like the music).
+// --- Practising some bars of a run or a groove (Infinity Drumming, 2026) ----------
+// "3-6, 9": bars 3 to 6 and bar 9 of the run (numbered like the music). Spaces
+// or anything else can part them too ("2 5"), and "3 to 6" or "3–6" is a range:
+// an iPhone's keyboard is on its letters to start with.
 
 /**
  * The bars a list names, in order, only those from 1 to `count`; [] for all bars.
@@ -1228,9 +1230,15 @@ export function merge_kick_arrays(primary_kick_array, secondary_kick_array) {
 export function parseBarList(text, count) {
   var bars = [];
   String(text || '')
-    .split(',')
+    .replace(/to|[\u2013\u2014]/gi, '-')
+    .split('-')
+    .map(function (part) {
+      return part.trim(); // "3 - 6" is "3-6"
+    })
+    .join('-')
+    .split(/[^\d-]+/)
     .forEach(function (part) {
-      var range = /^\s*(\d+)\s*(?:-\s*(\d+)\s*)?$/.exec(part);
+      var range = /^(\d+)(?:-(\d+))?$/.exec(part);
       if (!range) return;
       var from = parseInt(range[1], 10);
       var to = range[2] ? parseInt(range[2], 10) : from;

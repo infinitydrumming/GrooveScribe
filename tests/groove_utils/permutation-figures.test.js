@@ -403,6 +403,9 @@ describe('bar lists ("Practise bars")', () => {
     expect(parseBarList('14-20, 2, 2', 16)).toEqual([2, 14, 15, 16]); // past the end: up to it
     expect(parseBarList('', 16)).toEqual([]); // all bars
     expect(parseBarList('abc, 0, 99', 16)).toEqual([]);
+    expect(parseBarList('1 2 5', 16)).toEqual([1, 2, 5]); // spaces part them too
+    expect(parseBarList('1 to 3; 7\u20138', 16)).toEqual([1, 2, 3, 7, 8]);
+    expect(parseBarList('3 - 4', 16)).toEqual([3, 4]);
   });
 
   it('writes them back tidily', () => {

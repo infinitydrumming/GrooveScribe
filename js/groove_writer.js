@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes, practising some bars of a groove. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -3627,6 +3627,7 @@ function GrooveWriter() {
 
     // update the current URL so that reloads and history traversal and link shares and bookmarks work correctly
     root.updateCurrentURL();
+    showPractiseBars();
 
     root.displayNewSVG();
 
@@ -5069,12 +5070,13 @@ function GrooveWriter() {
     if (class_groove_click_active && length > 0) {
       var start = class_groove_click_cycle_start_bar;
       var grooveBars = class_groove_click_groove_bars;
-      for (var g = 0; g < grooveBars; g++) round.push({ bar: (start + g) % length, click: false });
+      for (var g = 0; g < grooveBars; g++)
+        round.push({ bar: sequenceBar((start + g) % length), click: false });
       for (var c = 0; c < class_groove_click_click_bars; c++)
-        round.push({ bar: (start + grooveBars + c) % length, click: true });
+        round.push({ bar: sequenceBar((start + grooveBars + c) % length), click: true });
       return round;
     }
-    for (var b = 0; b < length; b++) round.push({ bar: b, click: false });
+    for (var b = 0; b < length; b++) round.push({ bar: sequenceBar(b), click: false });
     return round;
   }
 
@@ -5090,6 +5092,7 @@ function GrooveWriter() {
   function buildGrooveMidiUrl() {
     if (class_groove_click_active && grooveClickSequenceLength() > 0)
       return createGrooveClickCycleMidiUrl(class_groove_click_cycle_start_bar);
+    if (practisedBars().length) return createPractisedBarsMidiUrl();
     return createMidiUrlFromClickableUI('our_MIDI');
   }
 
@@ -5166,7 +5169,13 @@ function GrooveWriter() {
     element = document.createElement('span');
     element.id = 'practiceTimerStatus';
     element.className = 'practiceTimerStatus';
-    playTime.parentNode.insertBefore(element, playTime.nextSibling);
+    // with the time played (one over the other on a phone, leaving room for the
+    // "Practise bars" box)
+    var both = document.createElement('span');
+    both.className = 'playTimeAndTimer';
+    playTime.parentNode.insertBefore(both, playTime);
+    both.appendChild(playTime);
+    both.appendChild(element);
     return element;
   }
 
@@ -5945,16 +5954,125 @@ function GrooveWriter() {
     class_groove_click_playing_start_bar = 0;
   }
 
-  // The bars the groove / click cycles count through: the groove's bars, or with a
-  // permutation every bar it plays ("Play each" repeats included).
+  // --- Practising some bars of a groove (Infinity Drumming, 2026) -------------
+  // "Practise bars" in the play bar: only those bars play, round and round (the
+  // music still shows them all, the grid dims the others). Not with a permutation,
+  // which has its own box. In the link as PlayBars=1-2.
+  var class_practise_bars = ''; // as typed ("1-2, 5"); '' for all
+  var class_practise_bars_timer = null;
+
+  // the bars the box names (1-based, in order), of the bars there are
+  function chosenPractiseBars() {
+    if (class_permutation_type != 'none') return [];
+    return _perm.parseBarList(class_practise_bars, class_number_of_measures);
+  }
+
+  // the groove's bars that play (0-based), [] for all of them
+  function practisedBars() {
+    var chosen = chosenPractiseBars();
+    if (chosen.length >= class_number_of_measures) return [];
+    return chosen.map(function (bar) {
+      return bar - 1;
+    });
+  }
+
+  function practiseBarsText() {
+    return _perm.barListToText(chosenPractiseBars());
+  }
+
+  function setPractiseBars(text) {
+    var bars = _perm.barListToText(_perm.parseBarList(text, class_number_of_measures));
+    if (bars != class_practise_bars) {
+      class_practise_bars = bars;
+      resetGrooveClickPhase();
+      root.myGrooveUtils.midiNoteHasChanged(); // the next time round plays them
+      showPractiseBars();
+      root.updateCurrentURL(); // part of the link
+    }
+    return bars;
+  }
+
+  // the box follows what's typed once typing pauses, and is tidied up ("1-3, 6")
+  // on Enter or leaving it
+  root.practiseBarsInput = function (event) {
+    var box = event.target;
+    if (class_practise_bars_timer) clearTimeout(class_practise_bars_timer);
+    class_practise_bars_timer = setTimeout(function () {
+      class_practise_bars_timer = null;
+      setPractiseBars(box.value);
+    }, 300);
+  };
+
+  root.practiseBarsChange = function (event) {
+    if (class_practise_bars_timer) clearTimeout(class_practise_bars_timer);
+    class_practise_bars_timer = null;
+    event.target.value = setPractiseBars(event.target.value);
+  };
+
+  root.practiseBarsKey = function (event) {
+    if (event.key == 'Enter') event.target.blur();
+  };
+
+  // the box in the play bar (only for a groove of more than one bar)
+  function practiseBarsBox() {
+    var box = /** @type {HTMLInputElement | null} */ (document.getElementById('practiseBars'));
+    if (box) return box;
+    var tempo = document.getElementById(
+      'tempoAndProgress' + root.myGrooveUtils.grooveUtilsUniqueIndex
+    );
+    if (!tempo || !tempo.parentNode) return null;
+    var option = document.createElement('span');
+    option.id = 'practiseBarsOption';
+    option.innerHTML = _view.practiseBarsHTML();
+    tempo.parentNode.insertBefore(option, tempo);
+    return /** @type {HTMLInputElement | null} */ (document.getElementById('practiseBars'));
+  }
+
+  // the box and the grid as the bars to practise have them
+  function showPractiseBars() {
+    var box = practiseBarsBox();
+    var shown = class_permutation_type == 'none' && class_number_of_measures > 1;
+    if (box) {
+      /** @type {HTMLElement} */ (box.parentNode).style.display = shown ? '' : 'none';
+      if (document.activeElement !== box) box.value = practiseBarsText();
+    }
+    var bars = practisedBars();
+    for (var bar = 0; bar < class_number_of_measures; bar++) {
+      var staff = document.getElementById('staff-container' + (bar + 1));
+      if (staff) staff.classList.toggle('notPractised', bars.length > 0 && bars.indexOf(bar) < 0);
+    }
+  }
+
+  // just the bars to practise, in order
+  function createPractisedBarsMidiUrl() {
+    var midiFile = new Midi.File();
+    var midiTrack = newExactTimeTrack();
+    midiFile.addTrack(midiTrack);
+    midiTrack.setTempo(root.myGrooveUtils.getTempo());
+    midiTrack.setInstrument(0, 0x13);
+    practisedBars().forEach(function (bar) {
+      addGrooveBarToMidiTrack(midiTrack, bar, 'our_MIDI');
+    });
+    return 'data:audio/midi;base64,' + btoa(midiFile.toBytes());
+  }
+
+  // The bars the groove / click cycles count through: the groove's bars (those
+  // to practise when some are chosen), or with a permutation every bar it plays
+  // ("Play each" repeats included).
   function grooveClickSequenceLength() {
     return class_permutation_type == 'none'
-      ? class_number_of_measures
+      ? practisedBars().length || class_number_of_measures
       : get_numberOfPermutationBars();
   }
 
-  // Does bar `bar` of that sequence play straight? (Permutations: its bar of the
-  // ostinato.)
+  // Bar `index` of that sequence: a bar of the groove, or of the permutation's run
+  function sequenceBar(index) {
+    var bars = practisedBars();
+    return bars.length ? bars[index] : index;
+  }
+
+  // Does bar `bar` of the groove (of the run, with a permutation) play straight?
+  // (Permutations: its bar of the ostinato.)
   function isSequenceBarStraight(bar) {
     return !!class_straight_bars[
       class_permutation_type == 'none' ? bar : bar % get_ostinato_bars()
@@ -5984,15 +6102,16 @@ function GrooveWriter() {
       // the cycle's bars (click bars as long as the bars they stand in for)
       var cycle = [];
       for (var c = 0; c < cycleBars; c++)
-        cycle.push((class_groove_click_playing_start_bar + c) % length);
+        cycle.push(sequenceBar((class_groove_click_playing_start_bar + c) % length));
       var where = positionInBars(percent_complete, cycle);
       return groovePercentAt(cycle[where.index], where.fraction);
     }
     var position = percent_complete * cycleBars;
     var barInCycle = Math.min(Math.floor(position), cycleBars - 1);
     if (length < 1) return -1;
-    var grooveBar = (class_groove_click_playing_start_bar + barInCycle) % length;
-    return (grooveBar + (position - barInCycle)) / length;
+    var grooveBar = sequenceBar((class_groove_click_playing_start_bar + barInCycle) % length);
+    var bars = class_permutation_type == 'none' ? class_number_of_measures : length;
+    return (grooveBar + (position - barInCycle)) / bars;
   }
 
   // The playback position (a fraction of the MIDI now playing) as a position in the
@@ -6009,6 +6128,11 @@ function GrooveWriter() {
     }
     percent = snapToSwungGrid(percent);
     if (class_groove_click_active) return grooveClickCycleGroovePercent(percent);
+    var practised = practisedBars();
+    if (practised.length) {
+      var where = positionInBars(percent, practised);
+      return groovePercentAt(practised[where.index], where.fraction);
+    }
     return percent;
   }
 
@@ -6025,11 +6149,12 @@ function GrooveWriter() {
       for (var bar = 0; bar < cycleLength; bar++)
         cycleBars.push(
           isSequenceBarStraight(
-            (class_groove_click_playing_start_bar + bar) % grooveClickSequenceLength()
+            sequenceBar((class_groove_click_playing_start_bar + bar) % grooveClickSequenceLength())
           )
         );
       return cycleBars;
     }
+    if (practisedBars().length) return practisedBars().map(isSequenceBarStraight);
     if (class_permutation_type != 'none') {
       var runBars = [];
       for (var b = 0; b < get_numberOfPermutationBars(); b++)
@@ -6187,21 +6312,20 @@ function GrooveWriter() {
     var length = grooveClickSequenceLength();
     var sections = class_permutation_type == 'none' ? null : get_shown_permutation_sections();
     for (var grooveBar = 0; grooveBar < class_groove_click_groove_bars; grooveBar++) {
-      var bar = (startBar + grooveBar) % length;
+      var bar = sequenceBar((startBar + grooveBar) % length);
       if (sections) addPermutationBarToMidiTrack(midiTrack, sections, bar);
       else addGrooveBarToMidiTrack(midiTrack, bar, 'our_MIDI');
     }
-    for (var clickBar = 0; clickBar < class_groove_click_click_bars; clickBar++)
-      addClickBarToMidiTrack(
-        midiTrack,
-        isSequenceBarStraight((startBar + class_groove_click_groove_bars + clickBar) % length),
-        sections ? 0 : (startBar + class_groove_click_groove_bars + clickBar) % length
-      );
+    for (var clickBar = 0; clickBar < class_groove_click_click_bars; clickBar++) {
+      var standsFor = sequenceBar((startBar + class_groove_click_groove_bars + clickBar) % length);
+      addClickBarToMidiTrack(midiTrack, isSequenceBarStraight(standsFor), sections ? 0 : standsFor);
+    }
 
     // end with the grace notes of the next cycle's first bar (it may not be this one's)
     var ownLeadIn = root.myGrooveUtils.graceLeadIn;
-    var nextBar =
-      (startBar + class_groove_click_groove_bars + class_groove_click_click_bars) % length;
+    var nextBar = sequenceBar(
+      (startBar + class_groove_click_groove_bars + class_groove_click_click_bars) % length
+    );
     var probe = newExactTimeTrack();
     if (sections) addPermutationBarToMidiTrack(probe, sections, nextBar);
     else addGrooveBarToMidiTrack(probe, nextBar, 'our_MIDI');
@@ -6922,6 +7046,7 @@ function GrooveWriter() {
       clickSolo: !!gu.getMetronomeSolo(),
       clickStart: gu.getMetronomeOffsetClickStart() || '1',
       mutes: currentMutes(),
+      playBars: practiseBarsText(),
     };
   }
 
@@ -7006,6 +7131,9 @@ function GrooveWriter() {
       if ((gu.getMetronomeOffsetClickStart() || '1') != settings.clickStart)
         root.metronomeOptionsMenuOffsetClickPopupClick(settings.clickStart);
       setMutesFromLink(settings.mutes || {});
+      class_practise_bars = settings.playBars || '';
+      resetGrooveClickPhase();
+      showPractiseBars();
     } finally {
       class_applying_link_settings = false;
     }

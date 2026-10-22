@@ -466,6 +466,11 @@ body,
 #midiPlayer .practiceTimerStatus {
   margin: 0;
 }
+#midiPlayer .playTimeAndTimer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 #midiPlayer .tempoAndProgress {
   display: flex;
   align-items: center;
@@ -743,6 +748,15 @@ body,
   #midiPlayer .MIDIPlayTime {
     font-size: 20px;
     min-width: 0;
+  }
+  /* the timer under the time played */
+  #midiPlayer .playTimeAndTimer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  #midiPlayer .practiceTimerStatus {
+    font-size: 13px;
   }
   #creditsFooter {
     font-size: 10px;
@@ -1588,6 +1602,74 @@ body.selectingNotes #measureContainer .notes-row-container {
   text-overflow: ellipsis;
   box-shadow: 0 4px 14px rgba(5, 17, 36, 0.3);
   pointer-events: none;
+}
+
+/* a groove's "Practise bars" box in the play bar (Infinity Drumming, 2026) */
+#practiseBarsOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#practiseBarsOption label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--id-text-on-dark-2);
+}
+#practiseBars {
+  width: 76px;
+  height: 34px;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 0 6px;
+  border: 1.5px solid var(--id-text-on-dark-3);
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--id-text-on-dark);
+  background: var(--id-navy-700);
+}
+#practiseBars::placeholder {
+  font-weight: 400;
+  color: var(--id-text-on-dark-3);
+}
+#practiseBars:hover {
+  border-color: var(--id-text-on-dark);
+}
+#practiseBars:focus {
+  outline: none;
+  border-color: var(--id-amber);
+  box-shadow: 0 0 0 2px rgba(254, 159, 19, 0.35);
+}
+/* the bars that don't play while some are practised */
+#measureContainer .staff-container.notPractised {
+  opacity: 0.4;
+}
+@media (max-width: 560px) {
+  /* "Bars" over its box */
+  #practiseBarsOption {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 3px;
+  }
+  #practiseBarsOption label {
+    font-size: 11px;
+    text-align: center;
+  }
+  #practiseBars {
+    width: 56px;
+    height: 30px;
+    font-size: 16px; /* (smaller, and iPhones zoom in on it) */
+  }
+}
+@media (max-width: 380px) {
+  /* a small phone: room for the timer, the box and the tempo */
+  #midiPlayer .playerControlsRow {
+    gap: 6px;
+  }
 }
 
 /* the permutation's "Practise bars" box (Infinity Drumming, 2026) */

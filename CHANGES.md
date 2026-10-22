@@ -11,6 +11,24 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-22 — Practising some bars of a groove
+
+- A **Practise bars** box in the play bar (**Bars** on a phone) for a groove of
+  2 or more bars: type a bar, a run or a list (`1-2`, `3`, `2, 5`) and only
+  those bars play, round and round, so a student can learn a section bar by
+  bar (`1-2`, then `1-3`...). The music still shows the whole groove; the grid
+  greys out the bars that don't play, and its highlight and the music's cursor
+  follow the bars that do. The practice timer, speed-up and groove / click bars
+  count just those bars. In the link as `PlayBars=1-2` with the other practice
+  settings (`js/practiceSettings.js`, `js/groove_writer.js`, `js/viewHtml.js`,
+  `css/infinity_layout.css`, `gscribe_help.html`).
+- The bars to practise (here and in the alphabet's box) can be parted with
+  spaces as well as commas, and `3 to 6` or `3–6` is a range; both boxes use
+  the usual keyboard, as an iPhone's number pad has no dash (`js/permutations.js`,
+  `js/viewHtml.js`).
+- On a phone the practice timer's status sits under the time played, leaving
+  room for the box (`js/groove_writer.js`, `css/infinity_layout.css`).
+
 ## 2026-10-22 — Copying some notes
 
 - Hold Shift (or ⌘ on a Mac) and drag a box over the grid to select notes: any

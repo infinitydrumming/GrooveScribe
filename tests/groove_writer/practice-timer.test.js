@@ -209,4 +209,62 @@ describe('practice timer and speed-up in bars', () => {
     expect(barsText.style.display).toBe('');
     expect(document.getElementById('metronomeAutoSpeedupMinutesText').style.display).toBe('none');
   });
+
+  // --- practising some bars of a groove ("Practise bars" in the play bar) ---
+  // bar n has its kick on its nth 16th
+  const KICK = 35;
+  const KICK_PER_BAR = FOUR_BARS.replace(
+    /&K=.*$/,
+    '&K=|' + [0, 1, 2, 3].map((n) => '-'.repeat(n) + 'o' + '-'.repeat(15 - n)).join('|') + '|'
+  );
+  // (a file's first bar starts a tick in)
+  const kicks = (notes) => notes.filter((n) => n.key == KICK).map((n) => n.tick);
+  const box = () => document.getElementById('practiseBars');
+
+  it('plays just the bars a link says, round and round', () => {
+    gw.loadNewGroove(KICK_PER_BAR + '&PlayBars=2,4');
+    expect(kicks(playRounds(0))).toEqual([1 + 32, 512 + 96]); // bar 2, then bar 4
+    expect(kicks(playRounds(1))).toEqual([1 + 32, 512 + 96]);
+    expect(box().value).toBe('2, 4');
+    expect(document.querySelector('#staff-container1').classList.contains('notPractised')).toBe(
+      true
+    );
+    expect(document.querySelector('#staff-container2').classList.contains('notPractised')).toBe(
+      false
+    );
+    expect(link()).toContain('&PlayBars=2,4');
+  });
+
+  it('takes the bars typed in the box, tidied, into the link', () => {
+    gw.loadNewGroove(KICK_PER_BAR);
+    expect(box().value).toBe('');
+    expect(kicks(playRounds(0))).toEqual([1, 512 + 32, 1024 + 64, 1536 + 96]); // all 4
+    box().value = '3 - 4';
+    gw.practiseBarsChange({ target: box() }); // (what leaving the box does)
+    expect(box().value).toBe('3-4');
+    expect(window.location.search).toContain('PlayBars=3-4');
+    expect(kicks(playRounds(1))).toEqual([1 + 64, 512 + 96]);
+    box().value = '';
+    gw.practiseBarsChange({ target: box() });
+    expect(window.location.search).not.toContain('PlayBars');
+    expect(document.querySelectorAll('.notPractised')).toHaveLength(0);
+  });
+
+  it('counts the practised bars for the practice timer', () => {
+    gw.loadNewGroove(KICK_PER_BAR + '&PlayBars=1-2&Practice=3b');
+    expect(barsIn(playRounds(0))).toBe(2);
+    const last = playRounds(1);
+    expect(kicks(last)).toEqual([1, 512]); // bar 1 once more, then the crash and a kick
+    expect(last.find((n) => n.key == CRASH).tick).toBe(512);
+  });
+
+  it('leaves the box out for one bar, and a permutation keeps to its own', () => {
+    gw.loadNewGroove(KICK_PER_BAR.replace('Measures=4', 'Measures=1') + '&PlayBars=1');
+    expect(box().parentNode.style.display).toBe('none');
+    gw.loadNewGroove(KICK_PER_BAR + '&PlayBars=2');
+    expect(box().parentNode.style.display).toBe('');
+    gw.permutationPopupClick('kick_16ths');
+    expect(box().parentNode.style.display).toBe('none');
+    expect(link()).not.toContain('PlayBars');
+  });
 });

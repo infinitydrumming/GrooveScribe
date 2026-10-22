@@ -262,3 +262,41 @@ test.describe('a block of notes', () => {
     await expect.poll(() => inLink(page, 'H')).toBe('|x-x-x-x-x-x-x-x-|----------------|');
   });
 });
+
+// Infinity Drumming, 2026: "Practise bars" in the play bar plays just the bars typed
+test.describe('practising some bars', () => {
+  const bars = ['x-x-x-x-x-x-x-x-', 'xxxxxxxxxxxxxxxx', 'x---x---x---x---', 'X-X-X-X-X-X-X-X-'];
+  const kicks = ['o---------------', '-o--------------', '--o-------------', '---o------------'];
+  const groove = (which) =>
+    '?TimeSig=4/4&Div=16&Tempo=80&Measures=' +
+    which.length +
+    '&H=|' +
+    which.map((b) => bars[b]).join('|') +
+    '|&S=|' +
+    which.map(() => '----O-------O---').join('|') +
+    '|&K=|' +
+    which.map((b) => kicks[b]).join('|') +
+    '|';
+  // the MIDI that pressing play loads
+  const playing = (page) =>
+    page.evaluate(() => {
+      const gu = window.myGrooveWriter.myGrooveUtils;
+      let midi = null;
+      gu.loadMIDIFromURL = (url) => (midi = url);
+      gu.midiEventCallbacks.loadMidiDataEvent(gu, true);
+      return midi;
+    });
+
+  test('typing bars plays just those, as a groove of only them would', async ({ page }) => {
+    await loadGroove(page, grooveUrl(groove([1, 2])));
+    const own = await playing(page);
+
+    await loadGroove(page, grooveUrl(groove([0, 1, 2, 3])));
+    await page.fill('#practiseBars', '2 - 3');
+    await page.press('#practiseBars', 'Enter');
+    await expect(page.locator('#practiseBars')).toHaveValue('2-3');
+    await expect.poll(() => page.evaluate(() => location.search)).toContain('PlayBars=2-3');
+    await expect(page.locator('.staff-container.notPractised')).toHaveCount(2);
+    expect(await playing(page)).toBe(own);
+  });
+});
