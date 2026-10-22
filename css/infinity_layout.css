@@ -677,6 +677,9 @@ body,
   #advancedEditAnchor {
     order: 7;
   }
+  #selectNotesAnchor {
+    order: 8;
+  }
   #midiPlayer .tempoAndProgress {
     flex-direction: column;
     align-items: stretch;
@@ -1485,6 +1488,69 @@ body,
 #beatContextMenu li.disabled {
   color: var(--id-border);
   pointer-events: none;
+}
+
+/* a block of notes to copy (Infinity Drumming, 2026): Shift (or ⌘) + drag, or Select */
+#measureContainer .noteSelected {
+  border-radius: 4px;
+  background-color: rgba(11, 118, 219, 0.16);
+  box-shadow: inset 0 0 0 2px rgba(11, 118, 219, 0.7);
+}
+#noteSelectBox {
+  position: fixed;
+  z-index: 1500;
+  box-sizing: border-box;
+  border: 1.5px dashed var(--id-blue);
+  background: rgba(11, 118, 219, 0.08);
+  pointer-events: none;
+}
+#noteSelectBar {
+  position: fixed;
+  top: calc(var(--layout-header-h) + var(--layout-toolbar-h) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw - 16px);
+  box-sizing: border-box;
+  padding: 6px 6px 6px 14px;
+  border-radius: 12px;
+  background: var(--id-navy-900);
+  color: var(--id-text-on-dark);
+  font-family: Lato, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(5, 17, 36, 0.3);
+}
+#noteSelectText {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+#noteSelectBar button {
+  flex: none;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  color: var(--id-navy-900);
+  background: var(--id-text-on-dark);
+  cursor: pointer;
+}
+#noteSelectBar button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+#noteSelectBar #noteSelectDone {
+  color: var(--id-text-on-dark);
+  background: var(--id-navy-600);
+}
+/* while Select is on, a finger on the notes selects instead of scrolling */
+body.selectingNotes #measureContainer .notes-row-container {
+  touch-action: none;
 }
 
 /* the rep counter's switch, by "Play each" (Infinity Drumming, 2026) */

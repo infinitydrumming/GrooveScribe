@@ -11,6 +11,21 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-22 — Copying some notes
+
+- Hold Shift (or ⌘ on a Mac) and drag a box over the grid to select notes: any
+  lines, any notes, in one bar or across bars. Ctrl / ⌘ + C (or the Copy button
+  of the bar that appears) copies them; a Shift-click picks the note where the
+  copy starts and Ctrl / ⌘ + V (or Paste) puts it there, in its own lines,
+  replacing what's there (rests included, with accents, flams and diddles) and
+  keeping its shape across bars; other lines stay. One undo takes it back. On
+  touch screens a **Select** button (next to Articulations) makes a finger do
+  the same: drag, Copy, tap where, Paste, Done. Shift because Ctrl + moving over
+  notes already turns them on (an original shortcut, kept). The copying and
+  pasting are in the new `js/noteBlocks.js` (the kick line holds the kick and the
+  hi-hat foot rows, kept apart); `js/groove_writer.js`, `js/main.js`,
+  `index.html`, `css/infinity_layout.css`, `gscribe_help.html`.
+
 ## 2026-10-22 — The Alphabet
 
 - Infinity Drumming's students know the permutations as the Alphabet, so that's

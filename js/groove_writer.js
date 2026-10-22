@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -111,6 +111,7 @@ import {
   speedUpStepsDue,
 } from './practiceTimer.js';
 import * as _perm from './permutations.js';
+import * as _blocks from './noteBlocks.js';
 import * as _view from './viewHtml.js';
 import * as _grid from './gridState.js';
 import {
@@ -4199,6 +4200,322 @@ function GrooveWriter() {
     updateSheetMusic();
   }
 
+  // --- A block of notes (Infinity Drumming, 2026) ------------------------------
+  // Hold Shift (or ⌘ on a Mac) and drag a box over the grid to select notes: any
+  // lines, any notes, across bars too (Ctrl + moving over notes already turns
+  // them on). On a touch screen the Select button does the same for a finger.
+  // Ctrl / ⌘ + C (or Copy) copies them; a Shift-click (a tap in Select) picks the
+  // slot the block starts at, and Ctrl / ⌘ + V (or Paste) puts it there,
+  // replacing what's in its rows (noteBlocks.js).
+  var NOTE_ROW_CELLS = {
+    sticking: 'sticking',
+    crash: 'crash',
+    ride: 'ride',
+    hh: 'hi-hat',
+    tom1: 'tom1-',
+    tom2: 'tom2-',
+    snare: 'snare',
+    tom4: 'tom4-',
+    kick: 'kick',
+    hhfoot: 'hhfoot',
+  };
+  var class_note_selection = []; // the selected cells: {row, index}
+  var class_note_block = null; // the copied block, and the note setting it's in
+  var class_select_mode = false; // the Select button
+  var class_selecting = null; // a box being dragged
+  var class_swallow_note_click = false; // (the click that ends a drag)
+
+  function noteCell(row, index) {
+    return document.getElementById(NOTE_ROW_CELLS[row] + index);
+  }
+
+  // every cell showing in the grid, where it is on the screen
+  function shownNoteCells() {
+    var cells = [];
+    var total = class_notes_per_measure * class_number_of_measures;
+    for (var row in NOTE_ROW_CELLS)
+      for (var index = 0; index < total; index++) {
+        var cell = noteCell(row, index);
+        if (!cell || !cell.offsetParent) continue; // (a hidden line or slot)
+        var rect = cell.getBoundingClientRect();
+        if (rect.width > 0) cells.push({ row: row, index: index, rect: rect });
+      }
+    return cells;
+  }
+
+  function showNoteSelection() {
+    var marked = document.querySelectorAll('#measureContainer .noteSelected');
+    for (var m = 0; m < marked.length; m++) marked[m].classList.remove('noteSelected');
+    class_note_selection.forEach(function (cell) {
+      var element = noteCell(cell.row, cell.index);
+      if (element) element.classList.add('noteSelected');
+    });
+    showNoteSelectBar();
+  }
+
+  function selectionSummary() {
+    var cells = class_note_selection;
+    if (!cells.length) return '';
+    var rows = {};
+    var first = Infinity;
+    var last = -1;
+    cells.forEach(function (cell) {
+      rows[cell.row] = true;
+      first = Math.min(first, cell.index);
+      last = Math.max(last, cell.index);
+    });
+    var lines = Object.keys(rows).length;
+    var notes = last - first + 1;
+    if (cells.length == 1) return '1 note';
+    return (
+      (lines == 1 ? '1 line' : lines + ' lines') + ' × ' + notes + (notes == 1 ? ' note' : ' notes')
+    );
+  }
+
+  // Copy / Paste / Done, while there's a selection or Select is on
+  function showNoteSelectBar(message) {
+    var bar = document.getElementById('noteSelectBar');
+    var on = class_select_mode || class_note_selection.length > 0;
+    if (!bar) {
+      if (!on) return;
+      bar = document.createElement('div');
+      bar.id = 'noteSelectBar';
+      bar.innerHTML =
+        '<span id="noteSelectText"></span>' +
+        '<button type="button" id="noteSelectCopy" onclick="myGrooveWriter.copyNoteSelection()">' +
+        '<i class="fa fa-copy"></i> Copy</button>' +
+        '<button type="button" id="noteSelectPaste" onclick="myGrooveWriter.pasteNoteBlock()">' +
+        '<i class="fa fa-paste"></i> Paste</button>' +
+        '<button type="button" id="noteSelectDone" onclick="myGrooveWriter.endNoteSelection()">' +
+        'Done</button>';
+      document.body.appendChild(bar);
+    }
+    bar.style.display = on ? '' : 'none';
+    var pick = class_select_mode ? 'tap' : 'Shift-click';
+    var drag = class_select_mode ? 'Drag' : 'Shift + drag';
+    var text = message || selectionSummary();
+    if (!text)
+      text = class_note_block ? 'Copied: ' + pick + ' where it goes' : drag + ' over the notes';
+    document.getElementById('noteSelectText').textContent = text;
+    /** @type {HTMLButtonElement} */ (document.getElementById('noteSelectCopy')).disabled =
+      !class_note_selection.length;
+    /** @type {HTMLButtonElement} */ (document.getElementById('noteSelectPaste')).disabled =
+      !class_note_block || !class_note_selection.length;
+  }
+
+  function noteSelectPointerDown(event) {
+    if (!(event.shiftKey || event.metaKey) && !class_select_mode) return;
+    if (event.pointerType == 'mouse' && event.button !== 0) return;
+    var target = /** @type {HTMLElement} */ (event.target);
+    if (!target.closest || !target.closest('.notes-row-container')) return;
+    if (target.closest('.line-labels')) return;
+    event.preventDefault();
+    class_selecting = {
+      x: event.clientX,
+      y: event.clientY,
+      id: event.pointerId,
+      cells: shownNoteCells(),
+      moved: false,
+    };
+    class_swallow_note_click = true;
+  }
+
+  function noteSelectBox(drag, event) {
+    return {
+      left: Math.min(drag.x, event.clientX),
+      right: Math.max(drag.x, event.clientX),
+      top: Math.min(drag.y, event.clientY),
+      bottom: Math.max(drag.y, event.clientY),
+    };
+  }
+
+  function noteSelectPointerMove(event) {
+    var drag = class_selecting;
+    if (!drag || event.pointerId != drag.id) return;
+    if (!drag.moved && Math.abs(event.clientX - drag.x) + Math.abs(event.clientY - drag.y) < 6)
+      return;
+    drag.moved = true;
+    event.preventDefault();
+    var box = noteSelectBox(drag, event);
+    var outline = document.getElementById('noteSelectBox');
+    if (!outline) {
+      outline = document.createElement('div');
+      outline.id = 'noteSelectBox';
+      document.body.appendChild(outline);
+    }
+    outline.style.display = '';
+    outline.style.left = box.left + 'px';
+    outline.style.top = box.top + 'px';
+    outline.style.width = box.right - box.left + 'px';
+    outline.style.height = box.bottom - box.top + 'px';
+    // the cells whose middles are in the box
+    class_note_selection = drag.cells
+      .filter(function (cell) {
+        var x = (cell.rect.left + cell.rect.right) / 2;
+        var y = (cell.rect.top + cell.rect.bottom) / 2;
+        return x >= box.left && x <= box.right && y >= box.top && y <= box.bottom;
+      })
+      .map(function (cell) {
+        return { row: cell.row, index: cell.index };
+      });
+    showNoteSelection();
+  }
+
+  function noteSelectPointerUp(event) {
+    var drag = class_selecting;
+    if (!drag || event.pointerId != drag.id) return;
+    class_selecting = null;
+    var outline = document.getElementById('noteSelectBox');
+    if (outline) outline.style.display = 'none';
+    if (!drag.moved) {
+      // a click or a tap: that one note (where a paste goes)
+      var hit = drag.cells.filter(function (cell) {
+        var r = cell.rect;
+        return (
+          event.clientX >= r.left &&
+          event.clientX <= r.right &&
+          event.clientY >= r.top &&
+          event.clientY <= r.bottom
+        );
+      })[0];
+      class_note_selection = hit ? [{ row: hit.row, index: hit.index }] : [];
+      showNoteSelection();
+    }
+    // the click that follows doesn't play the note (noteSelectClick)
+    window.setTimeout(function () {
+      class_swallow_note_click = false;
+    }, 400);
+  }
+
+  function noteSelectClick(event) {
+    if (!class_swallow_note_click && !class_select_mode) return;
+    var target = /** @type {HTMLElement} */ (event.target);
+    if (!target.closest || !target.closest('.notes-row-container')) return;
+    if (target.closest('.line-labels')) return;
+    event.stopPropagation(); // (the notes' own onclick)
+    event.preventDefault();
+    class_swallow_note_click = false;
+  }
+
+  function noteSelectKeys(event) {
+    var target = /** @type {HTMLElement} */ (event.target);
+    if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+    if (event.key == 'Escape') {
+      if (class_note_selection.length || class_select_mode) root.endNoteSelection();
+      return;
+    }
+    if (!(event.ctrlKey || event.metaKey)) return;
+    var key = String(event.key).toLowerCase();
+    if (key == 'c' && class_note_selection.length) {
+      if (window.getSelection && String(window.getSelection())) return; // copying text
+      event.preventDefault();
+      root.copyNoteSelection();
+    } else if (key == 'v' && class_note_block && class_note_selection.length) {
+      event.preventDefault();
+      root.pasteNoteBlock();
+    }
+  }
+
+  function setupNoteSelection() {
+    var grid = document.getElementById('measureContainer');
+    if (!grid) return;
+    grid.addEventListener('pointerdown', noteSelectPointerDown);
+    window.addEventListener('pointermove', noteSelectPointerMove, { passive: false });
+    window.addEventListener('pointerup', noteSelectPointerUp);
+    window.addEventListener('pointercancel', noteSelectPointerUp);
+    grid.addEventListener('click', noteSelectClick, true); // before the notes' own
+    document.addEventListener('keydown', noteSelectKeys);
+  }
+
+  root.copyNoteSelection = function () {
+    if (!class_note_selection.length) return;
+    var block = _blocks.copyBlock(getTabLinesFromClickableUI(), class_note_selection);
+    class_note_block = { block: block, division: class_time_division };
+    showNoteSelectBar(
+      'Copied ' +
+        selectionSummary() +
+        ': ' +
+        (class_select_mode ? 'tap' : 'Shift-click') +
+        ' where it goes'
+    );
+  };
+
+  // the copied block, from the first selected note's slot (rows of its own)
+  root.pasteNoteBlock = function () {
+    var copied = class_note_block;
+    if (!copied || !class_note_selection.length) return;
+    if (copied.division != class_time_division) {
+      window.alert(
+        'Those notes were copied with another note setting: change Notes back to paste them.'
+      );
+      return;
+    }
+    var at = Math.min.apply(
+      null,
+      class_note_selection.map(function (cell) {
+        return cell.index;
+      })
+    );
+    var written = [];
+    keepingMutes(
+      function (bar) {
+        return [bar];
+      },
+      function () {
+        var lines = getTabLinesFromClickableUI();
+        written = _blocks.pasteBlock(lines, copied.block, at, function (slot) {
+          return !isHiddenSlot(slot) && !isBeatHiddenSlot(slot);
+        });
+        if (!written.length) return false;
+        changeDivisionWithNotes(
+          class_time_division,
+          lines.Stickings,
+          lines.HH,
+          lines.Tom1,
+          lines.Tom2,
+          lines.Tom4,
+          lines.Snare,
+          lines.Kick,
+          lines.Crash,
+          lines.Ride,
+          ornamentLinesFromTabLines(lines)
+        );
+        // pasted toms, cymbals and stickings show
+        if (pastedInto(written, ['tom1', 'tom2', 'tom4'])) root.showHideToms(true, true, true);
+        if (pastedInto(written, ['crash', 'ride'])) root.showHideCymbals(true, true, true);
+        if (pastedInto(written, ['sticking'])) root.stickingsShowHide(true, true, true);
+        updateSheetMusic();
+      }
+    );
+    if (written.length) class_note_selection = written; // (what was pasted)
+    showNoteSelection();
+  };
+
+  function pastedInto(written, rows) {
+    return written.some(function (cell) {
+      return rows.indexOf(cell.row) >= 0;
+    });
+  }
+
+  root.endNoteSelection = function () {
+    class_note_selection = [];
+    if (class_select_mode) root.toggleSelectNotes();
+    showNoteSelection();
+  };
+
+  // the Select button (touch screens): a finger selects instead of playing notes
+  root.toggleSelectNotes = function () {
+    class_select_mode = !class_select_mode;
+    var button = document.getElementById('selectNotesAnchor');
+    if (button) {
+      if (class_select_mode) selectButton(button);
+      else unselectButton(button);
+    }
+    document.body.classList.toggle('selectingNotes', class_select_mode);
+    if (!class_select_mode) class_note_selection = [];
+    showNoteSelection();
+  };
+
   function showHideCSS_ClassDisplay(className, force, showElseHide, showState) {
     var myElements = document.querySelectorAll(className);
     var newStateIsOn = true;
@@ -4473,6 +4790,7 @@ function GrooveWriter() {
   root.runsOnPageLoad = function () {
     setAutoScroll(storedAutoScroll());
     root.setupWriterHotKeys(); // there are other hot keys in GrooveUtils for the midi player
+    setupNoteSelection(); // Shift + drag over the notes (Infinity Drumming, 2026)
 
     setupPermutationMenu();
     root.setTimeSigLabel();
@@ -6899,6 +7217,7 @@ function GrooveWriter() {
 
     // rewrite the HTML for the HTML note grid
     document.getElementById('measureContainer').innerHTML = newHTML;
+    if (class_note_selection.length) showNoteSelection(); // (marked again)
 
     // change the Permutation options too (keeping their ticks when the figures
     // are the same: a bar added to the ostinato, say)

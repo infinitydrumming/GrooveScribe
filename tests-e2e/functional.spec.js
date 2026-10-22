@@ -215,3 +215,50 @@ test.describe('copies of bars', () => {
     expect(await inLink(other, 'H')).toBe('|x-x-x-x-|');
   });
 });
+
+// Infinity Drumming, 2026: some notes of some lines, chosen with a box
+test.describe('a block of notes', () => {
+  const TWO_BARS =
+    '?TimeSig=4/4&Div=16&Tempo=80&Measures=2&H=|x-x-x-x-x-x-x-x-|----------------|' +
+    '&S=|----O-------O---|----------------|&K=|o-------o-------|----------------|';
+  const inLink = (page, name) =>
+    page.evaluate((param) => new URLSearchParams(window.location.search).get(param), name);
+  const middle = async (page, id, scroll = true) => {
+    if (scroll)
+      await page.locator('#' + id).evaluate((cell) => cell.scrollIntoView({ block: 'center' }));
+    const box = await page.locator('#' + id).boundingBox();
+    return [box.x + box.width / 2, box.y + box.height / 2];
+  };
+
+  test('Shift + drag selects without playing notes; Ctrl + C, Shift-click, Ctrl + V pastes it there', async ({
+    page,
+  }) => {
+    await loadGroove(page, grooveUrl(TWO_BARS));
+    const [x0, y0] = await middle(page, 'hi-hat0');
+    const [x1, y1] = await middle(page, 'snare7', false); // (in view with the first)
+    await page.keyboard.down('Shift');
+    await page.mouse.move(x0 - 4, y0 - 4);
+    await page.mouse.down();
+    await page.mouse.move(x1 + 4, y1 + 4, { steps: 6 });
+    await page.mouse.up();
+    await page.keyboard.up('Shift');
+    await expect(page.locator('#noteSelectText')).toHaveText('2 lines × 8 notes');
+    expect(await inLink(page, 'H')).toBe('|x-x-x-x-x-x-x-x-|----------------|'); // nothing played
+
+    await page.keyboard.press('Control+c');
+    const [kx, ky] = await middle(page, 'kick24'); // bar 2, beat 3
+    await page.keyboard.down('Shift');
+    await page.mouse.click(kx, ky);
+    await page.keyboard.up('Shift');
+    expect(await inLink(page, 'K')).toBe('|o-------o-------|----------------|'); // still no note
+    await page.keyboard.press('Control+v');
+
+    await expect.poll(() => inLink(page, 'H')).toBe('|x-x-x-x-x-x-x-x-|--------x-x-x-x-|');
+    expect(await inLink(page, 'S')).toBe('|----O-------O---|------------O---|');
+    expect(await inLink(page, 'K')).toBe('|o-------o-------|----------------|');
+    await expect(page.locator('.noteSelected')).toHaveCount(16); // what was pasted
+
+    await page.click('#undoButton', { force: true });
+    await expect.poll(() => inLink(page, 'H')).toBe('|x-x-x-x-x-x-x-x-|----------------|');
+  });
+});

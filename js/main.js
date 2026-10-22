@@ -64,6 +64,14 @@ if (utils.is_touch_device()) {
       'onclick="event.preventDefault(); myGrooveWriter.toggleAdvancedEdit()">' +
       '<span class="left-button-content"><span>Articulations</span></span></span>'
   );
+  // (Infinity Drumming, 2026) a finger selects notes to copy, as Shift + drag does
+  replaceSlot(
+    'selectNotesSlot',
+    '<span class="left-button edit-block" id="selectNotesAnchor" ' +
+      'title="While on, drag over notes to copy them, or tap where to paste them" ' +
+      'onclick="event.preventDefault(); myGrooveWriter.toggleSelectNotes()">' +
+      '<span class="left-button-content"><span>Select</span></span></span>'
+  );
 }
 
 // A phone held upright: the toolbar's rows can wrap onto another (a narrow
