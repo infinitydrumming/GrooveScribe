@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1138 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **120 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1142 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **121 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -83,6 +83,8 @@ Pure / low-coupling core (extracted from the two big files, imported back):
   stickings voice (its tuplets drawn without numbers).
 - `tempoSwitch.js` — the sums for a tempo change while playing: the next bar line whose last note
   before it is still to come, in the playing MIDI and in the round built again at the new tempo.
+- `noteBlocks.js` — a block of notes (any rows, any slots) copied from / pasted into the groove's tab
+  lines, keeping its shape; the kick line holds two grid rows (kick, hi-hat foot), kept apart.
 - `audioSession.js` — while a groove plays, `navigator.audioSession.type = 'playback'` so iPhones
   play it through the silent switch; `'auto'` again on pause/stop.
 - `gridState.js` — the DOM grid **read** layer: per-cell state (`is_*_on`/`get_*_state`)
@@ -153,6 +155,10 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   then its `replayer` / `data` / `currentTime` set and `resume()`, from a `setTimeout(0)` after that
   note's callback (inside it, `stop()` would cut the note still in MIDI.js's queue). The golden master
   doesn't cover it (no tempo changes); check it in a real browser by recording `MIDI.noteOn` times.
+- **Selecting notes** is Shift (or ⌘) + drag on `#measureContainer` (pointer events; Ctrl + hover
+  is the original "paint notes on" shortcut, Alt + hover erases), or the Select button on touch
+  screens (`touch-action: none` on the rows while on). A capture-phase click handler on the grid
+  swallows the click that ends a drag, so no note toggles. Pastes go through `keepingMutes`.
 - **Bar copies** go to localStorage and the device clipboard (`Infinity Scribe bar {json}`, with an
   `at` time; paste takes the newer): each origin, home-screen app and private tab has its own
   storage. Anything that lays the grid out again (add / remove / paste / "Add a copy") goes through

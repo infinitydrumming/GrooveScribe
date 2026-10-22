@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: play each up to ×16 and the rep counter switch, fat back kick permutations, a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: the permutations called the Alphabet, play each up to ×16 and the rep counter switch, fat back kick permutations, a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -871,7 +871,8 @@ export function buildPermutationOptionsHTML(
       break;
   }
 
-  var newHTML = '<span id="PermutationOptionsHeader">Permutation Options</span>\n';
+  // (Infinity Drumming, 2026: its students know the permutations as the Alphabet)
+  var newHTML = '<span id="PermutationOptionsHeader">Alphabet Options</span>\n';
 
   newHTML += playEachHTML(repeats, repCounter);
 
