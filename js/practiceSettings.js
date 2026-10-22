@@ -8,6 +8,7 @@
 //   Perm=kick_16ths&PermSet=0011..&PlayEach=2   permutation, its ticked boxes
 //                                               (in the options' order), × each
 //   PermBars=3-6,9                              just these bars of the run
+//   PlayBars=1-2                                just these bars of a groove
 //   Ostinato=2                                  the figures go over the first
 //                                               2 bars (1 if not given)
 //   FatBack=1                                   kick figures without the kicks
@@ -43,7 +44,8 @@ var PERMUTATION_TYPES = [
  *   unit 'm' (minutes) or 'b' (bars); target 0 = no "Stop at"
  * @typedef {{permutation: (PermutationSetting|null), speedUp: (SpeedUpSetting|null),
  *   countIn: boolean, clickSolo: boolean, clickStart: string,
- *   mutes: Object<string, number[]>}} PracticeSettings
+ *   mutes: Object<string, number[]>, playBars?: string}} PracticeSettings
+ *   playBars: the bars of a groove to practise ("1-3, 6"), '' for all
  */
 
 /** @returns {PracticeSettings} every setting off */
@@ -55,6 +57,7 @@ export function emptyPracticeSettings() {
     clickSolo: false,
     clickStart: '1',
     mutes: {},
+    playBars: '',
   };
 }
 
@@ -126,6 +129,18 @@ function mutesFromText(text) {
   return mutes;
 }
 
+// "3-6, 9" as a link has it ("3-6,9"), and back
+function barsToUrl(bars) {
+  return String(bars).replace(/\s+/g, '');
+}
+function barsFromUrl(text) {
+  return String(text || '')
+    .replace(/[^0-9,-]/g, '')
+    .split(',')
+    .filter(Boolean)
+    .join(', ');
+}
+
 /**
  * The permutation as link parameters ('&Perm=...&PermSet=...'), '' for none.
  * @param {PermutationSetting|null} perm
@@ -135,7 +150,7 @@ function permutationToUrl(perm) {
   var url = '&Perm=' + perm.type;
   if (perm.boxes) url += '&PermSet=' + perm.boxes;
   if (perm.playEach > 1) url += '&PlayEach=' + perm.playEach;
-  if (perm.bars) url += '&PermBars=' + String(perm.bars).replace(/\s+/g, '');
+  if (perm.bars) url += '&PermBars=' + barsToUrl(perm.bars);
   if (perm.fatBack) url += '&FatBack=1';
   if (perm.ostinato > 1) url += '&Ostinato=' + perm.ostinato;
   return url;
@@ -148,6 +163,7 @@ function permutationToUrl(perm) {
 export function practiceSettingsToUrl(settings) {
   if (!settings) return '';
   var url = permutationToUrl(settings.permutation);
+  if (settings.playBars) url += '&PlayBars=' + barsToUrl(settings.playBars);
   if (settings.speedUp) url += '&SpeedUp=' + speedUpToText(settings.speedUp);
   if (settings.countIn) url += '&CountIn=1';
   if (settings.clickSolo) url += '&ClickSolo=1';
@@ -171,11 +187,7 @@ export function practiceSettingsFromUrl(get) {
       type: type,
       boxes: String(get('PermSet', '')).replace(/[^01]/g, ''),
       playEach: whole(get('PlayEach', '1'), 1, 16, 1),
-      bars: String(get('PermBars', ''))
-        .replace(/[^0-9,-]/g, '')
-        .split(',')
-        .filter(Boolean)
-        .join(', '),
+      bars: barsFromUrl(get('PermBars', '')),
       fatBack: get('FatBack', '0') == '1',
       ostinato: whole(get('Ostinato', '1'), 1, 99, 1),
     };
@@ -185,5 +197,6 @@ export function practiceSettingsFromUrl(get) {
   var start = String(get('ClickStart', '1')).toUpperCase();
   settings.clickStart = CLICK_STARTS.indexOf(start) >= 0 ? start : '1';
   settings.mutes = mutesFromText(get('Mute', ''));
+  settings.playBars = barsFromUrl(get('PlayBars', ''));
   return settings;
 }

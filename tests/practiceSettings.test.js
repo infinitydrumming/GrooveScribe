@@ -39,6 +39,7 @@ describe('practice settings in a link', () => {
       clickSolo: true,
       clickStart: 'AND',
       mutes: { hh: [1, 2], kick: [3] },
+      playBars: '',
     };
     const url = practiceSettingsToUrl(settings);
     expect(url).toBe(
@@ -47,6 +48,13 @@ describe('practice settings in a link', () => {
         '&CountIn=1&ClickSolo=1&ClickStart=AND&Mute=hh:1:2,kick:3'
     );
     expect(fromQuery(url)).toEqual(settings);
+  });
+
+  it("keeps a groove's bars to practise", () => {
+    const settings = { ...emptyPracticeSettings(), playBars: '1-3, 6' };
+    expect(practiceSettingsToUrl(settings)).toBe('&PlayBars=1-3,6');
+    expect(fromQuery('&PlayBars=1-3,6')).toEqual(settings);
+    expect(fromQuery('&PlayBars=1-2;x,4').playBars).toBe('1-2, 4'); // only digits, commas, dashes
   });
 
   // links from before multi-bar ostinatos (October 2026) played bar 1 only
