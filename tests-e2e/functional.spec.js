@@ -361,8 +361,8 @@ test.describe('32nds on one beat', () => {
 
 // Infinity Drumming, 2026: sections (A ×2, then B) on the groove page
 test.describe('sections', () => {
-  const bars = { A: 'RLRRLRLLRLRRLRLL', B: 'RRLLRRLLRRLLRRLL' };
-  const snare = { A: 'O-------O-------', B: 'oooooooooooooooo' };
+  const bars = { A: 'RLRRLRLLRLRRLRLL', B: 'RRLLRRLLRRLLRRLL', C: 'RLRLRLRLRLRLRLRL' };
+  const snare = { A: 'O-------O-------', B: 'oooooooooooooooo', C: '----O-------O---' };
   const groove = (which, extra = '') =>
     '?TimeSig=4/4&Div=16&Tempo=80&Measures=' +
     which.length +
@@ -391,6 +391,24 @@ test.describe('sections', () => {
     const abc = await page.locator('#ABCsource').inputValue();
     expect(abc).toContain('[P:A ×2]|:');
     expect(abc).toContain('[P:B]');
+  });
+
+  test('a form typed in plays them in its order, as the bars written out would', async ({
+    page,
+  }) => {
+    await loadGroove(page, grooveUrl(groove(['A', 'B', 'A', 'C', 'A', 'B', 'A', 'C'])));
+    const writtenOut = await playing(page);
+
+    await loadGroove(page, grooveUrl(groove(['A', 'B', 'C'], '&Sections=A1,B2,C3')));
+    await expect(page.locator('#sectionFormBox')).toBeVisible();
+    await page.fill('#sectionForm', 'abac abac');
+    await page.press('#sectionForm', 'Enter');
+    await expect
+      .poll(() => page.evaluate(() => new URLSearchParams(location.search).get('Form')))
+      .toBe('ABAC-ABAC');
+    expect(await page.locator('#sectionForm').inputValue()).toBe('ABAC ABAC');
+    expect(await playing(page)).toBe(writtenOut);
+    expect(await page.locator('#ABCsource').inputValue()).toContain('Form: A B A C   |   A B A C');
   });
 });
 

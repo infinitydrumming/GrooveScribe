@@ -1,5 +1,6 @@
 // Infinity Drumming, 2026: sections of a groove ("A" for 2 bars of paradiddles,
-// then "B" for 2 bars of doubles), each played a number of times.
+// then "B" for 2 bars of doubles), each played a number of times, in order or in
+// a form ("ABAC", "ABCA ABCA").
 //
 // Each bar can have a section letter; bars in a row with the same letter are one
 // section, played as many times as its repeats say before the next (A ×4, then
@@ -100,4 +101,62 @@ export function sectionsFromUrl(text, count) {
       }
     });
   return { letters: letters, repeats: repeats };
+}
+
+/** The most letters a form has. */
+export var MAX_FORM_LETTERS = 32;
+
+/**
+ * A form as typed, tidied: its section letters in capitals, a space between
+ * groups ("abca abca" → "ABCA ABCA"), MAX_FORM_LETTERS at most.
+ * @returns {string}
+ */
+export function tidyForm(text) {
+  var count = 0;
+  return String(text || '')
+    .toUpperCase()
+    .replace(/[^A-F\s]/g, '')
+    .replace(/[A-F]/g, function (letter) {
+      return ++count > MAX_FORM_LETTERS ? '' : letter;
+    })
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * The bars in the order a form plays them: each letter its section (every section
+ * with that letter, each as many times as it says); letters with no section are
+ * left out, and so are bars with no letter.
+ * @returns {number[]}
+ */
+export function formOrderBars(form, letters, repeats, count) {
+  var runs = sectionRuns(letters, repeats, count);
+  var bars = [];
+  tidyForm(form)
+    .replace(/ /g, '')
+    .split('')
+    .forEach(function (letter) {
+      runs.forEach(function (run) {
+        if (run.letter != letter) return;
+        for (var time = 0; time < run.repeats; time++)
+          for (var b = run.from; b <= run.to; b++) bars.push(b);
+      });
+    });
+  return bars;
+}
+
+/** "Form=" for a link: "ABCA-ABCA" ('' with none). */
+export function formToUrl(form) {
+  return tidyForm(form).replace(/ /g, '-');
+}
+
+/** A link's "Form=" as a form. */
+export function formFromUrl(text) {
+  var form = String(text || '');
+  try {
+    form = decodeURIComponent(form);
+  } catch {
+    /* as it is */
+  }
+  return tidyForm(form.replace(/[-+_]/g, ' '));
 }

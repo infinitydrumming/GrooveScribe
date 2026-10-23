@@ -5,6 +5,11 @@ import {
   barsOfSection,
   sectionsToUrl,
   sectionsFromUrl,
+  tidyForm,
+  formOrderBars,
+  formToUrl,
+  formFromUrl,
+  MAX_FORM_LETTERS,
 } from '../js/sections.js';
 
 // Infinity Drumming, 2026: a groove's sections (A for 2 bars, B for 2 bars), each
@@ -42,5 +47,35 @@ describe('sections', () => {
       letters: ['', 'A', 'A'],
       repeats: [1, 16, 16],
     });
+  });
+});
+
+// Infinity Drumming, 2026: a form, the order the sections play ("ABAC")
+describe('a form', () => {
+  const letters = ['A', 'A', 'B', 'C', ''];
+  const repeats = [2, 2, 1, 1, 1];
+
+  it('is tidied: its letters in capitals, a space between groups', () => {
+    expect(tidyForm(' abca   abca! ')).toBe('ABCA ABCA');
+    expect(tidyForm('a-b x 2')).toBe('AB');
+    expect(tidyForm('A'.repeat(40))).toHaveLength(MAX_FORM_LETTERS);
+  });
+
+  it('plays each letter its section, as many times as it says', () => {
+    // A (bars 1-2, twice), B, A again, C
+    expect(formOrderBars('ABAC', letters, repeats, 5)).toEqual([0, 1, 0, 1, 2, 0, 1, 0, 1, 3]);
+    expect(formOrderBars('CA CA', letters, [1, 1, 1, 1, 1], 5)).toEqual([3, 0, 1, 3, 0, 1]);
+  });
+
+  it('leaves out letters with no section, and bars with no letter', () => {
+    expect(formOrderBars('AD', letters, [1, 1, 1, 1, 1], 5)).toEqual([0, 1]);
+    expect(formOrderBars('', letters, repeats, 5)).toEqual([]);
+  });
+
+  it('goes in a link as letters, its groups joined by "-"', () => {
+    expect(formToUrl('abca abca')).toBe('ABCA-ABCA');
+    expect(formFromUrl('ABCA-ABCA')).toBe('ABCA ABCA');
+    expect(formFromUrl('ABCA%20ABCA')).toBe('ABCA ABCA');
+    expect(formToUrl('')).toBe('');
   });
 });

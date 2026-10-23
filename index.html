@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, music spacing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, the Count menu, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button, more metronome clicks, diddles, beat-by-beat notes, the permutations called the Alphabet, the Select button.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, music spacing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, the Count menu, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button, more metronome clicks, diddles, beat-by-beat notes, the permutations called the Alphabet, the Select button, the sections' Form box.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
@@ -227,6 +227,12 @@
 
 
 				<div id="musicalInput" class="fullWidthEle edit-block">
+					<!-- the order the sections play (Infinity Drumming, 2026); shown once there are sections -->
+					<div id="sectionFormBox" style="display: none">
+						<label for="sectionForm">Form</label>
+						<input id="sectionForm" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="60" placeholder="e.g. ABAC" onchange="myGrooveWriter.sectionFormChange(this.value);" onkeydown="if (event.key === 'Enter') this.blur();">
+						<span class="sectionFormHint">the order the sections play, e.g. <b>ABAC</b> or <b>ABCA ABCA</b>; empty: in order</span>
+					</div>
 					<!-- The clickable note grid is built by js/main.js (was document.write). -->
 					<div id="measureContainer"></div>
 				</div>

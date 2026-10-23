@@ -11,6 +11,16 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-24 — A form for the sections (ABAC)
+
+- Once a groove has sections, a "Form" box above the bars takes the order they
+  play: "ABAC", or "ABCA ABCA" (a space between groups). Each letter plays its
+  section as many times as its chip says; empty, the sections play in order as
+  before. The music writes each section once, with "Form: A B A C" under the
+  title. Links carry it as "Form=ABCA-ABCA" (`js/sections.js`,
+  `js/grooveData.js`, `js/urlSerialization.js`, `js/groove_writer.js`,
+  `index.html`, `css/infinity_layout.css`).
+
 ## 2026-10-24 — "Play each bar", larger; moderate practised bars; Music spacing
 
 - The alphabet's "Play each" is now "Play each bar", and its ×1 box is larger
