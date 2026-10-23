@@ -17,7 +17,7 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1177 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm test`             | Vitest unit suite — **1181 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
 | `npm run test:e2e`     | Playwright golden-master — **130 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
@@ -191,7 +191,14 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   lines alone), and `practisedBarsLayout` sets the bars a line and centring margins so every bar is as wide,
   no wider than a moderate bar (120 page px a quarter) times the device's Music spacing (localStorage
   `grooveScribeMusicSpacing`, percent; 0 fills the page). One line is stretched (`%%stretchlast 1`); more,
-  the last takes the line before's spacing (`%%stretchlast 0`). Drawn wider for a broken line: no margins.
+  the last takes the line before's spacing (`%%stretchlast 0.01`: abc2svg rejects 0, keeping the value
+  before it, so the permutation boilerplate's `0` is really its default .25). Drawn wider for a broken line:
+  no margins.
+- **Music spacing for all music** (`spacedMusic` in `generate_ABC`): other than practised alphabet bars,
+  `spacedLayout` makes `musicLayout`'s bars a line `1 / spacing` times as many (at most 8; a wider page,
+  drawn smaller, when `bar` × that won't fit), and a groove's `spacedLines` heading centres one short line
+  and keeps a last line's spacing. 100% returns the layout untouched (golden master unchanged). Alphabet
+  groups break their lines every `barsPerLine` (`getPermutationSectionABC`).
 - **Sections & the playing order**: `playedBars()` is the order the groove's bars play: the practised
   bars, else the typed form (`Form=ABCA-ABCA`, `#sectionForm` above the bars once there are sections:
   `formOrderBars`, each letter every section with it, its repeats; `%%center Form: A B A C` over the

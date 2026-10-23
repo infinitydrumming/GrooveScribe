@@ -11,6 +11,18 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-24 — Music spacing for all the music
+
+- "Music spacing" (Options) now spaces all the music, grooves and the alphabet:
+  narrower bars put more on a line (down to a quarter as wide, four times as
+  many, drawn smaller when their notes need it, e.g. 32nds or Mixed, for looking
+  over a piece or a big screen), wider ones fewer, as far as one a line; every
+  bar as wide, a line of fewer centred. At 100% the music is laid out as before
+  (`js/abcNotation.js` `spacedLayout` / `spacedLines`, `js/permutations.js`,
+  `js/groove_writer.js`, `index.html`). A practised alphabet's last line takes
+  the line before's spacing (abc2svg turned down the `%%stretchlast 0` it was
+  given): one golden-master exercise is updated for it.
+
 ## 2026-10-24 — Section letters as rehearsal marks; bar numbers by the stave
 
 - A section's letter in the music is bold, in a round-cornered box, as a
