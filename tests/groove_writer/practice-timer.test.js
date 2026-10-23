@@ -233,6 +233,12 @@ describe('practice timer and speed-up in bars', () => {
       false
     );
     expect(link()).toContain('&PlayBars=2,4');
+    // the music: just those bars, numbered as in the whole groove (the music
+    // engine numbers the bar after each "setbarnb"; the first is in the heading)
+    const abc = document.getElementById('ABCsource').value;
+    expect(abc).toContain('P:Bars 2, 4');
+    expect([...abc.matchAll(/%%setbarnb (\d+)/g)].map((m) => +m[1])).toEqual([4]);
+    expect(gw.myGrooveUtils.note_mapping_array).toHaveLength(2 * 32);
   });
 
   it('takes the bars typed in the box, tidied, into the link', () => {
@@ -258,13 +264,14 @@ describe('practice timer and speed-up in bars', () => {
     expect(last.find((n) => n.key == CRASH).tick).toBe(512);
   });
 
-  it('leaves the box out for one bar, and a permutation keeps to its own', () => {
+  it('leaves the box out for one bar, and with a permutation is for its run', () => {
     gw.loadNewGroove(KICK_PER_BAR.replace('Measures=4', 'Measures=1') + '&PlayBars=1');
     expect(box().parentNode.style.display).toBe('none');
     gw.loadNewGroove(KICK_PER_BAR + '&PlayBars=2');
     expect(box().parentNode.style.display).toBe('');
     gw.permutationPopupClick('kick_16ths');
-    expect(box().parentNode.style.display).toBe('none');
+    expect(box().value).toBe(''); // now the run's bars: all of them
     expect(link()).not.toContain('PlayBars');
+    expect(document.getElementById('ABCsource').value).not.toContain('P:Bar 2');
   });
 });

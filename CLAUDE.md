@@ -161,11 +161,14 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   is the original "paint notes on" shortcut, Alt + hover erases), or the Select button on touch
   screens (`touch-action: none` on the rows while on). A capture-phase click handler on the grid
   swallows the click that ends a drag, so no note toggles. Pastes go through `keepingMutes`.
-- **Practise bars** (`PlayBars=1-2`, the play bar's box, plain grooves only): the time round is just those
-  bars (`practisedBars()`), built bar by bar like the groove / click cycle, whose sequence they become
+- **Practise bars** (`PlayBars=1-2`, the play bar's box): the time round is just those bars
+  (`practisedBars()`), built bar by bar like the groove / click cycle, whose sequence they become
   (`sequenceBar(i)`); `playingPercentToGroovePercent` turns the playing position back into the whole
-  groove's for the grid highlight and the music's cursor. A practised round must stay byte-identical to a
-  groove made of just those bars (the functional E2E checks it). The music always shows every bar.
+  groove's for the grid highlight, and `practisedMusicPercent` into the music's, which writes just those
+  bars (`barsWritten()`, numbered with `%%measurenb 1` and a `%%setbarnb` of the _next_ bar before each:
+  abc2svg numbers the bar after). A practised round must stay byte-identical to a groove made of just those
+  bars (the functional E2E checks it). The same box is a permutation's `PermBars` while one is on
+  (`setBoxBars`); the Alphabet panel has no box of its own.
 - **Two beat-by-beat grids**: Mixed (`Div=48`, 12 slots a quarter: 8ths, 16ths, every triplet) and
   32nds with `Beats=` (`Div=32`, 8 a quarter: 8ths, 16ths, 32nds); `beatGrid()` says which (0: plain).
   32nds and triplets never share a groove (`gridOfBeats` → -1; the beat menu greys them out). Grid

@@ -1672,23 +1672,6 @@ body.selectingNotes #measureContainer .notes-row-container {
   }
 }
 
-/* the permutation's "Practise bars" box (Infinity Drumming, 2026) */
-#PermutationBarsOption {
-  display: inline-block;
-  margin: 4px 0;
-}
-#PermutationBars {
-  box-sizing: border-box;
-  width: 110px;
-  padding: 4px 8px;
-  border: 1.5px solid var(--id-border);
-  border-radius: 8px;
-  font-size: 16px;
-}
-#PermutationBarsHint {
-  font-size: 13px;
-  color: var(--id-text-2);
-}
 /* the music engine gave up on a very long permutation run: it still plays */
 .musicTooLong {
   margin: 24px 16px;

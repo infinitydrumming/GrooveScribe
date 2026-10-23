@@ -299,6 +299,10 @@ test.describe('practising some bars', () => {
     await expect.poll(() => page.evaluate(() => location.search)).toContain('PlayBars=2-3');
     await expect(page.locator('.staff-container.notPractised')).toHaveCount(2);
     expect(await playing(page)).toBe(own);
+    // the music shows just them, numbered as in the whole groove
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('P:Bars 2-3');
+    expect(abc.match(/%%setbarnb \d+/g)).toEqual(['%%setbarnb 3']);
   });
 });
 

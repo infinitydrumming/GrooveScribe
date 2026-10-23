@@ -167,6 +167,7 @@ function GrooveWriter() {
   root.myGrooveUtils.percentForSheetMusic = function (percent) {
     percent = playingPercentToGroovePercent(percent);
     if (percent < 0) return percent; // count-in or click-only bar: nothing to follow
+    if (practisedBars().length) return practisedMusicPercent(percent);
     if (class_permutation_type == 'none' || get_permutation_repeats() < 2) return percent;
     // the run plays each figure "Play each" times through the ostinato's bars;
     // the music writes it once over them
@@ -287,9 +288,32 @@ function GrooveWriter() {
     return class_bar_time_sigs.slice(0, class_number_of_measures);
   }
   // a bar's ABC with the new time signature written in, where it changes
-  function withMeterChange(barABC, bar) {
-    if (bar === 0 || barSigLabel(bar) == barSigLabel(bar - 1)) return barABC;
-    return addMeterChange(barABC, barSigOf(bar));
+  // Bar `shown` of the bars written (every bar, or some practised): its time
+  // signature when it isn't the one before it (the first: bar 1's), and when some
+  // are practised the next bar's number as in the whole groove (set before this
+  // one, as the music engine numbers the bar after; the first is in the heading)
+  function writtenBarABC(barABC, shownBars, shown, numbered) {
+    var bar = shownBars[shown];
+    var before = shown > 0 ? shownBars[shown - 1] : 0;
+    if (barSigLabel(bar) != barSigLabel(before)) barABC = addMeterChange(barABC, barSigOf(bar));
+    var next = shownBars[shown + 1];
+    if (!numbered || next === undefined) return barABC;
+    return '%%setbarnb ' + (next + 1) + '\n' + barABC;
+  }
+  // the bars the music writes: every bar, or those practised (Infinity Drumming, 2026)
+  function barsWritten() {
+    var practised = practisedBars();
+    return practised.length ? practised : allBars();
+  }
+  // over the bars practised: which they are ("Bars 1-2"), and their numbers on
+  // ('' with every bar)
+  function practisedBarsHeading() {
+    var bars = practisedBars().map(function (bar) {
+      return bar + 1;
+    });
+    if (!bars.length) return '';
+    var which = (bars.length > 1 ? 'Bars ' : 'Bar ') + _perm.barListToText(bars);
+    return '%%measurenb 1\nP:' + which + '\n';
   }
   function barSigLabel(bar) {
     var sig = barSigOf(bar);
@@ -2614,9 +2638,7 @@ function GrooveWriter() {
   // the bars of the run to practise, as typed ("3-6, 9"); '' for all of them
   var class_permutation_bars = '';
 
-  // the "Practise bars" box: the run follows it as it's typed (once typing
-  // pauses), and it's tidied up ("3-6, 9") on Enter or leaving it
-  var class_permutation_bars_timer = null;
+  // the play bar's "Practise bars" box, for the run (see setBoxBars)
   function setPermutationBars(text) {
     var layout = get_permutation_layout();
     var ticked = layout
@@ -2628,21 +2650,6 @@ function GrooveWriter() {
     if (changed) root.refresh_ABC();
     return bars;
   }
-
-  root.permutationBarsInput = function (event) {
-    var box = event.target;
-    if (class_permutation_bars_timer) clearTimeout(class_permutation_bars_timer);
-    class_permutation_bars_timer = setTimeout(function () {
-      class_permutation_bars_timer = null;
-      setPermutationBars(box.value);
-    }, 300);
-  };
-
-  root.permutationBarsChange = function (event) {
-    if (class_permutation_bars_timer) clearTimeout(class_permutation_bars_timer);
-    class_permutation_bars_timer = null;
-    event.target.value = setPermutationBars(event.target.value);
-  };
 
   var class_permutation_repeats = 1;
   function get_permutation_repeats() {
@@ -3605,16 +3612,25 @@ function GrooveWriter() {
         var numberOfMeasuresPerLine = layout.barsPerLine;
         var addon_abc;
 
+        // the bars written: every bar, or the bars being practised, numbered as in
+        // the whole groove (Infinity Drumming, 2026)
+        var shownBars = barsWritten();
+        var numbered = shownBars.length < class_number_of_measures;
+        fullABC += practisedBarsHeading();
+
         // "Straight" / "Swing" over the bars where the feel changes
         var feelMarkings = getFeelMarkings(
-          class_straight_bars,
-          class_number_of_measures,
+          shownBars.map(function (bar) {
+            return class_straight_bars[bar];
+          }),
+          shownBars.length,
           root.myGrooveUtils.getSwing(),
           root.myGrooveUtils.getSwingStyle(),
           usingTriplets()
         );
 
-        for (i = 0; i < class_number_of_measures; i++) {
+        for (var shown = 0; shown < shownBars.length; shown++) {
+          i = shownBars[shown];
           // we already go the array states above, don't get it again.
           if (i > 0) {
             // reset arrays (in this bar's time signature)
@@ -3634,10 +3650,10 @@ function GrooveWriter() {
             );
           }
 
-          if (i + 1 == class_number_of_measures) {
+          if (shown + 1 == shownBars.length) {
             // last measure
             addon_abc = '|\n';
-          } else if ((i + 1) % numberOfMeasuresPerLine === 0) {
+          } else if ((shown + 1) % numberOfMeasuresPerLine === 0) {
             // new line measure
             addon_abc = '\n';
           } else {
@@ -3659,7 +3675,8 @@ function GrooveWriter() {
             barSigOf(i).bottom,
             beatPlanOfBar(i)
           );
-          fullABC += addFeelMarking(withMeterChange(barABC, i), feelMarkings[i]);
+          barABC = writtenBarABC(barABC, shownBars, shown, numbered);
+          fullABC += addFeelMarking(barABC, feelMarkings[shown]);
           root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
             root.myGrooveUtils.create_note_mapping_array_for_highlighting(
               HH_Array,
@@ -6030,9 +6047,10 @@ function GrooveWriter() {
   }
 
   // --- Practising some bars of a groove (Infinity Drumming, 2026) -------------
-  // "Practise bars" in the play bar: only those bars play, round and round (the
-  // music still shows them all, the grid dims the others). Not with a permutation,
-  // which has its own box. In the link as PlayBars=1-2.
+  // "Practise bars" in the play bar: only those bars play, round and round, and
+  // the music shows just them (with their numbers; the grid dims the others). In
+  // the link as PlayBars=1-2. With a permutation the same box is for the bars of
+  // its run (PermBars=).
   var class_practise_bars = ''; // as typed ("1-2, 5"); '' for all
   var class_practise_bars_timer = null;
 
@@ -6060,11 +6078,27 @@ function GrooveWriter() {
     if (bars != class_practise_bars) {
       class_practise_bars = bars;
       resetGrooveClickPhase();
-      root.myGrooveUtils.midiNoteHasChanged(); // the next time round plays them
-      showPractiseBars();
-      root.updateCurrentURL(); // part of the link
+      // the music shows just them, the next time round plays them, the link has them
+      root.refresh_ABC();
     }
     return bars;
+  }
+
+  // A position in the whole groove (0..1) as one in the music of the bars being
+  // practised, which shows only them
+  function practisedMusicPercent(groovePercent) {
+    var practised = practisedBars();
+    var where = positionInBars(groovePercent, allBars());
+    var shown = practised.indexOf(where.index);
+    if (shown < 0) return -1;
+    var lengths = practised.map(barLengthInBeats);
+    return (sumOf(lengths.slice(0, shown)) + where.fraction * lengths[shown]) / sumOf(lengths);
+  }
+
+  // The play bar's box is for a permutation's run when one is on (its own bars),
+  // else the groove's
+  function setBoxBars(text) {
+    return class_permutation_type == 'none' ? setPractiseBars(text) : setPermutationBars(text);
   }
 
   // the box follows what's typed once typing pauses, and is tidied up ("1-3, 6")
@@ -6074,14 +6108,14 @@ function GrooveWriter() {
     if (class_practise_bars_timer) clearTimeout(class_practise_bars_timer);
     class_practise_bars_timer = setTimeout(function () {
       class_practise_bars_timer = null;
-      setPractiseBars(box.value);
+      setBoxBars(box.value);
     }, 300);
   };
 
   root.practiseBarsChange = function (event) {
     if (class_practise_bars_timer) clearTimeout(class_practise_bars_timer);
     class_practise_bars_timer = null;
-    event.target.value = setPractiseBars(event.target.value);
+    event.target.value = setBoxBars(event.target.value);
   };
 
   root.practiseBarsKey = function (event) {
@@ -6103,13 +6137,16 @@ function GrooveWriter() {
     return /** @type {HTMLInputElement | null} */ (document.getElementById('practiseBars'));
   }
 
-  // the box and the grid as the bars to practise have them
+  // the box and the grid as the bars to practise have them (with a permutation,
+  // its run's bars)
   function showPractiseBars() {
     var box = practiseBarsBox();
-    var shown = class_permutation_type == 'none' && class_number_of_measures > 1;
+    var permutation = class_permutation_type != 'none';
+    var shown = permutation || class_number_of_measures > 1;
     if (box) {
       /** @type {HTMLElement} */ (box.parentNode).style.display = shown ? '' : 'none';
-      if (document.activeElement !== box) box.value = practiseBarsText();
+      if (document.activeElement !== box)
+        box.value = permutation ? class_permutation_bars : practiseBarsText();
     }
     var bars = practisedBars();
     for (var bar = 0; bar < class_number_of_measures; bar++) {
@@ -7756,7 +7793,6 @@ function GrooveWriter() {
       class_permutation_type,
       layout,
       get_permutation_repeats(),
-      class_permutation_bars,
       class_permutation_fat_back,
       class_rep_counter
     );

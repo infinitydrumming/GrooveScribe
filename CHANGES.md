@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-23 — Practise bars: just those bars in the music, one box
+
+- Practising some bars of a groove, the music shows just those bars, headed
+  "Bars 1-2" and numbered as in the whole groove (the music's cursor follows
+  them), as the alphabet's practised bars already were; the grid still shows
+  every bar, the others greyed out. Empty the box and the whole groove is back.
+- The alphabet's "Practise bars" box is now the play bar's: the same box in the
+  same place, for the run's bars while the alphabet is on (still `PermBars=` in
+  links) and the groove's otherwise (`PlayBars=`) (`js/groove_writer.js`,
+  `js/viewHtml.js`, `css/infinity_layout.css`, `gscribe_help.html`).
+
 ## 2026-10-23 — 32nds beat by beat
 
 - The Notes menu of each beat (the row of beats over a bar) has **32nds**, so a
