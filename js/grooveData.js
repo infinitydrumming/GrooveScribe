@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar, practice timer, counting and its choices, more metronome clicks, diddles and beat-by-beat notes, an exercise's practice settings and instructions. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: 32nds beat by beat, crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar, practice timer, counting and its choices, more metronome clicks, diddles and beat-by-beat notes, an exercise's practice settings and instructions. See CHANGES.md.
 // grooveData — the central data contract for Groove Scribe.
 //
 // A GrooveData describes a single groove: its time signature, subdivision and
@@ -90,8 +90,8 @@ const EMPTY_NOTE_ARRAY = [
  *   'ghosts' (the same, ghost notes bold too), 'rhythm' (only where something plays) or 'click'
  *   (the click's count); see countModes.js. URL "Count=1" / "Count=bold" / "Count=ghosts" /
  *   "Count=rhythm" / "Count=click".
- * @property {string[]} beatNotes  Mixed note setting (Div 48): each bar's beats, one character a
- *   beat ('ssqq'; see beatNotes.js); [] otherwise.
+ * @property {string[]} beatNotes  Mixed note setting (Div 48), or 32nds with beats of their own
+ *   (Div 32): each bar's beats, one character a beat ('ssqq', 'sssd'; see beatNotes.js); [] otherwise.
  *   URL "Count=1" (only when on).
  * @property {string} practiceLimit  Practice timer: stop after this many minutes ("10m") or
  *   bars ("16b"); '' = off. URL "Practice".
@@ -161,7 +161,7 @@ export function createGrooveData(config = {}) {
     practiceLimit: '', // '' = practice timer off
     showCounts: false,
     countMode: 'all',
-    beatNotes: [], // Mixed (Div 48): each bar's beats, see beatNotes.js
+    beatNotes: [], // Mixed (Div 48) or 32nds beat by beat (Div 32): each bar's beats, see beatNotes.js
     straightBars: [],
     barTimeSigs: [],
     graceSpacingMs: DEFAULT_GRACE_SPACING_MS,

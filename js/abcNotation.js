@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices, dense bars one a line on phones, each glyph defined once in the music on the page. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: 32nds beat by beat, tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices, dense bars one a line on phones, each glyph defined once in the music on the page. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -30,12 +30,19 @@ import {
   styleCounts,
 } from './countModes.js';
 
+// notes beat by beat: Mixed, or 32nds with beats of their own
+function isBeatByBeat(gd) {
+  if (gd.timeDivision == 48) return true;
+  return gd.timeDivision == 32 && (gd.beatNotes || []).some(Boolean);
+}
+
 /**
- * The beat plan (see beatNotes.js) of bars fromBar..toBar-1 of a groove in the
- * Mixed note setting, or null (other note settings, or a bar without one).
+ * The beat plan (see beatNotes.js) of bars fromBar..toBar-1 of a groove of notes
+ * beat by beat (Mixed, or 32nds with beats of their own), or null (other note
+ * settings, or a bar without one).
  */
 function beatPlanOf(gd, fromBar, toBar) {
-  if (gd.timeDivision != 48 || !gd.beatNotes || !gd.beatNotes.length) return null;
+  if (!isBeatByBeat(gd) || !gd.beatNotes || !gd.beatNotes.length) return null;
   var bars = [];
   var sigs = [];
   for (var bar = fromBar; bar < toBar; bar++) {
@@ -44,7 +51,7 @@ function beatPlanOf(gd, fromBar, toBar) {
     bars.push(gd.beatNotes[bar]);
     sigs.push(sig);
   }
-  return makeBeatPlan(bars, sigs);
+  return makeBeatPlan(bars, sigs, gd.timeDivision);
 }
 import {
   create_note_mapping_array_for_highlighting,
@@ -1625,7 +1632,7 @@ function grooveDataABC(gu, myGrooveData, renderWidth) {
       counted: gu.showCounts && !gu.countSmall,
       triplets: is_triplet_division,
       oneBar: myGrooveData.notesPerMeasure >= 32,
-      keepWidth: myGrooveData.timeDivision == 48,
+      keepWidth: isBeatByBeat(myGrooveData),
     }
   );
 
@@ -1800,7 +1807,7 @@ function createMixedMeterABC(gu, myGrooveData, renderWidth) {
       counted: gu.showCounts && !gu.countSmall,
       triplets: triplets,
       oneBar: gd.timeDivision >= 32,
-      keepWidth: gd.timeDivision == 48,
+      keepWidth: isBeatByBeat(gd),
     }
   );
   var abc = gu.get_top_ABC_BoilerPlate(
