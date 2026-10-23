@@ -578,6 +578,7 @@ body,
 #fullURLPopup,
 #metronomeAutoSpeedupConfiguration,
 #cursorTimingConfiguration,
+#musicSpacingConfiguration,
 #graceNoteConfiguration,
 #practiceTimerConfiguration,
 #grooveClickConfiguration,
@@ -1626,7 +1627,31 @@ body.selectingNotes #measureContainer .notes-row-container {
   touch-action: none;
 }
 
-/* the rep counter's switch, by "Play each" (Infinity Drumming, 2026) */
+/* "Play each bar": large enough to read at a glance (Infinity Drumming, 2026) */
+#PermutationRepeatOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 4px 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--id-navy-900);
+  white-space: nowrap;
+}
+#PermutationRepeat {
+  min-height: 36px;
+  padding: 4px 10px;
+  border: 2px solid var(--id-navy-900);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--id-navy-900);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* the rep counter's switch, by "Play each bar" (Infinity Drumming, 2026) */
 #PermutationRepCounterOption {
   display: inline-flex;
   align-items: center;

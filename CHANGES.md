@@ -11,6 +11,21 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-24 — "Play each bar", larger; moderate practised bars; Music spacing
+
+- The alphabet's "Play each" is now "Play each bar", and its ×1 box is larger
+  and bolder, easier to see (`js/viewHtml.js`, `css/infinity_layout.css`).
+- Practising some bars of the alphabet, the bars are written in one run of
+  lines (each group's name over its first bar), two a line on a laptop, every
+  bar as wide and no wider than a moderate bar, so a big screen no longer
+  stretches one bar across the page; a bar alone is centred. The golden
+  master's two practised-bars exercises are updated for it (their playback is
+  unchanged) (`js/abcNotation.js`, `js/permutations.js`, `js/groove_writer.js`).
+- "Music spacing" in the Options menu: a slider for how wide those bars are
+  drawn (narrower, more a line; wider, as far as one a line as wide as the
+  page). Each device remembers it (`index.html`, `js/groove_writer.js`, the
+  pop-up styles in `css/`).
+
 ## 2026-10-24 — Practised alphabet bars all one size; a clearer Section chip; keep the phrase or the timing
 
 - A switch after the Notes buttons (on a phone, at the foot of the Notes menu)

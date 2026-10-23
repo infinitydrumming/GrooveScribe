@@ -9,6 +9,7 @@ import {
   fatBackKickArray,
   parseBarList,
   barListToText,
+  practisedBarsABC,
 } from '../../js/permutations.js';
 
 // Permutation figures per note setting (Infinity Drumming). Each figure is one
@@ -108,6 +109,27 @@ describe('permutation bars', () => {
     expect(second.pre).not.toContain('P:');
     expect(second.post).toBe('\n');
     expect(getPermutationSectionABC(singles1, 2, true, 1).post).toBe('|\n');
+  });
+
+  // Infinity Drumming, 2026: practised bars in one run of lines, each group's
+  // heading over its first bar
+  it('writes practised bars in one run of lines, the headings as part labels', () => {
+    const bars = practisedBarsABC(
+      [
+        { pre: '%%setbarnb 4\nT: \nP: Singles   (bar 3)\n%\n% Singles on "a"\n%\n', post: '|\n' },
+        { pre: '%%setbarnb 5\nT: \nP: Doubles\n%\n% Doubles on "1"\n%\n', post: '\\\n' },
+        { pre: '%\n% Doubles on "e"\n%\n', post: '\n' },
+      ],
+      2
+    );
+    expect(bars.map((bar) => bar.label)).toEqual(['Singles   (bar 3)', 'Doubles', '']);
+    expect(bars.map((bar) => bar.post)).toEqual(['\\\n', '\n', '|\n']);
+    expect(bars[1].pre).toBe('%%setbarnb 5\n%\n% Doubles on "1"\n%\n');
+    expect(practisedBarsABC([{ pre: 'P:Ostinato\n', post: '\n' }], 2)[0]).toEqual({
+      pre: '',
+      post: '|\n',
+      label: 'Ostinato',
+    });
   });
 
   // Infinity Drumming, 2026: a permutation over a multi-bar ostinato

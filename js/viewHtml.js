@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: triplets keeping the phrase, a bar's eraser, copied notes in other tabs, sections (A, B) and bar numbers, the "Practise bars" box for a groove, the permutations called the Alphabet, play each up to ×16 and the rep counter switch, fat back kick permutations, a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: triplets keeping the phrase, a bar's eraser, copied notes in other tabs, sections (A, B) and bar numbers, the "Practise bars" box for a groove, the permutations called the Alphabet, play each up to ×16 and the rep counter switch, fat back kick permutations, a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each bar" (large), swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -847,11 +847,12 @@ export function straightBarButtonHTML(baseindex, straight) {
   );
 }
 
-// "Play each": how many times each figure plays before the next one (up to 16),
+// "Play each bar": how many times each figure plays before the next one (up to 16),
 // and the rep counter's switch: which bar and rep is playing (Infinity Drumming,
 // 2026; not one of the figures' ticks, so the link's PermSet leaves it out)
 function playEachHTML(repeats, repCounter) {
-  var html = '<span id="PermutationRepeatOption"><label for="PermutationRepeat">Play each</label> ';
+  var html =
+    '<span id="PermutationRepeatOption"><label for="PermutationRepeat">Play each bar</label> ';
   html +=
     '<select id="PermutationRepeat" onchange="myGrooveWriter.permutationRepeatChange(event)">';
   for (var times = 1; times <= 16; times++)

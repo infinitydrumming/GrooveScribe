@@ -1,4 +1,4 @@
-/* Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, a copy of a bar after it, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar, speed-up target tempo, cursor timing popup, practice timer. See CHANGES.md. */
+/* Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, collapsing rows, copy / paste buttons, a copy of a bar after it, groove / click settings, tom ghost / accent marks, credits footer, swing / straight switch per bar, speed-up target tempo, cursor timing popup, music spacing popup, practice timer. See CHANGES.md. */
 /* this is for debugging layout issues - puts a red border around everything */
 /* body * { border: 1px solid red; }		 */
 DEBUG {
@@ -1170,6 +1170,7 @@ hr {
 #fullURLPopup,
 #metronomeAutoSpeedupConfiguration,
 #cursorTimingConfiguration,
+#musicSpacingConfiguration,
 #graceNoteConfiguration,
 #practiceTimerConfiguration,
 #grooveClickConfiguration,
@@ -1334,26 +1335,32 @@ hr {
 #metronomeAutoSpeedupConfigurationIntervalLable {
   font-size: 12px;
 }
-/* Infinity Drumming, 2026: cursor timing popup */
-#cursorTimingTitle {
+/* Infinity Drumming, 2026: cursor timing and music spacing popups */
+#cursorTimingTitle,
+#musicSpacingTitle {
   font-size: 22px;
   text-align: center;
   margin-bottom: 6px;
 }
 .cursorTimingText,
-#cursorTimingOutput {
+#cursorTimingOutput,
+.musicSpacingText,
+#musicSpacingOutput {
   font-size: 13px;
   margin: 6px 0;
 }
-#cursorTimingAdjust {
+#cursorTimingAdjust,
+#musicSpacingAdjust {
   width: 100%;
   background: var(--highlight-color);
 }
-#cursorTimingOutput {
+#cursorTimingOutput,
+#musicSpacingOutput {
   color: var(--highlight-color);
   text-align: center;
 }
-#cursorTimingButtons {
+#cursorTimingButtons,
+#musicSpacingButtons {
   text-align: center;
 }
 /* Infinity Drumming, 2026: practice timer popup */

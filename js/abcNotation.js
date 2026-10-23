@@ -1005,7 +1005,8 @@ function musicPageWidth(renderWidth) {
  * @param {{counted?: boolean, triplets?: boolean, oneBar?: boolean, keepWidth?: boolean}} how
  *   counted: a count over the notes (in 16px letters); oneBar: one bar a line
  *   anyway; keepWidth: never a wider page (bars beat by beat, whose notes vary)
- * @returns {{barsPerLine: number, renderWidth: number}}
+ * @returns {{barsPerLine: number, renderWidth: number, bar: number}}  bar: the
+ *   page a bar needs at least
  */
 export function musicLayout(notesPerBar, renderWidth, how) {
   var perNote = (how.counted ? 10 : 8) * (how.triplets ? 1.1 : 1);
@@ -1014,6 +1015,37 @@ export function musicLayout(notesPerBar, renderWidth, how) {
   return {
     barsPerLine: how.oneBar || 2 * bar > page ? 1 : 2,
     renderWidth: bar > page && !how.keepWidth ? Math.ceil(bar / 0.75) : renderWidth,
+    bar: bar,
+  };
+}
+
+// a moderate bar: this much of the page a quarter note at most (a 4/4 bar about
+// 770px wide on a laptop's screen)
+var MODERATE_QUARTER = 120;
+
+/**
+ * Infinity Drumming, 2026: some practised bars of the alphabet, each as wide: as
+ * musicLayout lays them out, but no wider than a moderate bar (a big screen
+ * doesn't stretch one bar across the page), times the device's "Music spacing"
+ * (narrower bars: more a line; wider: fewer). The bars a line, the margins that
+ * centre the lines, and whether there's just one (stretched to the margins, as
+ * no line before it sets its spacing).
+ * @param {number} count  the bars written
+ * @param {{barsPerLine: number, renderWidth: number, bar: number}} layout  musicLayout's
+ * @param {number} quarters  a bar's length in quarter notes
+ * @param {number} spacing  1 for moderate bars, 1.5 half as wide again...; 0: as wide as the page
+ * @returns {{barsPerLine: number, margin: number, oneLine: boolean}}
+ */
+export function practisedBarsLayout(count, layout, quarters, spacing) {
+  var page = musicPageWidth(layout.renderWidth);
+  var moderate = Math.min(page / layout.barsPerLine, quarters * MODERATE_QUARTER);
+  var bar = Math.min(page, Math.max(layout.bar, spacing ? moderate * spacing : page));
+  var barsPerLine = Math.max(1, Math.floor(page / bar + 1e-9));
+  var line = Math.min(count, barsPerLine) * bar;
+  return {
+    barsPerLine: barsPerLine,
+    margin: Math.max(0, Math.floor((page - line) / 2)),
+    oneLine: count <= barsPerLine,
   };
 }
 

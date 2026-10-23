@@ -120,6 +120,7 @@ import {
   addFeelMarking,
   addMeterChange,
   musicLayout,
+  practisedBarsLayout,
   musicLineBroken,
   notesOnALine,
   defineGlyphsOnce,
@@ -1900,6 +1901,10 @@ function GrooveWriter() {
         setAutoScroll(!root.myGrooveUtils.autoScrollEnabled);
         break;
 
+      case 'MusicSpacing':
+        root.show_MusicSpacingConfiguration();
+        break;
+
       case 'CursorTiming':
         root.show_CursorTimingConfiguration();
         break;
@@ -2662,6 +2667,87 @@ function GrooveWriter() {
       return { section: section, abc: abc };
     });
   }
+
+  // Some bars practised (Infinity Drumming, 2026): every bar as wide and no wider
+  // than a moderate bar, in one run of lines (see abcNotation.practisedBarsLayout);
+  // drawn wider (a line broken mid-bar), the bars fill the page again
+  function practisedBarsMusic(shownSections, layout, widened) {
+    var bars = [];
+    shownSections.forEach(function (shownSection) {
+      bars = bars.concat(shownSection.abc);
+    });
+    var fit = practisedBarsLayout(
+      bars.length,
+      layout,
+      (class_num_beats_per_measure * 4) / class_note_value_per_measure,
+      class_music_spacing / 100
+    );
+    var margin = widened ? 0 : fit.margin;
+    return {
+      heading:
+        '%%leftmargin ' +
+        margin +
+        'px\n%%rightmargin ' +
+        margin +
+        'px\n' +
+        (fit.oneLine ? '%%stretchlast 1\n' : ''),
+      bars: _perm.practisedBarsABC(bars, fit.barsPerLine),
+    };
+  }
+
+  // --- "Music spacing" (Infinity Drumming, 2026): how wide practised bars are -----
+  // drawn on this device, in percent of a moderate bar (0: as wide as the page)
+  var constant_music_spacing_key = 'grooveScribeMusicSpacing';
+  var constant_music_spacing_fill = 210; // the slider's far end
+  var class_music_spacing = storedMusicSpacing();
+
+  function storedMusicSpacing() {
+    try {
+      var stored = parseInt(window.localStorage.getItem(constant_music_spacing_key) || '', 10);
+      return isNaN(stored) || stored < 0 || stored > 200 ? 100 : stored;
+    } catch {
+      return 100; // storage unavailable
+    }
+  }
+
+  function musicSpacingSlider() {
+    return /** @type {HTMLInputElement} */ (document.getElementById('musicSpacingAdjust'));
+  }
+
+  function setMusicSpacing(percent) {
+    class_music_spacing = percent;
+    try {
+      window.localStorage.setItem(constant_music_spacing_key, String(percent));
+    } catch {
+      /* storage unavailable: it lasts for this visit */
+    }
+    var shown = 'Fill the page: a bar a line, as wide as the page';
+    if (percent == 100) shown = 'Moderate bars (to start with)';
+    else if (percent) shown = 'Bars ' + percent + '% as wide as moderate bars';
+    document.getElementById('musicSpacingOutput').textContent = shown;
+    if (class_permutation_bars) root.refresh_ABC();
+  }
+
+  root.show_MusicSpacingConfiguration = function () {
+    musicSpacingSlider().value = String(class_music_spacing || constant_music_spacing_fill);
+    setMusicSpacing(class_music_spacing);
+    document.getElementById('musicSpacingConfiguration').style.display = 'block';
+  };
+
+  root.musicSpacingChange = function (event) {
+    var percent = parseInt(event.target.value, 10);
+    if (isNaN(percent)) percent = 100;
+    setMusicSpacing(percent >= constant_music_spacing_fill ? 0 : percent);
+  };
+
+  root.musicSpacingReset = function () {
+    musicSpacingSlider().value = '100';
+    setMusicSpacing(100);
+  };
+
+  root.close_MusicSpacingConfiguration = function () {
+    document.getElementById('musicSpacingConfiguration').style.display = 'none';
+  };
 
   // the bars of the run to practise, as typed ("3-6, 9"); '' for all of them
   var class_permutation_bars = '';
@@ -3580,13 +3666,7 @@ function GrooveWriter() {
           renderWidth
         );
         root.myGrooveUtils.note_mapping_array = [];
-        // some bars practised: each on a line of its own, all as wide, so they
-        // read alike (Infinity Drumming, 2026)
-        var barsPerLine = layout.barsPerLine;
-        if (class_permutation_bars) {
-          barsPerLine = 1;
-          fullABC += '%%stretchlast 1\n';
-        }
+        var shownSections = get_shown_permutation_sections(layout.barsPerLine);
 
         // every shown figure, written once over the ostinato's bars (marked
         // "play each ×N" when repeated)
@@ -3601,17 +3681,23 @@ function GrooveWriter() {
           },
         ];
         for (i = 1; i < get_ostinato_bars(); i++) ostinato.push(readOstinatoBar(i, false));
-        get_shown_permutation_sections(barsPerLine).forEach(function (shownSection) {
+        var practised = class_permutation_bars
+          ? practisedBarsMusic(shownSections, layout, !!atLeast && atLeast > layout.renderWidth)
+          : null;
+        if (practised) fullABC = fullABC.replace(/^K:/m, practised.heading + 'K:');
+        var written = 0;
+        shownSections.forEach(function (shownSection) {
           ostinato.forEach(function (o, k) {
             var bar = get_permutation_bar(shownSection.section, o.Kick, o.Snare);
-            fullABC += shownSection.abc[k].pre;
-            fullABC += root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
+            var abc = practised ? practised.bars[written++] : shownSection.abc[k];
+            fullABC += abc.pre;
+            var barABC = root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
               o.Sticking,
               o.HH,
               bar.snare,
               bar.kick,
               o.Toms,
-              shownSection.abc[k].post,
+              abc.post,
               o.num_notes,
               class_time_division,
               o.num_notes,
@@ -3619,6 +3705,9 @@ function GrooveWriter() {
               class_num_beats_per_measure,
               class_note_value_per_measure
             );
+            fullABC += abc.label
+              ? barABC.replace(/(V:Stickings\n)/, '$1[P:' + abc.label + ']')
+              : barABC;
             root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
               root.myGrooveUtils.create_note_mapping_array_for_highlighting(
                 o.HH,

@@ -17,7 +17,7 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1165 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm test`             | Vitest unit suite — **1171 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
 | `npm run test:e2e`     | Playwright golden-master — **129 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
@@ -181,6 +181,12 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   abc2svg numbers the bar after). A practised round must stay byte-identical to a groove made of just those
   bars (the functional E2E checks it). The same box is a permutation's `PermBars` while one is on
   (`setBoxBars`); the Alphabet panel has no box of its own.
+- **Practised alphabet bars** (`PermBars`): written in one run of lines (`practisedBarsABC`: each group's
+  `T:`/`P:` heading becomes an inline `[P:...]` over its first bar, as a new heading block would space its
+  lines alone), and `practisedBarsLayout` sets the bars a line and centring margins so every bar is as wide,
+  no wider than a moderate bar (120 page px a quarter) times the device's Music spacing (localStorage
+  `grooveScribeMusicSpacing`, percent; 0 fills the page). One line is stretched (`%%stretchlast 1`); more,
+  the last takes the line before's spacing (`%%stretchlast 0`). Drawn wider for a broken line: no margins.
 - **Sections & the playing order**: `playedBars()` is the order the groove's bars play: the practised
   bars, else the sections' form (A ×4, B ×2), else `[]` (every bar once, in order: the old byte-identical
   path). Everything that plays bar by bar (`sequenceBar`, the groove / click cycle, the practice timer,

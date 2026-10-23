@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, the Count menu, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button, more metronome clicks, diddles, beat-by-beat notes, the permutations called the Alphabet, the Select button.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, music spacing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, the Count menu, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button, more metronome clicks, diddles, beat-by-beat notes, the permutations called the Alphabet, the Select button.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
@@ -305,6 +305,7 @@
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuGrooveClick" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("GrooveClick");' title="Play the groove for some bars, then just the click for some bars">Groove / click bars</li>
 				<li class="metronomeOptionsContextMenuItem menuChecked" id="metronomeOptionsContextMenuAutoScroll" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("AutoScroll");' title="While playing, scroll the page to follow the playing bar of the music">Auto-scroll</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuCursorTiming" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("CursorTiming");' title="Line the blue playback cursor up with the sound on this device">Cursor timing</li>
+				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuMusicSpacing" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("MusicSpacing");' title="How wide the practised bars of the alphabet are drawn, on this device">Music spacing</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuGraceNotes" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("GraceNotes");' title="How far apart and how loud the grace notes of flams, drags and ruffs are">Flams, drags &amp; ruffs</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuCountIn"   onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("CountIn");' title="One measure of metronome count in at the start" >Count it in</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuOffTheOne" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("OffTheOne");' title="Click on the e, &, or a">Offset click</li>
@@ -721,6 +722,15 @@
 			<input type="range" min="-200" max="400" step="10" value="0" id="cursorTimingAdjust" oninput="myGrooveWriter.cursorTimingChange(event);">
 			<div id="cursorTimingOutput"></div>
 			<div id="cursorTimingButtons"><button onclick="myGrooveWriter.cursorTimingReset();">Reset</button> <button onclick="myGrooveWriter.close_CursorTimingConfiguration();">Done</button></div>
+		</div>
+
+		<!-- "Music spacing" (Infinity Drumming, 2026), hidden by default -->
+		<div id="musicSpacingConfiguration">
+			<div id="musicSpacingTitle">Music spacing</div>
+			<div class="musicSpacingText">How wide the practised bars of the alphabet are drawn: narrower to see more at once, wider to read them more easily (as far as filling the page). This device remembers the setting.</div>
+			<input type="range" min="50" max="210" step="10" value="100" id="musicSpacingAdjust" aria-label="Music spacing" oninput="myGrooveWriter.musicSpacingChange(event);">
+			<div id="musicSpacingOutput"></div>
+			<div id="musicSpacingButtons"><button onclick="myGrooveWriter.musicSpacingReset();">Reset</button> <button onclick="myGrooveWriter.close_MusicSpacingConfiguration();">Done</button></div>
 		</div>
 
 		<!-- this is used by the metronome auto speed up option menu, and is hidden by default -->
