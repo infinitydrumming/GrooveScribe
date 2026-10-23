@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { copyBlock, pasteBlock } from '../js/noteBlocks.js';
+import { copyBlock, pasteBlock, blockInDivision } from '../js/noteBlocks.js';
 
 // Infinity Drumming, 2026: copy and paste a block of notes chosen with a box.
 
@@ -62,5 +62,26 @@ describe('a block of notes', () => {
     expect(lines.HH).toBe('x-x-x-x-' + '-----x--');
     const shut = groove();
     expect(pasteBlock(shut, block, 0, (slot) => slot != 3)).toEqual([{ row: 'hh', index: 0 }]);
+  });
+});
+
+describe('a block in another note setting', () => {
+  const block = {
+    cells: [
+      { row: 'snare', offset: 0, chars: { Snare: 'O' } },
+      { row: 'snare', offset: 1, chars: { Snare: 'o' } },
+      { row: 'snare', offset: 2, chars: { Snare: 'o' } },
+    ],
+    span: 3,
+  };
+  it('keeps its notes in time where the grids line up', () => {
+    expect(blockInDivision(block, 16, 16)).toBe(block);
+    expect(blockInDivision(block, 16, 32).cells.map((c) => c.offset)).toEqual([0, 2, 4]);
+    expect(blockInDivision(block, 16, 48).cells.map((c) => c.offset)).toEqual([0, 3, 6]);
+    // 16ths into 8ths: the "e" has no place, the "&" does
+    expect(blockInDivision(block, 16, 8).cells.map((c) => c.offset)).toEqual([0, 1]);
+  });
+  it("can't go between triplets and straight notes", () => {
+    expect(blockInDivision(block, 16, 12)).toBeNull();
   });
 });

@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: 32nds beat by beat, an exercise's practice settings and instructions, mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting and its choices, more metronome clicks, diddle lines, beat-by-beat notes. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: sections (A, B) and bar numbers, 32nds beat by beat, an exercise's practice settings and instructions, mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting and its choices, more metronome clicks, diddle lines, beat-by-beat notes. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -15,6 +15,7 @@ import {
 import { parseTimeSigString, calc_notes_per_measure } from './musicMath.js';
 import { parsePracticeLimit, practiceLimitToText } from './practiceTimer.js';
 import { metronomeIsOn, parseMetronomeFrequency } from './metronome.js';
+import { sectionsFromUrl, sectionsToUrl } from './sections.js';
 import { practiceSettingsFromUrl, practiceSettingsToUrl } from './practiceSettings.js';
 import { countModeFromUrl, countModeToUrl } from './countModes.js';
 import {
@@ -358,6 +359,14 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
     myGrooveData.numberOfMeasures
   );
 
+  // Sections=A1-2x4,B3-4x2: the groove's sections and how many times each plays
+  var sections = sectionsFromUrl(
+    getQueryVariableFromString('Sections', '', encodedURLData),
+    myGrooveData.numberOfMeasures
+  );
+  myGrooveData.barSections = sections.letters;
+  myGrooveData.sectionRepeats = sections.repeats;
+
   // a time signature for each bar, when they differ: every bar keeps the longest
   // bar's number of note slots, and each bar's notes are read into its own
   var barCounts = readBarTimeSigs(myGrooveData, encodedURLData);
@@ -603,6 +612,14 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
   // straight bars in a swung groove, only when there are any
   var straightList = straightBarsToList(myGrooveData.straightBars, myGrooveData.numberOfMeasures);
   if (straightList) fullURL += '&StraightBars=' + straightList;
+
+  // the sections, only when there are any
+  var sections = sectionsToUrl(
+    myGrooveData.barSections || [],
+    myGrooveData.sectionRepeats || [],
+    myGrooveData.numberOfMeasures
+  );
+  if (sections) fullURL += '&Sections=' + sections;
 
   // "Groove / click bars" practice option, only when it is on
   fullURL += grooveClickForUrl(myGrooveData);

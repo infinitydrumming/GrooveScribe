@@ -431,7 +431,7 @@ describe('GrooveWriter core state & undo/redo', () => {
       expect(gw.myGrooveUtils.swingIsEnabled).toBe(false);
     });
 
-    it('preserves existing note state across a non-triplet -> non-triplet change, but resets to defaults across a triplet transition', () => {
+    it('preserves existing note state across a non-triplet -> non-triplet change, and keeps the notes in order across a triplet transition', () => {
       gw.stickingsShowHide(true, true, true);
       gw.noteLeftClick(null, 'sticking', 0); // -> "right"
       expect(gw.grooveDataFromClickableUI().sticking_array[0]).toBe('"R"x');
@@ -439,8 +439,11 @@ describe('GrooveWriter core state & undo/redo', () => {
       gw.changeDivision(8); // 16ths(non-triplet) -> 8ths(non-triplet): usingTriplets() unchanged -> notes preserved
       expect(gw.grooveDataFromClickableUI().sticking_array[0]).toBe('"R"x');
 
-      gw.changeDivision(12); // 8ths(non-triplet) -> 12(triplet): usingTriplets() flips -> resets to the default groove
-      expect(gw.grooveDataFromClickableUI().sticking_array[0]).toBe('""x'); // constant_ABC_STICK_OFF
+      // 8ths(non-triplet) -> 12(triplet): usingTriplets() flips -> the notes keep their
+      // order, slot after slot (Infinity Drumming, 2026; they used to reset to the
+      // default groove)
+      gw.changeDivision(12);
+      expect(gw.grooveDataFromClickableUI().sticking_array[0]).toBe('"R"x');
     });
   });
 });

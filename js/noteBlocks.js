@@ -112,3 +112,24 @@ export function pasteBlock(lines, block, at, isOpen) {
   });
   return written;
 }
+
+/**
+ * A block copied in one note setting for another whose grid is a whole multiple of
+ * its (or the other way round): its notes at the same places in time; notes with
+ * no place in the new grid are left out. null when the grids don't line up
+ * (triplets and straight notes).
+ *
+ * @param {{cells: Array<{row: string, offset: number, chars: Object<string, string>}>, span: number}} block
+ * @param {number} from  the note setting it was copied in (16 for 16ths ...)
+ * @param {number} to  the one it goes into
+ */
+export function blockInDivision(block, from, to) {
+  if (from == to) return block;
+  if (to % from !== 0 && from % to !== 0) return null;
+  var cells = [];
+  block.cells.forEach(function (cell) {
+    var offset = (cell.offset * to) / from;
+    if (offset % 1 === 0) cells.push({ row: cell.row, offset: offset, chars: cell.chars });
+  });
+  return { cells: cells, span: Math.max(1, Math.round((block.span * to) / from)) };
+}

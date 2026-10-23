@@ -10,7 +10,10 @@
 <g id="accent" class="stroke">
 	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
 </g>
-</defs><g transform="scale(0.75)"><path class="stroke" d="m455.58 79.04v-24.00"></path>
+</defs><g transform="scale(0.75)"><g transform="translate(0,57.70)">
+<text class="f1_1" x="452.50" y="-10.66">2</text>
+</g>
+<path class="stroke" d="m455.58 79.04v-24.00"></path>
 <path class="stroke" d="m885.33 79.04v-24.00"></path>
 <path class="stroke" d="m882.33 79.04v-24.00"></path>
 <path class="stroke" d="m0.00 79.04

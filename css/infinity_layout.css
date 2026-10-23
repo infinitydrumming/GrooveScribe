@@ -819,12 +819,50 @@ body,
   background: var(--id-blue-tint);
   border-color: #a8cdf3;
 }
+/* the bar's section (Infinity Drumming, 2026): its letter, and on a section's
+ * first bar how many times it plays */
+#measureContainer .barSection {
+  position: absolute;
+  top: 6px;
+  left: 66px;
+  display: inline-flex;
+  gap: 4px;
+}
+#measureContainer .barSection select {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+  padding: 2px 9px;
+  border: 1px solid #f3c98a;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  color: #8a4b00;
+  background: #fff4e3;
+  cursor: pointer;
+}
+#measureContainer .barSection select.barSectionSelect:not(.none) {
+  width: 34px;
+  text-align: center;
+  text-align-last: center;
+}
+#measureContainer .barSection select.none {
+  border-style: dashed;
+  border-color: var(--id-border);
+  font-weight: 600;
+  color: #7d8ea5;
+  background: transparent;
+}
+#measureContainer .clearMeasureButton,
 #measureContainer .copyMeasureButton,
 #measureContainer .pasteMeasureButton,
 #measureContainer .closeMeasureButton {
   font-size: 15px;
   color: #7d8ea5;
 }
+#measureContainer .clearMeasureButton:hover,
 #measureContainer .copyMeasureButton:hover,
 #measureContainer .pasteMeasureButton:hover,
 #measureContainer .closeMeasureButton:hover {

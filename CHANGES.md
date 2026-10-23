@@ -11,6 +11,47 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-23 — Triplets keep the phrase; erase one bar; copy notes between tabs
+
+- Changing the Notes setting between triplets and straight notes no longer
+  starts again from the default groove: the notes keep their order, slot after
+  slot, the phrase played through the new setting, as a new time signature
+  already does. A 3/4 groove of 16ths changed to 4/4 and then to 8th triplets
+  has each 12-note bar back in a bar of its own. The bars stay as many (cut at
+  the end, rests to fill); Mixed and 32nds go by way of 16ths, keeping the
+  notes' time. One undo.
+- An eraser at the top of each bar clears just that bar's notes (flams and
+  diddles too); its time signature, beats and section stay.
+- Notes copied with Shift + drag (or Select) paste into another tab or window,
+  and on the site's other address, by way of the device clipboard and this
+  site's storage (the newer copy); into another note setting they keep their
+  time where the grids line up (`blockInDivision` in `js/noteBlocks.js`).
+  Ctrl / ⌘ + V uses the paste itself (no clipboard permission needed); the Paste
+  button uses this site's copy if the clipboard doesn't answer
+  (`js/groove_writer.js`, `js/viewHtml.js`, `css/infinity_layout.css`,
+  `gscribe_help.html`).
+
+## 2026-10-23 — Sections; bar numbers
+
+- **Sections.** Each bar card has a Section chip next to its number: bars in a
+  row with the same letter are one section (A for 2 bars of paradiddles, B for
+  2 bars of doubles), and a section's first bar says how many times it plays
+  (×1 to ×16). The groove plays the form round and round (A ×4, then B ×2);
+  bars without a letter play once where they are. The music writes each
+  section once with its letter, how many times, and repeat signs; the cursor
+  and the grid's highlight follow the playing. The practice timer, speed-up,
+  groove / click bars and tempo changes go by the bars as they play. Practise
+  bars takes a section's letter ("B"). In links as `Sections=A1-2x4,B3-4x2`;
+  sections stay with their bars as bars are added, copied or removed. The new
+  `js/sections.js` works out the sections and the playing order;
+  `js/groove_writer.js`, `js/viewHtml.js`, `js/urlSerialization.js`,
+  `js/grooveData.js`, `js/practiceSettings.js` (`PlayBars=B`),
+  `css/infinity_layout.css`, `index.html`, `gscribe_help.html`.
+- **Bar numbers** in the music of a groove of 2 or more bars (on every bar after
+  the first, as the alphabet's are).
+- Adding a bar, or a copy of one, no longer scrolls the page down to the grid:
+  it stays where it is, on the music (`js/groove_writer.js`).
+
 ## 2026-10-23 — Practise bars: just those bars in the music, one box
 
 - Practising some bars of a groove, the music shows just those bars, headed

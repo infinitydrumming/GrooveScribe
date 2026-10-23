@@ -264,6 +264,38 @@ describe('practice timer and speed-up in bars', () => {
     expect(last.find((n) => n.key == CRASH).tick).toBe(512);
   });
 
+  // --- sections (A ×2, B ×3 ...) ---
+  it('plays its sections as many times as they say, the other bars once', () => {
+    gw.loadNewGroove(KICK_PER_BAR + '&Sections=A1-2x2,B3x3');
+    // bars 1, 2, 1, 2, 3, 3, 3, 4 (each bar's kick on its own 16th)
+    expect(kicks(playRounds(0))).toEqual(
+      [0, 1, 0, 1, 2, 2, 2, 3].map((bar, i) => i * 512 + bar * 32 + (i ? 0 : 1))
+    );
+    expect(link()).toContain('&Sections=A1-2x2,B3x3');
+    // the music: each section once, its letter and repeat signs
+    const abc = document.getElementById('ABCsource').value;
+    expect(abc).toContain('[P:A \u00d72]|:');
+    expect(abc).toContain('[P:B \u00d73]|:');
+    expect(abc.match(/ :\|/g)).toHaveLength(2 * 2); // (each section's end, in both voices)
+    expect(abc).toContain('%%measurenb 1');
+  });
+
+  it('sets sections from the bar chips: a bar joins the section before it', () => {
+    gw.loadNewGroove(KICK_PER_BAR);
+    gw.barSectionChange(3, 'B');
+    gw.sectionRepeatsChange(3, '3');
+    gw.barSectionChange(4, 'B');
+    expect(link()).toContain('&Sections=B3-4x3');
+    expect(document.querySelector('#barSection3 .sectionRepeatsSelect').value).toBe('3');
+    expect(document.querySelector('#barSection4 .sectionRepeatsSelect')).toBeNull();
+    // practise just B, by its letter
+    box().value = 'b';
+    gw.practiseBarsChange({ target: box() });
+    expect(box().value).toBe('B');
+    expect(kicks(playRounds(0))).toEqual([1 + 64, 512 + 96]);
+    expect(document.getElementById('ABCsource').value).toContain('P:Section B');
+  });
+
   it('leaves the box out for one bar, and with a permutation is for its run', () => {
     gw.loadNewGroove(KICK_PER_BAR.replace('Measures=4', 'Measures=1') + '&PlayBars=1');
     expect(box().parentNode.style.display).toBe('none');

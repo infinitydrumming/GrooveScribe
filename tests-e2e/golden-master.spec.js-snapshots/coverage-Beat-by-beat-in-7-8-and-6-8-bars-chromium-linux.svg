@@ -63,6 +63,7 @@ l146.25 0.00v3.20l-146.25 0.00"></path>
 <title>abc2svg - 6.</title><style type="text/css">
 .fill {fill: currentColor}
 .stroke {stroke: currentColor; fill: none; stroke-width: .7}
+.f1_1 {font:italic 14px serif}
 </style><defs>
 
 
@@ -71,6 +72,7 @@ l146.25 0.00v3.20l-146.25 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,59.70)">
+<text class="f1_1" x="24.00" y="-44.00">2</text>
 <path class="stroke" d="m47.50 -51.70v-3.00l247.60 0.00v3.00"></path>
 <rect fill="white" x="164.70" y="-60.70" width="13.20" height="12"></rect>
 <text style="font:italic 12px serif" x="171.30" y="-50.70" text-anchor="middle">3</text>

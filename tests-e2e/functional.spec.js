@@ -358,3 +358,117 @@ test.describe('32nds on one beat', () => {
     expect(await inLink(page, 'S')).toBe('|----O-------O---|');
   });
 });
+
+// Infinity Drumming, 2026: sections (A ×2, then B) on the groove page
+test.describe('sections', () => {
+  const bars = { A: 'RLRRLRLLRLRRLRLL', B: 'RRLLRRLLRRLLRRLL' };
+  const snare = { A: 'O-------O-------', B: 'oooooooooooooooo' };
+  const groove = (which, extra = '') =>
+    '?TimeSig=4/4&Div=16&Tempo=80&Measures=' +
+    which.length +
+    '&Stickings=|' +
+    which.map((b) => bars[b]).join('|') +
+    '|&S=|' +
+    which.map((b) => snare[b]).join('|') +
+    '|&K=|' +
+    which.map(() => 'o---o---o---o---').join('|') +
+    '|' +
+    extra;
+
+  test('chosen on the bars, play as the bars written out would', async ({ page }) => {
+    await loadGroove(page, grooveUrl(groove(['A', 'A', 'B'])));
+    const writtenOut = await playing(page);
+
+    await loadGroove(page, grooveUrl(groove(['A', 'B'])));
+    await page.selectOption('#barSection1 select', 'A');
+    await page.selectOption('#barSection1 .sectionRepeatsSelect', '2');
+    await page.selectOption('#barSection2 select', 'B');
+    await expect
+      .poll(() => page.evaluate(() => new URLSearchParams(location.search).get('Sections')))
+      .toBe('A1x2,B2');
+    expect(await playing(page)).toBe(writtenOut);
+    // the music: each once, lettered, A between repeat signs
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('[P:A ×2]|:');
+    expect(abc).toContain('[P:B]');
+  });
+});
+
+// Infinity Drumming, 2026: changing between straight notes and triplets keeps the
+// notes in order (the phrase played through the new note setting)
+test.describe('straight notes to triplets', () => {
+  const linkPart = (page, name) =>
+    page.evaluate((param) => new URLSearchParams(window.location.search).get(param), name);
+  // 3/4 bars of 16ths (12 notes) made 4/4 (the notes flow on across the bar lines)
+  const fourFour =
+    '?TimeSig=4/4&Div=16&Tempo=80&Measures=3' +
+    '&S=|-o-o-o-o-o-o--oo|--oo--oo-o--o-oo|-o--------------|' +
+    '&K=|X-o-X-o-X-o-Xo--|Xo--Xo--X-ooxo--|X-oo------------|';
+
+  test('8th triplets put each 12-note phrase back in a bar of its own, and 16ths again undo it', async ({
+    page,
+  }) => {
+    await loadGroove(page, grooveUrl(fourFour));
+    await page.click('#subdivision_12ths');
+    await expect.poll(() => linkPart(page, 'Div')).toBe('12');
+    expect(await linkPart(page, 'S')).toBe('|-o-o-o-o-o-o|--oo--oo--oo|-o--o-oo-o--|');
+    expect(await linkPart(page, 'K')).toBe('|X-o-X-o-X-o-|Xo--Xo--Xo--|X-ooxo--X-oo|');
+    await page.click('#subdivision_16ths');
+    await expect.poll(() => linkPart(page, 'Div')).toBe('16');
+    expect(await linkPart(page, 'S')).toBe('|-o-o-o-o-o-o--oo|--oo--oo-o--o-oo|-o--------------|');
+  });
+
+  test("a bar's eraser clears just that bar", async ({ page }) => {
+    await loadGroove(page, grooveUrl(fourFour));
+    await page.locator('#clearMeasureButton2').click();
+    await expect
+      .poll(() => linkPart(page, 'S'))
+      .toBe('|-o-o-o-o-o-o--oo|----------------|-o--------------|');
+    expect(await linkPart(page, 'K')).toBe('|X-o-X-o-X-o-Xo--|----------------|X-oo------------|');
+    await page.click('#undoButton', { force: true });
+    await expect
+      .poll(() => linkPart(page, 'S'))
+      .toBe('|-o-o-o-o-o-o--oo|--oo--oo-o--o-oo|-o--------------|');
+  });
+});
+
+test.describe('a block of notes in another tab', () => {
+  test('copied in one tab, pastes in another (in time, into 32nds)', async ({ page, context }) => {
+    // (the other address too: by way of the device's clipboard)
+    for (const origin of ['http://localhost:8000', 'http://127.0.0.1:8000'])
+      await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin });
+    const groove = (div, s) =>
+      '?TimeSig=4/4&Div=' + div + '&Tempo=80&Measures=1&S=|' + s + '|&K=|' + '-'.repeat(div) + '|';
+    await loadGroove(page, grooveUrl(groove(16, 'O-o-o-----------')));
+    // select the first 3 snare notes (16ths), copy
+    await page.evaluate(() => {
+      const gw = window.myGrooveWriter;
+      gw.toggleSelectNotes();
+    });
+    const cell = async (id) => {
+      const box = await page.locator('#' + id).boundingBox();
+      return [box.x + box.width / 2, box.y + box.height / 2];
+    };
+    await page.locator('#snare0').scrollIntoViewIfNeeded();
+    const [x0, y0] = await cell('snare0');
+    const [x1, y1] = await cell('snare4');
+    await page.mouse.move(x0, y0);
+    await page.mouse.down();
+    await page.mouse.move(x1, y1, { steps: 5 });
+    await page.mouse.up();
+    await page.click('#noteSelectCopy');
+    await expect(page.locator('#noteSelectText')).toContainText('Copied');
+
+    const other = await context.newPage();
+    await blockOutsideRequests(other);
+    await loadGroove(other, 'http://127.0.0.1:8000' + grooveUrl(groove(32, '-'.repeat(32))));
+    await other.bringToFront();
+    await other.evaluate(() => window.myGrooveWriter.toggleSelectNotes());
+    await other.locator('#snare8').scrollIntoViewIfNeeded();
+    await other.locator('#snare8').click();
+    await other.click('#noteSelectPaste');
+    await expect
+      .poll(() => other.evaluate(() => new URLSearchParams(location.search).get('S')))
+      .toBe('|--------O---o---o---------------|');
+  });
+});
