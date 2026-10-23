@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: sections (A, B) and bar numbers, the "Practise bars" box for a groove, the permutations called the Alphabet, play each up to ×16 and the rep counter switch, fat back kick permutations, a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: triplets keeping the phrase, a bar's eraser, copied notes in other tabs, sections (A, B) and bar numbers, the "Practise bars" box for a groove, the permutations called the Alphabet, play each up to ×16 and the rep counter switch, fat back kick permutations, a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -697,6 +697,12 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
       ')" class="closeMeasureButton"><i class="fa fa-times-circle"></i></span>';
   else newHTML += '<span class="closeMeasureButton"><i class="fa">&nbsp;&nbsp;&nbsp;</i></span>';
   newHTML +=
+    // its notes all off, to write it again (Infinity Drumming, 2026)
+    '<span title="Clear this bar\'s notes" id="clearMeasureButton' +
+    baseindex +
+    '" onClick="myGrooveWriter.clearMeasureButtonClick(' +
+    baseindex +
+    ')" class="clearMeasureButton"><i class="fa fa-eraser"></i></span>' +
     '<span title="Copy this bar" id="copyMeasureButton' +
     baseindex +
     '" onClick="myGrooveWriter.copyMeasureButtonClick(' +

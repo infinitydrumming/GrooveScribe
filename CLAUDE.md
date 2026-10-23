@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1157 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **125 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1159 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **128 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -159,10 +159,16 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   then its `replayer` / `data` / `currentTime` set and `resume()`, from a `setTimeout(0)` after that
   note's callback (inside it, `stop()` would cut the note still in MIDI.js's queue). The golden master
   doesn't cover it (no tempo changes); check it in a real browser by recording `MIDI.noteOn` times.
+- **Note settings between triplets and straight notes** (`changeDivisionKeepingThePhrase`): the notes keep
+  their slot order across the groove (`reflowIntoDivision`: every bar's slots as one phrase, laid into the
+  same number of bars in the new setting), as a whole-groove time-signature change already does (the
+  original reflow). Grid-multiple changes still keep the notes' time; Mixed / 32nds go by way of 16ths.
 - **Selecting notes** is Shift (or ⌘) + drag on `#measureContainer` (pointer events; Ctrl + hover
   is the original "paint notes on" shortcut, Alt + hover erases), or the Select button on touch
   screens (`touch-action: none` on the rows while on). A capture-phase click handler on the grid
-  swallows the click that ends a drag, so no note toggles. Pastes go through `keepingMutes`.
+  swallows the click that ends a drag, so no note toggles. Pastes go through `keepingMutes`. A copied block
+  also goes to localStorage and the clipboard (`Infinity Scribe notes {json}`, newest wins); Ctrl/⌘+V uses
+  the `paste` event's own text (no permission prompt), the Paste button `readText` with a 1.5 s fallback.
 - **Practise bars** (`PlayBars=1-2`, the play bar's box): the time round is just those bars
   (`practisedBars()`), built bar by bar like the groove / click cycle, whose sequence they become
   (`sequenceBar(i)`); `playingPercentToGroovePercent` turns the playing position back into the whole

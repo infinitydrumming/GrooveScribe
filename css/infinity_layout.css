@@ -855,12 +855,14 @@ body,
   color: #7d8ea5;
   background: transparent;
 }
+#measureContainer .clearMeasureButton,
 #measureContainer .copyMeasureButton,
 #measureContainer .pasteMeasureButton,
 #measureContainer .closeMeasureButton {
   font-size: 15px;
   color: #7d8ea5;
 }
+#measureContainer .clearMeasureButton:hover,
 #measureContainer .copyMeasureButton:hover,
 #measureContainer .pasteMeasureButton:hover,
 #measureContainer .closeMeasureButton:hover {

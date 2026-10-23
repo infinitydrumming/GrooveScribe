@@ -11,6 +11,26 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-23 — Triplets keep the phrase; erase one bar; copy notes between tabs
+
+- Changing the Notes setting between triplets and straight notes no longer
+  starts again from the default groove: the notes keep their order, slot after
+  slot, the phrase played through the new setting, as a new time signature
+  already does. A 3/4 groove of 16ths changed to 4/4 and then to 8th triplets
+  has each 12-note bar back in a bar of its own. The bars stay as many (cut at
+  the end, rests to fill); Mixed and 32nds go by way of 16ths, keeping the
+  notes' time. One undo.
+- An eraser at the top of each bar clears just that bar's notes (flams and
+  diddles too); its time signature, beats and section stay.
+- Notes copied with Shift + drag (or Select) paste into another tab or window,
+  and on the site's other address, by way of the device clipboard and this
+  site's storage (the newer copy); into another note setting they keep their
+  time where the grids line up (`blockInDivision` in `js/noteBlocks.js`).
+  Ctrl / ⌘ + V uses the paste itself (no clipboard permission needed); the Paste
+  button uses this site's copy if the clipboard doesn't answer
+  (`js/groove_writer.js`, `js/viewHtml.js`, `css/infinity_layout.css`,
+  `gscribe_help.html`).
+
 ## 2026-10-23 — Sections; bar numbers
 
 - **Sections.** Each bar card has a Section chip next to its number: bars in a

@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: sections (A, B) and bar numbers, 32nds beat by beat, tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes, practising some bars of a groove. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: triplets keeping the phrase, a bar's eraser, copied notes in other tabs, sections (A, B) and bar numbers, 32nds beat by beat, tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes, practising some bars of a groove. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -4415,6 +4415,10 @@ function GrooveWriter() {
   };
   var class_note_selection = []; // the selected cells: {row, index}
   var class_note_block = null; // the copied block, and the note setting it's in
+  // ... kept for other tabs too, like a copied bar: in this site's storage and on
+  // the device's clipboard ("Infinity Scribe notes {...}"); paste takes the newer
+  var constant_note_block_key = 'grooveScribeNoteBlock';
+  var constant_note_block_text = 'Infinity Scribe notes ';
   var class_select_mode = false; // the Select button
   var class_selecting = null; // a box being dragged
   var class_swallow_note_click = false; // (the click that ends a drag)
@@ -4489,12 +4493,13 @@ function GrooveWriter() {
     var drag = class_select_mode ? 'Drag' : 'Shift + drag';
     var text = message || selectionSummary();
     if (!text)
-      text = class_note_block ? 'Copied: ' + pick + ' where it goes' : drag + ' over the notes';
+      text = storedNoteBlock() ? 'Copied: ' + pick + ' where it goes' : drag + ' over the notes';
     document.getElementById('noteSelectText').textContent = text;
     /** @type {HTMLButtonElement} */ (document.getElementById('noteSelectCopy')).disabled =
       !class_note_selection.length;
+    // (a copy on the device's clipboard can't be seen till Paste reads it)
     /** @type {HTMLButtonElement} */ (document.getElementById('noteSelectPaste')).disabled =
-      !class_note_block || !class_note_selection.length;
+      !class_note_selection.length;
   }
 
   function noteSelectPointerDown(event) {
@@ -4604,10 +4609,19 @@ function GrooveWriter() {
       if (window.getSelection && String(window.getSelection())) return; // copying text
       event.preventDefault();
       root.copyNoteSelection();
-    } else if (key == 'v' && class_note_block && class_note_selection.length) {
-      event.preventDefault();
-      root.pasteNoteBlock();
     }
+    // (Ctrl / ⌘ + V: the paste event, see noteSelectPaste)
+  }
+
+  // Ctrl / ⌘ + V with notes selected: the copied block, from the paste's own text
+  // (another tab's, or the other address's) or this site's copy, the newer
+  function noteSelectPaste(event) {
+    if (!class_note_selection.length) return;
+    var target = /** @type {HTMLElement} */ (event.target);
+    if (target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)) return;
+    event.preventDefault();
+    var text = event.clipboardData ? event.clipboardData.getData('text/plain') : '';
+    pasteNoteBlockHere(newerNoteBlock(noteBlockFromText(text), storedNoteBlock()));
   }
 
   function setupNoteSelection() {
@@ -4619,12 +4633,24 @@ function GrooveWriter() {
     window.addEventListener('pointercancel', noteSelectPointerUp);
     grid.addEventListener('click', noteSelectClick, true); // before the notes' own
     document.addEventListener('keydown', noteSelectKeys);
+    document.addEventListener('paste', noteSelectPaste);
   }
 
   root.copyNoteSelection = function () {
     if (!class_note_selection.length) return;
     var block = _blocks.copyBlock(getTabLinesFromClickableUI(), class_note_selection);
-    class_note_block = { block: block, division: class_time_division };
+    class_note_block = { block: block, division: class_time_division, at: Date.now() };
+    try {
+      window.localStorage.setItem(constant_note_block_key, JSON.stringify(class_note_block));
+    } catch {
+      /* storage unavailable: the in-page copy still works */
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText)
+      navigator.clipboard
+        .writeText(constant_note_block_text + JSON.stringify(class_note_block))
+        .catch(function () {
+          /* not allowed: the copies above remain */
+        });
     showNoteSelectBar(
       'Copied ' +
         selectionSummary() +
@@ -4634,13 +4660,83 @@ function GrooveWriter() {
     );
   };
 
-  // the copied block, from the first selected note's slot (rows of its own)
+  // this tab's or this site's copied block (the newer), or null
+  function storedNoteBlock() {
+    var stored = null;
+    try {
+      stored = JSON.parse(window.localStorage.getItem(constant_note_block_key) || 'null');
+    } catch {
+      /* storage unavailable */
+    }
+    if (!stored || !stored.block) return class_note_block;
+    return class_note_block && class_note_block.at >= stored.at ? class_note_block : stored;
+  }
+
+  // a block in the device clipboard's text ("Infinity Scribe notes {...}"), or null
+  function noteBlockFromText(text) {
+    var prefix = constant_note_block_text.trim();
+    text = String(text || '').trim();
+    if (text.indexOf(prefix) !== 0) return null;
+    try {
+      var copied = JSON.parse(text.slice(prefix.length));
+      return copied && copied.block ? copied : null;
+    } catch {
+      return null; // not a block after all
+    }
+  }
+
+  function newerNoteBlock(a, b) {
+    if (!a || !b) return a || b;
+    return (a.at || 0) >= (b.at || 0) ? a : b;
+  }
+
+  // the block for the Paste button, to `then`: the newer of the device's
+  // clipboard's and this site's copy (as for a copied bar); this site's when the
+  // clipboard can't be read, or doesn't answer (a permission still being asked)
+  function readNoteBlock(then) {
+    var stored = storedNoteBlock();
+    var clipboard = navigator.clipboard;
+    if (!clipboard || !clipboard.readText) {
+      then(stored);
+      return;
+    }
+    var done = false;
+    var finish = function (copied) {
+      if (done) return;
+      done = true;
+      then(newerNoteBlock(copied, stored));
+    };
+    var timer = window.setTimeout(function () {
+      finish(null);
+    }, 1500);
+    clipboard.readText().then(
+      function (text) {
+        window.clearTimeout(timer);
+        finish(noteBlockFromText(text));
+      },
+      function () {
+        window.clearTimeout(timer);
+        finish(null); // not allowed (or nothing there): this site's copy
+      }
+    );
+  }
+
+  // the copied block (from this tab or another), from the first selected note's
+  // slot, in rows of its own
   root.pasteNoteBlock = function () {
-    var copied = class_note_block;
-    if (!copied || !class_note_selection.length) return;
-    if (copied.division != class_time_division) {
+    if (!class_note_selection.length) return;
+    readNoteBlock(pasteNoteBlockHere);
+  };
+
+  function pasteNoteBlockHere(copied) {
+    if (!copied || !class_note_selection.length) {
+      showNoteSelectBar('Nothing copied yet: select some notes and Copy them first');
+      return;
+    }
+    var block = _blocks.blockInDivision(copied.block, copied.division, class_time_division);
+    if (!block) {
       window.alert(
-        'Those notes were copied with another note setting: change Notes back to paste them.'
+        'Those notes were copied with triplets and these are straight (or the other way round): change Notes to paste them.'
       );
       return;
     }
@@ -4657,7 +4753,7 @@ function GrooveWriter() {
       },
       function () {
         var lines = getTabLinesFromClickableUI();
-        written = _blocks.pasteBlock(lines, copied.block, at, function (slot) {
+        written = _blocks.pasteBlock(lines, block, at, function (slot) {
           return !isHiddenSlot(slot) && !isBeatHiddenSlot(slot);
         });
         if (!written.length) return false;
@@ -4683,7 +4779,7 @@ function GrooveWriter() {
     );
     if (written.length) class_note_selection = written; // (what was pasted)
     showNoteSelection();
-  };
+  }
 
   function pastedInto(written, rows) {
     return written.some(function (cell) {
@@ -4749,18 +4845,29 @@ function GrooveWriter() {
   }
 
   // clear all the notes on all measures
+  // The eraser on a bar (Infinity Drumming, 2026): its notes all off, to write it
+  // again; its time signature, beats, section and the rest stay. One undo.
+  // measureNum is indexed starting at 1, not 0
+  root.clearMeasureButtonClick = function (measureNum) {
+    var first = (measureNum - 1) * class_notes_per_measure;
+    for (var i = first; i < first + class_notes_per_measure; i++) clearNotesAt(i);
+    updateSheetMusic();
+  };
+
+  function clearNotesAt(i) {
+    set_sticking_state(i, 'off');
+    set_hh_state(i, 'off');
+    set_tom1_state(i, 'off');
+    set_tom2_state(i, 'off');
+    set_crash_state(i, 'off');
+    set_ride_state(i, 'off');
+    set_tom4_state(i, 'off');
+    set_snare_state(i, 'off');
+    set_kick_state(i, 'off');
+  }
+
   root.clearAllNotes = function () {
-    for (var i = 0; i < class_number_of_measures * class_notes_per_measure; i++) {
-      set_sticking_state(i, 'off');
-      set_hh_state(i, 'off');
-      set_tom1_state(i, 'off');
-      set_tom2_state(i, 'off');
-      set_crash_state(i, 'off');
-      set_ride_state(i, 'off');
-      set_tom4_state(i, 'off');
-      set_snare_state(i, 'off');
-      set_kick_state(i, 'off');
-    }
+    for (var i = 0; i < class_number_of_measures * class_notes_per_measure; i++) clearNotesAt(i);
     updateSheetMusic();
   };
 
@@ -7649,9 +7756,10 @@ function GrooveWriter() {
     hideUnusedBarSlots();
     applyBeatHiding();
 
-    // un-highlight the old div
-    unselectButton(document.getElementById('subdivision_' + oldDivision + 'ths'));
-    unselectButton(document.getElementById('subdivision_48ths')); // (32nds beat by beat show it)
+    // un-highlight the old div (any: 32nds beat by beat show Mixed)
+    [8, 16, 32, 12, 24, 48, oldDivision].forEach(function (division) {
+      unselectButton(document.getElementById('subdivision_' + division + 'ths'));
+    });
 
     // highlight the new div (Mixed for 32nds beat by beat)
     selectButton(document.getElementById('subdivision_' + shownDivision() + 'ths'));
@@ -7699,6 +7807,55 @@ function GrooveWriter() {
       for (var b = 0; char && b < barSigOf(bar).top; b++) beats += char;
       return beats;
     });
+  }
+
+  // Between triplets and straight notes (Infinity Drumming, 2026): the notes keep
+  // their order, slot after slot, the phrase played through the new note setting,
+  // as a new time signature does (the 12 16ths of a 3/4 bar are the 12 8th-note
+  // triplets of a 4/4 bar). The bars stay as many: past their end is cut, and rests
+  // fill what's left. Mixed and 32nds go by way of 16ths, keeping the notes' time.
+  // One undo takes it back.
+  function changeDivisionKeepingThePhrase(newDivision) {
+    root.resetMetronomeOptionsMenuOffsetClick(); // the click's offsets differ in triplets
+    keepingMutes(
+      function (bar) {
+        return [bar];
+      },
+      function () {
+        if (newDivision != 48 && class_time_division != 48) return reflowIntoDivision(newDivision);
+        root.changeDivision(16);
+        root.changeDivision(newDivision);
+      }
+    );
+  }
+
+  // every bar's notes as one phrase, laid into the bars again in a new note setting
+  function reflowIntoDivision(newDivision) {
+    var records = readBarRecords();
+    var counts = records.map(function (record) {
+      return barNoteCount(newDivision, record.sig);
+    });
+    var reflow = function (kind, name) {
+      var phrase = records
+        .map(function (record) {
+          return record[kind][name] || '';
+        })
+        .join('');
+      var at = 0;
+      records.forEach(function (record, bar) {
+        var chars = phrase.slice(at, at + counts[bar]);
+        at += counts[bar];
+        record[kind][name] = chars + new Array(counts[bar] - chars.length + 1).join('-');
+      });
+    };
+    for (var name in BAR_LINE_READERS) reflow('lines', name);
+    for (var orn in emptyOrnamentLines()) reflow('ornaments', orn);
+    var oldDivision = class_time_division;
+    class_time_division = newDivision;
+    class_beat_notes = []; // (no beats of their own in a plain note setting)
+    if (layOutBarRecords(records) !== false) return true;
+    class_time_division = oldDivision;
+    return false;
   }
 
   // Mixed asked for on the 32nds grid, beat by beat: it is already (and would
@@ -7772,13 +7929,18 @@ function GrooveWriter() {
       return;
     }
 
-    class_beat_notes = beatsInDivision(newDivision);
-    class_beats_for_next_division = null;
-
     // notes keep their places when one note setting's grid is a whole multiple of
-    // the other's (16ths and Mixed, 8ths and 16th triplets...)
+    // the other's (16ths and Mixed, 8ths and 16th triplets...); between triplets and
+    // straight notes otherwise they keep their order (Infinity Drumming, 2026)
     var exactChange =
       newDivision % class_time_division === 0 || class_time_division % newDivision === 0;
+    if (!exactChange && usingTriplets() !== isNewDivisionTriplets) {
+      changeDivisionKeepingThePhrase(newDivision);
+      return;
+    }
+
+    class_beat_notes = beatsInDivision(newDivision);
+    class_beats_for_next_division = null;
     if (usingTriplets() !== isNewDivisionTriplets && exactChange)
       root.resetMetronomeOptionsMenuOffsetClick(); // the click's offsets differ in triplets
 
