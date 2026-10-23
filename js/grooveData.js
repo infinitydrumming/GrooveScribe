@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: 32nds beat by beat, crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar, practice timer, counting and its choices, more metronome clicks, diddles and beat-by-beat notes, an exercise's practice settings and instructions. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: sections (A, B) and bar numbers, 32nds beat by beat, crash and ride lines, Brazilian swing, straight bars, grace-note settings, a time signature per bar, practice timer, counting and its choices, more metronome clicks, diddles and beat-by-beat notes, an exercise's practice settings and instructions. See CHANGES.md.
 // grooveData — the central data contract for Groove Scribe.
 //
 // A GrooveData describes a single groove: its time signature, subdivision and
@@ -97,6 +97,10 @@ const EMPTY_NOTE_ARRAY = [
  *   bars ("16b"); '' = off. URL "Practice".
  * @property {boolean[]} straightBars  Per bar (index 0 = bar 1): true plays that bar straight
  *                                     even when the groove is swung. URL "StraightBars" (1-based list).
+ * @property {string[]} barSections  Per bar: its section's letter ('A'), '' for none; bars in a
+ *   row with the same letter are one section (see sections.js). URL "Sections=A1-2x4,B3-4x2".
+ * @property {number[]} sectionRepeats  Per bar: how many times its section plays (a section has
+ *   its first bar's).
  * @property {Array<{top: number, bottom: number}>} barTimeSigs  Each bar's time signature when
  *   they differ (bar 1's is numBeats / noteValue); empty when every bar is the same. URL
  *   "BarSigs" (only when they differ). notesPerMeasure is then the bar stride: the most
@@ -163,6 +167,8 @@ export function createGrooveData(config = {}) {
     countMode: 'all',
     beatNotes: [], // Mixed (Div 48) or 32nds beat by beat (Div 32): each bar's beats, see beatNotes.js
     straightBars: [],
+    barSections: [], // each bar's section letter, see sections.js
+    sectionRepeats: [],
     barTimeSigs: [],
     graceSpacingMs: DEFAULT_GRACE_SPACING_MS,
     graceVolume: DEFAULT_GRACE_VOLUME,

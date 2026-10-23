@@ -358,3 +358,38 @@ test.describe('32nds on one beat', () => {
     expect(await inLink(page, 'S')).toBe('|----O-------O---|');
   });
 });
+
+// Infinity Drumming, 2026: sections (A ×2, then B) on the groove page
+test.describe('sections', () => {
+  const bars = { A: 'RLRRLRLLRLRRLRLL', B: 'RRLLRRLLRRLLRRLL' };
+  const snare = { A: 'O-------O-------', B: 'oooooooooooooooo' };
+  const groove = (which, extra = '') =>
+    '?TimeSig=4/4&Div=16&Tempo=80&Measures=' +
+    which.length +
+    '&Stickings=|' +
+    which.map((b) => bars[b]).join('|') +
+    '|&S=|' +
+    which.map((b) => snare[b]).join('|') +
+    '|&K=|' +
+    which.map(() => 'o---o---o---o---').join('|') +
+    '|' +
+    extra;
+
+  test('chosen on the bars, play as the bars written out would', async ({ page }) => {
+    await loadGroove(page, grooveUrl(groove(['A', 'A', 'B'])));
+    const writtenOut = await playing(page);
+
+    await loadGroove(page, grooveUrl(groove(['A', 'B'])));
+    await page.selectOption('#barSection1 select', 'A');
+    await page.selectOption('#barSection1 .sectionRepeatsSelect', '2');
+    await page.selectOption('#barSection2 select', 'B');
+    await expect
+      .poll(() => page.evaluate(() => new URLSearchParams(location.search).get('Sections')))
+      .toBe('A1x2,B2');
+    expect(await playing(page)).toBe(writtenOut);
+    // the music: each once, lettered, A between repeat signs
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('[P:A ×2]|:');
+    expect(abc).toContain('[P:B]');
+  });
+});

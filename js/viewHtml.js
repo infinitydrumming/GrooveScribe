@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: the "Practise bars" box for a groove, the permutations called the Alphabet, play each up to ×16 and the rep counter switch, fat back kick permutations, a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: sections (A, B) and bar numbers, the "Practise bars" box for a groove, the permutations called the Alphabet, play each up to ×16 and the rep counter switch, fat back kick permutations, a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each", swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -9,6 +9,7 @@
 
 import { groupAt } from './beatNotes.js';
 import { constant_MAX_MEASURES } from './constants.js';
+import { SECTION_LETTERS, MAX_SECTION_REPEATS } from './sections.js';
 
 // Whether the note at `slot` (from 0) ends a group on the grid: every
 // ctx.noteGrouping notes, or at ctx.groupEnds (the classic x/8 groups,
@@ -709,6 +710,8 @@ export function buildStaffContainerHTML(baseindex, indexStartForNotes, ctx) {
     straightBarButtonHTML(baseindex, ctx.straightBar) +
     barTimeSigButtonHTML(baseindex, ctx.barTimeSig);
   newHTML += '</span>';
+  // the bar's section, next to its number (in view on a phone too)
+  if (ctx.section) newHTML += barSectionHTML(baseindex, ctx.section);
 
   // a copy of this bar right after it (Infinity Drumming, 2026), while there's room
   if (ctx.numberOfMeasures < constant_MAX_MEASURES)
@@ -756,6 +759,60 @@ function barTimeSigButtonHTML(baseindex, timeSig) {
     timeSig +
     '</span>'
   );
+}
+
+/**
+ * A bar's section (Infinity Drumming, 2026): its letter, chosen from a list, and on
+ * a section's first bar how many times the section plays (see sections.js).
+ *
+ * @param {number} baseindex  The bar, starting at 1.
+ * @param {{letter: string, repeats: number, first: boolean}} section
+ * @returns {string}
+ */
+export function barSectionHTML(baseindex, section) {
+  var html =
+    '<span class="barSection" id="barSection' +
+    baseindex +
+    '"><select class="barSectionSelect' +
+    (section.letter ? '' : ' none') +
+    '" title="The section this bar is in: bars in a row with the same letter are one section"' +
+    ' aria-label="Section of bar ' +
+    baseindex +
+    '" onchange="myGrooveWriter.barSectionChange(' +
+    baseindex +
+    ', this.value)"><option value="">Section</option>';
+  SECTION_LETTERS.forEach(function (letter) {
+    html +=
+      '<option value="' +
+      letter +
+      '"' +
+      (letter == section.letter ? ' selected' : '') +
+      '>' +
+      letter +
+      '</option>';
+  });
+  html += '</select>';
+  if (section.letter && section.first) {
+    html +=
+      '<select class="sectionRepeatsSelect" title="How many times section ' +
+      section.letter +
+      ' plays before what comes next" aria-label="Times section ' +
+      section.letter +
+      ' plays" onchange="myGrooveWriter.sectionRepeatsChange(' +
+      baseindex +
+      ', this.value)">';
+    for (var times = 1; times <= MAX_SECTION_REPEATS; times++)
+      html +=
+        '<option value="' +
+        times +
+        '"' +
+        (times == section.repeats ? ' selected' : '') +
+        '>\u00d7' +
+        times +
+        '</option>';
+    html += '</select>';
+  }
+  return html + '</span>';
 }
 
 /**

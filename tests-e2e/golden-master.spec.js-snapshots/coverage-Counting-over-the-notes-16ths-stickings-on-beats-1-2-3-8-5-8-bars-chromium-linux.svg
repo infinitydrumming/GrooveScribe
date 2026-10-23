@@ -12,6 +12,7 @@
 	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
 </g>
 </defs><g transform="scale(0.75)"><g transform="translate(0,75.70)">
+<text class="f1_1" x="636.35" y="-10.66">2</text>
 <text class="f2_1" x="43.80" y="-39.56">R</text>
 <text class="f2_1" x="119.11" y="-39.56">L</text>
 <text class="f2_1" x="193.62" y="-39.56">R</text>
@@ -105,6 +106,7 @@ l150.49 0.00v3.20l-150.49 0.00"></path>
 <title>abc2svg - 6.</title><style type="text/css">
 .fill {fill: currentColor}
 .stroke {stroke: currentColor; fill: none; stroke-width: .7}
+.f1_1 {font:italic 14px serif}
 .f2_1 {font:16px calibri}
 </style><defs>
 
@@ -115,6 +117,7 @@ l150.49 0.00v3.20l-150.49 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,69.70)">
+<text class="f1_1" x="24.00" y="-44.00">3</text>
 <text class="f2_1" x="44.98" y="-54.90">1</text>
 <text class="f2_1" x="127.65" y="-54.90">&amp;</text>
 <text class="f2_1" x="214.23" y="-54.90">2</text>

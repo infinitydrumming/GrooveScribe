@@ -98,6 +98,7 @@ export default [
       'js/constants.js',
       'js/tempoSwitch.js',
       'js/noteBlocks.js',
+      'js/sections.js',
       'js/musicMath.js',
       'js/noteArrays.js',
       'js/browserInfo.js',

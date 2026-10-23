@@ -8,7 +8,7 @@
 //   Perm=kick_16ths&PermSet=0011..&PlayEach=2   permutation, its ticked boxes
 //                                               (in the options' order), × each
 //   PermBars=3-6,9                              just these bars of the run
-//   PlayBars=1-2                                just these bars of a groove
+//   PlayBars=1-2  PlayBars=B                    just these bars (or sections) of a groove
 //   Ostinato=2                                  the figures go over the first
 //                                               2 bars (1 if not given)
 //   FatBack=1                                   kick figures without the kicks
@@ -135,7 +135,7 @@ function barsToUrl(bars) {
 }
 function barsFromUrl(text) {
   return String(text || '')
-    .replace(/[^0-9,-]/g, '')
+    .replace(/[^0-9A-Fa-f,-]/g, '') // (a groove's sections by letter too)
     .split(',')
     .filter(Boolean)
     .join(', ');

@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: 32nds beat by beat, tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes, practising some bars of a groove. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: sections (A, B) and bar numbers, 32nds beat by beat, tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes, practising some bars of a groove. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -111,6 +111,7 @@ import {
   speedUpStepsDue,
 } from './practiceTimer.js';
 import * as _perm from './permutations.js';
+import { sectionRuns, formBars, barsOfSection } from './sections.js';
 import * as _blocks from './noteBlocks.js';
 import * as _view from './viewHtml.js';
 import * as _grid from './gridState.js';
@@ -211,6 +212,10 @@ function GrooveWriter() {
   var class_loaded_midi_straight_bars = [];
   // per bar (index 0 = bar 1): true plays that bar straight when the groove is swung
   var class_straight_bars = [];
+  // per bar (index 0 = bar 1): its section's letter ('' for none), and how many
+  // times its section plays (a section has its first bar's), see sections.js
+  var class_bar_sections = [];
+  var class_section_repeats = [];
   // each bar's time signature ({ top, bottom }) when the bars differ, else empty
   // (all bars are class_num_beats_per_measure / class_note_value_per_measure).
   // Every bar keeps class_notes_per_measure note slots (the longest bar's); a
@@ -292,13 +297,32 @@ function GrooveWriter() {
   // signature when it isn't the one before it (the first: bar 1's), and when some
   // are practised the next bar's number as in the whole groove (set before this
   // one, as the music engine numbers the bar after; the first is in the heading)
-  function writtenBarABC(barABC, shownBars, shown, numbered) {
+  // (with every bar, its section's marks: `addon` ends the bar's lines)
+  function writtenBarABC(barABC, shownBars, shown, numbered, addon) {
     var bar = shownBars[shown];
     var before = shown > 0 ? shownBars[shown - 1] : 0;
     if (barSigLabel(bar) != barSigLabel(before)) barABC = addMeterChange(barABC, barSigOf(bar));
+    if (!numbered) return withSectionMarks(barABC, bar, addon);
     var next = shownBars[shown + 1];
-    if (!numbered || next === undefined) return barABC;
+    if (next === undefined) return barABC;
     return '%%setbarnb ' + (next + 1) + '\n' + barABC;
+  }
+  // what ends a bar's lines in the music: the end (a closing repeat sign is end
+  // enough), a new line, or the line going on
+  function barLineEnd(shownBars, shown, barsPerLine, numbered) {
+    if (shown + 1 == shownBars.length)
+      return !numbered && endsRepeatedSection(shownBars[shown]) ? '\n' : '|\n';
+    return (shown + 1) % barsPerLine === 0 ? '\n' : '\\\n';
+  }
+  function endsRepeatedSection(bar) {
+    return currentSectionRuns().some(function (run) {
+      return run.to == bar && run.repeats > 1;
+    });
+  }
+  // the music's bar numbers: on every bar after the first (Infinity Drumming,
+  // 2026), and over bars being practised which they are
+  function musicBarsHeading() {
+    return practisedBarsHeading() || (class_number_of_measures > 1 ? '%%measurenb 1\n' : '');
   }
   // the bars the music writes: every bar, or those practised (Infinity Drumming, 2026)
   function barsWritten() {
@@ -312,7 +336,10 @@ function GrooveWriter() {
       return bar + 1;
     });
     if (!bars.length) return '';
+    // a section, or sections, by name ("Section B")
+    var text = practiseBarsText();
     var which = (bars.length > 1 ? 'Bars ' : 'Bar ') + _perm.barListToText(bars);
+    if (/^[A-F](, [A-F])*$/.test(text)) which = (text.length > 1 ? 'Sections ' : 'Section ') + text;
     return '%%measurenb 1\nP:' + which + '\n';
   }
   function barSigLabel(bar) {
@@ -3141,6 +3168,12 @@ function GrooveWriter() {
       myGrooveData.straightBars.push(!!class_straight_bars[bar]);
     myGrooveData.barTimeSigs = currentBarTimeSigs();
     myGrooveData.beatNotes = currentBeatNotes();
+    myGrooveData.barSections = [];
+    myGrooveData.sectionRepeats = [];
+    for (var b = 0; b < class_number_of_measures; b++) {
+      myGrooveData.barSections.push(class_bar_sections[b] || '');
+      myGrooveData.sectionRepeats.push(class_section_repeats[b] || 1);
+    }
     myGrooveData.tempo = root.myGrooveUtils.getTempo();
     myGrooveData.graceSpacingMs = root.myGrooveUtils.graceSpacingMs;
     myGrooveData.graceVolume = root.myGrooveUtils.graceVolume;
@@ -3616,7 +3649,7 @@ function GrooveWriter() {
         // the whole groove (Infinity Drumming, 2026)
         var shownBars = barsWritten();
         var numbered = shownBars.length < class_number_of_measures;
-        fullABC += practisedBarsHeading();
+        fullABC += musicBarsHeading();
 
         // "Straight" / "Swing" over the bars where the feel changes
         var feelMarkings = getFeelMarkings(
@@ -3650,16 +3683,7 @@ function GrooveWriter() {
             );
           }
 
-          if (shown + 1 == shownBars.length) {
-            // last measure
-            addon_abc = '|\n';
-          } else if ((shown + 1) % numberOfMeasuresPerLine === 0) {
-            // new line measure
-            addon_abc = '\n';
-          } else {
-            // continuation measure
-            addon_abc = '\\\n';
-          }
+          addon_abc = barLineEnd(shownBars, shown, numberOfMeasuresPerLine, numbered);
           var barABC = root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
             Sticking_Array,
             HH_Array,
@@ -3675,7 +3699,7 @@ function GrooveWriter() {
             barSigOf(i).bottom,
             beatPlanOfBar(i)
           );
-          barABC = writtenBarABC(barABC, shownBars, shown, numbered);
+          barABC = writtenBarABC(barABC, shownBars, shown, numbered, addon_abc);
           fullABC += addFeelMarking(barABC, feelMarkings[shown]);
           root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
             root.myGrooveUtils.create_note_mapping_array_for_highlighting(
@@ -3882,6 +3906,8 @@ function GrooveWriter() {
     class_number_of_measures--;
     class_straight_bars.splice(measureNum - 1, 1);
     class_beat_notes.splice(measureNum - 1, 1);
+    class_bar_sections.splice(measureNum - 1, 1);
+    class_section_repeats.splice(measureNum - 1, 1);
 
     root.expandAuthoringViewWhenNecessary(class_notes_per_measure, class_number_of_measures);
 
@@ -3979,6 +4005,11 @@ function GrooveWriter() {
     class_straight_bars[class_number_of_measures - 1] =
       !!class_straight_bars[class_number_of_measures - 2];
     class_beat_notes[class_number_of_measures - 1] = beatsOfBar(class_number_of_measures - 2);
+    // ... and its section (the section goes on into it)
+    class_bar_sections[class_number_of_measures - 1] =
+      class_bar_sections[class_number_of_measures - 2] || '';
+    class_section_repeats[class_number_of_measures - 1] =
+      class_section_repeats[class_number_of_measures - 2] || 1;
 
     root.expandAuthoringViewWhenNecessary(class_notes_per_measure, class_number_of_measures);
 
@@ -4071,6 +4102,85 @@ function GrooveWriter() {
       if (button)
         button.outerHTML = _view.straightBarButtonHTML(bar, !!class_straight_bars[bar - 1]);
     }
+  }
+
+  // --- Sections (Infinity Drumming, 2026) -------------------------------------
+  // Each bar can have a section letter; bars in a row with the same letter are a
+  // section, played as many times as its first bar says before what comes next
+  // (A ×4, then B ×2, round and round; see sections.js). The music writes each
+  // section once, with its letter, repeat signs and how many times.
+
+  function currentSectionRuns() {
+    return sectionRuns(class_bar_sections, class_section_repeats, class_number_of_measures);
+  }
+
+  // a bar's section for its buttons: {letter, repeats, first}
+  function sectionOfBar(bar) {
+    var run = currentSectionRuns().find(function (r) {
+      return bar >= r.from && bar <= r.to;
+    });
+    return run
+      ? { letter: run.letter, repeats: run.repeats, first: run.from == bar }
+      : { letter: '', repeats: 1, first: false };
+  }
+
+  function refreshSectionButtons() {
+    for (var bar = 1; bar <= class_number_of_measures; bar++) {
+      var buttons = document.getElementById('barSection' + bar);
+      if (buttons) buttons.outerHTML = _view.barSectionHTML(bar, sectionOfBar(bar - 1));
+    }
+  }
+
+  // set every bar of a section to its repeats
+  function setRunRepeats(run, times) {
+    for (var bar = run.from; bar <= run.to; bar++) class_section_repeats[bar] = times;
+  }
+
+  // a bar's section letter chosen: it joins the section before it (or after it)
+  // with that letter, taking its repeats, or starts one played once
+  root.barSectionChange = function (measureNum, letter) {
+    var bar = measureNum - 1;
+    var before = currentSectionRuns().find(function (r) {
+      return r.to == bar - 1 && r.letter == letter;
+    });
+    var after = currentSectionRuns().find(function (r) {
+      return r.from == bar + 1 && r.letter == letter;
+    });
+    class_bar_sections[bar] = letter || '';
+    var joined = before || after;
+    class_section_repeats[bar] = joined ? joined.repeats : 1;
+    // (a section split in two: each part keeps its repeats)
+    refreshSectionButtons();
+    root.refresh_ABC(); // the music, the playing order and the link
+  };
+
+  root.sectionRepeatsChange = function (measureNum, value) {
+    var bar = measureNum - 1;
+    var run = currentSectionRuns().find(function (r) {
+      return bar >= r.from && bar <= r.to;
+    });
+    if (!run) return;
+    setRunRepeats(run, Math.max(1, parseInt(value, 10) || 1));
+    refreshSectionButtons();
+    root.refresh_ABC();
+  };
+
+  // A bar of the whole groove's music with its section marked: at a section's
+  // start its letter (and how many times), and repeat signs round a section that
+  // plays more than once. `addon` is what ends the bar's lines.
+  function withSectionMarks(barABC, bar, addon) {
+    var run = currentSectionRuns().find(function (r) {
+      return bar >= r.from && bar <= r.to;
+    });
+    if (!run) return barABC;
+    var repeated = run.repeats > 1;
+    if (bar == run.from) {
+      var label = run.letter + (repeated ? ' \u00d7' + run.repeats : '');
+      if (repeated) barABC = barABC.replace(/(V:Stickings\n|%%voicemap drum\n)/g, '$1|:');
+      barABC = barABC.replace(/(V:Stickings\n)/, '$1[P:' + label + ']');
+    }
+    if (bar == run.to && repeated) barABC = barABC.split(' |' + addon).join(' :|' + addon);
+    return barABC;
   }
 
   // measureNum is indexed starting at 1, not 0
@@ -5184,7 +5294,7 @@ function GrooveWriter() {
   function buildGrooveMidiUrl() {
     if (class_groove_click_active && grooveClickSequenceLength() > 0)
       return createGrooveClickCycleMidiUrl(class_groove_click_cycle_start_bar);
-    if (practisedBars().length) return createPractisedBarsMidiUrl();
+    if (playedBars().length) return createPlayedBarsMidiUrl();
     return createMidiUrlFromClickableUI('our_MIDI');
   }
 
@@ -6057,10 +6167,55 @@ function GrooveWriter() {
   // the bars the box names (1-based, in order), of the bars there are
   function chosenPractiseBars() {
     if (class_permutation_type != 'none') return [];
-    return _perm.parseBarList(class_practise_bars, class_number_of_measures);
+    return _perm.parseBarList(withSectionBars(class_practise_bars), class_number_of_measures);
   }
 
-  // the groove's bars that play (0-based), [] for all of them
+  // the box's sections ("B") as their bars ("3,4"), so "B" practises section B
+  function withSectionBars(text) {
+    return String(text || '').replace(/[A-Fa-f]/g, function (letter) {
+      var bars = barsOfSection(class_bar_sections, letter.toUpperCase(), class_number_of_measures);
+      return (
+        ',' +
+        bars
+          .map(function (bar) {
+            return bar + 1;
+          })
+          .join(',') +
+        ','
+      );
+    });
+  }
+
+  // What's typed in the box, tidied: the sections it names that there are, then
+  // its bars ("B, 1-3, 6")
+  function tidyPractiseBars(text) {
+    var letters = [];
+    String(text || '').replace(/[A-Fa-f]/g, function (letter) {
+      letter = letter.toUpperCase();
+      if (letters.indexOf(letter) < 0 && class_bar_sections.indexOf(letter) >= 0)
+        letters.push(letter);
+      return '';
+    });
+    var numbers = String(text || '').replace(/[A-Fa-f]/g, ' ');
+    var bars = _perm.barListToText(_perm.parseBarList(numbers, class_number_of_measures));
+    return letters.concat(bars ? [bars] : []).join(', ');
+  }
+
+  // The groove's bars in the order they play (0-based): those practised, or the
+  // sections each as many times as it says; [] when that's every bar once, in order
+  function playedBars() {
+    var practised = practisedBars();
+    if (practised.length || class_permutation_type != 'none') return practised;
+    var form = formBars(class_bar_sections, class_section_repeats, class_number_of_measures);
+    var inOrder =
+      form.length == class_number_of_measures &&
+      form.every(function (bar, i) {
+        return bar == i;
+      });
+    return inOrder ? [] : form;
+  }
+
+  // the groove's bars that are practised (0-based), [] for all of them
   function practisedBars() {
     var chosen = chosenPractiseBars();
     if (chosen.length >= class_number_of_measures) return [];
@@ -6070,11 +6225,11 @@ function GrooveWriter() {
   }
 
   function practiseBarsText() {
-    return _perm.barListToText(chosenPractiseBars());
+    return class_permutation_type == 'none' ? tidyPractiseBars(class_practise_bars) : '';
   }
 
   function setPractiseBars(text) {
-    var bars = _perm.barListToText(_perm.parseBarList(text, class_number_of_measures));
+    var bars = tidyPractiseBars(text);
     if (bars != class_practise_bars) {
       class_practise_bars = bars;
       resetGrooveClickPhase();
@@ -6155,14 +6310,14 @@ function GrooveWriter() {
     }
   }
 
-  // just the bars to practise, in order
-  function createPractisedBarsMidiUrl() {
+  // just the bars to practise (or the sections as they play), in order
+  function createPlayedBarsMidiUrl() {
     var midiFile = new Midi.File();
     var midiTrack = newExactTimeTrack();
     midiFile.addTrack(midiTrack);
     midiTrack.setTempo(root.myGrooveUtils.getTempo());
     midiTrack.setInstrument(0, 0x13);
-    practisedBars().forEach(function (bar) {
+    playedBars().forEach(function (bar) {
       addGrooveBarToMidiTrack(midiTrack, bar, 'our_MIDI');
     });
     return 'data:audio/midi;base64,' + btoa(midiFile.toBytes());
@@ -6173,13 +6328,13 @@ function GrooveWriter() {
   // ("Play each" repeats included).
   function grooveClickSequenceLength() {
     return class_permutation_type == 'none'
-      ? practisedBars().length || class_number_of_measures
+      ? playedBars().length || class_number_of_measures
       : get_numberOfPermutationBars();
   }
 
   // Bar `index` of that sequence: a bar of the groove, or of the permutation's run
   function sequenceBar(index) {
-    var bars = practisedBars();
+    var bars = playedBars();
     return bars.length ? bars[index] : index;
   }
 
@@ -6240,10 +6395,10 @@ function GrooveWriter() {
     }
     percent = snapToSwungGrid(percent);
     if (class_groove_click_active) return grooveClickCycleGroovePercent(percent);
-    var practised = practisedBars();
-    if (practised.length) {
-      var where = positionInBars(percent, practised);
-      return groovePercentAt(practised[where.index], where.fraction);
+    var played = playedBars();
+    if (played.length) {
+      var where = positionInBars(percent, played);
+      return groovePercentAt(played[where.index], where.fraction);
     }
     return percent;
   }
@@ -6266,7 +6421,7 @@ function GrooveWriter() {
         );
       return cycleBars;
     }
-    if (practisedBars().length) return practisedBars().map(isSequenceBarStraight);
+    if (playedBars().length) return playedBars().map(isSequenceBarStraight);
     if (class_permutation_type != 'none') {
       var runBars = [];
       for (var b = 0; b < get_numberOfPermutationBars(); b++)
@@ -6544,6 +6699,8 @@ function GrooveWriter() {
       var record = {
         sig: barSigOf(bar),
         straight: !!class_straight_bars[bar],
+        section: class_bar_sections[bar] || '',
+        sectionRepeats: class_section_repeats[bar] || 1,
         lines: {},
         beats: beatsOfBar(bar),
         beatsSig: barSigOf(bar),
@@ -6589,6 +6746,12 @@ function GrooveWriter() {
     if (!isMixedMeterGroove()) class_bar_time_sigs = [];
     class_straight_bars = records.map(function (record) {
       return record.straight;
+    });
+    class_bar_sections = records.map(function (record) {
+      return record.section || '';
+    });
+    class_section_repeats = records.map(function (record) {
+      return record.sectionRepeats || 1;
     });
     // beat by beat: a bar keeps its beats, or in a new time signature gets them
     // from its notes
@@ -7382,6 +7545,9 @@ function GrooveWriter() {
 
     class_straight_bars = (myGrooveData.straightBars || []).slice();
     refreshStraightBarButtons();
+    class_bar_sections = (myGrooveData.barSections || []).slice();
+    class_section_repeats = (myGrooveData.sectionRepeats || []).slice();
+    refreshSectionButtons();
     root.myGrooveUtils.setSwing(myGrooveData.swingPercent);
     root.myGrooveUtils.setSwingStyle(myGrooveData.swingStyle);
     root.myGrooveUtils.setGraceSpacingMs(myGrooveData.graceSpacingMs);
@@ -7727,6 +7893,7 @@ function GrooveWriter() {
       numberOfMeasures: class_number_of_measures,
       straightBar: !!class_straight_bars[baseindex - 1],
       barTimeSig: barSigLabel(baseindex - 1),
+      section: sectionOfBar(baseindex - 1),
       // the row of beats, to choose each beat's notes
       beatHeader: beatHeaderOfBar(baseindex - 1),
       // x/8 bars are grouped like their beaming (5/8 = 3+2, ...); beat by beat,

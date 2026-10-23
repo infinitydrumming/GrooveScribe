@@ -7,7 +7,10 @@
 <path id="pclef" class="stroke" style="stroke-width:1.4" d="m-4 10h5.4v-20h-5.4v20"></path>
 <ellipse id="hd" rx="4.1" ry="2.9" transform="rotate(-20)" class="fill"></ellipse>
 <path id="Xhead" d="m-3,-3 l6,6 m0,-6 l-6,6" class="stroke" style="stroke-width:1.2"></path>
-</defs><g transform="scale(0.75)"><path class="stroke" d="m444.50 70.04v-24.00"></path>
+</defs><g transform="scale(0.75)"><g transform="translate(0,48.70)">
+<text class="f1_1" x="441.42" y="-10.66">2</text>
+</g>
+<path class="stroke" d="m444.50 70.04v-24.00"></path>
 <path class="stroke" d="m885.33 70.04v-24.00"></path>
 <path class="stroke" d="m882.33 70.04v-24.00"></path>
 <path class="stroke" d="m0.00 70.04

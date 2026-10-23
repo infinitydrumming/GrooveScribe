@@ -11,6 +11,25 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-23 — Sections; bar numbers
+
+- **Sections.** Each bar card has a Section chip next to its number: bars in a
+  row with the same letter are one section (A for 2 bars of paradiddles, B for
+  2 bars of doubles), and a section's first bar says how many times it plays
+  (×1 to ×16). The groove plays the form round and round (A ×4, then B ×2);
+  bars without a letter play once where they are. The music writes each
+  section once with its letter, how many times, and repeat signs; the cursor
+  and the grid's highlight follow the playing. The practice timer, speed-up,
+  groove / click bars and tempo changes go by the bars as they play. Practise
+  bars takes a section's letter ("B"). In links as `Sections=A1-2x4,B3-4x2`;
+  sections stay with their bars as bars are added, copied or removed. The new
+  `js/sections.js` works out the sections and the playing order;
+  `js/groove_writer.js`, `js/viewHtml.js`, `js/urlSerialization.js`,
+  `js/grooveData.js`, `js/practiceSettings.js` (`PlayBars=B`),
+  `css/infinity_layout.css`, `index.html`, `gscribe_help.html`.
+- **Bar numbers** in the music of a groove of 2 or more bars (on every bar after
+  the first, as the alphabet's are).
+
 ## 2026-10-23 — Practise bars: just those bars in the music, one box
 
 - Practising some bars of a groove, the music shows just those bars, headed
