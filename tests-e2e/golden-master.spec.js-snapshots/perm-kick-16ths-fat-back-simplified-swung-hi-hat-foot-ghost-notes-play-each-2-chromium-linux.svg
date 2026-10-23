@@ -91,7 +91,7 @@ l97.95 0.00v3.20l-97.95 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Singles   (fat back, play each ×2)</text>
 <g transform="translate(0,87.70)">
-<text class="f1_1" x="24.00" y="-48.70">2</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">2</text>
 <text class="f1_1" x="408.98" y="-32.00">3</text>
 </g>
 <path class="stroke" d="m412.06 87.70v-24.00"></path>
@@ -245,7 +245,7 @@ l31.25 0.00v3.20l-31.25 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,62.70)">
-<text class="f1_1" x="24.00" y="-48.70">4</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">4</text>
 <text class="f1_1" x="415.65" y="-32.00">5</text>
 </g>
 <path class="stroke" d="m418.73 62.70v-24.00"></path>
@@ -405,7 +405,7 @@ l31.81 0.00v3.20l-31.81 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">8th notes / Off-beat 16ths   (fat back, play each ×2)</text>
 <g transform="translate(0,87.70)">
-<text class="f1_1" x="24.00" y="-48.70">6</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">6</text>
 <text class="f1_1" x="384.84" y="-32.00">7</text>
 </g>
 <path class="stroke" d="m387.92 87.70v-24.00"></path>
@@ -583,7 +583,7 @@ l87.74 0.00v3.20l-87.74 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Doubles   (fat back, play each ×2)</text>
 <g transform="translate(0,88.70)">
-<text class="f1_1" x="24.00" y="-49.70">8</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">8</text>
 <text class="f1_1" x="446.53" y="-32.00">9</text>
 </g>
 <path class="stroke" d="m449.61 88.70v-24.00"></path>
@@ -771,7 +771,7 @@ l28.78 0.00v3.20l-28.78 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,63.70)">
-<text class="f1_1" x="24.00" y="-49.70">10</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">10</text>
 <text class="f1_1" x="441.37" y="-32.00">11</text>
 </g>
 <path class="stroke" d="m447.53 63.70v-24.00"></path>
@@ -960,7 +960,7 @@ l29.85 0.00v3.20l-29.85 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Triples   (fat back, play each ×2)</text>
 <g transform="translate(0,88.70)">
-<text class="f1_1" x="24.00" y="-49.70">12</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">12</text>
 <text class="f1_1" x="420.25" y="-32.00">13</text>
 </g>
 <path class="stroke" d="m426.41 88.70v-24.00"></path>
@@ -1170,7 +1170,7 @@ l81.48 0.00v3.20l-81.48 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,63.70)">
-<text class="f1_1" x="24.00" y="-49.70">14</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">14</text>
 <text class="f1_1" x="417.48" y="-32.00">15</text>
 </g>
 <path class="stroke" d="m423.64 63.70v-24.00"></path>
@@ -1377,7 +1377,7 @@ l84.34 0.00v3.20l-84.34 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Quads   (fat back, play each ×2)</text>
 <g transform="translate(0,88.70)">
-<text class="f1_1" x="24.00" y="-49.70">16</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">16</text>
 </g>
 <path class="stroke" d="m501.43 88.70v-24.00"></path>
 <path class="stroke" d="m498.43 88.70v-24.00"></path>

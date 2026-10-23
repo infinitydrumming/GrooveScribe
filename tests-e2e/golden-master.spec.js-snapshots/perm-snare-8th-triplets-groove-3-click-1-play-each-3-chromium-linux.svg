@@ -114,7 +114,7 @@ l46.80 0.00v3.20l-46.80 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,62.70)">
-<text class="f1_1" x="24.00" y="-48.70">3</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text style="font:italic 12px serif" x="109.40" y="-44.20" text-anchor="middle">3</text>
 "<text style="font:italic 12px serif" x="323.59" y="-46.20" text-anchor="middle">3</text>
 "<text style="font:italic 12px serif" x="537.78" y="-44.20" text-anchor="middle">3</text>
@@ -187,7 +187,7 @@ l143.47 0.00v3.20l-143.47 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Doubles   (play each ×3)</text>
 <g transform="translate(0,87.70)">
-<text class="f1_1" x="24.00" y="-48.70">4</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">4</text>
 <text class="f1_1" x="448.06" y="-32.00">5</text>
 <path class="stroke" d="m35.50 -49.70v-3.00l78.91 0.00v3.00"></path>
 <rect fill="white" x="68.36" y="-58.70" width="13.20" height="12"></rect>
@@ -326,7 +326,7 @@ l71.09 0.00v3.20l-71.09 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,62.70)">
-<text class="f1_1" x="24.00" y="-48.70">6</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">6</text>
 <text style="font:italic 12px serif" x="109.40" y="-44.20" text-anchor="middle">3</text>
 "<text style="font:italic 12px serif" x="323.59" y="-44.20" text-anchor="middle">3</text>
 "<text style="font:italic 12px serif" x="537.78" y="-44.20" text-anchor="middle">3</text>
@@ -413,7 +413,7 @@ l143.47 0.00v3.20l-143.47 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Cross-rhythm: every 2nd note   (play each ×3)</text>
 <g transform="translate(0,87.70)">
-<text class="f1_1" x="24.00" y="-48.70">7</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">7</text>
 <text class="f1_1" x="446.16" y="-32.00">8</text>
 <text style="font:italic 12px serif" x="73.04" y="-44.20" text-anchor="middle">3</text>
 "<path class="stroke" d="m140.63 -51.70v-3.00l78.59 0.00v3.00"></path>
@@ -557,7 +557,7 @@ l70.77 0.00v3.20l-70.77 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Cross-rhythm: every 4th note   (play each ×3)</text>
 <g transform="translate(0,89.50)">
-<text class="f1_1" x="24.00" y="-50.50">9</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">9</text>
 <text class="f1_1" x="437.92" y="-32.00">10</text>
 <path class="stroke" d="m102.30 -51.70v-3.00l103.02 0.00v3.00"></path>
 <rect fill="white" x="147.21" y="-60.70" width="13.20" height="12"></rect>
@@ -669,7 +669,7 @@ l95.20 0.00v3.20l-95.20 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,62.70)">
-<text class="f1_1" x="24.00" y="-48.70">11</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">11</text>
 <text class="f1_1" x="441.87" y="-32.00">12</text>
 <text style="font:italic 12px serif" x="84.38" y="-44.20" text-anchor="middle">3</text>
 "<path class="stroke" d="m318.20 -51.70v-3.00l101.26 0.00v3.00"></path>

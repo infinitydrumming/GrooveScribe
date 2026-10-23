@@ -217,7 +217,7 @@ l87.56 0.00v3.20l-87.56 0.00"></path>
 </g>
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,84.70)">
-<text class="f1_1" x="24.00" y="-50.70">2</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">2</text>
 <text class="f1_1" x="448.06" y="-32.00">2</text>
 <path class="stroke" d="m35.50 -51.70v-3.00l78.91 0.00v3.00"></path>
 <rect fill="white" x="68.36" y="-60.70" width="13.20" height="12"></rect>
@@ -383,7 +383,7 @@ l35.89 0.00v3.20l-35.89 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,85.70)">
-<text class="f1_1" x="24.00" y="-50.70">2</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">2</text>
 <text class="f1_1" x="448.06" y="-32.00">2</text>
 <path class="stroke" d="m35.50 -51.70v-3.00l78.91 0.00v3.00"></path>
 <rect fill="white" x="68.36" y="-60.70" width="13.20" height="12"></rect>
@@ -559,7 +559,7 @@ l71.09 0.00v3.20l-71.09 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,82.70)">
-<text class="f1_1" x="24.00" y="-50.70">3</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f1_1" x="448.06" y="-32.00">3</text>
 <text style="font:italic 12px serif" x="73.21" y="-46.20" text-anchor="middle">3</text>
 "<text style="font:italic 12px serif" x="178.82" y="-44.20" text-anchor="middle">3</text>
@@ -722,7 +722,7 @@ l71.09 0.00v3.20l-71.09 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,85.70)">
-<text class="f1_1" x="24.00" y="-50.70">3</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f1_1" x="446.16" y="-32.00">3</text>
 <text style="font:italic 12px serif" x="73.04" y="-46.20" text-anchor="middle">3</text>
 "<text style="font:italic 12px serif" x="178.17" y="-44.20" text-anchor="middle">3</text>
@@ -899,7 +899,7 @@ l70.77 0.00v3.20l-70.77 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Doubles</text>
 <g transform="translate(0,109.70)">
-<text class="f1_1" x="24.00" y="-48.70">4</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">4</text>
 <text class="f1_1" x="448.06" y="-32.00">4</text>
 <path class="stroke" d="m35.50 -49.70v-3.00l78.91 0.00v3.00"></path>
 <rect fill="white" x="68.36" y="-58.70" width="13.20" height="12"></rect>
@@ -1099,7 +1099,7 @@ l35.89 0.00v3.20l-35.89 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,85.70)">
-<text class="f1_1" x="24.00" y="-48.70">4</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">4</text>
 <text class="f1_1" x="448.06" y="-32.00">4</text>
 <path class="stroke" d="m35.50 -49.70v-3.00l78.91 0.00v3.00"></path>
 <rect fill="white" x="68.36" y="-58.70" width="13.20" height="12"></rect>
@@ -1307,7 +1307,7 @@ l71.09 0.00v3.20l-71.09 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,82.70)">
-<text class="f1_1" x="24.00" y="-50.70">5</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">5</text>
 <text class="f1_1" x="448.06" y="-32.00">5</text>
 <text style="font:italic 12px serif" x="73.21" y="-50.70" text-anchor="middle">3</text>
 "<text style="font:italic 12px serif" x="178.82" y="-48.70" text-anchor="middle">3</text>
@@ -1508,7 +1508,7 @@ l71.09 0.00v3.20l-71.09 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,85.70)">
-<text class="f1_1" x="24.00" y="-50.70">5</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">5</text>
 <text class="f1_1" x="448.06" y="-32.00">5</text>
 <text style="font:italic 12px serif" x="73.21" y="-50.70" text-anchor="middle">3</text>
 "<text style="font:italic 12px serif" x="178.82" y="-48.70" text-anchor="middle">3</text>
@@ -1720,7 +1720,7 @@ l71.09 0.00v3.20l-71.09 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,80.70)">
-<text class="f1_1" x="24.00" y="-48.70">6</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">6</text>
 <text class="f1_1" x="448.06" y="-32.00">6</text>
 <text style="font:italic 12px serif" x="73.21" y="-44.20" text-anchor="middle">3</text>
 "<text style="font:italic 12px serif" x="178.82" y="-44.20" text-anchor="middle">3</text>
@@ -1926,7 +1926,7 @@ l71.09 0.00v3.20l-71.09 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,85.70)">
-<text class="f1_1" x="24.00" y="-48.70">6</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">6</text>
 <text class="f1_1" x="446.16" y="-32.00">6</text>
 <text style="font:italic 12px serif" x="73.04" y="-44.20" text-anchor="middle">3</text>
 "<text style="font:italic 12px serif" x="178.17" y="-44.20" text-anchor="middle">3</text>
@@ -2146,7 +2146,7 @@ l70.77 0.00v3.20l-70.77 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Cross-rhythm: every 2nd note</text>
 <g transform="translate(0,109.70)">
-<text class="f1_1" x="24.00" y="-48.70">7</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">7</text>
 <text class="f1_1" x="448.06" y="-32.00">7</text>
 <text style="font:italic 12px serif" x="73.21" y="-44.20" text-anchor="middle">3</text>
 "<path class="stroke" d="m141.12 -55.70v-3.00l78.91 0.00v3.00"></path>
@@ -2369,7 +2369,7 @@ l35.89 0.00v3.20l-35.89 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,85.70)">
-<text class="f1_1" x="24.00" y="-48.70">7</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">7</text>
 <text class="f1_1" x="448.06" y="-32.00">7</text>
 <text style="font:italic 12px serif" x="73.21" y="-44.20" text-anchor="middle">3</text>
 "<path class="stroke" d="m141.12 -55.70v-3.00l78.91 0.00v3.00"></path>
@@ -2602,7 +2602,7 @@ l71.09 0.00v3.20l-71.09 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,82.70)">
-<text class="f1_1" x="24.00" y="-50.70">8</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">8</text>
 <text class="f1_1" x="448.06" y="-32.00">8</text>
 <path class="stroke" d="m35.50 -51.70v-3.00l78.91 0.00v3.00"></path>
 <rect fill="white" x="68.36" y="-60.70" width="13.20" height="12"></rect>
@@ -2838,7 +2838,7 @@ l71.09 0.00v3.20l-71.09 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,85.70)">
-<text class="f1_1" x="24.00" y="-50.70">8</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">8</text>
 <text class="f1_1" x="446.16" y="-32.00">8</text>
 <path class="stroke" d="m35.50 -51.70v-3.00l78.59 0.00v3.00"></path>
 <rect fill="white" x="68.19" y="-60.70" width="13.20" height="12"></rect>
@@ -3088,7 +3088,7 @@ l70.77 0.00v3.20l-70.77 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Cross-rhythm: every 4th note</text>
 <g transform="translate(0,109.70)">
-<text class="f1_1" x="24.00" y="-50.50">9</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">9</text>
 <text class="f1_1" x="446.91" y="-32.00">9</text>
 <path class="stroke" d="m127.59 -55.70v-3.00l87.21 0.00v3.00"></path>
 <rect fill="white" x="164.60" y="-64.70" width="13.20" height="12"></rect>
@@ -3303,7 +3303,7 @@ l79.39 0.00v3.20l-79.39 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,85.70)">
-<text class="f1_1" x="24.00" y="-50.50">9</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">9</text>
 <text class="f1_1" x="435.51" y="-32.00">9</text>
 <path class="stroke" d="m125.06 -55.70v-3.00l85.04 0.00v3.00"></path>
 <rect fill="white" x="160.97" y="-64.70" width="13.20" height="12"></rect>
@@ -3536,7 +3536,7 @@ l77.22 0.00v3.20l-77.22 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,95.70)">
-<text class="f1_1" x="24.00" y="-50.70">10</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">10</text>
 <text class="f1_1" x="443.83" y="-32.00">10</text>
 <path class="stroke" d="m35.50 -67.88v-3.00l87.21 16.00v3.00"></path>
 <rect fill="white" x="72.50" y="-68.88" width="13.20" height="12"></rect>
@@ -3764,7 +3764,7 @@ l79.39 0.00v3.20l-79.39 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,95.70)">
-<text class="f1_1" x="24.00" y="-50.70">10</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">10</text>
 <text class="f1_1" x="432.43" y="-32.00">10</text>
 <path class="stroke" d="m35.50 -67.89v-3.00l85.04 16.00v3.00"></path>
 <rect fill="white" x="71.42" y="-68.89" width="13.20" height="12"></rect>
@@ -4010,7 +4010,7 @@ l77.22 0.00v3.20l-77.22 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,85.70)">
-<text class="f1_1" x="24.00" y="-50.70">11</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">11</text>
 <text class="f1_1" x="443.78" y="-32.00">11</text>
 <text style="font:italic 12px serif" x="77.53" y="-46.20" text-anchor="middle">3</text>
 "<path class="stroke" d="m339.12 -55.70v-3.00l87.57 0.00v3.00"></path>
@@ -4251,7 +4251,7 @@ l40.21 0.00v3.20l-40.21 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,85.70)">
-<text class="f1_1" x="24.00" y="-50.70">11</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">11</text>
 <text class="f1_1" x="443.78" y="-32.00">11</text>
 <text style="font:italic 12px serif" x="77.53" y="-46.20" text-anchor="middle">3</text>
 "<path class="stroke" d="m339.12 -55.70v-3.00l87.57 0.00v3.00"></path>
@@ -4502,7 +4502,7 @@ l79.75 0.00v3.20l-79.75 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,87.50)">
-<text class="f1_1" x="24.00" y="-52.50">12</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">12</text>
 <text class="f1_1" x="443.78" y="-32.00">12</text>
 <path class="stroke" d="m220.52 -51.70v-3.00l87.57 0.00v3.00"></path>
 <rect fill="white" x="257.71" y="-60.70" width="13.20" height="12"></rect>
@@ -4756,7 +4756,7 @@ l79.75 0.00v3.20l-79.75 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,87.50)">
-<text class="f1_1" x="24.00" y="-52.50">12</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">12</text>
 <text class="f1_1" x="441.65" y="-32.00">12</text>
 <path class="stroke" d="m219.57 -51.70v-3.00l87.16 0.00v3.00"></path>
 <rect fill="white" x="256.55" y="-60.70" width="13.20" height="12"></rect>

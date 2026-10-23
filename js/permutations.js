@@ -471,11 +471,12 @@ export function getPermutationSectionABC(
   if (shownIndex === 0 && bar === 0) pre += groupHeading(section, repeats, fatBack);
   pre += '%\n% ' + figureName(section) + (bars > 1 ? ', ostinato bar ' + (bar + 1) : '') + '\n%\n';
 
-  // two bars a line, or one (dense bars on a phone, see abcNotation.musicLayout)
+  // two bars a line, or one (dense bars on a phone, see abcNotation.musicLayout),
+  // or as many as the device's Music spacing says (Infinity Drumming, 2026)
   var place = shownIndex * bars + bar; // the bar's place in its group
   var post;
   if (lastInGroup && bar == bars - 1) post = '|\n';
-  else if (barsPerLine === 1 || place % 2 == 1) post = '\n';
+  else if ((place + 1) % (barsPerLine || 2) == 0) post = '\n';
   else post = '\\\n';
 
   return { pre: pre, post: post };

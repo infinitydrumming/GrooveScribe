@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: 32nds beat by beat, tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices, dense bars one a line on phones, each glyph defined once in the music on the page. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: section letters boxed and bar numbers by the stave, 32nds beat by beat, tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices, dense bars one a line on phones, each glyph defined once in the music on the page. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -971,6 +971,65 @@ export function defineGlyphsOnce(svg) {
 }
 
 /**
+ * Infinity Drumming, 2026: the music's finishing touches, as a score has them. A
+ * section's letter (a part label in a box) gets round corners and a little room,
+ * and a bar number starting a line sits by the clef just over the stave, not up
+ * over the first note's stem (abc2svg puts it over whatever is there).
+ * @param {string} svg  abc2svg's output, one <svg> a line of music
+ * @returns {string}
+ */
+export function engravedMusic(svg) {
+  var measureFont = /\.(f\d+_\d+) \{font:italic 14px serif\}/.exec(svg);
+  return String(svg)
+    .split(/(?=<svg[\s>])/)
+    .map(function (line) {
+      line = line.replace(
+        /<rect class="stroke" stroke-width="0.6"\s+x="([-\d.]+)" y="([-\d.]+)" width="([\d.]+)" height="([\d.]+)"\/>/g,
+        function (box, x, y, w, h) {
+          return (
+            '<rect class="stroke" stroke-width="1.2" rx="4" x="' +
+            (Number(x) - 2).toFixed(2) +
+            '" y="' +
+            y +
+            '" width="' +
+            (Number(w) + 4).toFixed(2) +
+            '" height="' +
+            h +
+            '"/>'
+          );
+        }
+      );
+      var staff = /<path class="stroke" d="m0\.00 ([\d.]+)\nh/.exec(line);
+      if (!measureFont || !staff) return line;
+      var top = Number(staff[1]) - 24; // (the stave's top line: 4 spaces of 6 up)
+      var number = new RegExp(
+        '(<g transform="translate\\(0,([-\\d.]+)\\)">\\n)<text class="' +
+          measureFont[1] +
+          '" x="([\\d.]+)" y="[-\\d.]+">(\\d+)</text>'
+      );
+      return line.replace(number, function (text, group, g, x, bar) {
+        if (Number(x) > LINE_START) return text; // (a bar number within the line)
+        return (
+          group +
+          '<text class="' +
+          measureFont[1] +
+          '" x="' +
+          (Number(x) - 2).toFixed(2) +
+          '" y="' +
+          (top - 3 - Number(g)).toFixed(2) +
+          '" text-anchor="end">' +
+          bar +
+          '</text>'
+        );
+      });
+    })
+    .join('');
+}
+
+// a bar number this far into its line starts it (the clef's width and some)
+var LINE_START = 100;
+
+/**
  * Infinity Drumming, 2026: whether abc2svg broke a line of the music in the
  * middle of a bar (it couldn't fit): more lines of notes in its SVG (one <svg>
  * each) than the ABC asks for.
@@ -1022,6 +1081,49 @@ export function musicLayout(notesPerBar, renderWidth, how) {
 // a moderate bar: this much of the page a quarter note at most (a 4/4 bar about
 // 770px wide on a laptop's screen)
 var MODERATE_QUARTER = 120;
+// at most this many bars on a line, however narrow the Music spacing
+var MAX_BARS_PER_LINE = 8;
+
+/**
+ * Infinity Drumming, 2026: musicLayout's layout with the device's "Music spacing":
+ * narrower bars, more on a line (`1 / spacing` times as many, drawn smaller when
+ * their notes need it), or wider ones, fewer (one at least).
+ * @param {{barsPerLine: number, renderWidth: number, bar: number}} layout  musicLayout's
+ * @param {number} spacing  1 leaves the layout as it is; 0: a bar a line
+ * @returns {{barsPerLine: number, renderWidth: number, bar: number}}
+ */
+export function spacedLayout(layout, spacing) {
+  if (spacing == 1) return layout;
+  var barsPerLine = spacing ? Math.floor(layout.barsPerLine / spacing + 1e-9) : 1;
+  return withRoomFor(Math.min(MAX_BARS_PER_LINE, Math.max(1, barsPerLine)), layout);
+}
+
+// so many bars a line, on a page wide enough for their notes (drawn smaller)
+function withRoomFor(barsPerLine, layout) {
+  var needs = barsPerLine * layout.bar;
+  return {
+    barsPerLine: barsPerLine,
+    renderWidth:
+      needs > musicPageWidth(layout.renderWidth) ? Math.ceil(needs / 0.75) : layout.renderWidth,
+    bar: layout.bar,
+  };
+}
+
+/**
+ * Infinity Drumming, 2026: the lines of `count` bars laid out so, every bar as wide
+ * as on a full line: one line of fewer bars is centred between margins.
+ * @param {number} count
+ * @param {{barsPerLine: number, renderWidth: number}} layout
+ * @returns {{margin: number, oneLine: boolean}}
+ */
+export function spacedLines(count, layout) {
+  var page = musicPageWidth(layout.renderWidth);
+  var onALine = Math.min(count, layout.barsPerLine);
+  return {
+    margin: Math.floor((page - (onALine * page) / layout.barsPerLine) / 2),
+    oneLine: count <= layout.barsPerLine,
+  };
+}
 
 /**
  * Infinity Drumming, 2026: some practised bars of the alphabet, each as wide: as
@@ -1034,16 +1136,23 @@ var MODERATE_QUARTER = 120;
  * @param {{barsPerLine: number, renderWidth: number, bar: number}} layout  musicLayout's
  * @param {number} quarters  a bar's length in quarter notes
  * @param {number} spacing  1 for moderate bars, 1.5 half as wide again...; 0: as wide as the page
- * @returns {{barsPerLine: number, margin: number, oneLine: boolean}}
+ * @returns {{barsPerLine: number, renderWidth: number, margin: number, oneLine: boolean}}
+ *   renderWidth: wider than musicLayout's when the bars need it (drawn smaller)
  */
 export function practisedBarsLayout(count, layout, quarters, spacing) {
   var page = musicPageWidth(layout.renderWidth);
   var moderate = Math.min(page / layout.barsPerLine, quarters * MODERATE_QUARTER);
-  var bar = Math.min(page, Math.max(layout.bar, spacing ? moderate * spacing : page));
-  var barsPerLine = Math.max(1, Math.floor(page / bar + 1e-9));
+  var bar = spacing ? Math.min(page, moderate * spacing) : page;
+  var barsPerLine = Math.min(MAX_BARS_PER_LINE, Math.max(1, Math.floor(page / bar + 1e-9)));
+  var spaced = withRoomFor(barsPerLine, layout);
+  if (spaced.renderWidth != layout.renderWidth) {
+    page = musicPageWidth(spaced.renderWidth);
+    bar = page / barsPerLine;
+  } else bar = Math.max(bar, layout.bar);
   var line = Math.min(count, barsPerLine) * bar;
   return {
     barsPerLine: barsPerLine,
+    renderWidth: spaced.renderWidth,
     margin: Math.max(0, Math.floor((page - line) / 2)),
     oneLine: count <= barsPerLine,
   };

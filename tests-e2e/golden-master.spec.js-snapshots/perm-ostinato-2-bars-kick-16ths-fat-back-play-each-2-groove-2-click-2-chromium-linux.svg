@@ -121,7 +121,7 @@ l50.56 0.00v3.20l-50.56 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">2</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">2</text>
 <text class="f1_1" x="446.10" y="-32.00">2</text>
 </g>
 <path class="stroke" d="m449.18 67.70v-24.00"></path>
@@ -266,7 +266,7 @@ l29.87 0.00v3.20l-29.87 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,64.70)">
-<text class="f1_1" x="24.00" y="-50.70">3</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f1_1" x="443.78" y="-32.00">3</text>
 </g>
 <path class="stroke" d="m446.86 64.70v-24.00"></path>
@@ -383,7 +383,7 @@ l51.27 0.00v3.20l-51.27 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">4</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">4</text>
 <text class="f1_1" x="444.45" y="-32.00">4</text>
 </g>
 <path class="stroke" d="m447.53 67.70v-24.00"></path>
@@ -541,7 +541,7 @@ l29.85 0.00v3.20l-29.85 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">8th notes / Off-beat 16ths   (fat back, play each ×2)</text>
 <g transform="translate(0,87.70)">
-<text class="f1_1" x="24.00" y="-48.70">5</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">5</text>
 <text class="f1_1" x="443.78" y="-32.00">5</text>
 </g>
 <path class="stroke" d="m446.86 87.70v-24.00"></path>
@@ -672,7 +672,7 @@ l51.27 0.00v3.20l-51.27 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">6</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">6</text>
 <text class="f1_1" x="446.34" y="-32.00">6</text>
 </g>
 <path class="stroke" d="m449.42 67.70v-24.00"></path>
@@ -864,7 +864,7 @@ l76.89 0.00v3.20l-76.89 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Doubles   (fat back, play each ×2)</text>
 <g transform="translate(0,89.70)">
-<text class="f1_1" x="24.00" y="-50.70">7</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">7</text>
 <text class="f1_1" x="446.10" y="-32.00">7</text>
 </g>
 <path class="stroke" d="m449.18 89.70v-24.00"></path>
@@ -1038,7 +1038,7 @@ l29.87 0.00v3.20l-29.87 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">8</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">8</text>
 <text class="f1_1" x="446.10" y="-32.00">8</text>
 </g>
 <path class="stroke" d="m449.18 67.70v-24.00"></path>
@@ -1220,7 +1220,7 @@ l29.87 0.00v3.20l-29.87 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,64.70)">
-<text class="f1_1" x="24.00" y="-50.70">9</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">9</text>
 <text class="f1_1" x="446.06" y="-32.00">9</text>
 </g>
 <path class="stroke" d="m449.14 64.70v-24.00"></path>
@@ -1407,7 +1407,7 @@ l29.96 0.00v3.20l-29.96 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">10</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">10</text>
 <text class="f1_1" x="441.37" y="-32.00">10</text>
 </g>
 <path class="stroke" d="m447.53 67.70v-24.00"></path>
@@ -1599,7 +1599,7 @@ l29.85 0.00v3.20l-29.85 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Triples   (fat back, play each ×2)</text>
 <g transform="translate(0,88.70)">
-<text class="f1_1" x="24.00" y="-49.70">11</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">11</text>
 <text class="f1_1" x="443.02" y="-32.00">11</text>
 </g>
 <path class="stroke" d="m449.18 88.70v-24.00"></path>
@@ -1800,7 +1800,7 @@ l29.87 0.00v3.20l-29.87 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">12</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">12</text>
 <text class="f1_1" x="444.65" y="-32.00">12</text>
 </g>
 <path class="stroke" d="m450.81 67.70v-24.00"></path>
@@ -2026,7 +2026,7 @@ l77.15 0.00v3.20l-77.15 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,63.70)">
-<text class="f1_1" x="24.00" y="-49.70">13</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">13</text>
 <text class="f1_1" x="442.98" y="-32.00">13</text>
 </g>
 <path class="stroke" d="m449.14 63.70v-24.00"></path>
@@ -2237,7 +2237,7 @@ l29.96 0.00v3.20l-29.96 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">14</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">14</text>
 <text class="f1_1" x="443.26" y="-32.00">14</text>
 </g>
 <path class="stroke" d="m449.42 67.70v-24.00"></path>

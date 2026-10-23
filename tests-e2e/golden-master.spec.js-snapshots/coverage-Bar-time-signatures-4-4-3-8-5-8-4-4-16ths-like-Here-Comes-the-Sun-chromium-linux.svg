@@ -140,7 +140,7 @@ c2.20 3.00 8.80 3.00 11.00 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,58.00)">
-<text class="f1_1" x="24.00" y="-44.00">3</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f1_1" x="349.47" y="-32.00">4</text>
 </g>
 <path class="stroke" d="m352.55 58.00v-24.00"></path>

@@ -11,6 +11,29 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-24 — Music spacing for all the music
+
+- "Music spacing" (Options) now spaces all the music, grooves and the alphabet:
+  narrower bars put more on a line (down to a quarter as wide, four times as
+  many, drawn smaller when their notes need it, e.g. 32nds or Mixed, for looking
+  over a piece or a big screen), wider ones fewer, as far as one a line; every
+  bar as wide, a line of fewer centred. At 100% the music is laid out as before
+  (`js/abcNotation.js` `spacedLayout` / `spacedLines`, `js/permutations.js`,
+  `js/groove_writer.js`, `index.html`). A practised alphabet's last line takes
+  the line before's spacing (abc2svg turned down the `%%stretchlast 0` it was
+  given): one golden-master exercise is updated for it.
+
+## 2026-10-24 — Section letters as rehearsal marks; bar numbers by the stave
+
+- A section's letter in the music is bold, in a round-cornered box, as a
+  score's rehearsal marks are; how many times it plays (×4) goes under its end
+  repeat sign instead of beside the letter (`js/groove_writer.js`,
+  `js/abcNotation.js`).
+- A bar number starting a line sits by the clef just over the stave, no longer
+  up over the first note's stem, out of the way of the section letters. The
+  golden master's music with such numbers is updated for it: only those
+  numbers moved (`js/abcNotation.js` `engravedMusic`).
+
 ## 2026-10-24 — A form for the sections (ABAC)
 
 - Once a groove has sections, a "Form" box above the bars takes the order they

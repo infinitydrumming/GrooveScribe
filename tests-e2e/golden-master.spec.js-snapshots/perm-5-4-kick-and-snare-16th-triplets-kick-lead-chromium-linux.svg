@@ -267,7 +267,7 @@ l55.35 0.00v3.20l-55.35 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">3</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text style="font:italic 12px serif" x="109.00" y="-49.20" text-anchor="middle">6</text>
 "<text style="font:italic 12px serif" x="279.40" y="-49.20" text-anchor="middle">6</text>
 "<text style="font:italic 12px serif" x="449.79" y="-49.20" text-anchor="middle">6</text>
@@ -398,7 +398,7 @@ l142.00 0.00v3.20l-142.00 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Doubles (twice a beat)</text>
 <g transform="translate(0,92.70)">
-<text class="f1_1" x="24.00" y="-53.70">4</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">4</text>
 <text class="f1_1" x="451.59" y="-53.70">5</text>
 <path class="stroke" d="m35.50 -54.70v-3.00l78.70 0.00v3.00"></path>
 <rect fill="white" x="68.25" y="-63.70" width="13.20" height="12"></rect>
@@ -673,7 +673,7 @@ l70.20 0.00v3.20l-70.20 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">6</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">6</text>
 <text style="font:italic 12px serif" x="109.00" y="-49.20" text-anchor="middle">6</text>
 "<text style="font:italic 12px serif" x="279.40" y="-49.20" text-anchor="middle">6</text>
 "<text style="font:italic 12px serif" x="449.79" y="-49.20" text-anchor="middle">6</text>
@@ -829,7 +829,7 @@ l142.00 0.00v3.20l-142.00 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Cross-rhythm: every 2nd note</text>
 <g transform="translate(0,88.70)">
-<text class="f1_1" x="24.00" y="-49.70">7</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">7</text>
 <text class="f1_1" x="450.78" y="-53.70">8</text>
 <path class="stroke" d="m35.50 -50.70v-3.00l78.57 0.00v3.00"></path>
 <rect fill="white" x="68.18" y="-59.70" width="13.20" height="12"></rect>

@@ -214,24 +214,36 @@ describe('an exercise in its link', () => {
     expect(link()).not.toContain('FatBack');
   });
 
-  // "Music spacing" (Infinity Drumming, 2026): how wide practised bars are drawn
-  it('draws practised bars as wide as Music spacing says, and this device remembers it', () => {
+  // "Music spacing" (Infinity Drumming, 2026): how wide bars of music are drawn
+  it('draws bars as wide as Music spacing says, and this device remembers it', () => {
     addPopups('musicSpacingConfiguration');
     const abc = () => document.getElementById('ABCsource').value;
+    const page = () => Number(/%%pagewidth (\d+)px/.exec(abc())[1]);
+    const margin = () => (/%%leftmargin (\d+)px/.exec(abc()) || [])[1];
     gw.loadNewGroove(EXERCISE.replace('&PlayEach=3', '&PermBars=1-3'));
-    const margin = () => Number(/%%leftmargin (\d+)px/.exec(abc())[1]);
-    const moderate = margin();
+    const moderate = page(); // (two practised bars a line)
+    expect(abc()).toContain('%%stretchlast 0.01\n');
 
     gw.show_MusicSpacingConfiguration();
     expect(document.getElementById('musicSpacingAdjust').value).toBe('100');
-    gw.musicSpacingChange({ target: { value: '60' } });
+    gw.musicSpacingChange({ target: { value: '60' } }); // three a line, on a wider page
     expect(window.localStorage.getItem('grooveScribeMusicSpacing')).toBe('60');
-    expect(margin()).not.toBe(moderate);
-    gw.musicSpacingChange({ target: { value: '210' } }); // the far end: fill the page
-    expect(margin()).toBe(0);
-    expect(document.getElementById('musicSpacingOutput').textContent).toContain('Fill the page');
+    expect(page()).toBeGreaterThan(moderate);
+    expect(abc()).toContain('%%stretchlast 1\n');
+    gw.musicSpacingChange({ target: { value: '210' } }); // the far end: a bar a line
+    expect(page()).toBe(moderate);
+    expect(document.getElementById('musicSpacingOutput').textContent).toContain('A bar a line');
     gw.musicSpacingReset();
-    expect(margin()).toBe(moderate);
+    expect(page()).toBe(moderate);
+
+    // a groove's bars too: at a quarter as wide, three bars on one line, centred
+    gw.loadNewGroove(
+      '?TimeSig=4/4&Div=16&Tempo=80&Measures=3&S=|----O-------O---|----O-------O---|----O-------O---|'
+    );
+    expect(margin()).toBeUndefined(); // (as laid out)
+    gw.musicSpacingChange({ target: { value: '25' } });
+    expect(margin()).toBe('320'); // (8 bars of 128px a line, on a 1024px page)
+    expect(page()).toBe(1024);
     gw.close_MusicSpacingConfiguration();
     window.localStorage.clear();
   });

@@ -90,7 +90,7 @@ l103.85 0.00v3.20l-103.85 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,82.70)">
-<text class="f1_1" x="24.00" y="-50.70">3</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f1_1" x="423.42" y="-32.00">4</text>
 <text class="f2_1" x="36.50" y="-67.90"><tspan class="f4_1">1</tspan></text>
 <text class="f2_1" x="139.74" y="-60.90"><tspan class="f4_1">&amp;</tspan></text>
@@ -168,7 +168,7 @@ l103.92 0.00v3.20l-103.92 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Quarter notes / Off-beat 8ths</text>
 <g transform="translate(0,107.70)">
-<text class="f1_1" x="24.00" y="-50.70">5</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">5</text>
 <text class="f1_1" x="423.42" y="-32.00">6</text>
 <text class="f2_1" x="36.50" y="-67.90"><tspan class="f3_1">1</tspan></text>
 <text class="f2_1" x="139.74" y="-60.90"><tspan class="f4_1">&amp;</tspan></text>
@@ -252,7 +252,7 @@ l103.92 0.00v3.20l-103.92 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Doubles</text>
 <g transform="translate(0,105.70)">
-<text class="f1_1" x="24.00" y="-48.70">7</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">7</text>
 <text class="f1_1" x="428.77" y="-32.00">8</text>
 <text class="f2_1" x="36.50" y="-65.90"><tspan class="f3_1">1</tspan></text>
 <text class="f2_1" x="141.15" y="-60.90"><tspan class="f3_1">&amp;</tspan></text>
@@ -338,7 +338,7 @@ l105.33 0.00v3.20l-105.33 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,82.70)">
-<text class="f1_1" x="24.00" y="-50.70">9</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">9</text>
 <text class="f1_1" x="420.34" y="-32.00">10</text>
 <text class="f2_1" x="36.50" y="-67.90"><tspan class="f4_1">1</tspan></text>
 <text class="f2_1" x="139.74" y="-58.90"><tspan class="f4_1">&amp;</tspan></text>
@@ -430,7 +430,7 @@ l103.92 0.00v3.20l-103.92 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Triples</text>
 <g transform="translate(0,108.70)">
-<text class="f1_1" x="24.00" y="-48.70">11</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">11</text>
 <text class="f1_1" x="425.69" y="-32.00">12</text>
 <text class="f2_1" x="36.50" y="-68.90"><tspan class="f3_1">1</tspan></text>
 <text class="f2_1" x="141.15" y="-68.90"><tspan class="f3_1">&amp;</tspan></text>
@@ -526,7 +526,7 @@ l105.33 0.00v3.20l-105.33 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,85.70)">
-<text class="f1_1" x="24.00" y="-50.70">13</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">13</text>
 <text class="f1_1" x="420.34" y="-32.00">14</text>
 <text class="f2_1" x="36.50" y="-70.90"><tspan class="f3_1">1</tspan></text>
 <text class="f2_1" x="139.74" y="-70.90"><tspan class="f4_1">&amp;</tspan></text>

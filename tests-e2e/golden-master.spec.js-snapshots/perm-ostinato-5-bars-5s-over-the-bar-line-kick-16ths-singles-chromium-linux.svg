@@ -545,7 +545,7 @@ l77.15 0.00v3.20l-77.15 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">2</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">2</text>
 <text class="f1_1" x="447.73" y="-32.00">2</text>
 </g>
 <path class="stroke" d="m450.81 67.70v-24.00"></path>
@@ -729,7 +729,7 @@ l77.15 0.00v3.20l-77.15 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">2</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">2</text>
 <text class="f1_1" x="447.73" y="-32.00">2</text>
 </g>
 <path class="stroke" d="m450.81 67.70v-24.00"></path>
@@ -917,7 +917,7 @@ l77.15 0.00v3.20l-77.15 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">3</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f1_1" x="447.73" y="-32.00">3</text>
 </g>
 <path class="stroke" d="m450.81 67.70v-24.00"></path>
@@ -1110,7 +1110,7 @@ l77.15 0.00v3.20l-77.15 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">3</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f1_1" x="447.73" y="-32.00">3</text>
 </g>
 <path class="stroke" d="m450.81 67.70v-24.00"></path>
@@ -1306,7 +1306,7 @@ l77.15 0.00v3.20l-77.15 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">3</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f1_1" x="447.73" y="-32.00">4</text>
 </g>
 <path class="stroke" d="m450.81 67.70v-24.00"></path>
@@ -1508,7 +1508,7 @@ l77.15 0.00v3.20l-77.15 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">4</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">4</text>
 <text class="f1_1" x="447.73" y="-32.00">4</text>
 </g>
 <path class="stroke" d="m450.81 67.70v-24.00"></path>
@@ -1712,7 +1712,7 @@ l77.15 0.00v3.20l-77.15 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,67.70)">
-<text class="f1_1" x="24.00" y="-53.70">4</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">4</text>
 <text class="f1_1" x="446.34" y="-32.00">4</text>
 </g>
 <path class="stroke" d="m449.42 67.70v-24.00"></path>
