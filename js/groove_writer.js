@@ -120,6 +120,8 @@ import {
   addFeelMarking,
   addMeterChange,
   musicLayout,
+  spacedLayout,
+  spacedLines,
   practisedBarsLayout,
   musicLineBroken,
   notesOnALine,
@@ -2679,10 +2681,33 @@ function GrooveWriter() {
     });
   }
 
+  // This device's Music spacing over the music's layout (Infinity Drumming, 2026):
+  // narrower bars, more a line, or wider, fewer; practised bars of the alphabet as
+  // practisedBarsMusic lays them out. With the alphabet's shown figures.
+  function spacedMusic(layout) {
+    if (class_permutation_type == 'none')
+      return { layout: spacedLayout(layout, class_music_spacing / 100), shownSections: [] };
+    if (!class_permutation_bars) {
+      var spaced = spacedLayout(layout, class_music_spacing / 100);
+      return { layout: spaced, shownSections: get_shown_permutation_sections(spaced.barsPerLine) };
+    }
+    var shownSections = get_shown_permutation_sections(layout.barsPerLine);
+    var practised = practisedBarsMusic(shownSections, layout);
+    return {
+      layout: {
+        barsPerLine: layout.barsPerLine,
+        renderWidth: practised.renderWidth,
+        bar: layout.bar,
+      },
+      shownSections: shownSections,
+      practised: practised,
+    };
+  }
+
   // Some bars practised (Infinity Drumming, 2026): every bar as wide and no wider
   // than a moderate bar, in one run of lines (see abcNotation.practisedBarsLayout);
   // drawn wider (a line broken mid-bar), the bars fill the page again
-  function practisedBarsMusic(shownSections, layout, widened) {
+  function practisedBarsMusic(shownSections, layout) {
     var bars = [];
     shownSections.forEach(function (shownSection) {
       bars = bars.concat(shownSection.abc);
@@ -2693,21 +2718,33 @@ function GrooveWriter() {
       (class_num_beats_per_measure * 4) / class_note_value_per_measure,
       class_music_spacing / 100
     );
-    var margin = widened ? 0 : fit.margin;
     return {
-      heading:
-        '%%leftmargin ' +
-        margin +
-        'px\n%%rightmargin ' +
-        margin +
-        'px\n' +
-        (fit.oneLine ? '%%stretchlast 1\n' : ''),
+      fit: fit,
+      renderWidth: fit.renderWidth,
       bars: _perm.practisedBarsABC(bars, fit.barsPerLine),
     };
   }
 
-  // --- "Music spacing" (Infinity Drumming, 2026): how wide practised bars are -----
-  // drawn on this device, in percent of a moderate bar (0: as wide as the page)
+  // the margins centring the music's lines, and whether one line is stretched to
+  // them (or the last of more takes the line before's spacing: abc2svg turns down
+  // a stretchlast of 0); drawn wider for a line broken mid-bar, the music fills
+  // the page
+  function linesHeading(lines, widened) {
+    var margin = widened ? 0 : lines.margin;
+    return (
+      '%%leftmargin ' +
+      margin +
+      'px\n%%rightmargin ' +
+      margin +
+      'px\n%%stretchlast ' +
+      (lines.oneLine ? 1 : 0.01) +
+      '\n'
+    );
+  }
+
+  // --- "Music spacing" (Infinity Drumming, 2026): how wide bars of music are -------
+  // drawn on this device, in percent (100: as laid out, practised bars of the
+  // alphabet moderate; 0: a bar a line, as wide as the page)
   var constant_music_spacing_key = 'grooveScribeMusicSpacing';
   var constant_music_spacing_fill = 210; // the slider's far end
   var class_music_spacing = storedMusicSpacing();
@@ -2715,7 +2752,9 @@ function GrooveWriter() {
   function storedMusicSpacing() {
     try {
       var stored = parseInt(window.localStorage.getItem(constant_music_spacing_key) || '', 10);
-      return isNaN(stored) || stored < 0 || stored > 200 ? 100 : stored;
+      return isNaN(stored) || stored < 0 || stored > 200 || (stored > 0 && stored < 25)
+        ? 100
+        : stored;
     } catch {
       return 100; // storage unavailable
     }
@@ -2732,11 +2771,12 @@ function GrooveWriter() {
     } catch {
       /* storage unavailable: it lasts for this visit */
     }
-    var shown = 'Fill the page: a bar a line, as wide as the page';
-    if (percent == 100) shown = 'Moderate bars (to start with)';
-    else if (percent) shown = 'Bars ' + percent + '% as wide as moderate bars';
+    var shown = 'Bars ' + percent + '% as wide: fewer on a line';
+    if (!percent) shown = 'A bar a line, as wide as the page';
+    else if (percent == 100) shown = 'As laid out (to start with)';
+    else if (percent < 100) shown = 'Bars ' + percent + '% as wide: more on a line';
     document.getElementById('musicSpacingOutput').textContent = shown;
-    if (class_permutation_bars) root.refresh_ABC();
+    root.refresh_ABC();
   }
 
   root.show_MusicSpacingConfiguration = function () {
@@ -3657,6 +3697,12 @@ function GrooveWriter() {
         keepWidth: beatGrid() !== 0,
       }
     );
+    // this device's Music spacing (Infinity Drumming, 2026)
+    var spaced = spacedMusic(layout);
+    layout = spaced.layout;
+    var shownSections = spaced.shownSections;
+    var practised = spaced.practised;
+    var widened = !!atLeast && atLeast > layout.renderWidth; // (a line broken mid-bar)
     renderWidth = Math.max(layout.renderWidth, atLeast || 0);
     class_music_render_width = Math.max(renderWidth, 400); // (the boilerplate's least)
 
@@ -3678,7 +3724,6 @@ function GrooveWriter() {
           renderWidth
         );
         root.myGrooveUtils.note_mapping_array = [];
-        var shownSections = get_shown_permutation_sections(layout.barsPerLine);
 
         // every shown figure, written once over the ostinato's bars (marked
         // "play each ×N" when repeated)
@@ -3693,10 +3738,8 @@ function GrooveWriter() {
           },
         ];
         for (i = 1; i < get_ostinato_bars(); i++) ostinato.push(readOstinatoBar(i, false));
-        var practised = class_permutation_bars
-          ? practisedBarsMusic(shownSections, layout, !!atLeast && atLeast > layout.renderWidth)
-          : null;
-        if (practised) fullABC = fullABC.replace(/^K:/m, practised.heading + 'K:');
+        if (practised)
+          fullABC = fullABC.replace(/^K:/m, linesHeading(practised.fit, widened) + 'K:');
         var written = 0;
         shownSections.forEach(function (shownSection) {
           ostinato.forEach(function (o, k) {
@@ -3758,6 +3801,11 @@ function GrooveWriter() {
         // the whole groove (Infinity Drumming, 2026)
         var shownBars = barsWritten();
         var numbered = shownBars.length < class_number_of_measures;
+        if (class_music_spacing != 100)
+          fullABC = fullABC.replace(
+            /^K:/m,
+            linesHeading(spacedLines(shownBars.length, layout), widened) + 'K:'
+          );
         fullABC += musicBarsHeading();
 
         // "Straight" / "Swing" over the bars where the feel changes

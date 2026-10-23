@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   musicLayout,
   practisedBarsLayout,
+  spacedLayout,
+  spacedLines,
   musicLineBroken,
   defineGlyphsOnce,
   engravedMusic,
@@ -100,12 +102,27 @@ describe('glyphs defined once on the page', () => {
       practisedBarsLayout(count, eighths(width), 4, spacing);
 
     it('two moderate bars a line on a wide screen, centred; one alone as wide', () => {
-      expect(fit(3, wide)).toEqual({ barsPerLine: 2, margin: 44, oneLine: false });
-      expect(fit(1, wide)).toEqual({ barsPerLine: 2, margin: 284, oneLine: true }); // 480 of 1048
+      expect(fit(3, wide)).toEqual({
+        barsPerLine: 2,
+        renderWidth: wide,
+        margin: 44,
+        oneLine: false,
+      });
+      expect(fit(1, wide)).toEqual({
+        barsPerLine: 2,
+        renderWidth: wide,
+        margin: 284,
+        oneLine: true,
+      }); // 480 of 1048
     });
 
     it('a laptop keeps its two bars a line, filling the page', () => {
-      expect(fit(4, laptop)).toEqual({ barsPerLine: 2, margin: 0, oneLine: false });
+      expect(fit(4, laptop)).toEqual({
+        barsPerLine: 2,
+        renderWidth: laptop,
+        margin: 0,
+        oneLine: false,
+      });
       expect(fit(1, laptop).margin).toBe(179); // half the page, centred
     });
 
@@ -113,13 +130,60 @@ describe('glyphs defined once on the page', () => {
       expect(fit(3, wide, 1.6).barsPerLine).toBe(1); // 768 of 1048
       expect(fit(3, wide, 1.6).margin).toBe(140);
       expect(fit(6, wide, 0.6).barsPerLine).toBe(3); // 288 each
-      expect(fit(3, wide, 0)).toEqual({ barsPerLine: 1, margin: 0, oneLine: false });
+      expect(fit(9, wide, 0.25).barsPerLine).toBe(8); // (the most)
+      expect(fit(3, wide, 0)).toEqual({
+        barsPerLine: 1,
+        renderWidth: wide,
+        margin: 0,
+        oneLine: false,
+      });
     });
 
-    it('never narrower than a bar needs', () => {
+    it('bars narrower than their notes need: a wider page, drawn smaller', () => {
       const dense = musicLayout(32, laptop, { counted: true }); // 32nds: 320px at least
-      expect(practisedBarsLayout(2, dense, 4, 0.5).barsPerLine).toBe(2);
-      expect(practisedBarsLayout(2, dense, 4, 0.5).margin).toBe(38);
+      expect(practisedBarsLayout(2, dense, 4, 0.5)).toEqual({
+        barsPerLine: 4,
+        renderWidth: 1707, // (its page: 1280px, 4 bars of 320)
+        margin: 320,
+        oneLine: true,
+      });
+    });
+  });
+
+  // Infinity Drumming, 2026: any music with the device's Music spacing
+  describe('Music spacing', () => {
+    const desktop16ths = musicLayout(16, 885, { counted: true }); // two bars a line
+
+    it('leaves the layout as it is at 100%', () => {
+      expect(spacedLayout(desktop16ths, 1)).toBe(desktop16ths);
+    });
+
+    it('narrower: more bars a line, on a wider page (drawn smaller) when they need it', () => {
+      expect(spacedLayout(desktop16ths, 0.5)).toEqual({
+        barsPerLine: 4,
+        renderWidth: 885,
+        bar: 160,
+      });
+      expect(spacedLayout(desktop16ths, 0.25)).toEqual({
+        barsPerLine: 8,
+        renderWidth: 1707,
+        bar: 160,
+      });
+      // a bar a line (32nds) down to 4 a line, whatever the notes
+      const dense = musicLayout(32, 885, { counted: true, oneBar: true });
+      expect(spacedLayout(dense, 0.25)).toEqual({ barsPerLine: 4, renderWidth: 1707, bar: 320 });
+    });
+
+    it('wider: fewer bars a line, one at least', () => {
+      expect(spacedLayout(desktop16ths, 1.5).barsPerLine).toBe(1);
+      expect(spacedLayout(desktop16ths, 0).barsPerLine).toBe(1);
+    });
+
+    it('centres one line of fewer bars than a line holds, each as wide', () => {
+      const four = { barsPerLine: 4, renderWidth: 885 }; // (its page: 663px)
+      expect(spacedLines(3, four)).toEqual({ margin: 82, oneLine: true });
+      expect(spacedLines(4, four)).toEqual({ margin: 0, oneLine: true });
+      expect(spacedLines(6, four)).toEqual({ margin: 0, oneLine: false });
     });
   });
 

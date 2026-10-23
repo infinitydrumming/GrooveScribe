@@ -1081,6 +1081,49 @@ export function musicLayout(notesPerBar, renderWidth, how) {
 // a moderate bar: this much of the page a quarter note at most (a 4/4 bar about
 // 770px wide on a laptop's screen)
 var MODERATE_QUARTER = 120;
+// at most this many bars on a line, however narrow the Music spacing
+var MAX_BARS_PER_LINE = 8;
+
+/**
+ * Infinity Drumming, 2026: musicLayout's layout with the device's "Music spacing":
+ * narrower bars, more on a line (`1 / spacing` times as many, drawn smaller when
+ * their notes need it), or wider ones, fewer (one at least).
+ * @param {{barsPerLine: number, renderWidth: number, bar: number}} layout  musicLayout's
+ * @param {number} spacing  1 leaves the layout as it is; 0: a bar a line
+ * @returns {{barsPerLine: number, renderWidth: number, bar: number}}
+ */
+export function spacedLayout(layout, spacing) {
+  if (spacing == 1) return layout;
+  var barsPerLine = spacing ? Math.floor(layout.barsPerLine / spacing + 1e-9) : 1;
+  return withRoomFor(Math.min(MAX_BARS_PER_LINE, Math.max(1, barsPerLine)), layout);
+}
+
+// so many bars a line, on a page wide enough for their notes (drawn smaller)
+function withRoomFor(barsPerLine, layout) {
+  var needs = barsPerLine * layout.bar;
+  return {
+    barsPerLine: barsPerLine,
+    renderWidth:
+      needs > musicPageWidth(layout.renderWidth) ? Math.ceil(needs / 0.75) : layout.renderWidth,
+    bar: layout.bar,
+  };
+}
+
+/**
+ * Infinity Drumming, 2026: the lines of `count` bars laid out so, every bar as wide
+ * as on a full line: one line of fewer bars is centred between margins.
+ * @param {number} count
+ * @param {{barsPerLine: number, renderWidth: number}} layout
+ * @returns {{margin: number, oneLine: boolean}}
+ */
+export function spacedLines(count, layout) {
+  var page = musicPageWidth(layout.renderWidth);
+  var onALine = Math.min(count, layout.barsPerLine);
+  return {
+    margin: Math.floor((page - (onALine * page) / layout.barsPerLine) / 2),
+    oneLine: count <= layout.barsPerLine,
+  };
+}
 
 /**
  * Infinity Drumming, 2026: some practised bars of the alphabet, each as wide: as
@@ -1093,16 +1136,23 @@ var MODERATE_QUARTER = 120;
  * @param {{barsPerLine: number, renderWidth: number, bar: number}} layout  musicLayout's
  * @param {number} quarters  a bar's length in quarter notes
  * @param {number} spacing  1 for moderate bars, 1.5 half as wide again...; 0: as wide as the page
- * @returns {{barsPerLine: number, margin: number, oneLine: boolean}}
+ * @returns {{barsPerLine: number, renderWidth: number, margin: number, oneLine: boolean}}
+ *   renderWidth: wider than musicLayout's when the bars need it (drawn smaller)
  */
 export function practisedBarsLayout(count, layout, quarters, spacing) {
   var page = musicPageWidth(layout.renderWidth);
   var moderate = Math.min(page / layout.barsPerLine, quarters * MODERATE_QUARTER);
-  var bar = Math.min(page, Math.max(layout.bar, spacing ? moderate * spacing : page));
-  var barsPerLine = Math.max(1, Math.floor(page / bar + 1e-9));
+  var bar = spacing ? Math.min(page, moderate * spacing) : page;
+  var barsPerLine = Math.min(MAX_BARS_PER_LINE, Math.max(1, Math.floor(page / bar + 1e-9)));
+  var spaced = withRoomFor(barsPerLine, layout);
+  if (spaced.renderWidth != layout.renderWidth) {
+    page = musicPageWidth(spaced.renderWidth);
+    bar = page / barsPerLine;
+  } else bar = Math.max(bar, layout.bar);
   var line = Math.min(count, barsPerLine) * bar;
   return {
     barsPerLine: barsPerLine,
+    renderWidth: spaced.renderWidth,
     margin: Math.max(0, Math.floor((page - line) / 2)),
     oneLine: count <= barsPerLine,
   };
