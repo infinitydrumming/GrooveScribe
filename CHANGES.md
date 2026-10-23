@@ -29,6 +29,8 @@ The original copyright notices and credits are unchanged.
   `css/infinity_layout.css`, `index.html`, `gscribe_help.html`.
 - **Bar numbers** in the music of a groove of 2 or more bars (on every bar after
   the first, as the alphabet's are).
+- Adding a bar, or a copy of one, no longer scrolls the page down to the grid:
+  it stays where it is, on the music (`js/groove_writer.js`).
 
 ## 2026-10-23 — Practise bars: just those bars in the music, one box
 

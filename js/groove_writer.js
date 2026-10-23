@@ -3953,10 +3953,7 @@ function GrooveWriter() {
       var last = records[records.length - 1];
       records.push(JSON.parse(JSON.stringify(last)));
       layOutBarRecords(records);
-      var addButton = document.getElementById('addMeasureButton');
-      if (addButton && addButton.scrollIntoView)
-        addButton.scrollIntoView({ block: 'start', behavior: 'smooth' });
-      return;
+      return; // (the page stays where it is, on the music: Infinity Drumming, 2026)
     }
 
     var uiStickings = '';
@@ -4027,11 +4024,7 @@ function GrooveWriter() {
       uiOrnaments
     );
 
-    // reference the button and scroll it into view
-    var add_measure_button = document.getElementById('addMeasureButton');
-    if (add_measure_button)
-      add_measure_button.scrollIntoView({ block: 'start', behavior: 'smooth' });
-
+    // (the page stays where it is, on the music: Infinity Drumming, 2026)
     updateSheetMusic();
 
     if (class_number_of_measures === 5)
@@ -4050,7 +4043,7 @@ function GrooveWriter() {
   root.duplicateMeasureButtonClick = function (measureNum) {
     if (class_number_of_measures >= constant_MAX_MEASURES) return; // the most a link holds
     if (ostinatoIsFull()) return;
-    var laidOut = keepingMutes(
+    keepingMutes(
       function (bar) {
         if (bar < measureNum) return [bar];
         return bar == measureNum ? [bar, bar + 1] : [bar + 1];
@@ -4061,9 +4054,7 @@ function GrooveWriter() {
         return layOutBarRecords(records);
       }
     );
-    var copy = document.getElementById('staff-container' + (measureNum + 1));
-    if (laidOut && copy && copy.scrollIntoView)
-      copy.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    // (the page stays where it is, on the music)
   };
 
   // Laying the grid out again (a bar added, removed, copied or pasted) draws every
