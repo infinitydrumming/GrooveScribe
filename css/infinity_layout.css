@@ -819,6 +819,26 @@ body,
   background: var(--id-blue-tint);
   border-color: #a8cdf3;
 }
+/* the Notes setting's "Keep" switch (Infinity Drumming, 2026): the phrase or the
+ * timing when the Notes change (on a phone: at the foot of the Notes menu) */
+#notesKeepToggle {
+  align-self: center;
+  margin-left: 4px;
+  padding: 4px 10px;
+  border: 1px dashed var(--id-border);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #5a6b82;
+  cursor: pointer;
+  user-select: none;
+}
+#notesKeepToggle:hover {
+  color: var(--id-navy-900);
+  border-color: var(--id-navy-900);
+}
+
 /* the bar's section (Infinity Drumming, 2026): its letter, and on a section's
  * first bar how many times it plays */
 #measureContainer .barSection {
@@ -1360,6 +1380,7 @@ body,
 }
 @media (max-width: 900px) {
   #divisionButtonContainer .subdivision,
+  #notesKeepToggle,
   #notesToolbarLabel {
     display: none !important;
   }

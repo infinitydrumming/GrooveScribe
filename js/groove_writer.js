@@ -788,7 +788,7 @@ function GrooveWriter() {
           var route = divisionRoute(class_time_division, division);
           route.forEach(function (step, i) {
             class_beats_for_next_division = i == route.length - 1 && !plain ? bars : null;
-            root.changeDivision(step); // (keeps the notes; hides the slots no beat uses)
+            root.changeDivision(step, true); // (keeps the notes; hides the slots no beat uses)
           });
         } finally {
           class_beats_for_next_division = null;
@@ -1644,6 +1644,7 @@ function GrooveWriter() {
   // The phone toolbar shows "Notes" and "Click" as selectors instead of rows of
   // buttons (Infinity Drumming, 2026): keep them showing the current settings.
   function syncToolbarSelects() {
+    showNotesKeep();
     var notes = document.getElementById('notesSelect');
     if (notes) {
       notes.value = String(shownDivision());
@@ -7816,12 +7817,87 @@ function GrooveWriter() {
     });
   }
 
-  // Between triplets and straight notes (Infinity Drumming, 2026): the notes keep
-  // their order, slot after slot, the phrase played through the new note setting,
-  // as a new time signature does (the 12 16ths of a 3/4 bar are the 12 8th-note
-  // triplets of a 4/4 bar). The bars stay as many: past their end is cut, and rests
-  // fill what's left. Mixed and 32nds go by way of 16ths, keeping the notes' time.
-  // One undo takes it back.
+  // --- The Notes setting's "Keep" switch (Infinity Drumming, 2026) -------------
+  // A change of Notes keeps the phrase (the notes in order, slot after slot,
+  // across the bars: a sticking played as 8ths, then 16ths, then triplets) or the
+  // timing (the notes where they are in the beat: room for 32nds in a groove of
+  // 16ths). This device remembers it; the phrase to start with. Between triplets
+  // and straight notes the phrase is kept either way (the timing can't be), and
+  // Mixed, notes beat by beat and a permutation's ostinato always keep the timing.
+  var constant_notes_keep_key = 'grooveScribeNotesKeep';
+  var class_notes_keep = storedNotesKeep();
+
+  function storedNotesKeep() {
+    try {
+      return window.localStorage.getItem(constant_notes_keep_key) == 'time' ? 'time' : 'phrase';
+    } catch {
+      return 'phrase'; // storage unavailable
+    }
+  }
+
+  // keepTiming: a change on the way to another (the beat menus', Mixed's by way of 16ths)
+  function changeKeepsThePhrase(newDivision, keepTiming) {
+    var exactChange =
+      newDivision % class_time_division === 0 || class_time_division % newDivision === 0;
+    if (!exactChange && usingTriplets() !== root.myGrooveUtils.isTripletDivision(newDivision))
+      return true; // the timing can't be kept
+    return (
+      !keepTiming &&
+      class_notes_keep == 'phrase' &&
+      class_permutation_type == 'none' && // (an ostinato keeps its time)
+      newDivision != class_time_division &&
+      newDivision != 48 &&
+      !beatGrid()
+    );
+  }
+
+  root.setNotesKeep = function (keep) {
+    class_notes_keep = keep == 'time' ? 'time' : 'phrase';
+    try {
+      window.localStorage.setItem(constant_notes_keep_key, class_notes_keep);
+    } catch {
+      /* storage unavailable: it lasts for this visit */
+    }
+    showNotesKeep();
+  };
+
+  root.notesKeepToggle = function () {
+    root.setNotesKeep(class_notes_keep == 'phrase' ? 'time' : 'phrase');
+  };
+
+  // the phone's Notes menu: a note setting, or the switch at its foot
+  root.notesSelectChange = function (value) {
+    if (value == 'phrase' || value == 'time') {
+      root.setNotesKeep(value);
+      syncToolbarSelects();
+      return;
+    }
+    root.changeDivision(parseInt(value, 10));
+  };
+
+  function showNotesKeep() {
+    var toggle = document.getElementById('notesKeepToggle');
+    if (toggle) {
+      toggle.textContent = class_notes_keep == 'phrase' ? 'Keep: phrase' : 'Keep: timing';
+      toggle.title =
+        class_notes_keep == 'phrase'
+          ? 'Changing Notes keeps the phrase: the notes in order, across the bars. Click to keep the timing instead'
+          : 'Changing Notes keeps the timing: the notes where they are in the beat. Click to keep the phrase instead';
+    }
+    ['phrase', 'time'].forEach(function (keep) {
+      var option = document.getElementById('notesKeep_' + keep);
+      if (option)
+        option.textContent =
+          (class_notes_keep == keep ? '\u2713 ' : '\u2003') +
+          (keep == 'phrase' ? 'Keep the phrase' : 'Keep the timing');
+    });
+  }
+
+  // Keeping the phrase (Infinity Drumming, 2026): the notes keep their order, slot
+  // after slot, the phrase played through the new note setting, as a new time
+  // signature does (the 12 16ths of a 3/4 bar are the 12 8th-note triplets of a 4/4
+  // bar). The bars stay as many: past their end is cut, and rests fill what's left.
+  // Mixed goes by way of 16ths, keeping the notes' time. One undo takes it back.
   function changeDivisionKeepingThePhrase(newDivision) {
     root.resetMetronomeOptionsMenuOffsetClick(); // the click's offsets differ in triplets
     keepingMutes(
@@ -7830,8 +7906,8 @@ function GrooveWriter() {
       },
       function () {
         if (newDivision != 48 && class_time_division != 48) return reflowIntoDivision(newDivision);
-        root.changeDivision(16);
-        root.changeDivision(newDivision);
+        root.changeDivision(16, true);
+        root.changeDivision(newDivision, true);
       }
     );
   }
@@ -7871,7 +7947,9 @@ function GrooveWriter() {
     return newDivision == 48 && beatGrid() == 32 && !class_beats_for_next_division;
   }
 
-  root.changeDivision = function (newDivision) {
+  // keepTiming (Infinity Drumming, 2026): the notes stay where they are in the beat
+  // whatever the "Keep" switch says (see changeKeepsThePhrase)
+  root.changeDivision = function (newDivision, keepTiming) {
     if (alreadyBeatByBeat(newDivision)) return;
     var uiStickings = '|';
     var uiHH = '|';
@@ -7936,15 +8014,15 @@ function GrooveWriter() {
       return;
     }
 
-    // notes keep their places when one note setting's grid is a whole multiple of
-    // the other's (16ths and Mixed, 8ths and 16th triplets...); between triplets and
-    // straight notes otherwise they keep their order (Infinity Drumming, 2026)
-    var exactChange =
-      newDivision % class_time_division === 0 || class_time_division % newDivision === 0;
-    if (!exactChange && usingTriplets() !== isNewDivisionTriplets) {
+    // the notes keep their order (the "Keep" switch; Infinity Drumming, 2026), or
+    // their places when one note setting's grid is a whole multiple of the other's
+    // (16ths and Mixed, 8ths and 16th triplets...)
+    if (changeKeepsThePhrase(newDivision, keepTiming)) {
       changeDivisionKeepingThePhrase(newDivision);
       return;
     }
+    var exactChange =
+      newDivision % class_time_division === 0 || class_time_division % newDivision === 0;
 
     class_beat_notes = beatsInDivision(newDivision);
     class_beats_for_next_division = null;

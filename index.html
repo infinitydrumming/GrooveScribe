@@ -118,14 +118,19 @@
 					<span class="left-button subdivision edit-block" id="subdivision_12ths" onclick="myGrooveWriter.changeDivision(12);"><span class="left-button-content"><span>8th triplets</span></span></span>
 					<span class="left-button subdivision edit-block" id="subdivision_24ths" onclick="myGrooveWriter.changeDivision(24);"><span class="left-button-content"><span>16th triplets</span></span></span>
 					<span class="left-button subdivision edit-block" id="subdivision_48ths" onclick="myGrooveWriter.changeDivision(48);"><span class="left-button-content"><span>Mixed</span></span></span>
+					<span class="edit-block" id="notesKeepToggle" onclick="myGrooveWriter.notesKeepToggle();">Keep: phrase</span>
 
-					<span class="phoneSelectWrap edit-block" id="notesSelectWrap" title="How many notes per beat the grid has"><select id="notesSelect" aria-label="Notes per beat" onchange="myGrooveWriter.changeDivision(parseInt(this.value, 10));">
+					<span class="phoneSelectWrap edit-block" id="notesSelectWrap" title="How many notes per beat the grid has"><select id="notesSelect" aria-label="Notes per beat" onchange="myGrooveWriter.notesSelectChange(this.value);">
 						<option value="8">Notes: 8ths</option>
 						<option value="16">Notes: 16ths</option>
 						<option value="32">Notes: 32nds</option>
 						<option value="12">Notes: 8th trip.</option>
 						<option value="24">Notes: 16th trip.</option>
 						<option value="48">Notes: Mixed</option>
+						<optgroup label="When the Notes change">
+							<option value="phrase" id="notesKeep_phrase">Keep the phrase</option>
+							<option value="time" id="notesKeep_time">Keep the timing</option>
+						</optgroup>
 					</select></span>
 					<span class="toolbarSpacer"></span>
 					<span id="metronomeContainer" class="toolbarGroup">

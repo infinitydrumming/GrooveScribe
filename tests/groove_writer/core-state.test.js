@@ -417,6 +417,76 @@ describe('GrooveWriter core state & undo/redo', () => {
     });
   });
 
+  // the Notes setting's "Keep" switch (Infinity Drumming, 2026)
+  describe('changeDivision: keep the phrase or the timing', () => {
+    beforeEach(() => {
+      buildFixture(gw, 1);
+      stubCascadingRenders(gw);
+      gw.stickingsShowHide(true, true, true);
+      gw.noteLeftClick(null, 'sticking', 2); // the "&" of 1 in 16ths
+    });
+    afterEach(() => {
+      window.localStorage.clear();
+    });
+
+    function stickingSlots() {
+      return gw.grooveDataFromClickableUI().sticking_array;
+    }
+
+    it('keeps the phrase to start with: the 3rd 16th becomes the 3rd 8th', () => {
+      gw.changeDivision(8);
+      expect(stickingSlots().indexOf('"R"x')).toBe(2);
+      gw.changeDivision(16); // and back: still the 3rd note
+      expect(stickingSlots().indexOf('"R"x')).toBe(2);
+    });
+
+    it('keeps the timing when switched: the "&" of 1 stays the "&" of 1', () => {
+      gw.notesKeepToggle();
+      gw.changeDivision(8);
+      expect(stickingSlots().indexOf('"R"x')).toBe(1);
+      gw.changeDivision(32);
+      expect(stickingSlots().indexOf('"R"x')).toBe(4);
+    });
+
+    it('Mixed keeps the timing either way (its beats choose their own notes)', () => {
+      gw.changeDivision(48);
+      expect(stickingSlots().indexOf('"R"x')).toBe(6); // 12 slots a beat
+    });
+
+    it('this device remembers the choice', async () => {
+      gw.setNotesKeep('time');
+      expect(window.localStorage.getItem('grooveScribeNotesKeep')).toBe('time');
+      const next = await newGrooveWriter();
+      document.body.innerHTML = ''; // (the grid ids are the page's own)
+      buildFixture(next, 1);
+      stubCascadingRenders(next);
+      next.stickingsShowHide(true, true, true);
+      next.noteLeftClick(null, 'sticking', 2);
+      next.changeDivision(8);
+      expect(next.grooveDataFromClickableUI().sticking_array.indexOf('"R"x')).toBe(1);
+    });
+
+    it("the phone's Notes menu holds the switch at its foot", () => {
+      const select = document.createElement('select');
+      select.id = 'notesSelect';
+      select.innerHTML =
+        '<option value="8">Notes: 8ths</option><option value="16">Notes: 16ths</option>' +
+        '<optgroup label="When the Notes change">' +
+        '<option value="phrase" id="notesKeep_phrase"></option>' +
+        '<option value="time" id="notesKeep_time"></option></optgroup>';
+      document.body.appendChild(select);
+
+      gw.notesSelectChange('time');
+      expect(window.localStorage.getItem('grooveScribeNotesKeep')).toBe('time');
+      expect(document.getElementById('notesKeep_time').textContent).toBe('\u2713 Keep the timing');
+      expect(select.value).toBe('16'); // the menu shows the note setting again
+
+      gw.notesSelectChange('8');
+      expect(gw.notesPerMeasure()).toBe(8);
+      expect(stickingSlots().indexOf('"R"x')).toBe(1);
+    });
+  });
+
   describe('usingTriplets (private) - covered indirectly via changeDivision side effects', () => {
     beforeEach(() => {
       buildFixture(gw, 1);

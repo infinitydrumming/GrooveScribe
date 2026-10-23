@@ -214,6 +214,21 @@ describe('an exercise in its link', () => {
     expect(link()).not.toContain('FatBack');
   });
 
+  // the Notes change's "Keep" switch (Infinity Drumming, 2026)
+  it("keeps an ostinato's timing whatever the switch says", () => {
+    gw.setNotesKeep('phrase');
+    gw.loadNewGroove(
+      '?TimeSig=4/4&Div=8&Tempo=80&Measures=1&Perm=kick_16ths' +
+        '&H=|xxxxxxxx|&S=|--O---O-|&K=|o---o---|'
+    );
+    gw.changeDivision(16);
+    const now = new URLSearchParams(window.location.search);
+    expect(now.get('Div')).toBe('16');
+    expect(now.get('S')).toBe('|----O-------O---|');
+    expect(now.get('K')).toBe('|o-------o-------|');
+    window.localStorage.clear();
+  });
+
   it('keeps the ticks of a 1/16 triplet link from before the per-beat figures were filled out', () => {
     const ticked = () =>
       [...document.querySelectorAll('#PermutationOptions input[type="checkbox"]')]
