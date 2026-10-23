@@ -283,7 +283,7 @@ l77.62 0.00v3.20l-77.62 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">8th notes / Off-beat 16ths   (play each ×3)</text>
 <g transform="translate(0,106.70)">
-<text class="f1_1" x="24.00" y="-49.70">5</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">5</text>
 <text class="f1_1" x="446.10" y="-32.00">6</text>
 <text class="f2_1" x="36.50" y="-66.90"><tspan class="f4_1">1</tspan></text>
 <text class="f2_1" x="62.66" y="-59.90"><tspan class="f3_1">e</tspan></text>

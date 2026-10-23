@@ -272,11 +272,15 @@ describe('practice timer and speed-up in bars', () => {
       [0, 1, 0, 1, 2, 2, 2, 3].map((bar, i) => i * 512 + bar * 32 + (i ? 0 : 1))
     );
     expect(link()).toContain('&Sections=A1-2x2,B3x3');
-    // the music: each section once, its letter and repeat signs
+    // the music: each section once, its letter (bold, boxed) and repeat signs, how
+    // many times under the end one
     const abc = document.getElementById('ABCsource').value;
-    expect(abc).toContain('[P:A \u00d72]|:');
-    expect(abc).toContain('[P:B \u00d73]|:');
-    expect(abc.match(/ :\|/g)).toHaveLength(2 * 2); // (each section's end, in both voices)
+    expect(abc).toContain('%%partsfont calibri-Bold 18 box\n');
+    expect(abc).toContain('[P:A]|:');
+    expect(abc).toContain('[P:B]|:');
+    expect(abc.match(/ :\|/g)).toHaveLength(2); // (each section's end, in the hands' voice)
+    expect(abc.match(/ "_\u00d72":\|/g)).toHaveLength(1); // (and the feet's)
+    expect(abc.match(/ "_\u00d73":\|/g)).toHaveLength(1);
     expect(abc).toContain('%%measurenb 1');
   });
 

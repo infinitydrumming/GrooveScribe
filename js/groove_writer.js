@@ -124,6 +124,7 @@ import {
   musicLineBroken,
   notesOnALine,
   defineGlyphsOnce,
+  engravedMusic,
 } from './abcNotation.js';
 import { barSig, barNoteCount, barStride, isMixedMeter, divisionFitsBar } from './barMeters.js';
 import { scaleTabMeasure } from './noteArrays.js';
@@ -326,9 +327,14 @@ function GrooveWriter() {
   // 2026), and over bars being practised which they are
   function musicBarsHeading() {
     return (
-      practisedBarsHeading() ||
-      formHeading() + (class_number_of_measures > 1 ? '%%measurenb 1\n' : '')
+      sectionLetterFont() +
+      (practisedBarsHeading() ||
+        formHeading() + (class_number_of_measures > 1 ? '%%measurenb 1\n' : ''))
     );
+  }
+  // sections' letters as rehearsal marks: bold, in a box (Infinity Drumming, 2026)
+  function sectionLetterFont() {
+    return class_bar_sections.some(Boolean) ? '%%partsfont calibri-Bold 18 box\n' : '';
   }
   // the bars the music writes: every bar, or those practised (Infinity Drumming, 2026)
   function barsWritten() {
@@ -3882,8 +3888,9 @@ function GrooveWriter() {
     }
 
     diverr.innerHTML = svg_return.error_html;
-    // each glyph defined once on the page (abc2svg repeats them line after line)
-    svgTarget.innerHTML = defineGlyphsOnce(svg_return.svg);
+    // each glyph defined once on the page (abc2svg repeats them line after line),
+    // the section letters and bar numbers as a score has them
+    svgTarget.innerHTML = defineGlyphsOnce(engravedMusic(svg_return.svg));
     class_music_svg = svg_return.svg;
   };
 
@@ -4309,11 +4316,15 @@ function GrooveWriter() {
     if (!run) return barABC;
     var repeated = run.repeats > 1;
     if (bar == run.from) {
-      var label = run.letter + (repeated ? ' \u00d7' + run.repeats : '');
       if (repeated) barABC = barABC.replace(/(V:Stickings\n|%%voicemap drum\n)/g, '$1|:');
-      barABC = barABC.replace(/(V:Stickings\n)/, '$1[P:' + label + ']');
+      barABC = barABC.replace(/(V:Stickings\n)/, '$1[P:' + run.letter + ']');
     }
-    if (bar == run.to && repeated) barABC = barABC.split(' |' + addon).join(' :|' + addon);
+    if (bar == run.to && repeated) {
+      barABC = barABC.split(' |' + addon).join(' :|' + addon);
+      // how many times, under the end repeat sign (the feet's, the last voice's)
+      var end = barABC.lastIndexOf(' :|' + addon);
+      barABC = barABC.slice(0, end) + ' "_\u00d7' + run.repeats + '"' + barABC.slice(end + 1);
+    }
     return barABC;
   }
 

@@ -387,9 +387,10 @@ test.describe('sections', () => {
       .poll(() => page.evaluate(() => new URLSearchParams(location.search).get('Sections')))
       .toBe('A1x2,B2');
     expect(await playing(page)).toBe(writtenOut);
-    // the music: each once, lettered, A between repeat signs
+    // the music: each once, lettered, A between repeat signs, ×2 under the end one
     const abc = await page.locator('#ABCsource').inputValue();
-    expect(abc).toContain('[P:A ×2]|:');
+    expect(abc).toContain('[P:A]|:');
+    expect(abc).toContain('"_×2":|');
     expect(abc).toContain('[P:B]');
   });
 

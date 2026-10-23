@@ -158,7 +158,7 @@ l33.29 0.00v3.20l-33.29 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,82.70)">
-<text class="f2_1" x="24.00" y="-50.70">3</text>
+<text class="f2_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f2_1" x="402.07" y="-32.00">4</text>
 <text class="f3_1" x="32.98" y="-67.90">1</text>
 <text class="f3_1" x="78.42" y="-63.90">&amp;</text>
@@ -304,7 +304,7 @@ l33.50 0.00v3.20l-33.50 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f3_1" x="26.50" y="18.00">8th notes / Off-beat 16ths   (play each ×4)</text>
 <g transform="translate(0,105.70)">
-<text class="f2_1" x="24.00" y="-48.70">5</text>
+<text class="f2_1" x="22.00" y="-27.00" text-anchor="end">5</text>
 <text class="f2_1" x="370.91" y="-32.00">6</text>
 <text class="f3_1" x="32.98" y="-65.90">1</text>
 <text class="f3_1" x="74.41" y="-63.90">&amp;</text>
@@ -474,7 +474,7 @@ l92.00 0.00v3.20l-92.00 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f3_1" x="26.50" y="18.00">Doubles   (play each ×4)</text>
 <g transform="translate(0,107.70)">
-<text class="f2_1" x="24.00" y="-50.70">7</text>
+<text class="f2_1" x="22.00" y="-27.00" text-anchor="end">7</text>
 <text class="f2_1" x="445.69" y="-32.00">8</text>
 <text class="f3_1" x="32.98" y="-67.90">1</text>
 <text class="f3_1" x="64.27" y="-60.90">e</text>
@@ -654,7 +654,7 @@ l30.89 0.00v3.20l-30.89 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,82.70)">
-<text class="f2_1" x="24.00" y="-50.70">9</text>
+<text class="f2_1" x="22.00" y="-27.00" text-anchor="end">9</text>
 <text class="f2_1" x="441.05" y="-32.00">10</text>
 <text class="f3_1" x="32.98" y="-67.90">1</text>
 <text class="f3_1" x="74.27" y="-63.90">&amp;</text>
@@ -840,7 +840,7 @@ l30.56 0.00v3.20l-30.56 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f3_1" x="26.50" y="18.00">Triples   (play each ×4)</text>
 <g transform="translate(0,109.70)">
-<text class="f2_1" x="24.00" y="-49.70">11</text>
+<text class="f2_1" x="22.00" y="-27.00" text-anchor="end">11</text>
 <text class="f2_1" x="409.09" y="-32.00">12</text>
 <text class="f3_1" x="32.98" y="-69.90">1</text>
 <text class="f3_1" x="61.75" y="-69.90">e</text>
@@ -1048,7 +1048,7 @@ l85.14 0.00v3.20l-85.14 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,84.70)">
-<text class="f2_1" x="24.00" y="-49.70">13</text>
+<text class="f2_1" x="22.00" y="-27.00" text-anchor="end">13</text>
 <text class="f2_1" x="409.13" y="-32.00">14</text>
 <text class="f3_1" x="32.98" y="-69.90">1</text>
 <text class="f3_1" x="70.91" y="-69.90">&amp;</text>
@@ -1262,7 +1262,7 @@ l84.57 0.00v3.20l-84.57 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f3_1" x="26.50" y="18.00">Quads   (play each ×4)</text>
 <g transform="translate(0,109.70)">
-<text class="f2_1" x="24.00" y="-49.70">15</text>
+<text class="f2_1" x="22.00" y="-27.00" text-anchor="end">15</text>
 <text class="f3_1" x="32.98" y="-69.90">1</text>
 <text class="f3_1" x="62.14" y="-69.90">e</text>
 <text class="f3_1" x="88.55" y="-69.90">&amp;</text>

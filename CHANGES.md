@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-24 — Section letters as rehearsal marks; bar numbers by the stave
+
+- A section's letter in the music is bold, in a round-cornered box, as a
+  score's rehearsal marks are; how many times it plays (×4) goes under its end
+  repeat sign instead of beside the letter (`js/groove_writer.js`,
+  `js/abcNotation.js`).
+- A bar number starting a line sits by the clef just over the stave, no longer
+  up over the first note's stem, out of the way of the section letters. The
+  golden master's music with such numbers is updated for it: only those
+  numbers moved (`js/abcNotation.js` `engravedMusic`).
+
 ## 2026-10-24 — A form for the sections (ABAC)
 
 - Once a groove has sections, a "Form" box above the bars takes the order they

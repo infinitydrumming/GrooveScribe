@@ -163,7 +163,7 @@ l25.87 0.00v3.20l-25.87 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,82.70)">
-<text class="f1_1" x="24.00" y="-50.70">3</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f1_1" x="446.10" y="-32.00">4</text>
 <text class="f2_1" x="36.50" y="-67.90"><tspan class="f4_1">1</tspan></text>
 <text class="f2_1" x="62.66" y="-57.90"><tspan class="f4_1">e</tspan></text>
@@ -316,7 +316,7 @@ l26.16 0.00v3.20l-26.16 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">8th notes / Off-beat 16ths   (play each ×2)</text>
 <g transform="translate(0,105.70)">
-<text class="f1_1" x="24.00" y="-48.70">5</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">5</text>
 <text class="f1_1" x="446.10" y="-32.00">6</text>
 <text class="f2_1" x="36.50" y="-65.90"><tspan class="f3_1">1</tspan></text>
 <text class="f2_1" x="62.66" y="-57.90"><tspan class="f4_1">e</tspan></text>
@@ -488,7 +488,7 @@ l78.47 0.00v3.20l-78.47 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Doubles   (play each ×2)</text>
 <g transform="translate(0,107.70)">
-<text class="f1_1" x="24.00" y="-50.70">7</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">7</text>
 <text class="f1_1" x="447.52" y="-32.00">8</text>
 <text class="f2_1" x="36.50" y="-67.90"><tspan class="f3_1">1</tspan></text>
 <text class="f2_1" x="62.75" y="-57.90"><tspan class="f3_1">e</tspan></text>
@@ -669,7 +669,7 @@ l26.25 0.00v3.20l-26.25 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,82.70)">
-<text class="f1_1" x="24.00" y="-50.70">9</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">9</text>
 <text class="f1_1" x="443.02" y="-32.00">10</text>
 <text class="f2_1" x="36.50" y="-67.90"><tspan class="f4_1">1</tspan></text>
 <text class="f2_1" x="62.66" y="-57.90"><tspan class="f4_1">e</tspan></text>
@@ -855,7 +855,7 @@ l26.16 0.00v3.20l-26.16 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Triples   (play each ×2)</text>
 <g transform="translate(0,109.70)">
-<text class="f1_1" x="24.00" y="-49.70">11</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">11</text>
 <text class="f1_1" x="444.44" y="-32.00">12</text>
 <text class="f2_1" x="36.50" y="-69.90"><tspan class="f3_1">1</tspan></text>
 <text class="f2_1" x="62.75" y="-69.90"><tspan class="f3_1">e</tspan></text>
@@ -1058,7 +1058,7 @@ l78.74 0.00v3.20l-78.74 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,84.70)">
-<text class="f1_1" x="24.00" y="-49.70">13</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">13</text>
 <text class="f1_1" x="443.02" y="-32.00">14</text>
 <text class="f2_1" x="36.50" y="-69.90"><tspan class="f3_1">1</tspan></text>
 <text class="f2_1" x="62.66" y="-69.90"><tspan class="f4_1">e</tspan></text>

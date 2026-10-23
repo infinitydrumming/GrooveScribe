@@ -17,7 +17,7 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1176 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm test`             | Vitest unit suite — **1177 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
 | `npm run test:e2e`     | Playwright golden-master — **130 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
@@ -149,6 +149,10 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   per dotted-quarter beat. Cross-rhythm groups exist only when they divide the bar, so a group list
   (and `PermSet`) depends on the meter too. After the time-signature popup the beats can be strings
   ("3"): keep layout maths to `*`, `%` and `==`.
+- **The music is engraved after abc2svg** (`engravedMusic` in `displayNewSVG`): part-label boxes (section
+  letters: `%%partsfont calibri-Bold 18 box` once a groove has sections, ×N as `"_×N"` before the feet's
+  end repeat) get round corners, and a bar number starting a line (`x` under 100) moves by the clef just
+  over the stave, as abc2svg stacks it over the first note's stem. `musicLineBroken` still reads the raw SVG.
 - **The editor puts each glyph on the page once** (`defineGlyphsOnce` in `displayNewSVG`): with
   `%%fullsvg`, abc2svg 1.3.2 repeats every earlier line's `<defs>` in each line (quadratic: seconds
   for a long permutation run). The golden master snapshots that page form; `musicLineBroken` still

@@ -131,7 +131,7 @@ l34.38 0.00v3.20l-34.38 0.00"></path>
 
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,85.70)">
-<text class="f1_1" x="24.00" y="-53.70">3</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f2_1" x="32.98" y="-70.90">1</text>
 <text class="f2_1" x="102.42" y="-57.90">&amp;</text>
 <text class="f2_1" x="175.77" y="-57.90">2</text>
@@ -204,7 +204,7 @@ l71.40 0.00v3.20l-71.40 0.00"></path>
 
 </defs><g transform="scale(0.75)"><text class="f2_1" x="26.50" y="18.00">Cross-rhythm: every 2nd note</text>
 <g transform="translate(0,105.70)">
-<text class="f1_1" x="24.00" y="-48.70">4</text>
+<text class="f1_1" x="22.00" y="-27.00" text-anchor="end">4</text>
 <text class="f1_1" x="442.26" y="-32.00">5</text>
 <text class="f2_1" x="32.98" y="-65.90">1</text>
 <text class="f2_1" x="65.74" y="-57.90">&amp;</text>

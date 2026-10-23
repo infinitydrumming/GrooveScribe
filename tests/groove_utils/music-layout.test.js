@@ -4,6 +4,7 @@ import {
   practisedBarsLayout,
   musicLineBroken,
   defineGlyphsOnce,
+  engravedMusic,
 } from '../../js/abcNotation.js';
 import { clickCountNotes } from '../../js/countModes.js';
 
@@ -120,5 +121,33 @@ describe('glyphs defined once on the page', () => {
       expect(practisedBarsLayout(2, dense, 4, 0.5).barsPerLine).toBe(2);
       expect(practisedBarsLayout(2, dense, 4, 0.5).margin).toBe(38);
     });
+  });
+
+  // Infinity Drumming, 2026: section letters in round-cornered boxes, and a bar
+  // number starting a line by the clef just over the stave
+  it('engraves the section boxes and the bar numbers at the start of lines', () => {
+    const line = (inside) =>
+      '<svg><style>.f2_1 {font:italic 14px serif}</style><g transform="scale(0.75)">' +
+      inside +
+      '<path class="stroke" d="m0.00 91.70\nh1013.33m-1013.33 -6h1013.33"/></g></svg>';
+    const music =
+      line(
+        '<rect class="stroke" stroke-width="0.6"\n\tx="24.50" y="2.00" width="17.21" height="22.00"/>\n' +
+          '<g transform="translate(0,91.70)">\n<text class="f2_1" x="24.00" y="-50.70">3</text>\n</g>\n'
+      ) +
+      line(
+        '<g transform="translate(0,75.70)">\n<text class="f2_1" x="536.62" y="15.01">4</text>\n</g>\n'
+      );
+    const engraved = engravedMusic(music);
+    expect(engraved).toContain(
+      '<rect class="stroke" stroke-width="1.2" rx="4" x="22.50" y="2.00" width="21.21" height="22.00"/>'
+    );
+    // 3 above the top line (91.70 - 24), right next to where it was
+    expect(engraved).toContain(
+      '<text class="f2_1" x="22.00" y="-27.00" text-anchor="end">3</text>'
+    );
+    // a number by a bar line within its line stays where it is
+    expect(engraved).toContain('<text class="f2_1" x="536.62" y="15.01">4</text>');
+    expect(engravedMusic('<p>no music</p>')).toBe('<p>no music</p>');
   });
 });

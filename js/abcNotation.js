@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: 32nds beat by beat, tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices, dense bars one a line on phones, each glyph defined once in the music on the page. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: section letters boxed and bar numbers by the stave, 32nds beat by beat, tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices, dense bars one a line on phones, each glyph defined once in the music on the page. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -969,6 +969,65 @@ export function defineGlyphsOnce(svg) {
     return '<defs>' + kept.join('') + '</defs>';
   });
 }
+
+/**
+ * Infinity Drumming, 2026: the music's finishing touches, as a score has them. A
+ * section's letter (a part label in a box) gets round corners and a little room,
+ * and a bar number starting a line sits by the clef just over the stave, not up
+ * over the first note's stem (abc2svg puts it over whatever is there).
+ * @param {string} svg  abc2svg's output, one <svg> a line of music
+ * @returns {string}
+ */
+export function engravedMusic(svg) {
+  var measureFont = /\.(f\d+_\d+) \{font:italic 14px serif\}/.exec(svg);
+  return String(svg)
+    .split(/(?=<svg[\s>])/)
+    .map(function (line) {
+      line = line.replace(
+        /<rect class="stroke" stroke-width="0.6"\s+x="([-\d.]+)" y="([-\d.]+)" width="([\d.]+)" height="([\d.]+)"\/>/g,
+        function (box, x, y, w, h) {
+          return (
+            '<rect class="stroke" stroke-width="1.2" rx="4" x="' +
+            (Number(x) - 2).toFixed(2) +
+            '" y="' +
+            y +
+            '" width="' +
+            (Number(w) + 4).toFixed(2) +
+            '" height="' +
+            h +
+            '"/>'
+          );
+        }
+      );
+      var staff = /<path class="stroke" d="m0\.00 ([\d.]+)\nh/.exec(line);
+      if (!measureFont || !staff) return line;
+      var top = Number(staff[1]) - 24; // (the stave's top line: 4 spaces of 6 up)
+      var number = new RegExp(
+        '(<g transform="translate\\(0,([-\\d.]+)\\)">\\n)<text class="' +
+          measureFont[1] +
+          '" x="([\\d.]+)" y="[-\\d.]+">(\\d+)</text>'
+      );
+      return line.replace(number, function (text, group, g, x, bar) {
+        if (Number(x) > LINE_START) return text; // (a bar number within the line)
+        return (
+          group +
+          '<text class="' +
+          measureFont[1] +
+          '" x="' +
+          (Number(x) - 2).toFixed(2) +
+          '" y="' +
+          (top - 3 - Number(g)).toFixed(2) +
+          '" text-anchor="end">' +
+          bar +
+          '</text>'
+        );
+      });
+    })
+    .join('');
+}
+
+// a bar number this far into its line starts it (the clef's width and some)
+var LINE_START = 100;
 
 /**
  * Infinity Drumming, 2026: whether abc2svg broke a line of the music in the
