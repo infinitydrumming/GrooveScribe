@@ -11,6 +11,25 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-24 — Practised alphabet bars all one size; a clearer Section chip; keep the phrase or the timing
+
+- A switch after the Notes buttons (on a phone, at the foot of the Notes menu)
+  chooses what a change of Notes does: "Keep: phrase" (to start with) keeps the
+  notes in order across the bars for every change (a sticking played as 8ths,
+  then 16ths, then triplets), as triplets already did; "Keep: timing" leaves
+  them where they are in the beat (16ths to 32nds for room for fills). Between
+  triplets and straight notes the phrase is always kept; Mixed, the beat menus
+  and an alphabet exercise's ostinato always keep the timing. Each device remembers its choice
+  (`js/groove_writer.js`, `index.html`, `css/infinity_layout.css`).
+
+- Practising some bars of the alphabet, the music writes each on a line of its
+  own, all as wide as the page, so they read alike (a bar alone on a line used
+  to be stretched across the page and the last one left narrow). The golden
+  master's two practised-bars exercises are updated for it (their playback is
+  unchanged) (`js/groove_writer.js`).
+- The empty Section chip on a bar card is in the sections' amber, so it's
+  easier to spot (`css/infinity_layout.css`).
+
 ## 2026-10-23 — Triplets keep the phrase; erase one bar; copy notes between tabs
 
 - Changing the Notes setting between triplets and straight notes no longer

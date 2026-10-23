@@ -394,9 +394,9 @@ test.describe('sections', () => {
   });
 });
 
-// Infinity Drumming, 2026: changing between straight notes and triplets keeps the
-// notes in order (the phrase played through the new note setting)
-test.describe('straight notes to triplets', () => {
+// Infinity Drumming, 2026: changing the Notes keeps the notes in order (the phrase
+// played through the new note setting), always between straight notes and triplets
+test.describe('changing the Notes', () => {
   const linkPart = (page, name) =>
     page.evaluate((param) => new URLSearchParams(window.location.search).get(param), name);
   // 3/4 bars of 16ths (12 notes) made 4/4 (the notes flow on across the bar lines)
@@ -416,6 +416,30 @@ test.describe('straight notes to triplets', () => {
     await page.click('#subdivision_16ths');
     await expect.poll(() => linkPart(page, 'Div')).toBe('16');
     expect(await linkPart(page, 'S')).toBe('|-o-o-o-o-o-o--oo|--oo--oo-o--o-oo|-o--------------|');
+  });
+
+  // the Notes setting's "Keep" switch: the phrase (to start with) or the timing
+  test('8ths keep the phrase across the bars; switched to the timing, they keep the beat', async ({
+    page,
+  }) => {
+    const sixteenths =
+      '?TimeSig=4/4&Div=16&Tempo=80&Measures=2&S=|oo-o-oo-oo-o-oo-|----------------|';
+    await loadGroove(page, grooveUrl(sixteenths));
+    await expect(page.locator('#notesKeepToggle')).toHaveText('Keep: phrase');
+    await page.click('#subdivision_8ths');
+    await expect.poll(() => linkPart(page, 'Div')).toBe('8');
+    expect(await linkPart(page, 'S')).toBe('|oo-o-oo-|oo-o-oo-|');
+    await page.click('#subdivision_16ths');
+    await expect.poll(() => linkPart(page, 'Div')).toBe('16');
+    expect(await linkPart(page, 'S')).toBe('|oo-o-oo-oo-o-oo-|----------------|');
+
+    await page.click('#notesKeepToggle');
+    await expect(page.locator('#notesKeepToggle')).toHaveText('Keep: timing');
+    await page.click('#subdivision_8ths');
+    await expect.poll(() => linkPart(page, 'Div')).toBe('8');
+    expect(await linkPart(page, 'S')).toBe('|o--oo--o|--------|');
+    await page.reload();
+    await expect(page.locator('#notesKeepToggle')).toHaveText('Keep: timing'); // this device remembers
   });
 
   test("a bar's eraser clears just that bar", async ({ page }) => {
