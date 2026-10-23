@@ -151,20 +151,21 @@ describe('an exercise in its link', () => {
       [...document.getElementById('ABCsource').value.matchAll(/%%setbarnb (\d+)/g)].map(
         (m) => +m[1]
       );
-    expect(document.getElementById('PermutationBars').value).toBe('3-4');
+    // (the play bar's "Practise bars" box is the run's while a permutation is on)
+    expect(document.getElementById('practiseBars').value).toBe('3-4');
     expect(numbers()).toEqual([4]); // bar 3 opens the music; bar 4 is numbered
     expect(document.getElementById('ABCsource').value).toMatch(/P:.*\(bar 3\)/);
     expect(window.location.search).toContain('PermBars=3-4');
 
-    const box = document.getElementById('PermutationBars');
+    const box = document.getElementById('practiseBars');
     box.value = ' 7-8,5 ';
-    gw.permutationBarsChange({ target: box });
+    gw.practiseBarsChange({ target: box });
     expect(box.value).toBe('5, 7-8');
     expect(numbers()).toEqual([7, 8]);
 
     // emptied without Enter: the whole run comes back once typing pauses
     box.value = '';
-    gw.permutationBarsInput({ target: box });
+    gw.practiseBarsInput({ target: box });
     expect(numbers()).toEqual([7, 8]); // not yet
     vi.advanceTimersByTime(300);
     expect(numbers().slice(0, 3)).toEqual([2, 3, 4]); // the whole run again

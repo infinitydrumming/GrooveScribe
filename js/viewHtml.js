@@ -811,17 +811,9 @@ function playEachHTML(repeats, repCounter) {
 
 // `layout` is permutations.getPermutationLayout(...) for the current note
 // setting; `repeats` is the current "Play each ×" value.
-// barsText: the bars of the run to practise ("3-6, 9"), '' for all
 // fatBack: kick permutations leave out the kicks on the snare's backbeat
 // repCounter: the rep counter shows while it plays (a switch of this device's)
-export function buildPermutationOptionsHTML(
-  permutationType,
-  layout,
-  repeats,
-  barsText,
-  fatBack,
-  repCounter
-) {
+export function buildPermutationOptionsHTML(permutationType, layout, repeats, fatBack, repCounter) {
   if (permutationType == 'none') return '';
 
   var optionTypeArray = layout.groups.map(function (group) {
@@ -875,15 +867,7 @@ export function buildPermutationOptionsHTML(
   var newHTML = '<span id="PermutationOptionsHeader">Alphabet Options</span>\n';
 
   newHTML += playEachHTML(repeats, repCounter);
-
-  // just some bars of the run, by their numbers in the music (Infinity Drumming, 2026)
-  newHTML +=
-    '<span id="PermutationBarsOption"><label for="PermutationBars">Practise bars</label> ' +
-    '<input type="text" id="PermutationBars" autocomplete="off" placeholder="all" value="' +
-    String(barsText || '').replace(/[^0-9, -]/g, '') +
-    '" oninput="myGrooveWriter.permutationBarsInput(event)"' +
-    ' onchange="myGrooveWriter.permutationBarsChange(event)">' +
-    ' <span id="PermutationBarsHint">e.g. 5, 3-6 or 2, 5, 9</span></span>\n';
+  // (the bars of the run to practise: the play bar's "Practise bars" box)
 
   newHTML += '<span class="PermutationOptionWrapper">';
 

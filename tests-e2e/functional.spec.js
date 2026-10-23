@@ -263,6 +263,16 @@ test.describe('a block of notes', () => {
   });
 });
 
+// Infinity Drumming, 2026: the MIDI that pressing play loads
+const playing = (page) =>
+  page.evaluate(() => {
+    const gu = window.myGrooveWriter.myGrooveUtils;
+    let midi = null;
+    gu.loadMIDIFromURL = (url) => (midi = url);
+    gu.midiEventCallbacks.loadMidiDataEvent(gu, true);
+    return midi;
+  });
+
 // Infinity Drumming, 2026: "Practise bars" in the play bar plays just the bars typed
 test.describe('practising some bars', () => {
   const bars = ['x-x-x-x-x-x-x-x-', 'xxxxxxxxxxxxxxxx', 'x---x---x---x---', 'X-X-X-X-X-X-X-X-'];
@@ -277,15 +287,6 @@ test.describe('practising some bars', () => {
     '|&K=|' +
     which.map((b) => kicks[b]).join('|') +
     '|';
-  // the MIDI that pressing play loads
-  const playing = (page) =>
-    page.evaluate(() => {
-      const gu = window.myGrooveWriter.myGrooveUtils;
-      let midi = null;
-      gu.loadMIDIFromURL = (url) => (midi = url);
-      gu.midiEventCallbacks.loadMidiDataEvent(gu, true);
-      return midi;
-    });
 
   test('typing bars plays just those, as a groove of only them would', async ({ page }) => {
     await loadGroove(page, grooveUrl(groove([1, 2])));
@@ -298,5 +299,62 @@ test.describe('practising some bars', () => {
     await expect.poll(() => page.evaluate(() => location.search)).toContain('PlayBars=2-3');
     await expect(page.locator('.staff-container.notPractised')).toHaveCount(2);
     expect(await playing(page)).toBe(own);
+    // the music shows just them, numbered as in the whole groove
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('P:Bars 2-3');
+    expect(abc.match(/%%setbarnb \d+/g)).toEqual(['%%setbarnb 3']);
+  });
+});
+
+// Infinity Drumming, 2026: a beat of 32nd notes in a groove of 16ths
+test.describe('32nds on one beat', () => {
+  const sixteenths =
+    '?TimeSig=4/4&Div=16&Tempo=80&Measures=1' +
+    '&H=|x-x-x-x-x-x-x-x-|&S=|----O-------O---|&K=|o-------o-------|';
+  const inLink = (page, name) =>
+    page.evaluate((param) => new URLSearchParams(window.location.search).get(param), name);
+  const choose = async (page, slot, choice) => {
+    await page.click('#beatSlot' + slot);
+    await page.waitForTimeout(150); // (a menu closes on the next click from 100 ms after it opens)
+    await page.click('#beatContextMenu li[data-beat-choice="' + choice + '"]');
+  };
+
+  test('puts the groove on the 32nds grid, plays as 32nds would, and goes back', async ({
+    page,
+  }) => {
+    await loadGroove(page, grooveUrl(sixteenths));
+    await choose(page, 12, 'd'); // beat 4
+    await expect.poll(() => inLink(page, 'Div')).toBe('32');
+    expect(await inLink(page, 'Beats')).toBe('sssd');
+    await page.click('#snare25');
+    await page.click('#snare27');
+    await expect.poll(() => inLink(page, 'S')).toBe('|--------O---------------Oo-o----|');
+    const beatByBeat = await playing(page);
+
+    // the triplets aren't for this groove now
+    await page.click('#beatSlot0');
+    await page.waitForTimeout(150);
+    await expect(page.locator('#beatContextMenu li[data-beat-choice="t"]')).toHaveClass(/disabled/);
+    await page.keyboard.press('Escape');
+
+    // the same notes in the 32nds note setting sound the same
+    await loadGroove(
+      page,
+      grooveUrl(
+        '?TimeSig=4/4&Div=32&Tempo=80&Measures=1&H=|x---x---x---x---x---x---x---x---|' +
+          '&S=|--------O---------------Oo-o----|&K=|o---------------o---------------|'
+      )
+    );
+    expect(await playing(page)).toBe(beatByBeat);
+  });
+
+  test('16ths again on that beat take the groove back to 16ths', async ({ page }) => {
+    await loadGroove(page, grooveUrl(sixteenths));
+    await choose(page, 12, 'd');
+    await expect.poll(() => inLink(page, 'Div')).toBe('32');
+    await choose(page, 24, 's'); // beat 4 on the 32nds grid
+    await expect.poll(() => inLink(page, 'Div')).toBe('16');
+    expect(await inLink(page, 'Beats')).toBeNull();
+    expect(await inLink(page, 'S')).toBe('|----O-------O---|');
   });
 });

@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: an exercise's practice settings and instructions, mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting and its choices, more metronome clicks, diddle lines, beat-by-beat notes. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: 32nds beat by beat, an exercise's practice settings and instructions, mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting and its choices, more metronome clicks, diddle lines, beat-by-beat notes. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -127,14 +127,14 @@ function readOrnaments(myGrooveData, encodedURLData, barCounts) {
 }
 
 // The Mixed note setting's beats, bar by bar ("Beats=ssqq,ssss", see
-// beatNotes.js).  A bar without them gets them from its notes.
+// beatNotes.js).  A bar without them gets them from its notes.  In the 32nds
+// note setting only a link with them has them ("Beats=sssd": 32nd notes on beat 4).
 function readBeatNotes(myGrooveData, encodedURLData) {
   myGrooveData.beatNotes = [];
-  if (myGrooveData.timeDivision != 48) return;
-  var listed = beatsFromList(
-    getQueryVariableFromString('Beats', '', encodedURLData),
-    myGrooveData.numberOfMeasures
-  );
+  var list = getQueryVariableFromString('Beats', '', encodedURLData);
+  var grid = myGrooveData.timeDivision;
+  if (grid != 48 && !(grid == 32 && list)) return;
+  var listed = beatsFromList(list, myGrooveData.numberOfMeasures);
   var lines = [
     myGrooveData.hh_array,
     myGrooveData.snare_array,
@@ -145,8 +145,10 @@ function readBeatNotes(myGrooveData, encodedURLData) {
   for (var bar = 0; bar < myGrooveData.numberOfMeasures; bar++) {
     var sig = barSig(myGrooveData.barTimeSigs, bar, myGrooveData.numBeats, myGrooveData.noteValue);
     if (!hasBeatNotes(sig)) myGrooveData.beatNotes.push('');
-    else if (listed[bar]) myGrooveData.beatNotes.push(normalizeBeats(listed[bar], sig));
-    else myGrooveData.beatNotes.push(inferBeats(lines, bar * myGrooveData.notesPerMeasure, sig));
+    else if (listed[bar])
+      myGrooveData.beatNotes.push(normalizeBeats(listed[bar], sig, undefined, grid));
+    else
+      myGrooveData.beatNotes.push(inferBeats(lines, bar * myGrooveData.notesPerMeasure, sig, grid));
   }
 }
 
@@ -619,8 +621,9 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
   // a time signature for each bar, when they differ
   fullURL += barSigsForUrl(myGrooveData);
 
-  // the Mixed note setting's beats, bar by bar
-  if (myGrooveData.timeDivision == 48 && (myGrooveData.beatNotes || []).some(Boolean))
+  // the Mixed note setting's beats, bar by bar (and 32nds with beats of their own)
+  var beatGrid = myGrooveData.timeDivision == 48 || myGrooveData.timeDivision == 32;
+  if (beatGrid && (myGrooveData.beatNotes || []).some(Boolean))
     fullURL += '&Beats=' + beatsToList(myGrooveData.beatNotes);
 
   // notes

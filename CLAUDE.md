@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1147 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **122 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1151 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **124 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -73,6 +73,8 @@ Pure / low-coupling core (extracted from the two big files, imported back):
   (triplets, sextuplets, swung 8ths/16ths, dotted quarters) as ticks per bar.
 - `beatNotes.js` — notes beat by beat in the Mixed setting (`Beats=ssqq`): each beat's choice,
   which grid slots it uses, inference from notes, counting, and the beat plan the ABC/MIDI writers take.
+  A beat of 32nds (`d`) needs the 32nds grid instead (`Div=32&Beats=sssd`, 8 slots a beat); functions take
+  the grid (48 / 32) last.
 - `ornaments.js` — flams/drags/ruffs (grace groups) and diddles (`!/!`) inside note tokens.
 - `barMeters.js` — a time signature per bar; which note settings fit a bar.
 - `practiceSettings.js` — an exercise's practice settings in its link (`Perm`/`PermSet`/`PlayEach`/`PermBars`/`FatBack`/`Ostinato`,
@@ -159,11 +161,20 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   is the original "paint notes on" shortcut, Alt + hover erases), or the Select button on touch
   screens (`touch-action: none` on the rows while on). A capture-phase click handler on the grid
   swallows the click that ends a drag, so no note toggles. Pastes go through `keepingMutes`.
-- **Practise bars** (`PlayBars=1-2`, the play bar's box, plain grooves only): the time round is just those
-  bars (`practisedBars()`), built bar by bar like the groove / click cycle, whose sequence they become
+- **Practise bars** (`PlayBars=1-2`, the play bar's box): the time round is just those bars
+  (`practisedBars()`), built bar by bar like the groove / click cycle, whose sequence they become
   (`sequenceBar(i)`); `playingPercentToGroovePercent` turns the playing position back into the whole
-  groove's for the grid highlight and the music's cursor. A practised round must stay byte-identical to a
-  groove made of just those bars (the functional E2E checks it). The music always shows every bar.
+  groove's for the grid highlight, and `practisedMusicPercent` into the music's, which writes just those
+  bars (`barsWritten()`, numbered with `%%measurenb 1` and a `%%setbarnb` of the _next_ bar before each:
+  abc2svg numbers the bar after). A practised round must stay byte-identical to a groove made of just those
+  bars (the functional E2E checks it). The same box is a permutation's `PermBars` while one is on
+  (`setBoxBars`); the Alphabet panel has no box of its own.
+- **Two beat-by-beat grids**: Mixed (`Div=48`, 12 slots a quarter: 8ths, 16ths, every triplet) and
+  32nds with `Beats=` (`Div=32`, 8 a quarter: 8ths, 16ths, 32nds); `beatGrid()` says which (0: plain).
+  32nds and triplets never share a groove (`gridOfBeats` → -1; the beat menu greys them out). Grid
+  changes go through `setGrooveBeats` / `divisionRoute` (by way of 16ths, so notes keep their places;
+  a direct 48↔32 change would fall back to the default groove). A plain `Div=32` link has no
+  `Beats=` and stays byte-identical.
 - **Bar copies** go to localStorage and the device clipboard (`Infinity Scribe bar {json}`, with an
   `at` time; paste takes the newer): each origin, home-screen app and private tab has its own
   storage. Anything that lays the grid out again (add / remove / paste / "Add a copy") goes through

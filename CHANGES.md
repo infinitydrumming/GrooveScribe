@@ -11,6 +11,34 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-23 — Practise bars: just those bars in the music, one box
+
+- Practising some bars of a groove, the music shows just those bars, headed
+  "Bars 1-2" and numbered as in the whole groove (the music's cursor follows
+  them), as the alphabet's practised bars already were; the grid still shows
+  every bar, the others greyed out. Empty the box and the whole groove is back.
+- The alphabet's "Practise bars" box is now the play bar's: the same box in the
+  same place, for the run's bars while the alphabet is on (still `PermBars=` in
+  links) and the groove's otherwise (`PlayBars=`) (`js/groove_writer.js`,
+  `js/viewHtml.js`, `css/infinity_layout.css`, `gscribe_help.html`).
+
+## 2026-10-23 — 32nds beat by beat
+
+- The Notes menu of each beat (the row of beats over a bar) has **32nds**, so a
+  groove of 16ths can have a 32nd-note fill on one beat. 32nd notes don't fit
+  the Mixed grid (12 slots a beat), so a groove with a beat of them goes on the
+  32nds grid instead, with beats of their own (`Div=32&Beats=sssd`: 8 slots a
+  beat; 8ths, 16ths or 32nds on each). The grid shows only each beat's notes,
+  the music writes 16ths as 16ths, and the counting follows each beat ("1 e & a"
+  for 16ths, "1 a li bi & a la ba" for 32nds). It plays exactly as the 32nds note
+  setting does. 32nds and triplets can't share a groove: the menu greys out the
+  ones that don't fit. Changing between the two grids goes by way of 16ths, so
+  the notes stay where they are; the toolbar shows Mixed; the alphabet is off for
+  these grooves. Choosing a beat's notes now closes the menu straight away, and
+  muted lines stay muted (`js/beatNotes.js`, `js/groove_writer.js`,
+  `js/abcNotation.js`, `js/midiFile.js`, `js/urlSerialization.js`,
+  `js/grooveData.js`, `gscribe_help.html`).
+
 ## 2026-10-22 — Practising some bars of a groove
 
 - A **Practise bars** box in the play bar (**Bars** on a phone) for a groove of

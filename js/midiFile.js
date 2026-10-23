@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: tom rim clicks, crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar, exact tempo for swung and triplet notes, more metronome clicks, diddles, swing in notes beat by beat. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: 32nds beat by beat, tom rim clicks, crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar, exact tempo for swung and triplet notes, more metronome clicks, diddles, swing in notes beat by beat. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -139,14 +139,16 @@ function takeDiddles(HH_Array, Snare_Array, Kick_Array, Toms_Array, num_notes) {
 }
 
 /**
- * In a groove in the Mixed note setting, how many slots each note of a bar lasts
- * on its beat's grid (for a diddle's second stroke); undefined otherwise.
+ * In a groove of notes beat by beat (Mixed, or 32nds with beats of their own), how
+ * many slots each note of a bar lasts on its beat's grid (for a diddle's second
+ * stroke); undefined otherwise.
  */
 function slotSpansOf(gd, bar, slots) {
-  if (gd.timeDivision != 48 || !gd.beatNotes || !gd.beatNotes[bar]) return undefined;
+  if (gd.timeDivision != 48 && gd.timeDivision != 32) return undefined;
+  if (!gd.beatNotes || !gd.beatNotes[bar]) return undefined;
   var sig = barSig(gd.barTimeSigs, bar, gd.numBeats, gd.noteValue);
   if (!hasBeatNotes(sig)) return undefined;
-  var groups = beatGroups(gd.beatNotes[bar], sig);
+  var groups = beatGroups(gd.beatNotes[bar], sig, gd.timeDivision);
   var spans = [];
   for (var i = 0; i < slots; i++) {
     var group = groupAt(groups, i);
