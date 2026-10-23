@@ -4321,11 +4321,18 @@ function GrooveWriter() {
     }
     if (bar == run.to && repeated) {
       barABC = barABC.split(' |' + addon).join(' :|' + addon);
-      // how many times, under the end repeat sign (the feet's, the last voice's)
-      var end = barABC.lastIndexOf(' :|' + addon);
-      barABC = barABC.slice(0, end) + ' "_\u00d7' + run.repeats + '"' + barABC.slice(end + 1);
+      barABC = withTimesUnderLastBeat(barABC, ' :|' + addon, '\u00d7' + run.repeats);
     }
     return barABC;
+  }
+
+  // how many times a section plays, under its last beat by the end repeat sign (in
+  // the last voice). On the bar line itself abc2svg would copy it to the next
+  // line's start when the section ends a line.
+  function withTimesUnderLastBeat(barABC, endBar, times) {
+    var end = barABC.lastIndexOf(endBar);
+    var beat = barABC.lastIndexOf(' ', end - 1) + 1; // (its notes are written together)
+    return barABC.slice(0, beat) + '"_' + times + '"' + barABC.slice(beat);
   }
 
   // measureNum is indexed starting at 1, not 0

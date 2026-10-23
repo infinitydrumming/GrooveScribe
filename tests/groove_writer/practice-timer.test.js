@@ -278,9 +278,9 @@ describe('practice timer and speed-up in bars', () => {
     expect(abc).toContain('%%partsfont calibri-Bold 18 box\n');
     expect(abc).toContain('[P:A]|:');
     expect(abc).toContain('[P:B]|:');
-    expect(abc.match(/ :\|/g)).toHaveLength(2); // (each section's end, in the hands' voice)
-    expect(abc.match(/ "_\u00d72":\|/g)).toHaveLength(1); // (and the feet's)
-    expect(abc.match(/ "_\u00d73":\|/g)).toHaveLength(1);
+    expect(abc.match(/ :\|/g)).toHaveLength(2 * 2); // (each section's end, in both voices)
+    expect(abc.match(/"_\u00d72"/g)).toHaveLength(1); // (under the last note)
+    expect(abc.match(/"_\u00d73"/g)).toHaveLength(1);
     expect(abc).toContain('%%measurenb 1');
   });
 

@@ -390,7 +390,7 @@ test.describe('sections', () => {
     // the music: each once, lettered, A between repeat signs, ×2 under the end one
     const abc = await page.locator('#ABCsource').inputValue();
     expect(abc).toContain('[P:A]|:');
-    expect(abc).toContain('"_×2":|');
+    expect(abc).toContain('"_×2"');
     expect(abc).toContain('[P:B]');
   });
 
