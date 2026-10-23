@@ -3579,6 +3579,13 @@ function GrooveWriter() {
           renderWidth
         );
         root.myGrooveUtils.note_mapping_array = [];
+        // some bars practised: each on a line of its own, all as wide, so they
+        // read alike (Infinity Drumming, 2026)
+        var barsPerLine = layout.barsPerLine;
+        if (class_permutation_bars) {
+          barsPerLine = 1;
+          fullABC += '%%stretchlast 1\n';
+        }
 
         // every shown figure, written once over the ostinato's bars (marked
         // "play each ×N" when repeated)
@@ -3593,7 +3600,7 @@ function GrooveWriter() {
           },
         ];
         for (i = 1; i < get_ostinato_bars(); i++) ostinato.push(readOstinatoBar(i, false));
-        get_shown_permutation_sections(layout.barsPerLine).forEach(function (shownSection) {
+        get_shown_permutation_sections(barsPerLine).forEach(function (shownSection) {
           ostinato.forEach(function (o, k) {
             var bar = get_permutation_bar(shownSection.section, o.Kick, o.Snare);
             fullABC += shownSection.abc[k].pre;

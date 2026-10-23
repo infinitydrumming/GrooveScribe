@@ -850,10 +850,10 @@ body,
 }
 #measureContainer .barSection select.none {
   border-style: dashed;
-  border-color: var(--id-border);
-  font-weight: 600;
-  color: #7d8ea5;
-  background: transparent;
+  border-color: #e9b46a;
+  font-weight: 700;
+  color: #b26b00;
+  background: #fffaf2;
 }
 #measureContainer .clearMeasureButton,
 #measureContainer .copyMeasureButton,
