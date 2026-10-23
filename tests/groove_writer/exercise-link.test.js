@@ -214,6 +214,28 @@ describe('an exercise in its link', () => {
     expect(link()).not.toContain('FatBack');
   });
 
+  // "Music spacing" (Infinity Drumming, 2026): how wide practised bars are drawn
+  it('draws practised bars as wide as Music spacing says, and this device remembers it', () => {
+    addPopups('musicSpacingConfiguration');
+    const abc = () => document.getElementById('ABCsource').value;
+    gw.loadNewGroove(EXERCISE.replace('&PlayEach=3', '&PermBars=1-3'));
+    const margin = () => Number(/%%leftmargin (\d+)px/.exec(abc())[1]);
+    const moderate = margin();
+
+    gw.show_MusicSpacingConfiguration();
+    expect(document.getElementById('musicSpacingAdjust').value).toBe('100');
+    gw.musicSpacingChange({ target: { value: '60' } });
+    expect(window.localStorage.getItem('grooveScribeMusicSpacing')).toBe('60');
+    expect(margin()).not.toBe(moderate);
+    gw.musicSpacingChange({ target: { value: '210' } }); // the far end: fill the page
+    expect(margin()).toBe(0);
+    expect(document.getElementById('musicSpacingOutput').textContent).toContain('Fill the page');
+    gw.musicSpacingReset();
+    expect(margin()).toBe(moderate);
+    gw.close_MusicSpacingConfiguration();
+    window.localStorage.clear();
+  });
+
   // the Notes change's "Keep" switch (Infinity Drumming, 2026)
   it("keeps an ostinato's timing whatever the switch says", () => {
     gw.setNotesKeep('phrase');

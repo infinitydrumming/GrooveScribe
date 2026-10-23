@@ -578,6 +578,7 @@ body,
 #fullURLPopup,
 #metronomeAutoSpeedupConfiguration,
 #cursorTimingConfiguration,
+#musicSpacingConfiguration,
 #graceNoteConfiguration,
 #practiceTimerConfiguration,
 #grooveClickConfiguration,
@@ -819,6 +820,46 @@ body,
   background: var(--id-blue-tint);
   border-color: #a8cdf3;
 }
+/* the sections' form (Infinity Drumming, 2026): in the sections' amber */
+#sectionFormBox {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border: 1px solid #e9b46a;
+  border-radius: 10px;
+  background: #fffaf2;
+}
+#sectionFormBox label {
+  font-weight: 700;
+  color: #b26b00;
+}
+#sectionForm {
+  width: 12em;
+  max-width: 100%;
+  padding: 6px 10px;
+  border: 2px solid #e9b46a;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--id-navy-900);
+  background: #fff;
+}
+#sectionForm::placeholder {
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.sectionFormHint {
+  font-size: 13px;
+  color: #6b5a40;
+}
+
 /* the Notes setting's "Keep" switch (Infinity Drumming, 2026): the phrase or the
  * timing when the Notes change (on a phone: at the foot of the Notes menu) */
 #notesKeepToggle {
@@ -1626,7 +1667,31 @@ body.selectingNotes #measureContainer .notes-row-container {
   touch-action: none;
 }
 
-/* the rep counter's switch, by "Play each" (Infinity Drumming, 2026) */
+/* "Play each bar": large enough to read at a glance (Infinity Drumming, 2026) */
+#PermutationRepeatOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 4px 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--id-navy-900);
+  white-space: nowrap;
+}
+#PermutationRepeat {
+  min-height: 36px;
+  padding: 4px 10px;
+  border: 2px solid var(--id-navy-900);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--id-navy-900);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* the rep counter's switch, by "Play each bar" (Infinity Drumming, 2026) */
 #PermutationRepCounterOption {
   display: inline-flex;
   align-items: center;

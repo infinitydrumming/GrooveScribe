@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: triplets keeping the phrase, a bar's eraser, copied notes in other tabs, sections (A, B) and bar numbers, 32nds beat by beat, tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes, practising some bars of a groove. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: a form of sections (ABAC), triplets keeping the phrase, a bar's eraser, copied notes in other tabs, sections (A, B) and bar numbers, 32nds beat by beat, tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes, practising some bars of a groove. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -111,7 +111,7 @@ import {
   speedUpStepsDue,
 } from './practiceTimer.js';
 import * as _perm from './permutations.js';
-import { sectionRuns, formBars, barsOfSection } from './sections.js';
+import { sectionRuns, formBars, barsOfSection, tidyForm, formOrderBars } from './sections.js';
 import * as _blocks from './noteBlocks.js';
 import * as _view from './viewHtml.js';
 import * as _grid from './gridState.js';
@@ -120,6 +120,7 @@ import {
   addFeelMarking,
   addMeterChange,
   musicLayout,
+  practisedBarsLayout,
   musicLineBroken,
   notesOnALine,
   defineGlyphsOnce,
@@ -216,6 +217,8 @@ function GrooveWriter() {
   // times its section plays (a section has its first bar's), see sections.js
   var class_bar_sections = [];
   var class_section_repeats = [];
+  // the order the sections play ("ABAC"), '' for in order
+  var class_section_form = '';
   // each bar's time signature ({ top, bottom }) when the bars differ, else empty
   // (all bars are class_num_beats_per_measure / class_note_value_per_measure).
   // Every bar keeps class_notes_per_measure note slots (the longest bar's); a
@@ -322,7 +325,10 @@ function GrooveWriter() {
   // the music's bar numbers: on every bar after the first (Infinity Drumming,
   // 2026), and over bars being practised which they are
   function musicBarsHeading() {
-    return practisedBarsHeading() || (class_number_of_measures > 1 ? '%%measurenb 1\n' : '');
+    return (
+      practisedBarsHeading() ||
+      formHeading() + (class_number_of_measures > 1 ? '%%measurenb 1\n' : '')
+    );
   }
   // the bars the music writes: every bar, or those practised (Infinity Drumming, 2026)
   function barsWritten() {
@@ -1900,6 +1906,10 @@ function GrooveWriter() {
         setAutoScroll(!root.myGrooveUtils.autoScrollEnabled);
         break;
 
+      case 'MusicSpacing':
+        root.show_MusicSpacingConfiguration();
+        break;
+
       case 'CursorTiming':
         root.show_CursorTimingConfiguration();
         break;
@@ -2663,6 +2673,87 @@ function GrooveWriter() {
     });
   }
 
+  // Some bars practised (Infinity Drumming, 2026): every bar as wide and no wider
+  // than a moderate bar, in one run of lines (see abcNotation.practisedBarsLayout);
+  // drawn wider (a line broken mid-bar), the bars fill the page again
+  function practisedBarsMusic(shownSections, layout, widened) {
+    var bars = [];
+    shownSections.forEach(function (shownSection) {
+      bars = bars.concat(shownSection.abc);
+    });
+    var fit = practisedBarsLayout(
+      bars.length,
+      layout,
+      (class_num_beats_per_measure * 4) / class_note_value_per_measure,
+      class_music_spacing / 100
+    );
+    var margin = widened ? 0 : fit.margin;
+    return {
+      heading:
+        '%%leftmargin ' +
+        margin +
+        'px\n%%rightmargin ' +
+        margin +
+        'px\n' +
+        (fit.oneLine ? '%%stretchlast 1\n' : ''),
+      bars: _perm.practisedBarsABC(bars, fit.barsPerLine),
+    };
+  }
+
+  // --- "Music spacing" (Infinity Drumming, 2026): how wide practised bars are -----
+  // drawn on this device, in percent of a moderate bar (0: as wide as the page)
+  var constant_music_spacing_key = 'grooveScribeMusicSpacing';
+  var constant_music_spacing_fill = 210; // the slider's far end
+  var class_music_spacing = storedMusicSpacing();
+
+  function storedMusicSpacing() {
+    try {
+      var stored = parseInt(window.localStorage.getItem(constant_music_spacing_key) || '', 10);
+      return isNaN(stored) || stored < 0 || stored > 200 ? 100 : stored;
+    } catch {
+      return 100; // storage unavailable
+    }
+  }
+
+  function musicSpacingSlider() {
+    return /** @type {HTMLInputElement} */ (document.getElementById('musicSpacingAdjust'));
+  }
+
+  function setMusicSpacing(percent) {
+    class_music_spacing = percent;
+    try {
+      window.localStorage.setItem(constant_music_spacing_key, String(percent));
+    } catch {
+      /* storage unavailable: it lasts for this visit */
+    }
+    var shown = 'Fill the page: a bar a line, as wide as the page';
+    if (percent == 100) shown = 'Moderate bars (to start with)';
+    else if (percent) shown = 'Bars ' + percent + '% as wide as moderate bars';
+    document.getElementById('musicSpacingOutput').textContent = shown;
+    if (class_permutation_bars) root.refresh_ABC();
+  }
+
+  root.show_MusicSpacingConfiguration = function () {
+    musicSpacingSlider().value = String(class_music_spacing || constant_music_spacing_fill);
+    setMusicSpacing(class_music_spacing);
+    document.getElementById('musicSpacingConfiguration').style.display = 'block';
+  };
+
+  root.musicSpacingChange = function (event) {
+    var percent = parseInt(event.target.value, 10);
+    if (isNaN(percent)) percent = 100;
+    setMusicSpacing(percent >= constant_music_spacing_fill ? 0 : percent);
+  };
+
+  root.musicSpacingReset = function () {
+    musicSpacingSlider().value = '100';
+    setMusicSpacing(100);
+  };
+
+  root.close_MusicSpacingConfiguration = function () {
+    document.getElementById('musicSpacingConfiguration').style.display = 'none';
+  };
+
   // the bars of the run to practise, as typed ("3-6, 9"); '' for all of them
   var class_permutation_bars = '';
 
@@ -3175,6 +3266,7 @@ function GrooveWriter() {
       myGrooveData.barSections.push(class_bar_sections[b] || '');
       myGrooveData.sectionRepeats.push(class_section_repeats[b] || 1);
     }
+    myGrooveData.sectionForm = class_section_form;
     myGrooveData.tempo = root.myGrooveUtils.getTempo();
     myGrooveData.graceSpacingMs = root.myGrooveUtils.graceSpacingMs;
     myGrooveData.graceVolume = root.myGrooveUtils.graceVolume;
@@ -3580,13 +3672,7 @@ function GrooveWriter() {
           renderWidth
         );
         root.myGrooveUtils.note_mapping_array = [];
-        // some bars practised: each on a line of its own, all as wide, so they
-        // read alike (Infinity Drumming, 2026)
-        var barsPerLine = layout.barsPerLine;
-        if (class_permutation_bars) {
-          barsPerLine = 1;
-          fullABC += '%%stretchlast 1\n';
-        }
+        var shownSections = get_shown_permutation_sections(layout.barsPerLine);
 
         // every shown figure, written once over the ostinato's bars (marked
         // "play each ×N" when repeated)
@@ -3601,17 +3687,23 @@ function GrooveWriter() {
           },
         ];
         for (i = 1; i < get_ostinato_bars(); i++) ostinato.push(readOstinatoBar(i, false));
-        get_shown_permutation_sections(barsPerLine).forEach(function (shownSection) {
+        var practised = class_permutation_bars
+          ? practisedBarsMusic(shownSections, layout, !!atLeast && atLeast > layout.renderWidth)
+          : null;
+        if (practised) fullABC = fullABC.replace(/^K:/m, practised.heading + 'K:');
+        var written = 0;
+        shownSections.forEach(function (shownSection) {
           ostinato.forEach(function (o, k) {
             var bar = get_permutation_bar(shownSection.section, o.Kick, o.Snare);
-            fullABC += shownSection.abc[k].pre;
-            fullABC += root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
+            var abc = practised ? practised.bars[written++] : shownSection.abc[k];
+            fullABC += abc.pre;
+            var barABC = root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
               o.Sticking,
               o.HH,
               bar.snare,
               bar.kick,
               o.Toms,
-              shownSection.abc[k].post,
+              abc.post,
               o.num_notes,
               class_time_division,
               o.num_notes,
@@ -3619,6 +3711,9 @@ function GrooveWriter() {
               class_num_beats_per_measure,
               class_note_value_per_measure
             );
+            fullABC += abc.label
+              ? barABC.replace(/(V:Stickings\n)/, '$1[P:' + abc.label + ']')
+              : barABC;
             root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
               root.myGrooveUtils.create_note_mapping_array_for_highlighting(
                 o.HH,
@@ -4128,6 +4223,46 @@ function GrooveWriter() {
       var buttons = document.getElementById('barSection' + bar);
       if (buttons) buttons.outerHTML = _view.barSectionHTML(bar, sectionOfBar(bar - 1));
     }
+    refreshSectionForm();
+  }
+
+  // --- The form (Infinity Drumming, 2026): the order the sections play ----------
+  // "ABAC", "ABCA ABCA": each letter its section, as many times as it says. The
+  // music writes each section once, the form over it. The box shows once there
+  // are sections.
+  function refreshSectionForm() {
+    var box = document.getElementById('sectionFormBox');
+    if (!box) return;
+    box.style.display = class_bar_sections.some(Boolean) ? '' : 'none';
+    var input = /** @type {HTMLInputElement} */ (document.getElementById('sectionForm'));
+    if (document.activeElement !== input) input.value = class_section_form;
+  }
+
+  root.sectionFormChange = function (text) {
+    class_section_form = tidyForm(text);
+    var input = /** @type {HTMLInputElement} */ (document.getElementById('sectionForm'));
+    if (input) input.value = class_section_form;
+    root.refresh_ABC(); // the music, the playing order and the link
+  };
+
+  // the bars the form plays, [] with no form (or none of its sections)
+  function formOrder() {
+    if (!class_section_form) return [];
+    return formOrderBars(
+      class_section_form,
+      class_bar_sections,
+      class_section_repeats,
+      class_number_of_measures
+    );
+  }
+
+  // the form over the music ("Form: A B A C"), '' with none
+  function formHeading() {
+    if (practisedBars().length || !formOrder().length) return '';
+    var groups = class_section_form.split(' ').map(function (group) {
+      return group.split('').join(' ');
+    });
+    return '%%center Form: ' + groups.join('   |   ') + '\n';
   }
 
   // set every bar of a section to its repeats
@@ -6312,7 +6447,9 @@ function GrooveWriter() {
   function playedBars() {
     var practised = practisedBars();
     if (practised.length || class_permutation_type != 'none') return practised;
-    var form = formBars(class_bar_sections, class_section_repeats, class_number_of_measures);
+    var form = formOrder();
+    if (!form.length)
+      form = formBars(class_bar_sections, class_section_repeats, class_number_of_measures);
     var inOrder =
       form.length == class_number_of_measures &&
       form.every(function (bar, i) {
@@ -7653,6 +7790,7 @@ function GrooveWriter() {
     refreshStraightBarButtons();
     class_bar_sections = (myGrooveData.barSections || []).slice();
     class_section_repeats = (myGrooveData.sectionRepeats || []).slice();
+    class_section_form = myGrooveData.sectionForm || '';
     refreshSectionButtons();
     root.myGrooveUtils.setSwing(myGrooveData.swingPercent);
     root.myGrooveUtils.setSwingStyle(myGrooveData.swingStyle);

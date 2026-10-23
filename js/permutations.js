@@ -481,6 +481,30 @@ export function getPermutationSectionABC(
   return { pre: pre, post: post };
 }
 
+/**
+ * Infinity Drumming, 2026: the bars of the alphabet being practised, in one run of
+ * lines, `barsPerLine` a line, so that every bar can be as wide (each group's
+ * heading would start its lines again, a line of its own spaced alone): the
+ * heading goes over its group's first bar instead, as a part label.
+ * @param {{pre: string, post: string}[]} bars  every bar's ABC before / after, in order
+ * @param {number} barsPerLine
+ * @returns {{pre: string, post: string, label: string}[]}  label: '' for none
+ */
+export function practisedBarsABC(bars, barsPerLine) {
+  return bars.map(function (abc, i) {
+    var label = '';
+    var pre = abc.pre.replace(/^(?:T: \n)?P: ?(.*)\n/m, function (heading, name) {
+      label = name;
+      return '';
+    });
+    var post;
+    if (i == bars.length - 1) post = '|\n';
+    else if ((i + 1) % barsPerLine == 0) post = '\n';
+    else post = '\\\n';
+    return { pre: pre, post: post, label: label };
+  });
+}
+
 // "Singles on "e""
 function figureName(section) {
   return section.group.name + (section.label ? ' on "' + section.label + '"' : '');

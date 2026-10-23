@@ -313,6 +313,7 @@ input[type='checkbox']:checked + label {
 #fullURLPopup,
 #metronomeAutoSpeedupConfiguration,
 #cursorTimingConfiguration,
+#musicSpacingConfiguration,
 #graceNoteConfiguration,
 #practiceTimerConfiguration,
 #grooveClickConfiguration,
@@ -327,6 +328,7 @@ input[type='checkbox']:checked + label {
 #fullURLPopup input[type='range']::-webkit-slider-runnable-track,
 #metronomeAutoSpeedupConfiguration input[type='range']::-webkit-slider-runnable-track,
 #cursorTimingConfiguration input[type='range']::-webkit-slider-runnable-track,
+#musicSpacingConfiguration input[type='range']::-webkit-slider-runnable-track,
 #graceNoteConfiguration input[type='range']::-webkit-slider-runnable-track,
 #grooveClickConfiguration input[type='range']::-webkit-slider-runnable-track,
 #practiceTimerConfiguration input[type='range']::-webkit-slider-runnable-track {
@@ -335,6 +337,7 @@ input[type='checkbox']:checked + label {
 #fullURLPopup input[type='range']::-moz-range-track,
 #metronomeAutoSpeedupConfiguration input[type='range']::-moz-range-track,
 #cursorTimingConfiguration input[type='range']::-moz-range-track,
+#musicSpacingConfiguration input[type='range']::-moz-range-track,
 #graceNoteConfiguration input[type='range']::-moz-range-track,
 #grooveClickConfiguration input[type='range']::-moz-range-track {
   background: var(--id-border);

@@ -280,6 +280,31 @@ describe('practice timer and speed-up in bars', () => {
     expect(abc).toContain('%%measurenb 1');
   });
 
+  // Infinity Drumming, 2026: a form, the order the sections play
+  it('plays the sections in the order the form says, written once with the form over them', () => {
+    const formBox = document.createElement('div');
+    formBox.id = 'sectionFormBox';
+    formBox.innerHTML = '<input id="sectionForm">';
+    document.body.appendChild(formBox);
+    gw.loadNewGroove(KICK_PER_BAR + '&Sections=A1x2,B2,C3&Form=ABAC');
+    expect(formBox.style.display).toBe(''); // (shown: there are sections)
+    // A twice (bar 1), B (bar 2), A twice, C (bar 3); bar 4 has no letter
+    expect(kicks(playRounds(0))).toEqual(
+      [0, 0, 1, 0, 0, 2].map((bar, i) => i * 512 + bar * 32 + (i ? 0 : 1))
+    );
+    expect(link()).toContain('&Sections=A1x2,B2,C3&Form=ABAC');
+    expect(document.getElementById('ABCsource').value).toContain('%%center Form: A B A C\n');
+    expect(document.getElementById('sectionForm').value).toBe('ABAC');
+
+    gw.sectionFormChange('ca ca');
+    expect(document.getElementById('sectionForm').value).toBe('CA CA');
+    expect(link()).toContain('&Form=CA-CA');
+    expect(document.getElementById('ABCsource').value).toContain('Form: C A   |   C A');
+    gw.sectionFormChange(''); // in order again: every bar
+    expect(link()).not.toContain('Form=');
+    expect(document.getElementById('ABCsource').value).not.toContain('Form:');
+  });
+
   it('sets sections from the bar chips: a bar joins the section before it', () => {
     gw.loadNewGroove(KICK_PER_BAR);
     gw.barSectionChange(3, 'B');

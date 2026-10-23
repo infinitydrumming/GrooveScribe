@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1165 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **129 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1176 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **130 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -86,7 +86,8 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `tempoSwitch.js` — the sums for a tempo change while playing: the next bar line whose last note
   before it is still to come, in the playing MIDI and in the round built again at the new tempo.
 - `sections.js` — a groove's sections (`Sections=A1-2x4,B3-4x2`): a letter per bar, runs of the same letter
-  are a section, its first bar's repeats; the playing order (`formBars`) and the link form.
+  are a section, its first bar's repeats; the playing order (`formBars`, or a typed form's `formOrderBars`,
+  `Form=ABAC`) and the link form.
 - `noteBlocks.js` — a block of notes (any rows, any slots) copied from / pasted into the groove's tab
   lines, keeping its shape; the kick line holds two grid rows (kick, hi-hat foot), kept apart.
 - `audioSession.js` — while a groove plays, `navigator.audioSession.type = 'playback'` so iPhones
@@ -181,8 +182,16 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   abc2svg numbers the bar after). A practised round must stay byte-identical to a groove made of just those
   bars (the functional E2E checks it). The same box is a permutation's `PermBars` while one is on
   (`setBoxBars`); the Alphabet panel has no box of its own.
+- **Practised alphabet bars** (`PermBars`): written in one run of lines (`practisedBarsABC`: each group's
+  `T:`/`P:` heading becomes an inline `[P:...]` over its first bar, as a new heading block would space its
+  lines alone), and `practisedBarsLayout` sets the bars a line and centring margins so every bar is as wide,
+  no wider than a moderate bar (120 page px a quarter) times the device's Music spacing (localStorage
+  `grooveScribeMusicSpacing`, percent; 0 fills the page). One line is stretched (`%%stretchlast 1`); more,
+  the last takes the line before's spacing (`%%stretchlast 0`). Drawn wider for a broken line: no margins.
 - **Sections & the playing order**: `playedBars()` is the order the groove's bars play: the practised
-  bars, else the sections' form (A ×4, B ×2), else `[]` (every bar once, in order: the old byte-identical
+  bars, else the typed form (`Form=ABCA-ABCA`, `#sectionForm` above the bars once there are sections:
+  `formOrderBars`, each letter every section with it, its repeats; `%%center Form: A B A C` over the
+  music), else the sections in order (A ×4, B ×2), else `[]` (every bar once, in order: the old byte-identical
   path). Everything that plays bar by bar (`sequenceBar`, the groove / click cycle, the practice timer,
   tempo switches, the cursor) goes through it. The music writes every bar once (`withSectionMarks`: an
   inline `[P:A ×4]` and `|:` / `:|` in each voice; the last bar's line end becomes `\n` so it isn't
