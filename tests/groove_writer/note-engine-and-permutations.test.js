@@ -580,6 +580,14 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
           expect([kickLine(1), kickLine(2)]).toEqual(['hidden', 'visible']);
         });
 
+        it('Clear everything takes the trade bars and the order away', () => {
+          gw.loadNewGroove(TRADE + '&PermBars=2_1');
+          gw.clearEverything();
+          expect(gw.numberOfMeasures()).toBe(1);
+          expect(window.location.search).not.toMatch(/Trade=|PermBars=/);
+          expect(window.location.search).toContain('Perm=kick_16ths'); // (still the alphabet)
+        });
+
         it('trades after each bar, adds and removes trade bars', () => {
           gw.loadNewGroove(TRADE);
           document.getElementById('PermutationTradeWhere').value = 'after';

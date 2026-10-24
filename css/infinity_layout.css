@@ -1691,6 +1691,21 @@ body.selectingNotes #measureContainer .notes-row-container {
   cursor: pointer;
 }
 
+/* the Clear all button's choices, over it (Infinity Drumming, 2026) */
+#clearAllContextMenu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 260px;
+}
+#clearAllContextMenu li {
+  padding: 8px 12px;
+  line-height: 1.3;
+  cursor: pointer;
+}
+#clearAllContextMenu small {
+  color: #5a6b82;
+}
+
 /* "Trade": grooves or fills between the figures (Infinity Drumming, 2026) */
 #PermutationTradeOption {
   display: inline-flex;

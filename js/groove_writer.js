@@ -5373,6 +5373,34 @@ function GrooveWriter() {
     updateSheetMusic();
   };
 
+  // The Clear all button (Infinity Drumming, 2026): just the notes, or everything
+  root.clearAllAnchorClick = function () {
+    var contextMenu = document.getElementById('clearAllContextMenu');
+    var anchorPoint = document.getElementById('clearAllNotesButton');
+    if (!contextMenu || !anchorPoint) return;
+    var button = anchorPoint.getBoundingClientRect();
+    contextMenu.style.left = button.left + 'px';
+    if (!root.myGrooveUtils.toggleContextMenu(contextMenu, anchorPoint)) return;
+    // (over the button, at the foot of the page)
+    contextMenu.style.top = Math.max(4, button.top - contextMenu.offsetHeight - 6) + 'px';
+  };
+
+  // Everything cleared, to start a new groove's form and structure from scratch:
+  // the notes, the sections and their form, the bars to practise, and the
+  // alphabet's order and trade bars (the bars, note setting and the rest stay).
+  // One undo takes it back.
+  root.clearEverything = function () {
+    if (tradeBars()) setTradeBarCount(0);
+    for (var i = 0; i < class_number_of_measures * class_notes_per_measure; i++) clearNotesAt(i);
+    class_bar_sections = [];
+    class_section_repeats = [];
+    class_section_form = '';
+    class_practise_bars = '';
+    class_permutation_bars = '';
+    refreshSectionButtons();
+    updateSheetMusic();
+  };
+
   function isTomsVisible() {
     var myElements = document.querySelectorAll('.toms-container');
     for (var i = 0; i < myElements.length; i++) {

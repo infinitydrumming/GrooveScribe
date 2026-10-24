@@ -11,6 +11,26 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-24 — The alphabet in an order; trade bars; Clear notes or everything
+
+- With the alphabet on, the Practise bars box plays the bars in the order typed,
+  as many times as each says: "1 2 1 3", "1x4 2x2 1x4 3", "1-4x2", "1-4 1-4 7",
+  "6-3". The music writes each bar once with "Order: ..." over it; playback,
+  the cursor, the rep counter, the practice timer, speed-up and tempo changes
+  follow it. A plain list plays as before. Links: `PermBars=1x4_2x2_1x4_3`
+  (`js/permutations.js` `parseBarOrder`, `js/practiceSettings.js`,
+  `js/groove_writer.js`).
+- Trade bars: a "Trade" choice in the Alphabet Options adds 1-4 bars after the
+  ostinato's (copies of the groove's first bar to start, every line shown),
+  played ×1-×8 before or after each bar of the run, for time-and-fill drills.
+  The music writes them once, first, under "Trade". Links: `Trade=1x3`
+  (`a`: after) (`js/groove_writer.js`, `js/viewHtml.js`, `js/abcNotation.js`,
+  `js/practiceSettings.js`, `css/infinity_layout.css`). The grid hides the
+  figures' line bar by bar, so it stays hidden after a bar is added or removed.
+- Clear all offers "Clear the notes" (as before) or "Clear everything": the
+  notes, sections, form, bars to practise and the alphabet's order and trade
+  bars (`index.html`, `js/groove_writer.js`).
+
 ## 2026-10-24 — Music spacing for all the music
 
 - "Music spacing" (Options) now spaces all the music, grooves and the alphabet:

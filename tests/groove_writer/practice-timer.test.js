@@ -309,6 +309,22 @@ describe('practice timer and speed-up in bars', () => {
     expect(document.getElementById('ABCsource').value).not.toContain('Form:');
   });
 
+  // Infinity Drumming, 2026: Clear all's "Clear everything"
+  it('clears everything: the notes, sections, form and bars to practise, keeping the bars', () => {
+    gw.loadNewGroove(KICK_PER_BAR + '&Sections=A1x2,B2,C3&Form=ABAC&PlayBars=1-2');
+    gw.clearEverything();
+    const now = link();
+    expect(now).not.toMatch(/Sections=|Form=|PlayBars=/);
+    expect(now).toContain('Measures=4');
+    expect(now).toContain(
+      '&K=|----------------|----------------|----------------|----------------|'
+    );
+    // (and Clear the notes keeps the rest)
+    gw.loadNewGroove(KICK_PER_BAR + '&Sections=A1x2');
+    gw.clearAllNotes();
+    expect(link()).toContain('&Sections=A1x2');
+  });
+
   it('sets sections from the bar chips: a bar joins the section before it', () => {
     gw.loadNewGroove(KICK_PER_BAR);
     gw.barSectionChange(3, 'B');
