@@ -205,9 +205,13 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   bars (`class_trade` {bars, times, after}; the grid's last bars, `get_ostinato_bars()` excludes them) play
   `times` times before / after each entry. Bar `n` of the run is `permutationRunBar(run, n)` (entry, rep,
   ostinatoBar, or trade / tradeTime; `gridBar` always): everything bar by bar (MIDI, the cursor, the grid
-  highlight, the rep counter, straight bars) goes through it. The music writes trade bars once, first
-  (`tradeBarsABC`, their bar numbers dropped by `engravedMusic`'s `hidden`). `showTradeBars` hides the
-  figures' lines per bar (ostinato bars) and shows every line in trade bars, on every refresh.
+  highlight, the rep counter, straight bars) goes through it. With trade bars or an order
+  (`writtenAsPlayed()`), the music is the run written out as it plays (`runAsPlayedABC`: each entry's trade
+  bars and figure once, `|:`/`:|` and `"_×N"` when they repeat; `asPlayedMusicBar` maps the cursor), else
+  each figure once as before. Trade bars are numbered from `UNNUMBERED_BARS` (9000), whose numbers
+  `engravedMusic` drops. A `%%setbarnb` goes to the next bar LINE abc2svg reads, so a repeat start sits on
+  the previous bar's closing line (`|:` / `:|:`), never at a bar's start (none at the music's start).
+  `showTradeBars` hides the figures' lines per bar (ostinato bars) and shows every line in trade bars.
 - **Sections & the playing order**: `playedBars()` is the order the groove's bars play: the practised
   bars, else the typed form (`Form=ABCA-ABCA`, `#sectionForm` above the bars once there are sections:
   `formOrderBars`, each letter every section with it, its repeats; `%%center Form: A B A C` over the

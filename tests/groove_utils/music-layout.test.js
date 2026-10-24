@@ -213,5 +213,13 @@ describe('glyphs defined once on the page', () => {
     // a number by a bar line within its line stays where it is
     expect(engraved).toContain('<text class="f2_1" x="536.62" y="15.01">4</text>');
     expect(engravedMusic('<p>no music</p>')).toBe('<p>no music</p>');
+    // an alphabet's trade bars show no number (numbered from 9000 on)
+    expect(
+      engravedMusic(
+        line(
+          '<g transform="translate(0,75.70)">\n<text class="f2_1" x="536.62" y="15.01">9001</text>\n</g>\n'
+        )
+      )
+    ).not.toContain('9001');
   });
 });

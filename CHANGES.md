@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-24 — The alphabet written out as it plays
+
+- With trade bars or an order of its own, the alphabet's music is written out
+  as it plays (each bar in turn, its trade bars before or after it, between
+  repeat signs with ×N under them), so it reads straight on and the cursor
+  never jumps back to the top. The figures keep their numbers; trade bars show
+  none (numbered from 9000, left off by `engravedMusic`). A repeat starts on
+  the bar line before it (abc2svg gives a set bar number to the next bar line
+  it reads) and needs no sign at the music's start (`js/groove_writer.js`
+  `runAsPlayedABC`, `js/abcNotation.js`). Plain runs are written as before.
+
 ## 2026-10-24 — The alphabet in an order; trade bars; Clear notes or everything
 
 - With the alphabet on, the Practise bars box plays the bars in the order typed,

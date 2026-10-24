@@ -518,7 +518,7 @@ test.describe('a block of notes in another tab', () => {
 
 // Infinity Drumming, 2026: an alphabet with grooves or fills traded between its bars
 test.describe('alphabet trade bars', () => {
-  test('a trade bar after the ostinato plays before each bar, written once first', async ({
+  test('a trade bar after the ostinato plays before each bar, written out as it plays', async ({
     page,
   }) => {
     await loadGroove(
@@ -535,9 +535,9 @@ test.describe('alphabet trade bars', () => {
       .toBe('1x3');
     await expect(page.locator('#staff-container2')).toHaveClass(/tradeBar/);
     await expect(page.locator('#staff-container2 .kick-container')).toBeVisible();
-    expect(await page.locator('#ABCsource').inputValue()).toContain(
-      'P: Trade   (×3, before each bar)'
-    );
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('[P:Trade]'); // (before each bar, as it plays)
+    expect(abc).toContain('"_×3"');
     // the order in the practise box: bar 2, then bar 1 twice
     await page.fill('#practiseBars', '2 1x2');
     await page.press('#practiseBars', 'Enter');

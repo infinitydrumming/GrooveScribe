@@ -127,6 +127,7 @@ import {
   notesOnALine,
   defineGlyphsOnce,
   engravedMusic,
+  UNNUMBERED_BARS,
 } from './abcNotation.js';
 import { barSig, barNoteCount, barStride, isMixedMeter, divisionFitsBar } from './barMeters.js';
 import { scaleTabMeasure } from './noteArrays.js';
@@ -186,6 +187,8 @@ function GrooveWriter() {
     var position = Math.min(percent * bars, bars - 1e-9);
     var bar = Math.floor(position);
     var at = permutationRunBar(run, bar);
+    if (writtenAsPlayed())
+      return asPlayedMusicBar(at, ostinato, position - bar) / (run.length * (trade + ostinato));
     if (at.trade !== undefined) return (at.trade + (position - bar)) / written;
     return (trade + at.entry.index * ostinato + at.ostinatoBar + (position - bar)) / written;
   };
@@ -2729,7 +2732,9 @@ function GrooveWriter() {
       bars = bars.concat(shownSection.abc);
     });
     var fit = practisedBarsLayout(
-      bars.length + tradeBars(),
+      writtenAsPlayed()
+        ? permutationRun().length * (tradeBars() + get_ostinato_bars())
+        : bars.length,
       layout,
       (class_num_beats_per_measure * 4) / class_note_value_per_measure,
       class_music_spacing / 100
@@ -3005,21 +3010,23 @@ function GrooveWriter() {
     if (trade) {
       var figure = entry.times * ostinato;
       var inTrade = class_trade.after ? bar - figure : bar;
-      if (inTrade >= 0 && inTrade < trade) return tradeRunBar(entry, inTrade, ostinato);
+      if (inTrade >= 0 && inTrade < trade) return tradeRunBar(entry, at, inTrade, ostinato);
       if (!class_trade.after) bar -= trade;
     }
     return {
       entry: entry,
+      position: at,
       rep: Math.floor(bar / ostinato),
       ostinatoBar: bar % ostinato,
       gridBar: bar % ostinato,
     };
   }
 
-  function tradeRunBar(entry, inTrade, ostinato) {
+  function tradeRunBar(entry, position, inTrade, ostinato) {
     var place = inTrade % class_trade.bars;
     return {
       entry: entry,
+      position: position,
       trade: place,
       tradeTime: Math.floor(inTrade / class_trade.bars),
       gridBar: ostinato + place,
@@ -3178,60 +3185,148 @@ function GrooveWriter() {
     );
   }
 
-  // The trade bars in the music, written once before the figures, under their own
-  // heading (their notes mapped for the cursor first); the last sets the number
-  // of the first figure, the music's first bar till now. Their own bar numbers
-  // are left off the page (see engravedMusic).
-  // (lines: the music's layout, barsPerLine bars a line)
-  function tradeBarsABC(lines) {
-    var barsPerLine = lines.barsPerLine;
-    var trade = tradeBars();
-    class_hidden_bar_numbers = Math.max(0, trade - 1);
+  // The alphabet's bars in the music: every shown figure once over the ostinato's
+  // bars (marked "play each ×N" when repeated), or, with trade bars or an order
+  // of its own, the run written out as it plays (Infinity Drumming, 2026)
+  function permutationBarsABC(ostinato, shownSections, practised, lines) {
+    if (writtenAsPlayed()) return runAsPlayedABC(ostinato, shownSections, lines);
     var abc = '';
-    for (var t = 0; t < trade; t++) {
-      var o = readOstinatoBar(get_ostinato_bars() + t, false);
-      if (t === 0) abc += 'T: \nP: ' + tradeHeading() + '\n';
-      if (t == trade - 1) abc += '%%setbarnb ' + (shownPermutationNumbers()[0] || 1) + '\n';
-      var post = '\\\n';
-      if (t == trade - 1) post = '|\n';
-      else if ((t + 1) % barsPerLine == 0) post = '\n';
-      abc += root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
-        o.Sticking,
-        o.HH,
-        o.Snare,
-        o.Kick,
-        o.Toms,
-        post,
-        o.num_notes,
-        class_time_division,
-        o.num_notes,
-        true,
-        class_num_beats_per_measure,
-        class_note_value_per_measure
-      );
-      root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
-        root.myGrooveUtils.create_note_mapping_array_for_highlighting(
-          o.HH,
-          o.Snare,
-          o.Kick,
-          o.Toms,
-          o.num_notes
-        )
-      );
-    }
+    var written = 0;
+    shownSections.forEach(function (shownSection) {
+      ostinato.forEach(function (o, k) {
+        var bar = get_permutation_bar(shownSection.section, o.Kick, o.Snare);
+        var part = practised ? practised.bars[written++] : shownSection.abc[k];
+        abc += part.pre;
+        abc += labelled(permutationBarABC(o, bar, part.post), part.label);
+      });
+    });
     return abc;
   }
-  var class_hidden_bar_numbers = 0; // the music's bar numbers left off the page
 
-  // "Trade (×3, before each bar)"
-  function tradeHeading() {
-    return (
-      'Trade' +
-      '   (' +
-      (class_trade.times > 1 ? '\u00d7' + class_trade.times + ', ' : '') +
-      (class_trade.after ? 'after' : 'before') +
-      ' each bar)'
+  // one bar of the alphabet's music, its notes mapped for the cursor (in order)
+  function permutationBarABC(o, bar, post) {
+    var barABC = root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
+      o.Sticking,
+      o.HH,
+      bar.snare,
+      bar.kick,
+      o.Toms,
+      post,
+      o.num_notes,
+      class_time_division,
+      o.num_notes,
+      true,
+      class_num_beats_per_measure,
+      class_note_value_per_measure
     );
+    root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
+      root.myGrooveUtils.create_note_mapping_array_for_highlighting(
+        o.HH,
+        bar.snare,
+        bar.kick,
+        o.Toms,
+        o.num_notes
+      )
+    );
+    return barABC;
+  }
+
+  // a part label over a bar ('' for none)
+  function labelled(barABC, label) {
+    return label ? barABC.replace(/(V:Stickings\n)/, '$1[P:' + label + ']') : barABC;
+  }
+
+  // the run is written out as it plays: with trade bars, or an order of its own
+  function writtenAsPlayed() {
+    return class_permutation_type != 'none' && (tradeBars() > 0 || !isPlainPermutationOrder());
+  }
+
+  // The run written out as it plays: each bar of it in turn, between repeat signs
+  // with how many times under the end one when it repeats, its trade bars before
+  // or after it the same way, so the music reads straight on and the cursor never
+  // jumps back. The figures keep their numbers; the trade bars show none.
+  function runAsPlayedABC(ostinato, shownSections, lines) {
+    var trade = [];
+    for (var t = 0; t < tradeBars(); t++)
+      trade.push(readOstinatoBar(get_ostinato_bars() + t, false));
+    var bars = [];
+    var group = null;
+    permutationRun().forEach(function (entry) {
+      if (!class_trade.after) pushTradeBars(bars, trade);
+      var section = shownSections[entry.index].section;
+      var label = section.group === group ? '' : section.group.name;
+      group = section.group;
+      ostinato.forEach(function (o, k) {
+        bars.push({
+          o: o,
+          notes: get_permutation_bar(section, o.Kick, o.Snare),
+          number: entry.number,
+          label: k === 0 ? label : '',
+          times: entry.times,
+          first: k === 0,
+          last: k == ostinato.length - 1,
+        });
+      });
+      if (class_trade.after) pushTradeBars(bars, trade);
+    });
+    // (the music's first bar has no number: a figure there says which it is)
+    if (bars.length && bars[0].number < UNNUMBERED_BARS && bars[0].number != 1)
+      bars[0].label += '   (bar ' + bars[0].number + ')';
+    return bars
+      .map(function (bar, i) {
+        var abc = i + 1 < bars.length ? '%%setbarnb ' + bars[i + 1].number + '\n' : '';
+        var post = asPlayedLineEnd(bars, i, lines.barsPerLine);
+        var barABC = permutationBarABC(bar.o, bar.notes, post);
+        return abc + labelled(withRepeatSigns(barABC, bar, post, bars[i + 1]), bar.label);
+      })
+      .join('');
+  }
+
+  function pushTradeBars(bars, trade) {
+    trade.forEach(function (o, t) {
+      bars.push({
+        o: o,
+        notes: { snare: o.Snare, kick: o.Kick }, // (as written)
+        number: UNNUMBERED_BARS + bars.length,
+        label: t === 0 ? 'Trade' : '',
+        times: class_trade.times,
+        first: t === 0,
+        last: t == trade.length - 1,
+      });
+    });
+  }
+
+  // the end of bar `i`'s lines: so many bars a line; the last bar ends the music
+  // (but not with ":||")
+  function asPlayedLineEnd(bars, i, barsPerLine) {
+    if (i == bars.length - 1) return bars[i].times > 1 && bars[i].last ? '\n' : '|\n';
+    return (i + 1) % barsPerLine === 0 ? '\n' : '\\\n';
+  }
+
+  // Repeat signs round a bar (or bars) of the run that repeats, how many times
+  // under the end one. A repeat starts on the closing line of the bar before
+  // (where the number set for the next bar goes: abc2svg gives it to the next bar
+  // line it reads), and from the music's start needs no sign.
+  function withRepeatSigns(barABC, bar, post, next) {
+    if (bar.times > 1 && bar.last) {
+      barABC = barABC.split(' |' + post).join(' :|' + post);
+      barABC = withTimesUnderLastBeat(barABC, ' :|' + post, '\u00d7' + bar.times);
+    }
+    if (!next || !next.first || next.times < 2) return barABC;
+    return barABC
+      .split(' :|' + post)
+      .join(' :|:' + post)
+      .split(' |' + post)
+      .join(' |:' + post);
+  }
+
+  // where a bar of the run is in the music written out as it plays: every bar of
+  // the run its trade bars and its figure's bars, each once (`fraction` on)
+  function asPlayedMusicBar(at, ostinato, fraction) {
+    var start = at.position * (tradeBars() + ostinato);
+    if (at.trade !== undefined)
+      return start + (class_trade.after ? ostinato : 0) + at.trade + fraction;
+    return start + (class_trade.after ? 0 : tradeBars()) + at.ostinatoBar + fraction;
   }
 
   // a trade bar playing: "Trade · 2 of 3 · bar 1/2"
@@ -3974,7 +4069,6 @@ function GrooveWriter() {
         keepWidth: beatGrid() !== 0,
       }
     );
-    class_hidden_bar_numbers = 0;
     // this device's Music spacing (Infinity Drumming, 2026)
     var spaced = spacedMusic(layout);
     layout = spaced.layout;
@@ -4019,41 +4113,7 @@ function GrooveWriter() {
         if (practised)
           fullABC = fullABC.replace(/^K:/m, linesHeading(practised.fit, widened) + 'K:');
         fullABC += permutationOrderHeading();
-        fullABC += tradeBarsABC(spaced.lines);
-        var written = 0;
-        shownSections.forEach(function (shownSection) {
-          ostinato.forEach(function (o, k) {
-            var bar = get_permutation_bar(shownSection.section, o.Kick, o.Snare);
-            var abc = practised ? practised.bars[written++] : shownSection.abc[k];
-            fullABC += abc.pre;
-            var barABC = root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
-              o.Sticking,
-              o.HH,
-              bar.snare,
-              bar.kick,
-              o.Toms,
-              abc.post,
-              o.num_notes,
-              class_time_division,
-              o.num_notes,
-              true,
-              class_num_beats_per_measure,
-              class_note_value_per_measure
-            );
-            fullABC += abc.label
-              ? barABC.replace(/(V:Stickings\n)/, '$1[P:' + abc.label + ']')
-              : barABC;
-            root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
-              root.myGrooveUtils.create_note_mapping_array_for_highlighting(
-                o.HH,
-                bar.snare,
-                bar.kick,
-                o.Toms,
-                o.num_notes
-              )
-            );
-          });
-        });
+        fullABC += permutationBarsABC(ostinato, shownSections, practised, spaced.lines);
         break;
 
       case 'none':
@@ -4218,7 +4278,7 @@ function GrooveWriter() {
     diverr.innerHTML = svg_return.error_html;
     // each glyph defined once on the page (abc2svg repeats them line after line),
     // the section letters and bar numbers as a score has them
-    svgTarget.innerHTML = defineGlyphsOnce(engravedMusic(svg_return.svg, class_hidden_bar_numbers));
+    svgTarget.innerHTML = defineGlyphsOnce(engravedMusic(svg_return.svg));
     class_music_svg = svg_return.svg;
   };
 

@@ -509,13 +509,15 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
         // figure 2 once, then figure 1 three times, each over both bars: 8 bars
         expect(noteOns(35)).toBe(8 * 4);
         expect(noteOns(46)).toBe(4);
-        // the music writes figures 1 and 2 once each (bars 0-1, 2-3), the order over them
+        // the music writes the run out as it plays: figure 2, then figure 1 between
+        // repeat signs, ×3, the order over it
         const abc = document.getElementById('ABCsource').value;
         expect(abc).toContain('%%center Order: 2 1\u00d73\n');
-        expect(abc.match(/ostinato bar 1/g)).toHaveLength(2);
+        expect(abc).toContain('[P:Singles   (bar 2)]');
+        expect(abc.match(/"_\u00d73"/g)).toHaveLength(1);
         const musicBar = (runBar) =>
           Math.floor(gw.myGrooveUtils.percentForSheetMusic((runBar + 0.5) / 8) * 4);
-        expect([0, 1, 2, 3, 4, 7].map(musicBar)).toEqual([2, 3, 0, 1, 0, 1]);
+        expect([0, 1, 2, 3, 4, 7].map(musicBar)).toEqual([0, 1, 2, 3, 2, 3]);
 
         const box = document.getElementById('PermutationRepCounter');
         box.checked = true;
@@ -551,16 +553,20 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
           expect(noteOns(35)).toBe(4 * 4 + 4 * 2 * 8);
         });
 
-        it('writes the trade bar once, first, and follows the run on the music', () => {
+        it('writes the run out as it plays, so the music reads straight on', () => {
           gw.loadNewGroove(TRADE);
           const abc = document.getElementById('ABCsource').value;
-          expect(abc).toContain('P: Trade   (\u00d72, before each bar)');
-          expect(abc.indexOf('P: Trade')).toBeLessThan(abc.indexOf('P: Singles'));
-          expect(abc).toContain('%%setbarnb 1\n'); // (the first figure keeps its number)
-          // run bar -> bar of the music (the trade bar, then 4 figures)
+          // the trade bar before each figure, ×2 under its repeat sign (none from the start)
+          expect(abc.match(/\[P:Trade\]/g)).toHaveLength(4);
+          expect(abc.match(/"_\u00d72"/g)).toHaveLength(4);
+          expect(abc).toContain('[P:Singles]');
+          // each figure keeps its number; the trade bars' are left off the page
+          expect(abc).toContain('%%setbarnb 2\n');
+          expect(abc).toContain('%%setbarnb 9002\n');
+          // run bar -> bar of the music (each figure's trade bar and figure, in turn)
           const musicBar = (runBar) =>
-            Math.floor(gw.myGrooveUtils.percentForSheetMusic((runBar + 0.5) / 12) * 5);
-          expect([0, 1, 2, 3, 5, 11].map(musicBar)).toEqual([0, 0, 1, 0, 2, 4]);
+            Math.floor(gw.myGrooveUtils.percentForSheetMusic((runBar + 0.5) / 12) * 8);
+          expect([0, 1, 2, 3, 5, 11].map(musicBar)).toEqual([0, 0, 1, 2, 3, 7]);
         });
 
         it('says it is trading on the rep counter, and the grid shows every line in it', () => {
@@ -593,9 +599,10 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
           document.getElementById('PermutationTradeWhere').value = 'after';
           gw.tradeChange();
           expect(window.location.search).toContain('&Trade=1x2a');
+          // (each figure, then its trade bar: 8 bars of music)
           const musicBar = (runBar) =>
-            Math.floor(gw.myGrooveUtils.percentForSheetMusic((runBar + 0.5) / 12) * 5);
-          expect([0, 1, 2, 3].map(musicBar)).toEqual([1, 0, 0, 2]);
+            Math.floor(gw.myGrooveUtils.percentForSheetMusic((runBar + 0.5) / 12) * 8);
+          expect([0, 1, 2, 3].map(musicBar)).toEqual([0, 1, 1, 2]);
           gw.addMeasureButtonClick(); // another trade bar (a copy of the last)
           expect(gw.numberOfMeasures()).toBe(3);
           expect(window.location.search).toContain('&Trade=2x2a');
