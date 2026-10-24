@@ -976,10 +976,13 @@ export function defineGlyphsOnce(svg) {
  * and a bar number starting a line sits by the clef just over the stave, not up
  * over the first note's stem (abc2svg puts it over whatever is there).
  * @param {string} svg  abc2svg's output, one <svg> a line of music
+ * @param {number} [hidden]  so many of the first bar numbers left off (bars that
+ *   aren't numbered: an alphabet's trade bars)
  * @returns {string}
  */
-export function engravedMusic(svg) {
+export function engravedMusic(svg, hidden) {
   var measureFont = /\.(f\d+_\d+) \{font:italic 14px serif\}/.exec(svg);
+  if (measureFont && hidden) svg = withoutFirstBarNumbers(svg, measureFont[1], hidden);
   return String(svg)
     .split(/(?=<svg[\s>])/)
     .map(function (line) {
@@ -1028,6 +1031,18 @@ export function engravedMusic(svg) {
 
 // a bar number this far into its line starts it (the clef's width and some)
 var LINE_START = 100;
+
+function withoutFirstBarNumbers(svg, measureFont, hidden) {
+  var left = hidden;
+  return String(svg).replace(
+    new RegExp('<text class="' + measureFont + '" x="[\\d.]+" y="[-\\d.]+">\\d+</text>\\n?', 'g'),
+    function (number) {
+      if (left <= 0) return number;
+      left--;
+      return '';
+    }
+  );
+}
 
 /**
  * Infinity Drumming, 2026: whether abc2svg broke a line of the music in the

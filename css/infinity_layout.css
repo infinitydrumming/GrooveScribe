@@ -1691,6 +1691,39 @@ body.selectingNotes #measureContainer .notes-row-container {
   cursor: pointer;
 }
 
+/* "Trade": grooves or fills between the figures (Infinity Drumming, 2026) */
+#PermutationTradeOption {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 4px 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--id-navy-900);
+}
+#PermutationTradeOption select {
+  min-height: 36px;
+  padding: 4px 8px;
+  border: 2px solid var(--id-navy-900);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--id-navy-900);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+/* a trade bar in the grid: every line shows, as it plays as written */
+#measureContainer .staff-container.tradeBar {
+  border: 2px solid #e9b46a;
+  background: #fffaf2;
+}
+#measureContainer .staff-container.tradeBar::before {
+  content: 'Trade';
+  color: #b26b00;
+}
+
 /* the rep counter's switch, by "Play each bar" (Infinity Drumming, 2026) */
 #PermutationRepCounterOption {
   display: inline-flex;

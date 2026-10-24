@@ -515,3 +515,35 @@ test.describe('a block of notes in another tab', () => {
       .toBe('|--------O---o---o---------------|');
   });
 });
+
+// Infinity Drumming, 2026: an alphabet with grooves or fills traded between its bars
+test.describe('alphabet trade bars', () => {
+  test('a trade bar after the ostinato plays before each bar, written once first', async ({
+    page,
+  }) => {
+    await loadGroove(
+      page,
+      grooveUrl(
+        '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&Perm=kick_16ths' +
+          '&H=|x-x-x-x-x-x-x-x-|&S=|----O-------O---|&K=|o-------o-------|'
+      )
+    );
+    await page.selectOption('#PermutationTradeBars', '1');
+    await page.selectOption('#PermutationTradeTimes', '3');
+    await expect
+      .poll(() => page.evaluate(() => new URLSearchParams(location.search).get('Trade')))
+      .toBe('1x3');
+    await expect(page.locator('#staff-container2')).toHaveClass(/tradeBar/);
+    await expect(page.locator('#staff-container2 .kick-container')).toBeVisible();
+    expect(await page.locator('#ABCsource').inputValue()).toContain(
+      'P: Trade   (×3, before each bar)'
+    );
+    // the order in the practise box: bar 2, then bar 1 twice
+    await page.fill('#practiseBars', '2 1x2');
+    await page.press('#practiseBars', 'Enter');
+    await expect
+      .poll(() => page.evaluate(() => new URLSearchParams(location.search).get('PermBars')))
+      .toBe('2_1x2');
+    expect(await page.locator('#ABCsource').inputValue()).toContain('Order: 2 1×2');
+  });
+});

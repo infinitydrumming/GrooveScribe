@@ -34,12 +34,16 @@ var PERMUTATION_TYPES = [
 
 /**
  * @typedef {{type: string, boxes: string, playEach: number, bars: string, fatBack?: boolean,
- *   ostinato?: number}} PermutationSetting
+ *   ostinato?: number, trade?: (TradeSetting|null)}} PermutationSetting
  *   boxes: each permutation option checkbox, in order, '1' ticked / '0' not;
  *   bars: the bars of the run to practise ("3-6, 9"), '' for all;
  *   fatBack: a kick permutation leaves out the kicks on the snare's backbeat;
  *   ostinato: the groove's first bars the figures go over (links from before
- *   October 2026 have 1: their permutations played bar 1 only)
+ *   October 2026 have 1: their permutations played bar 1 only);
+ *   trade: grooves or fills traded with the figures (Infinity Drumming, 2026)
+ * @typedef {{bars: number, times: number, after: boolean}} TradeSetting
+ *   the groove's bars after the ostinato's, played `times` times before (or
+ *   after) each bar of the run; links: "Trade=2x3a" (2 bars, 3 times, after)
  * @typedef {{amount: number, every: number, unit: string, keepGoing: boolean, target: number}} SpeedUpSetting
  *   unit 'm' (minutes) or 'b' (bars); target 0 = no "Stop at"
  * @typedef {{permutation: (PermutationSetting|null), speedUp: (SpeedUpSetting|null),
@@ -160,7 +164,24 @@ function permutationToUrl(perm) {
   if (perm.bars) url += '&PermBars=' + barsToUrl(perm.bars);
   if (perm.fatBack) url += '&FatBack=1';
   if (perm.ostinato > 1) url += '&Ostinato=' + perm.ostinato;
+  if (perm.trade && perm.trade.bars) url += '&Trade=' + tradeToText(perm.trade);
   return url;
+}
+
+/** @param {TradeSetting} trade */
+function tradeToText(trade) {
+  return trade.bars + (trade.times > 1 ? 'x' + trade.times : '') + (trade.after ? 'a' : '');
+}
+
+/** @returns {TradeSetting|null} */
+function tradeFromText(text) {
+  var trade = /^(\d+)(?:x(\d+))?(a?)$/i.exec(String(text || '').trim());
+  if (!trade) return null;
+  return {
+    bars: whole(trade[1], 1, 4, 1),
+    times: whole(trade[2] || '1', 1, 8, 1),
+    after: trade[3] !== '',
+  };
 }
 
 /**
@@ -198,6 +219,8 @@ export function practiceSettingsFromUrl(get) {
       fatBack: get('FatBack', '0') == '1',
       ostinato: whole(get('Ostinato', '1'), 1, 99, 1),
     };
+  var trade = settings.permutation && tradeFromText(get('Trade', ''));
+  if (trade) settings.permutation.trade = trade;
   settings.speedUp = speedUpFromText(get('SpeedUp', ''));
   settings.countIn = get('CountIn', '0') == '1';
   settings.clickSolo = get('ClickSolo', '0') == '1';

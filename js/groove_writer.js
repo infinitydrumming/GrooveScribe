@@ -174,18 +174,20 @@ function GrooveWriter() {
     if (percent < 0) return percent; // count-in or click-only bar: nothing to follow
     if (practisedBars().length) return practisedMusicPercent(percent);
     if (class_permutation_type == 'none') return percent;
-    if (get_permutation_repeats() < 2 && isPlainPermutationOrder()) return percent;
+    if (get_permutation_repeats() < 2 && isPlainPermutationOrder() && !tradeBars()) return percent;
     // the run plays each figure "Play each" times through the ostinato's bars (or
-    // in the order and times the practise box says); the music writes it once
-    // over them
+    // in the order and times the practise box says), its trade bars between; the
+    // music writes each once (the trade bars first)
     var run = permutationRun();
-    var shown = shownPermutationNumbers().length;
+    var trade = tradeBars();
     var ostinato = get_ostinato_bars();
-    var bars = runLength(run) * ostinato;
+    var written = trade + shownPermutationNumbers().length * ostinato;
+    var bars = get_numberOfPermutationBars();
     var position = Math.min(percent * bars, bars - 1e-9);
     var bar = Math.floor(position);
     var at = permutationRunBar(run, bar);
-    return (at.entry.index * ostinato + at.ostinatoBar + (position - bar)) / (shown * ostinato);
+    if (at.trade !== undefined) return (at.trade + (position - bar)) / written;
+    return (trade + at.entry.index * ostinato + at.ostinatoBar + (position - bar)) / written;
   };
 
   var class_undo_stack = [];
@@ -1517,8 +1519,10 @@ function GrooveWriter() {
     // of its ostinato)
     if (class_permutation_type != 'none') {
       var playing = percent_complete * get_numberOfPermutationBars();
-      percent_complete =
-        ((Math.floor(playing) % get_ostinato_bars()) + (playing % 1.0)) / class_number_of_measures;
+      var gridBar = tradeBars() // (and the trade bars' own, Infinity Drumming, 2026)
+        ? permutationRunBar(permutationRun(), Math.floor(playing)).gridBar
+        : Math.floor(playing) % get_ostinato_bars();
+      percent_complete = (gridBar + (playing % 1.0)) / class_number_of_measures;
     }
 
     if (isMixedMeterGroove()) {
@@ -2084,6 +2088,7 @@ function GrooveWriter() {
         showHideCSS_ClassVisibility('.kick-container', true, true); // show it
         showHideCSS_ClassVisibility('.snare-container', true, true); // show it
         class_permutation_type = 'none';
+        class_trade.bars = 0; // (its trade bars stay, as the groove's bars)
 
         unselectButton(document.getElementById('permutationAnchor'));
         document.getElementById('PermutationOptions').innerHTML = root.HTMLforPermutationOptions();
@@ -2687,12 +2692,19 @@ function GrooveWriter() {
   // This device's Music spacing over the music's layout (Infinity Drumming, 2026):
   // narrower bars, more a line, or wider, fewer; practised bars of the alphabet as
   // practisedBarsMusic lays them out. With the alphabet's shown figures.
+  // (lines: how its lines go, bars a line)
   function spacedMusic(layout) {
-    if (class_permutation_type == 'none')
-      return { layout: spacedLayout(layout, class_music_spacing / 100), shownSections: [] };
+    if (class_permutation_type == 'none') {
+      var groove = spacedLayout(layout, class_music_spacing / 100);
+      return { layout: groove, lines: groove, shownSections: [] };
+    }
     if (!class_permutation_bars) {
       var spaced = spacedLayout(layout, class_music_spacing / 100);
-      return { layout: spaced, shownSections: get_shown_permutation_sections(spaced.barsPerLine) };
+      return {
+        layout: spaced,
+        lines: spaced,
+        shownSections: get_shown_permutation_sections(spaced.barsPerLine),
+      };
     }
     var shownSections = get_shown_permutation_sections(layout.barsPerLine);
     var practised = practisedBarsMusic(shownSections, layout);
@@ -2702,6 +2714,7 @@ function GrooveWriter() {
         renderWidth: practised.renderWidth,
         bar: layout.bar,
       },
+      lines: practised.fit,
       shownSections: shownSections,
       practised: practised,
     };
@@ -2716,7 +2729,7 @@ function GrooveWriter() {
       bars = bars.concat(shownSection.abc);
     });
     var fit = practisedBarsLayout(
-      bars.length,
+      bars.length + tradeBars(),
       layout,
       (class_num_beats_per_measure * 4) / class_note_value_per_measure,
       class_music_spacing / 100
@@ -2916,7 +2929,8 @@ function GrooveWriter() {
   // bars in one full pass of the permutation, counting repeats and the
   // ostinato's bars
   function get_numberOfPermutationBars() {
-    return runLength(permutationRun()) * get_ostinato_bars();
+    var run = permutationRun();
+    return runLength(run) * get_ostinato_bars() + run.length * tradeSpan();
   }
 
   // --- The run's order (Infinity Drumming, 2026) --------------------------------
@@ -2976,15 +2990,57 @@ function GrooveWriter() {
   }
 
   // bar `bar` of the run as it plays: its entry, which time through (from 0) and
-  // which bar of the ostinato
+  // which bar of the ostinato, or which of the trade bars before or after it
+  // (trade: its place in them, tradeTime: which time through them); gridBar: the
+  // bar of the grid it plays
   function permutationRunBar(run, bar) {
     var ostinato = get_ostinato_bars();
+    var trade = tradeSpan();
     var at = 0;
-    while (at < run.length - 1 && bar >= run[at].times * ostinato) {
-      bar -= run[at].times * ostinato;
+    while (at < run.length - 1 && bar >= run[at].times * ostinato + trade) {
+      bar -= run[at].times * ostinato + trade;
       at++;
     }
-    return { entry: run[at], rep: Math.floor(bar / ostinato), ostinatoBar: bar % ostinato };
+    var entry = run[at];
+    if (trade) {
+      var figure = entry.times * ostinato;
+      var inTrade = class_trade.after ? bar - figure : bar;
+      if (inTrade >= 0 && inTrade < trade) return tradeRunBar(entry, inTrade, ostinato);
+      if (!class_trade.after) bar -= trade;
+    }
+    return {
+      entry: entry,
+      rep: Math.floor(bar / ostinato),
+      ostinatoBar: bar % ostinato,
+      gridBar: bar % ostinato,
+    };
+  }
+
+  function tradeRunBar(entry, inTrade, ostinato) {
+    var place = inTrade % class_trade.bars;
+    return {
+      entry: entry,
+      trade: place,
+      tradeTime: Math.floor(inTrade / class_trade.bars),
+      gridBar: ostinato + place,
+    };
+  }
+
+  // --- Trade bars (Infinity Drumming, 2026) ---------------------------------------
+  // Grooves or fills traded with the alphabet's figures ("3 bars of time, then the
+  // figure"): the grid's last bars, after the ostinato's, played so many times
+  // before (or after) each bar of the run. The music writes them once, first.
+  var MAX_TRADE_BARS = 4;
+  var MAX_TRADE_TIMES = 8;
+  var class_trade = { bars: 0, times: 1, after: false };
+
+  function tradeBars() {
+    return class_permutation_type == 'none' ? 0 : class_trade.bars;
+  }
+
+  // the trade's bars between two bars of the run
+  function tradeSpan() {
+    return tradeBars() * class_trade.times;
   }
 
   // over the music when the run has an order of its own ("Order: 1×4 2 1×4 3")
@@ -3061,13 +3117,129 @@ function GrooveWriter() {
     }
     if (note_type == 'complete' || note_type == 'clear' || groovePercent < 0) return; // as it was
     var bars = get_ostinato_bars();
-    var total = runLength(class_rep_counter_run) * bars;
+    var total =
+      runLength(class_rep_counter_run) * bars + class_rep_counter_run.length * tradeSpan();
     if (!total) return;
     var bar = Math.min(Math.floor(groovePercent * total), total - 1);
     var at = permutationRunBar(class_rep_counter_run, bar);
+    if (at.trade !== undefined) {
+      showRepCounter(tradeCounterText(at));
+      return;
+    }
     var text = 'Bar ' + at.entry.number + ' \u00b7 Rep ' + (at.rep + 1) + ' of ' + at.entry.times;
-    if (bars > 1) text += ' \u00b7 ostinato ' + ((bar % bars) + 1) + '/' + bars;
+    if (bars > 1) text += ' \u00b7 ostinato ' + (at.ostinatoBar + 1) + '/' + bars;
     showRepCounter(text);
+  }
+
+  // the Alphabet Options' "Trade" choices
+  root.tradeChange = function () {
+    var number = function (id, fallback, most) {
+      var element = /** @type {HTMLSelectElement | null} */ (document.getElementById(id));
+      var value = element ? parseInt(element.value, 10) : fallback;
+      return isNaN(value) ? fallback : Math.min(Math.max(value, 0), most);
+    };
+    var where = /** @type {HTMLSelectElement | null} */ (
+      document.getElementById('PermutationTradeWhere')
+    );
+    class_trade.times = Math.max(
+      1,
+      number('PermutationTradeTimes', class_trade.times, MAX_TRADE_TIMES)
+    );
+    class_trade.after = where ? where.value == 'after' : class_trade.after;
+    var bars = number('PermutationTradeBars', class_trade.bars, MAX_TRADE_BARS);
+    if (bars != class_trade.bars) setTradeBarCount(bars);
+    else updateSheetMusic();
+    redrawPermutationOptions();
+  };
+
+  // the panel drawn again, as it is (its ticks kept)
+  function redrawPermutationOptions() {
+    var boxes = permutationBoxes();
+    document.getElementById('PermutationOptions').innerHTML = root.HTMLforPermutationOptions();
+    setPermutationBoxes(boxes);
+  }
+
+  // So many trade bars after the ostinato's: new ones start as copies of the
+  // groove's first bar (its own notes, the lines the figures play included)
+  function setTradeBarCount(bars) {
+    var ostinato = get_ostinato_bars();
+    var kept = Math.min(bars, class_trade.bars);
+    keepingMutes(
+      function (bar) {
+        return bar <= ostinato + kept ? [bar] : [];
+      },
+      function () {
+        var records = readBarRecords();
+        var trade = records.slice(ostinato, ostinato + kept);
+        while (trade.length < bars) trade.push(JSON.parse(JSON.stringify(records[0])));
+        class_trade.bars = bars;
+        return layOutBarRecords(records.slice(0, ostinato).concat(trade));
+      }
+    );
+  }
+
+  // The trade bars in the music, written once before the figures, under their own
+  // heading (their notes mapped for the cursor first); the last sets the number
+  // of the first figure, the music's first bar till now. Their own bar numbers
+  // are left off the page (see engravedMusic).
+  // (lines: the music's layout, barsPerLine bars a line)
+  function tradeBarsABC(lines) {
+    var barsPerLine = lines.barsPerLine;
+    var trade = tradeBars();
+    class_hidden_bar_numbers = Math.max(0, trade - 1);
+    var abc = '';
+    for (var t = 0; t < trade; t++) {
+      var o = readOstinatoBar(get_ostinato_bars() + t, false);
+      if (t === 0) abc += 'T: \nP: ' + tradeHeading() + '\n';
+      if (t == trade - 1) abc += '%%setbarnb ' + (shownPermutationNumbers()[0] || 1) + '\n';
+      var post = '\\\n';
+      if (t == trade - 1) post = '|\n';
+      else if ((t + 1) % barsPerLine == 0) post = '\n';
+      abc += root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
+        o.Sticking,
+        o.HH,
+        o.Snare,
+        o.Kick,
+        o.Toms,
+        post,
+        o.num_notes,
+        class_time_division,
+        o.num_notes,
+        true,
+        class_num_beats_per_measure,
+        class_note_value_per_measure
+      );
+      root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
+        root.myGrooveUtils.create_note_mapping_array_for_highlighting(
+          o.HH,
+          o.Snare,
+          o.Kick,
+          o.Toms,
+          o.num_notes
+        )
+      );
+    }
+    return abc;
+  }
+  var class_hidden_bar_numbers = 0; // the music's bar numbers left off the page
+
+  // "Trade (×3, before each bar)"
+  function tradeHeading() {
+    return (
+      'Trade' +
+      '   (' +
+      (class_trade.times > 1 ? '\u00d7' + class_trade.times + ', ' : '') +
+      (class_trade.after ? 'after' : 'before') +
+      ' each bar)'
+    );
+  }
+
+  // a trade bar playing: "Trade · 2 of 3 · bar 1/2"
+  function tradeCounterText(at) {
+    var text = 'Trade';
+    if (class_trade.times > 1) text += ' \u00b7 ' + (at.tradeTime + 1) + ' of ' + class_trade.times;
+    if (class_trade.bars > 1) text += ' \u00b7 bar ' + (at.trade + 1) + '/' + class_trade.bars;
+    return text;
   }
 
   // --- Multi-bar ostinatos (Infinity Drumming, 2026) ----------------------------
@@ -3076,7 +3248,7 @@ function GrooveWriter() {
   // through. Bar `n` of the run is figure floor(n / (repeats × bars)), over bar
   // n % bars of the ostinato.
   function get_ostinato_bars() {
-    return Math.min(class_number_of_measures, _perm.MAX_OSTINATO_BARS);
+    return Math.min(class_number_of_measures - tradeBars(), _perm.MAX_OSTINATO_BARS);
   }
 
   // a permutation's swing goes by 16ths, however the bar is written (16 in 4/4)
@@ -3084,16 +3256,23 @@ function GrooveWriter() {
     return (16 * class_num_beats_per_measure) / class_note_value_per_measure;
   }
 
-  // choosing a permutation closes the bars after the ostinato's
+  // choosing a permutation closes the bars after the ostinato's (and its trade
+  // bars')
   function closeBarsPastOstinato(bars) {
-    bars = Math.min(bars || _perm.MAX_OSTINATO_BARS, _perm.MAX_OSTINATO_BARS);
+    bars = Math.min(bars || _perm.MAX_OSTINATO_BARS, _perm.MAX_OSTINATO_BARS) + tradeBars();
     while (class_number_of_measures > bars) root.closeMeasureButtonClick(bars + 1);
+  }
+
+  function tradeIsFull() {
+    if (class_trade.bars < MAX_TRADE_BARS) return false;
+    window.alert('The alphabet trades ' + MAX_TRADE_BARS + ' bars at most.');
+    return true;
   }
 
   // with a permutation on, no more bars than an ostinato has (and says so)
   function ostinatoIsFull() {
     if (class_permutation_type == 'none') return false;
-    if (class_number_of_measures < _perm.MAX_OSTINATO_BARS) return false;
+    if (get_ostinato_bars() < _perm.MAX_OSTINATO_BARS) return false;
     window.alert(
       'The alphabet plays over ' +
         _perm.MAX_OSTINATO_BARS +
@@ -3252,8 +3431,32 @@ function GrooveWriter() {
           });
         });
         // (in the run's order: each figure "Play each" times, or as the box says)
+        // the trade bars, played as written (Infinity Drumming, 2026)
+        var tradePlayed = [];
+        for (i = 0; i < tradeBars(); i++)
+          tradePlayed.push(readOstinatoBar(get_ostinato_bars() + i, true));
+        var playTrade = function () {
+          for (var time = 0; time < class_trade.times; time++)
+            tradePlayed.forEach(function (o, t) {
+              root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
+                midiTrack,
+                o.HH,
+                o.Snare,
+                o.Kick,
+                o.Toms,
+                MIDI_type,
+                metronomeFrequency,
+                o.num_notes,
+                num_notes_for_swing,
+                swingForBar(get_ostinato_bars() + t),
+                class_num_beats_per_measure,
+                class_note_value_per_measure
+              );
+            });
+        };
         permutationRun().forEach(function (entry) {
           var bars = figureBars[entry.index];
+          if (!class_trade.after) playTrade(); // (none without trade bars)
           for (var repeat = 0; repeat < entry.times; repeat++)
             ostinato.forEach(function (o, k) {
               root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
@@ -3271,6 +3474,7 @@ function GrooveWriter() {
                 class_note_value_per_measure
               );
             });
+          if (class_trade.after) playTrade();
         });
         break;
 
@@ -3770,6 +3974,7 @@ function GrooveWriter() {
         keepWidth: beatGrid() !== 0,
       }
     );
+    class_hidden_bar_numbers = 0;
     // this device's Music spacing (Infinity Drumming, 2026)
     var spaced = spacedMusic(layout);
     layout = spaced.layout;
@@ -3814,6 +4019,7 @@ function GrooveWriter() {
         if (practised)
           fullABC = fullABC.replace(/^K:/m, linesHeading(practised.fit, widened) + 'K:');
         fullABC += permutationOrderHeading();
+        fullABC += tradeBarsABC(spaced.lines);
         var written = 0;
         shownSections.forEach(function (shownSection) {
           ostinato.forEach(function (o, k) {
@@ -4012,7 +4218,7 @@ function GrooveWriter() {
     diverr.innerHTML = svg_return.error_html;
     // each glyph defined once on the page (abc2svg repeats them line after line),
     // the section letters and bar numbers as a score has them
-    svgTarget.innerHTML = defineGlyphsOnce(engravedMusic(svg_return.svg));
+    svgTarget.innerHTML = defineGlyphsOnce(engravedMusic(svg_return.svg, class_hidden_bar_numbers));
     class_music_svg = svg_return.svg;
   };
 
@@ -4082,6 +4288,11 @@ function GrooveWriter() {
   // remove a measure from the page (the other bars keep their muted lines)
   // measureNum is indexed starting at 1, not 0
   root.closeMeasureButtonClick = function (measureNum) {
+    if (tradeBars() && measureNum > get_ostinato_bars()) class_trade.bars--;
+    else if (tradeBars() && get_ostinato_bars() == 1) {
+      window.alert('The alphabet needs a bar to play over. Turn its trade bars off first.');
+      return;
+    }
     keepingMutes(
       function (bar) {
         if (bar == measureNum) return [];
@@ -4166,6 +4377,11 @@ function GrooveWriter() {
   // (the bars keep their muted lines, and the new bar the last one's)
   root.addMeasureButtonClick = function (event) {
     if (class_number_of_measures >= constant_MAX_MEASURES) return; // the most a link holds
+    if (tradeBars()) {
+      // (with the alphabet's trade bars, another trade bar: Infinity Drumming, 2026)
+      if (!tradeIsFull()) root.duplicateMeasureButtonClick(class_number_of_measures);
+      return;
+    }
     if (ostinatoIsFull()) return;
     var last = class_number_of_measures;
     keepingMutes(
@@ -4274,7 +4490,10 @@ function GrooveWriter() {
   // measureNum is indexed starting at 1, not 0
   root.duplicateMeasureButtonClick = function (measureNum) {
     if (class_number_of_measures >= constant_MAX_MEASURES) return; // the most a link holds
-    if (ostinatoIsFull()) return;
+    if (measureNum > get_ostinato_bars() && tradeBars()) {
+      if (tradeIsFull()) return;
+      class_trade.bars++; // (a copy of a trade bar is one too)
+    } else if (ostinatoIsFull()) return;
     keepingMutes(
       function (bar) {
         if (bar < measureNum) return [bar];
@@ -6691,6 +6910,35 @@ function GrooveWriter() {
       var staff = document.getElementById('staff-container' + (bar + 1));
       if (staff) staff.classList.toggle('notPractised', bars.length > 0 && bars.indexOf(bar) < 0);
     }
+    showTradeBars();
+  }
+
+  // The alphabet's lines in the grid, bar by bar (Infinity Drumming, 2026): the
+  // line(s) its figures play hidden in the ostinato's bars, every line in its
+  // trade bars (marked so), which play as written
+  function showTradeBars() {
+    var type = class_permutation_type;
+    var hideKick = type == 'kick_16ths' || type.indexOf('kick_snare') === 0;
+    var hideSnare = type == 'snare_16ths' || type.indexOf('kick_snare') === 0;
+    var ostinato = get_ostinato_bars();
+    for (var bar = 0; bar < class_number_of_measures; bar++) {
+      var staff = document.getElementById('staff-container' + (bar + 1));
+      if (!staff) continue;
+      var trade = bar >= ostinato && bar < ostinato + tradeBars();
+      staff.classList.toggle('tradeBar', trade);
+      setLinesVisible(staff, '.kick-container', trade || !hideKick);
+      setLinesVisible(staff, '.snare-container', trade || !hideSnare);
+    }
+    var select = /** @type {HTMLSelectElement | null} */ (
+      document.getElementById('PermutationTradeBars')
+    );
+    if (select && select.value != String(tradeBars())) redrawPermutationOptions(); // (a bar added or removed)
+  }
+
+  function setLinesVisible(staff, lines, visible) {
+    staff.querySelectorAll(lines).forEach(function (element) {
+      /** @type {HTMLElement} */ (element).style.visibility = visible ? 'visible' : 'hidden';
+    });
   }
 
   // just the bars to practise (or the sections as they play), in order
@@ -6724,9 +6972,9 @@ function GrooveWriter() {
   // Does bar `bar` of the groove (of the run, with a permutation) play straight?
   // (Permutations: its bar of the ostinato.)
   function isSequenceBarStraight(bar) {
-    return !!class_straight_bars[
-      class_permutation_type == 'none' ? bar : bar % get_ostinato_bars()
-    ];
+    if (class_permutation_type == 'none') return !!class_straight_bars[bar];
+    if (tradeBars()) return !!class_straight_bars[permutationRunBar(permutationRun(), bar).gridBar];
+    return !!class_straight_bars[bar % get_ostinato_bars()];
   }
 
   // One cycle has played: the next one starts that many groove bars later.
@@ -6929,9 +7177,11 @@ function GrooveWriter() {
   // like the permutation playback.
   function addPermutationBarToMidiTrack(midiTrack, sections, index) {
     var at = permutationRunBar(permutationRun(), index);
-    var section = sections[at.entry.index].section;
-    var o = readOstinatoBar(at.ostinatoBar, true);
-    var bar = get_permutation_bar(section, o.Kick, o.Snare);
+    var o = readOstinatoBar(at.gridBar, true);
+    var bar =
+      at.trade === undefined // (a trade bar plays as written)
+        ? get_permutation_bar(sections[at.entry.index].section, o.Kick, o.Snare)
+        : { snare: o.Snare, kick: o.Kick };
     root.myGrooveUtils.MIDI_from_HH_Snare_Kick_Arrays(
       midiTrack,
       o.HH,
@@ -6942,7 +7192,7 @@ function GrooveWriter() {
       root.getMetronomeFrequency(),
       o.num_notes,
       permutationSwingNotes(),
-      class_straight_bars[at.ostinatoBar] ? 0 : root.myGrooveUtils.getSwing() / 100,
+      class_straight_bars[at.gridBar] ? 0 : root.myGrooveUtils.getSwing() / 100,
       class_num_beats_per_measure,
       class_note_value_per_measure
     );
@@ -7698,6 +7948,7 @@ function GrooveWriter() {
               bars: class_permutation_bars,
               fatBack: fatBackOn(),
               ostinato: get_ostinato_bars(),
+              trade: tradeBars() ? Object.assign({}, class_trade) : null,
             },
       speedUp: currentSpeedUp(),
       countIn: class_metronome_count_in_active,
@@ -7712,6 +7963,12 @@ function GrooveWriter() {
     var allowed = !!perm && permutationsAllowed();
     class_permutation_repeats = allowed ? perm.playEach : 1;
     class_permutation_fat_back = allowed && !!perm.fatBack;
+    var trade = (allowed && perm.trade) || null;
+    class_trade = {
+      bars: trade ? trade.bars : 0,
+      times: trade ? trade.times : 1,
+      after: !!(trade && trade.after),
+    };
     root.permutationPopupClick(allowed ? perm.type : 'none');
     if (!allowed) return;
     // as many bars as the link's ostinato: links from before October 2026 played
@@ -8477,7 +8734,8 @@ function GrooveWriter() {
       layout,
       get_permutation_repeats(),
       class_permutation_fat_back,
-      class_rep_counter
+      class_rep_counter,
+      class_trade
     );
   };
 } // end of class
