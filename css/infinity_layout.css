@@ -1768,6 +1768,22 @@ body.selectingNotes #measureContainer .notes-row-container {
   border-color: var(--id-amber);
   box-shadow: 0 0 0 2px rgba(254, 159, 19, 0.35);
 }
+/* as wide as an order typed in ("1x4 2 1x4 3"), within reason, where the
+ * browser can size a box to its text */
+@supports (field-sizing: content) {
+  #practiseBars {
+    width: auto;
+    field-sizing: content;
+    min-width: 76px;
+    max-width: 220px;
+  }
+  @media (max-width: 560px) {
+    #practiseBars {
+      min-width: 56px;
+      max-width: 150px;
+    }
+  }
+}
 /* the bars that don't play while some are practised */
 #measureContainer .staff-container.notPractised {
   opacity: 0.4;

@@ -1291,3 +1291,76 @@ export function barListToText(bars, separator) {
   }
   return parts.join(separator === undefined ? ', ' : separator);
 }
+
+/** The most times one bar of an order plays (as "Play each bar" goes). */
+var MAX_ORDER_TIMES = 16;
+
+/**
+ * Infinity Drumming, 2026: the bars to practise as typed, in the order they play:
+ * "1 2 1 3", "1x4 2x2 1x4 3" (bar 1 four times...), "1-4x2" (each of 1 to 4
+ * twice), "1-4 1-4 7", "6-3" (6, 5, 4, 3). Bars past the run are left out.
+ * @param {string} text
+ * @param {number} count  the bars of the run
+ * @returns {{bar: number, times: number}[]}  bars from 1; times 0: as "Play each bar" says
+ */
+export function parseBarOrder(text, count) {
+  var order = [];
+  var entry = /(\d+)(?:-(\d+))?(?:x(\d+))?/g;
+  var tidy = String(text || '')
+    .toLowerCase()
+    .replace(/to|[\u2013\u2014]/g, '-')
+    .replace(/[\u00d7*]/g, 'x')
+    .split(/([-x])/)
+    .map(function (part) {
+      return part.trim(); // "3 - 6 x 2" is "3-6x2"
+    })
+    .join('');
+  var match;
+  while ((match = entry.exec(tidy))) {
+    var from = parseInt(match[1], 10);
+    var to = match[2] ? parseInt(match[2], 10) : from;
+    var times = match[3] ? Math.min(Math.max(parseInt(match[3], 10), 1), MAX_ORDER_TIMES) : 0;
+    var step = to < from ? -1 : 1;
+    for (var n = 0; n <= Math.abs(to - from); n++) {
+      var bar = from + n * step;
+      if (bar >= 1 && bar <= count) order.push({ bar: bar, times: times });
+    }
+  }
+  return order;
+}
+
+/**
+ * Whether an order is just some bars, each once, from first to last ("3-6, 9"):
+ * those play as practised bars always have, each "Play each bar" times.
+ * @param {{bar: number, times: number}[]} order
+ */
+export function isPlainOrder(order) {
+  return order.every(function (entry, i) {
+    return !entry.times && (i === 0 || entry.bar > order[i - 1].bar);
+  });
+}
+
+/**
+ * An order as the box shows it: three or more bars one after another with the
+ * same times as a range ("1-4x2 7 1x4", "1 2 1 3").
+ * @param {{bar: number, times: number}[]} order
+ */
+export function barOrderToText(order) {
+  var parts = [];
+  var i = 0;
+  while (i < order.length) {
+    var start = order[i];
+    var end = i;
+    while (
+      end + 1 < order.length &&
+      order[end + 1].bar == order[end].bar + 1 &&
+      order[end + 1].times == start.times
+    )
+      end++;
+    if (end - i < 2) end = i; // (two in a row stay apart)
+    var bars = end == i ? String(start.bar) : start.bar + '-' + order[end].bar;
+    parts.push(bars + (start.times ? 'x' + start.times : ''));
+    i = end + 1;
+  }
+  return parts.join(' ');
+}

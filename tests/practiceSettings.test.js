@@ -55,6 +55,12 @@ describe('practice settings in a link', () => {
     expect(practiceSettingsToUrl(settings)).toBe('&PlayBars=1-3,6');
     expect(fromQuery('&PlayBars=1-3,6')).toEqual(settings);
     expect(fromQuery('&PlayBars=1-2;x,4').playBars).toBe('1-2, 4'); // only digits, commas, dashes
+    // an alphabet's bars in an order (Infinity Drumming, 2026)
+    const perm = { type: 'kick_16ths', set: '', playEach: 1, bars: '1x4 2 1x4 3' };
+    expect(practiceSettingsToUrl({ ...emptyPracticeSettings(), permutation: perm })).toContain(
+      '&PermBars=1x4_2_1x4_3'
+    );
+    expect(fromQuery('&Perm=kick_16ths&PermBars=1x4_2_1x4_3').permutation.bars).toBe('1x4 2 1x4 3');
   });
 
   // links from before multi-bar ostinatos (October 2026) played bar 1 only

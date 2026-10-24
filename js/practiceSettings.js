@@ -130,10 +130,17 @@ function mutesFromText(text) {
 }
 
 // "3-6, 9" as a link has it ("3-6,9"), and back
+// (bars in an order, "1x4 2 1x4 3", go as "1x4_2_1x4_3"; Infinity Drumming, 2026)
 function barsToUrl(bars) {
-  return String(bars).replace(/\s+/g, '');
+  return String(bars).replace(/,\s*/g, ',').replace(/\s+/g, '_');
 }
-function barsFromUrl(text) {
+// ordered: the alphabet's bars, which can be in an order
+function barsFromUrl(text, ordered) {
+  if (ordered && /[x_]/.test(String(text)))
+    return String(text)
+      .replace(/[^0-9,x_-]/g, '')
+      .replace(/[_,]+/g, ' ')
+      .trim();
   return String(text || '')
     .replace(/[^0-9A-Fa-f,-]/g, '') // (a groove's sections by letter too)
     .split(',')
@@ -187,7 +194,7 @@ export function practiceSettingsFromUrl(get) {
       type: type,
       boxes: String(get('PermSet', '')).replace(/[^01]/g, ''),
       playEach: whole(get('PlayEach', '1'), 1, 16, 1),
-      bars: barsFromUrl(get('PermBars', '')),
+      bars: barsFromUrl(get('PermBars', ''), true),
       fatBack: get('FatBack', '0') == '1',
       ostinato: whole(get('Ostinato', '1'), 1, 99, 1),
     };

@@ -995,7 +995,8 @@ export function practiseBarsHTML() {
   return (
     '<label for="practiseBars"><span class="longLabel">Practise </span>bars</label>' +
     '<input type="text" id="practiseBars" placeholder="all" autocomplete="off"' +
-    ' enterkeyhint="done" title="Just these bars play, round and round: e.g. 1-2, 3-6 or 2, 5"' +
+    ' enterkeyhint="done" title="Just these bars play, round and round: e.g. 1-2, 3-6 or 2, 5;' +
+    ' in the alphabet also in an order, as many times as you like: 1 2 1 3, 1x4 2x2"' +
     ' oninput="myGrooveWriter.practiseBarsInput(event)"' +
     ' onchange="myGrooveWriter.practiseBarsChange(event)"' +
     ' onkeydown="myGrooveWriter.practiseBarsKey(event)">'

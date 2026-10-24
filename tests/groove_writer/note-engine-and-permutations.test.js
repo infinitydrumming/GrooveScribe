@@ -500,6 +500,38 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
         localStorage.removeItem('grooveScribeRepCounter');
       });
 
+      // Infinity Drumming, 2026: the bars to practise in an order of their own
+      it('plays the bars in the order the box says, each as many times as it says', () => {
+        gw.loadNewGroove(TWO_BARS + '&PermBars=2_1x3');
+        expect(document.getElementById('practiseBars').value).toBe('2 1x3');
+        expect(window.location.search).toContain('PermBars=2_1x3');
+        loadMidi(false);
+        // figure 2 once, then figure 1 three times, each over both bars: 8 bars
+        expect(noteOns(35)).toBe(8 * 4);
+        expect(noteOns(46)).toBe(4);
+        // the music writes figures 1 and 2 once each (bars 0-1, 2-3), the order over them
+        const abc = document.getElementById('ABCsource').value;
+        expect(abc).toContain('%%center Order: 2 1\u00d73\n');
+        expect(abc.match(/ostinato bar 1/g)).toHaveLength(2);
+        const musicBar = (runBar) =>
+          Math.floor(gw.myGrooveUtils.percentForSheetMusic((runBar + 0.5) / 8) * 4);
+        expect([0, 1, 2, 3, 4, 7].map(musicBar)).toEqual([2, 3, 0, 1, 0, 1]);
+
+        const box = document.getElementById('PermutationRepCounter');
+        box.checked = true;
+        gw.repCounterChange({ target: box });
+        loadMidi(false);
+        fireNote('hi-hat', 0.5 / 8);
+        expect(document.getElementById('repCounter').textContent).toBe(
+          'Bar 2 \u00b7 Rep 1 of 1 \u00b7 ostinato 1/2'
+        );
+        fireNote('hi-hat', 5.5 / 8); // figure 1's 2nd time, its 2nd bar
+        expect(document.getElementById('repCounter').textContent).toBe(
+          'Bar 1 \u00b7 Rep 2 of 3 \u00b7 ostinato 2/2'
+        );
+        localStorage.removeItem('grooveScribeRepCounter');
+      });
+
       it('counts the bars to practise by their numbers in the music', () => {
         gw.loadNewGroove(TWO_BARS + '&PermBars=3-4');
         const box = document.getElementById('PermutationRepCounter');

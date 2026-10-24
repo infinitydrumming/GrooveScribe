@@ -10,6 +10,9 @@ import {
   parseBarList,
   barListToText,
   practisedBarsABC,
+  parseBarOrder,
+  isPlainOrder,
+  barOrderToText,
 } from '../../js/permutations.js';
 
 // Permutation figures per note setting (Infinity Drumming). Each figure is one
@@ -434,5 +437,37 @@ describe('bar lists ("Practise bars")', () => {
     expect(barListToText([3, 4, 5, 6, 9])).toBe('3-6, 9');
     expect(barListToText([2, 5, 9, 10], ',')).toBe('2,5,9-10');
     expect(barListToText([])).toBe('');
+  });
+});
+
+// Infinity Drumming, 2026: the bars to practise in an order of their own
+describe('an order of bars', () => {
+  const order = (text, count = 12) =>
+    parseBarOrder(text, count).map((e) => e.bar + (e.times ? 'x' + e.times : ''));
+
+  it('reads bars in the order typed, with how many times each', () => {
+    expect(order('1 2 1 3')).toEqual(['1', '2', '1', '3']);
+    expect(order('1x4 2x2 1x4 3')).toEqual(['1x4', '2x2', '1x4', '3']);
+    expect(order('1-4x2')).toEqual(['1x2', '2x2', '3x2', '4x2']); // each of them twice
+    expect(order('1-4 1-4 7')).toEqual(['1', '2', '3', '4', '1', '2', '3', '4', '7']);
+    expect(order('6-3')).toEqual(['6', '5', '4', '3']);
+    expect(order('3 - 5 x 2, 1×4, 2*2')).toEqual(['3x2', '4x2', '5x2', '1x4', '2x2']);
+    expect(order('1x40 13 2', 12)).toEqual(['1x16', '2']); // (16 times at most; bars past the run left out)
+  });
+
+  it('knows a plain list of bars, which plays as practised bars always have', () => {
+    expect(isPlainOrder(parseBarOrder('3-6, 9', 12))).toBe(true);
+    expect(isPlainOrder(parseBarOrder('', 12))).toBe(true);
+    expect(isPlainOrder(parseBarOrder('2 1', 12))).toBe(false);
+    expect(isPlainOrder(parseBarOrder('1 1', 12))).toBe(false);
+    expect(isPlainOrder(parseBarOrder('1x2', 12))).toBe(false);
+  });
+
+  it('writes an order back tidily, three or more bars in a row as a range', () => {
+    const text = (t) => barOrderToText(parseBarOrder(t, 12));
+    expect(text('1 2 1 3')).toBe('1 2 1 3');
+    expect(text('1x4,2x2 , 1x4 3')).toBe('1x4 2x2 1x4 3');
+    expect(text('1-3x2 4x2')).toBe('1-4x2');
+    expect(text('1-4 1-4 7')).toBe('1-4 1-4 7');
   });
 });
