@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: triplets keeping the phrase, a bar's eraser, copied notes in other tabs, sections (A, B) and bar numbers, the "Practise bars" box for a groove, the permutations called the Alphabet, play each up to ×16 and the rep counter switch, fat back kick permutations, a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each bar" (large), swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: triplets keeping the phrase, a bar's eraser, copied notes in other tabs, sections (A, B) and bar numbers, the "Practise bars" box for a groove, the permutations called the Alphabet, play each up to ×16 and the rep counter switch, fat back kick permutations, a copy of a bar right after it, tom rim clicks, practise some bars of a permutation, mid tom, hi-hat foot, crash and ride lines, copy / paste buttons, row separators, tom ghost / accent marks, ride accent mark, permutation options from the figure layout, "Play each bar" (large), the alphabet's trade bars, swing / straight switch per bar, a time signature button per bar, classic note grouping in x/8 bars, the row of beats (notes beat by beat), no add-bar button at the most bars a link holds. See CHANGES.md.
 // View HTML builders (Step 4 extraction from groove_writer.js).
 //
 // Pure string builders for two chunks of the editor UI: the clickable staff
@@ -873,11 +873,59 @@ function playEachHTML(repeats, repCounter) {
   );
 }
 
+// "Trade" (Infinity Drumming, 2026): grooves or fills traded with the figures, the
+// grid's bars after the ostinato's, played so many times before (or after) each
+// bar of the run (not one of the figures' ticks: the link's Trade= has it)
+function tradeHTML(trade) {
+  var options = function (values, chosen, label) {
+    return values
+      .map(function (value) {
+        return (
+          '<option value="' +
+          value +
+          '"' +
+          (value == chosen ? ' selected' : '') +
+          '>' +
+          label(value) +
+          '</option>'
+        );
+      })
+      .join('');
+  };
+  var html =
+    '<span id="PermutationTradeOption"><label for="PermutationTradeBars">Trade</label> ' +
+    '<select id="PermutationTradeBars" onchange="myGrooveWriter.tradeChange()">' +
+    options([0, 1, 2, 3, 4], trade.bars, function (bars) {
+      if (!bars) return 'off';
+      return bars + (bars > 1 ? ' bars' : ' bar');
+    }) +
+    '</select>';
+  if (trade.bars)
+    html +=
+      ' <select id="PermutationTradeTimes" aria-label="Times through the trade bars" onchange="myGrooveWriter.tradeChange()">' +
+      options([1, 2, 3, 4, 5, 6, 7, 8], trade.times, function (times) {
+        return '\u00d7' + times;
+      }) +
+      '</select> <select id="PermutationTradeWhere" aria-label="Before or after each bar" onchange="myGrooveWriter.tradeChange()">' +
+      options(['before', 'after'], trade.after ? 'after' : 'before', function (where) {
+        return where + ' each bar';
+      }) +
+      '</select>';
+  return html + '</span>\n';
+}
+
 // `layout` is permutations.getPermutationLayout(...) for the current note
 // setting; `repeats` is the current "Play each ×" value.
 // fatBack: kick permutations leave out the kicks on the snare's backbeat
 // repCounter: the rep counter shows while it plays (a switch of this device's)
-export function buildPermutationOptionsHTML(permutationType, layout, repeats, fatBack, repCounter) {
+export function buildPermutationOptionsHTML(
+  permutationType,
+  layout,
+  repeats,
+  fatBack,
+  repCounter,
+  trade
+) {
   if (permutationType == 'none') return '';
 
   var optionTypeArray = layout.groups.map(function (group) {
@@ -931,6 +979,7 @@ export function buildPermutationOptionsHTML(permutationType, layout, repeats, fa
   var newHTML = '<span id="PermutationOptionsHeader">Alphabet Options</span>\n';
 
   newHTML += playEachHTML(repeats, repCounter);
+  newHTML += tradeHTML(trade || { bars: 0, times: 1, after: false });
   // (the bars of the run to practise: the play bar's "Practise bars" box)
 
   newHTML += '<span class="PermutationOptionWrapper">';
@@ -995,7 +1044,8 @@ export function practiseBarsHTML() {
   return (
     '<label for="practiseBars"><span class="longLabel">Practise </span>bars</label>' +
     '<input type="text" id="practiseBars" placeholder="all" autocomplete="off"' +
-    ' enterkeyhint="done" title="Just these bars play, round and round: e.g. 1-2, 3-6 or 2, 5"' +
+    ' enterkeyhint="done" title="Just these bars play, round and round: e.g. 1-2, 3-6 or 2, 5;' +
+    ' in the alphabet also in an order, as many times as you like: 1 2 1 3, 1x4 2x2"' +
     ' oninput="myGrooveWriter.practiseBarsInput(event)"' +
     ' onchange="myGrooveWriter.practiseBarsChange(event)"' +
     ' onkeydown="myGrooveWriter.practiseBarsKey(event)">'

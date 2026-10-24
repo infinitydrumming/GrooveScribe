@@ -1691,6 +1691,54 @@ body.selectingNotes #measureContainer .notes-row-container {
   cursor: pointer;
 }
 
+/* the Clear all button's choices, over it (Infinity Drumming, 2026) */
+#clearAllContextMenu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 260px;
+}
+#clearAllContextMenu li {
+  padding: 8px 12px;
+  line-height: 1.3;
+  cursor: pointer;
+}
+#clearAllContextMenu small {
+  color: #5a6b82;
+}
+
+/* "Trade": grooves or fills between the figures (Infinity Drumming, 2026) */
+#PermutationTradeOption {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 4px 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--id-navy-900);
+}
+#PermutationTradeOption select {
+  min-height: 36px;
+  padding: 4px 8px;
+  border: 2px solid var(--id-navy-900);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--id-navy-900);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+/* a trade bar in the grid: every line shows, as it plays as written */
+#measureContainer .staff-container.tradeBar {
+  border: 2px solid #e9b46a;
+  background: #fffaf2;
+}
+#measureContainer .staff-container.tradeBar::before {
+  content: 'Trade';
+  color: #b26b00;
+}
+
 /* the rep counter's switch, by "Play each bar" (Infinity Drumming, 2026) */
 #PermutationRepCounterOption {
   display: inline-flex;
@@ -1767,6 +1815,22 @@ body.selectingNotes #measureContainer .notes-row-container {
   outline: none;
   border-color: var(--id-amber);
   box-shadow: 0 0 0 2px rgba(254, 159, 19, 0.35);
+}
+/* as wide as an order typed in ("1x4 2 1x4 3"), within reason, where the
+ * browser can size a box to its text */
+@supports (field-sizing: content) {
+  #practiseBars {
+    width: auto;
+    field-sizing: content;
+    min-width: 76px;
+    max-width: 220px;
+  }
+  @media (max-width: 560px) {
+    #practiseBars {
+      min-width: 56px;
+      max-width: 150px;
+    }
+  }
 }
 /* the bars that don't play while some are practised */
 #measureContainer .staff-container.notPractised {

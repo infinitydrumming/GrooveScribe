@@ -158,10 +158,11 @@ describe('an exercise in its link', () => {
     expect(window.location.search).toContain('PermBars=3-4');
 
     const box = document.getElementById('practiseBars');
-    box.value = ' 7-8,5 ';
+    box.value = ' 5,7-8 ';
     gw.practiseBarsChange({ target: box });
     expect(box.value).toBe('5, 7-8');
     expect(numbers()).toEqual([7, 8]);
+    expect(document.getElementById('ABCsource').value).not.toContain('Order:');
 
     // emptied without Enter: the whole run comes back once typing pauses
     box.value = '';

@@ -500,6 +500,123 @@ describe('GrooveWriter playback highlighting (hilight_note)', () => {
         localStorage.removeItem('grooveScribeRepCounter');
       });
 
+      // Infinity Drumming, 2026: the bars to practise in an order of their own
+      it('plays the bars in the order the box says, each as many times as it says', () => {
+        gw.loadNewGroove(TWO_BARS + '&PermBars=2_1x3');
+        expect(document.getElementById('practiseBars').value).toBe('2 1x3');
+        expect(window.location.search).toContain('PermBars=2_1x3');
+        loadMidi(false);
+        // figure 2 once, then figure 1 three times, each over both bars: 8 bars
+        expect(noteOns(35)).toBe(8 * 4);
+        expect(noteOns(46)).toBe(4);
+        // the music writes the run out as it plays: figure 2, then figure 1 between
+        // repeat signs, ×3, the order over it
+        const abc = document.getElementById('ABCsource').value;
+        expect(abc).toContain('%%center Order: 2 1\u00d73\n');
+        expect(abc).toContain('[P:Singles   (bar 2)]');
+        expect(abc.match(/"_\u00d73"/g)).toHaveLength(1);
+        const musicBar = (runBar) =>
+          Math.floor(gw.myGrooveUtils.percentForSheetMusic((runBar + 0.5) / 8) * 4);
+        expect([0, 1, 2, 3, 4, 7].map(musicBar)).toEqual([0, 1, 2, 3, 2, 3]);
+
+        const box = document.getElementById('PermutationRepCounter');
+        box.checked = true;
+        gw.repCounterChange({ target: box });
+        loadMidi(false);
+        fireNote('hi-hat', 0.5 / 8);
+        expect(document.getElementById('repCounter').textContent).toBe(
+          'Bar 2 \u00b7 Rep 1 of 1 \u00b7 ostinato 1/2'
+        );
+        fireNote('hi-hat', 5.5 / 8); // figure 1's 2nd time, its 2nd bar
+        expect(document.getElementById('repCounter').textContent).toBe(
+          'Bar 1 \u00b7 Rep 2 of 3 \u00b7 ostinato 2/2'
+        );
+        localStorage.removeItem('grooveScribeRepCounter');
+      });
+
+      // Infinity Drumming, 2026: grooves or fills traded with the figures
+      describe('trade bars', () => {
+        // Singles over bar 1; bar 2 a trade bar (16th hi-hats, 8th kicks), twice before each
+        const TRADE =
+          '?TimeSig=4/4&Div=16&Tempo=90&Measures=2&Perm=kick_16ths&PermSet=001111100000000000000&Trade=1x2' +
+          '&H=|x-x-x-x-x-x-x-x-|xxxxxxxxxxxxxxxx|&S=|----O-------O---|----O-------O---|' +
+          '&K=|o-------o-------|o-o-o-o-o-o-o-o-|';
+
+        it('plays the trade bars as written, before each bar of the run', () => {
+          gw.loadNewGroove(TRADE);
+          expect(gw.numberOfMeasures()).toBe(2);
+          expect(window.location.search).toContain('&Trade=1x2');
+          loadMidi(false);
+          // 4 figures, each after the trade bar twice: 4 × (8 + 2 × 16) closed hi-hats
+          expect(noteOns(42)).toBe(160);
+          // the figures' kicks (one a beat) and the trade bar's 8, twice before each
+          expect(noteOns(35)).toBe(4 * 4 + 4 * 2 * 8);
+        });
+
+        it('writes the run out as it plays, so the music reads straight on', () => {
+          gw.loadNewGroove(TRADE);
+          const abc = document.getElementById('ABCsource').value;
+          // the trade bar before each figure, ×2 under its repeat sign (none from the start)
+          expect(abc.match(/\[P:Trade\]/g)).toHaveLength(4);
+          expect(abc.match(/"_\u00d72"/g)).toHaveLength(4);
+          expect(abc).toContain('[P:Singles]');
+          // each figure keeps its number; the trade bars' are left off the page
+          expect(abc).toContain('%%setbarnb 2\n');
+          expect(abc).toContain('%%setbarnb 9002\n');
+          // run bar -> bar of the music (each figure's trade bar and figure, in turn)
+          const musicBar = (runBar) =>
+            Math.floor(gw.myGrooveUtils.percentForSheetMusic((runBar + 0.5) / 12) * 8);
+          expect([0, 1, 2, 3, 5, 11].map(musicBar)).toEqual([0, 0, 1, 2, 3, 7]);
+        });
+
+        it('says it is trading on the rep counter, and the grid shows every line in it', () => {
+          gw.loadNewGroove(TRADE);
+          const box = document.getElementById('PermutationRepCounter');
+          box.checked = true;
+          gw.repCounterChange({ target: box });
+          loadMidi(false);
+          fireNote('hi-hat', 1.5 / 12);
+          expect(document.getElementById('repCounter').textContent).toBe('Trade \u00b7 2 of 2');
+          fireNote('hi-hat', 2.5 / 12);
+          expect(document.getElementById('repCounter').textContent).toBe('Bar 1 \u00b7 Rep 1 of 1');
+          localStorage.removeItem('grooveScribeRepCounter');
+          const kickLine = (bar) =>
+            document.querySelector('#staff-container' + bar + ' .kick-container').style.visibility;
+          expect(document.getElementById('staff-container2').classList).toContain('tradeBar');
+          expect([kickLine(1), kickLine(2)]).toEqual(['hidden', 'visible']);
+        });
+
+        it('Clear everything takes the trade bars and the order away', () => {
+          gw.loadNewGroove(TRADE + '&PermBars=2_1');
+          gw.clearEverything();
+          expect(gw.numberOfMeasures()).toBe(1);
+          expect(window.location.search).not.toMatch(/Trade=|PermBars=/);
+          expect(window.location.search).toContain('Perm=kick_16ths'); // (still the alphabet)
+        });
+
+        it('trades after each bar, adds and removes trade bars', () => {
+          gw.loadNewGroove(TRADE);
+          document.getElementById('PermutationTradeWhere').value = 'after';
+          gw.tradeChange();
+          expect(window.location.search).toContain('&Trade=1x2a');
+          // (each figure, then its trade bar: 8 bars of music)
+          const musicBar = (runBar) =>
+            Math.floor(gw.myGrooveUtils.percentForSheetMusic((runBar + 0.5) / 12) * 8);
+          expect([0, 1, 2, 3].map(musicBar)).toEqual([0, 1, 1, 2]);
+          gw.addMeasureButtonClick(); // another trade bar (a copy of the last)
+          expect(gw.numberOfMeasures()).toBe(3);
+          expect(window.location.search).toContain('&Trade=2x2a');
+          gw.closeMeasureButtonClick(3);
+          gw.closeMeasureButtonClick(2); // no trade bars: trading is off
+          expect(gw.numberOfMeasures()).toBe(1);
+          expect(window.location.search).not.toContain('Trade=');
+          document.getElementById('PermutationTradeBars').value = '2';
+          gw.tradeChange(); // two new ones, copies of the groove's first bar
+          expect(gw.numberOfMeasures()).toBe(3);
+          expect(window.location.search).toContain('&Trade=2x2a');
+        });
+      });
+
       it('counts the bars to practise by their numbers in the music', () => {
         gw.loadNewGroove(TWO_BARS + '&PermBars=3-4');
         const box = document.getElementById('PermutationRepCounter');

@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1181 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **130 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1191 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **131 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -199,6 +199,19 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   drawn smaller, when `bar` × that won't fit), and a groove's `spacedLines` heading centres one short line
   and keeps a last line's spacing. 100% returns the layout untouched (golden master unchanged). Alphabet
   groups break their lines every `barsPerLine` (`getPermutationSectionABC`).
+- **The alphabet's run, in order and with trade bars**: `permutationRun()` is the run as it plays, each
+  entry a written figure (`index` among the shown ones, `number`) and its `times`: the shown figures each
+  "Play each" times, or a `PermBars` order (`parseBarOrder`; `isPlainOrder` lists play as before). Trade
+  bars (`class_trade` {bars, times, after}; the grid's last bars, `get_ostinato_bars()` excludes them) play
+  `times` times before / after each entry. Bar `n` of the run is `permutationRunBar(run, n)` (entry, rep,
+  ostinatoBar, or trade / tradeTime; `gridBar` always): everything bar by bar (MIDI, the cursor, the grid
+  highlight, the rep counter, straight bars) goes through it. With trade bars or an order
+  (`writtenAsPlayed()`), the music is the run written out as it plays (`runAsPlayedABC`: each entry's trade
+  bars and figure once, `|:`/`:|` and `"_×N"` when they repeat; `asPlayedMusicBar` maps the cursor), else
+  each figure once as before. Trade bars are numbered from `UNNUMBERED_BARS` (9000), whose numbers
+  `engravedMusic` drops. A `%%setbarnb` goes to the next bar LINE abc2svg reads, so a repeat start sits on
+  the previous bar's closing line (`|:` / `:|:`), never at a bar's start (none at the music's start).
+  `showTradeBars` hides the figures' lines per bar (ostinato bars) and shows every line in trade bars.
 - **Sections & the playing order**: `playedBars()` is the order the groove's bars play: the practised
   bars, else the typed form (`Form=ABCA-ABCA`, `#sectionForm` above the bars once there are sections:
   `formOrderBars`, each letter every section with it, its repeats; `%%center Form: A B A C` over the

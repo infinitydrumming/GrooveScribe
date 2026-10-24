@@ -975,11 +975,13 @@ export function defineGlyphsOnce(svg) {
  * section's letter (a part label in a box) gets round corners and a little room,
  * and a bar number starting a line sits by the clef just over the stave, not up
  * over the first note's stem (abc2svg puts it over whatever is there).
+ * Bars numbered UNNUMBERED_BARS and on (an alphabet's trade bars) show no number.
  * @param {string} svg  abc2svg's output, one <svg> a line of music
  * @returns {string}
  */
 export function engravedMusic(svg) {
   var measureFont = /\.(f\d+_\d+) \{font:italic 14px serif\}/.exec(svg);
+  if (measureFont) svg = withoutUnnumberedBars(svg, measureFont[1]);
   return String(svg)
     .split(/(?=<svg[\s>])/)
     .map(function (line) {
@@ -1028,6 +1030,18 @@ export function engravedMusic(svg) {
 
 // a bar number this far into its line starts it (the clef's width and some)
 var LINE_START = 100;
+
+/** Bars numbered from this on in the music show no number (see engravedMusic). */
+export var UNNUMBERED_BARS = 9000;
+
+function withoutUnnumberedBars(svg, measureFont) {
+  return String(svg).replace(
+    new RegExp('<text class="' + measureFont + '" x="[\\d.]+" y="[-\\d.]+">(\\d+)</text>\\n?', 'g'),
+    function (number, bar) {
+      return Number(bar) >= UNNUMBERED_BARS ? '' : number;
+    }
+  );
+}
 
 /**
  * Infinity Drumming, 2026: whether abc2svg broke a line of the music in the
