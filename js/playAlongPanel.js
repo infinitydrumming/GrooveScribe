@@ -212,7 +212,10 @@ export function createPlayAlongPanel(deps) {
   function toEngine() {
     engine().setSong(on && song ? song.buffer : null, on && song ? setting : null);
     engine().setVolumes(volumes.song, volumes.drums);
-    engine().onStart = stopListening;
+    engine().onStart = function () {
+      stopListening();
+      animate(); // (the wave follows the song, if the pop-up is open)
+    };
   }
 
   function stopPlaying() {
@@ -392,7 +395,7 @@ export function createPlayAlongPanel(deps) {
     drawPeaks(g, overview, overviewPeaks);
     var scale = overview.width / song.duration;
     drawLine(g, overview, setting.bar1 * scale, '#c55000', 2 * ratio);
-    if (playing >= 0) drawLine(g, overview, playing * scale, '#0b76db', ratio);
+    if (playing >= 0) drawLine(g, overview, playing * scale, '#0b76db', 2 * ratio);
   }
 
   // close up on bar 1, with the song's beats at its tempo
@@ -420,7 +423,7 @@ export function createPlayAlongPanel(deps) {
     }
     drawLine(g, closeUp, CLOSE_UP_BEFORE * px, '#c55000', 3 * ratio);
     if (playing >= from && playing <= to)
-      drawLine(g, closeUp, (playing - from) * px, '#0b76db', ratio);
+      drawLine(g, closeUp, (playing - from) * px, '#0b76db', 2 * ratio);
   }
 
   function animate() {
