@@ -579,6 +579,7 @@ body,
 #metronomeAutoSpeedupConfiguration,
 #cursorTimingConfiguration,
 #musicSpacingConfiguration,
+#playAlongConfiguration,
 #graceNoteConfiguration,
 #practiceTimerConfiguration,
 #grooveClickConfiguration,
@@ -1866,4 +1867,199 @@ body.selectingNotes #measureContainer .notes-row-container {
   text-align: center;
   font-size: 15px;
   color: var(--id-text-2);
+}
+
+/* "Play along with a song" (Infinity Drumming, 2026) */
+#playAlongConfiguration {
+  width: 460px;
+  font-size: 14px;
+}
+#playAlongTitle {
+  font-size: 22px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.playAlongText,
+.playAlongNote {
+  font-size: 13px;
+  margin: 6px 0;
+}
+.playAlongNote:empty {
+  display: none;
+}
+#playAlongLinked {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--id-blue-tint);
+}
+.playAlongLabel {
+  margin: 12px 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--id-text-2);
+}
+.playAlongRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+}
+.playAlongRow button,
+#playAlongUseLink,
+#playAlongButtons button {
+  padding: 4px 10px;
+  border: 1px solid var(--id-border);
+  border-radius: 6px;
+  background: var(--id-surface-2);
+  color: var(--id-text);
+  font-size: 13px;
+  cursor: pointer;
+}
+.playAlongRow button:hover,
+#playAlongUseLink:hover,
+#playAlongButtons button:hover {
+  border-color: var(--id-blue);
+}
+#playAlongSpeeds button {
+  min-width: 46px;
+}
+.playAlongSmall {
+  font-size: 12px;
+  color: var(--id-text-2);
+}
+#playAlongHint {
+  margin: 4px 0;
+}
+.playAlongSongRow {
+  margin: 10px 0;
+}
+#playAlongSongName {
+  flex: 1 1 140px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.playAlongFile input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.playAlongFile span {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: var(--id-blue);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.playAlongFile input:focus-visible + span {
+  outline: 2px solid var(--id-amber);
+}
+#playAlongLoopFrom,
+#playAlongLoopTo {
+  width: 64px;
+  padding: 4px 6px;
+  border: 1px solid var(--id-border);
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+#playAlongLoopFit {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(254, 159, 19, 0.15);
+}
+#playAlongOverview {
+  touch-action: none; /* (a drag picks bars to loop) */
+}
+#playAlongBpm,
+#playAlongBar1 {
+  padding: 4px 6px;
+  border: 1px solid var(--id-border);
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+#playAlongOverview,
+#playAlongCloseUp {
+  display: block;
+  width: 100%;
+  margin: 6px 0 0;
+  border-radius: 6px;
+  background: var(--id-surface-2);
+  color: #7f93ab; /* the wave */
+  cursor: crosshair;
+}
+#playAlongOverview {
+  height: 34px;
+}
+#playAlongCloseUp {
+  height: 84px;
+}
+.playAlongVolume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+.playAlongVolume label {
+  width: 52px;
+  font-weight: 700;
+}
+.playAlongVolume input {
+  flex: 1;
+}
+.playAlongVolume span {
+  width: 42px;
+  text-align: right;
+}
+#playAlongButtons {
+  margin-top: 12px;
+  text-align: center;
+}
+#playAlongDone {
+  font-weight: 700;
+}
+/* the song in the play bar */
+#playAlongChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 180px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1.5px dashed var(--id-text-on-dark-3);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--id-text-on-dark-2);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+#playAlongChip.playAlongOn {
+  border-style: solid;
+  border-color: var(--id-amber);
+  color: var(--id-text-on-dark);
+}
+#playAlongChip .playAlongChipName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* phones: just the note, as the play bar is full */
+@media (max-width: 560px) {
+  #playAlongChip {
+    padding: 0 10px;
+  }
+  #playAlongChip .playAlongChipName {
+    display: none;
+  }
 }

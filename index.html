@@ -2,7 +2,7 @@
 <html unused_manifest="gscribe.manifest">
 	<!-- HTML for the Groove Writer part of the Groove Scribe HTML application -->
 	<!--Copyright 2015-2020 Lou Montulli, Mike Johnston  GPL V2.0 Please See LICENSE.txt for more details -->
-	<!--Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, music spacing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, the Count menu, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button, more metronome clicks, diddles, beat-by-beat notes, the permutations called the Alphabet, the Select button, the sections' Form box, the Clear all choices.  See CHANGES.md -->
+	<!--Modified by Infinity Drumming, 2026: tom rim clicks, mid tom, hi-hat foot, crash and ride lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, ride accents, permutation repeats, auto-scroll, logo, Infinity Scribe name, credits, speed-up target tempo, groove / click bars counted bar by bar, cursor timing, music spacing, Infinity Drumming colour theme, footer feature list, flams / drags / ruffs on every drum and the grace-note settings, a time signature per bar, Infinity Scribe icon, practice timer, speed-up every so many bars, counting button, new layout, no feature list, Notes / Click selectors on phones, the Count menu, release-versioned files and the update bar, tap a menu's button again to close it, ABC permutations button, the Articulations button, more metronome clicks, diddles, beat-by-beat notes, the permutations called the Alphabet, the Select button, the sections' Form box, the Clear all choices, playing along with a song.  See CHANGES.md -->
 
     <head>
 		<title>Infinity Scribe | Infinity Drumming</title>
@@ -31,73 +31,76 @@
 		<script type="importmap">
 		{
 			"imports": {
-				"./js/abcNotation.js": "./js/abcNotation.js?v=20261024-2304",
-				"./js/audioSession.js": "./js/audioSession.js?v=20261024-2304",
-				"./js/barMeters.js": "./js/barMeters.js?v=20261024-2304",
-				"./js/beatNotes.js": "./js/beatNotes.js?v=20261024-2304",
-				"./js/browserInfo.js": "./js/browserInfo.js?v=20261024-2304",
-				"./js/constants.js": "./js/constants.js?v=20261024-2304",
-				"./js/countModes.js": "./js/countModes.js?v=20261024-2304",
-				"./js/gridState.js": "./js/gridState.js?v=20261024-2304",
-				"./js/grooveData.js": "./js/grooveData.js?v=20261024-2304",
-				"./js/groove_utils.js": "./js/groove_utils.js?v=20261024-2304",
-				"./js/groove_writer.js": "./js/groove_writer.js?v=20261024-2304",
-				"./js/grooves.js": "./js/grooves.js?v=20261024-2304",
-				"./js/metronome.js": "./js/metronome.js?v=20261024-2304",
-				"./js/midiFile.js": "./js/midiFile.js?v=20261024-2304",
-				"./js/musicMath.js": "./js/musicMath.js?v=20261024-2304",
-				"./js/myGrooves.js": "./js/myGrooves.js?v=20261024-2304",
-				"./js/noteArrays.js": "./js/noteArrays.js?v=20261024-2304",
-				"./js/noteBlocks.js": "./js/noteBlocks.js?v=20261024-2304",
-				"./js/ornaments.js": "./js/ornaments.js?v=20261024-2304",
-				"./js/permutations.js": "./js/permutations.js?v=20261024-2304",
-				"./js/practiceSettings.js": "./js/practiceSettings.js?v=20261024-2304",
-				"./js/practiceTimer.js": "./js/practiceTimer.js?v=20261024-2304",
-				"./js/screenWakeLock.js": "./js/screenWakeLock.js?v=20261024-2304",
-				"./js/sections.js": "./js/sections.js?v=20261024-2304",
-				"./js/tempoSwitch.js": "./js/tempoSwitch.js?v=20261024-2304",
-				"./js/updateCheck.js": "./js/updateCheck.js?v=20261024-2304",
-				"./js/urlSerialization.js": "./js/urlSerialization.js?v=20261024-2304",
-				"./js/viewHtml.js": "./js/viewHtml.js?v=20261024-2304"
+				"./js/abcNotation.js": "./js/abcNotation.js?v=20261025-1407",
+				"./js/audioSession.js": "./js/audioSession.js?v=20261025-1407",
+				"./js/barMeters.js": "./js/barMeters.js?v=20261025-1407",
+				"./js/beatNotes.js": "./js/beatNotes.js?v=20261025-1407",
+				"./js/browserInfo.js": "./js/browserInfo.js?v=20261025-1407",
+				"./js/constants.js": "./js/constants.js?v=20261025-1407",
+				"./js/countModes.js": "./js/countModes.js?v=20261025-1407",
+				"./js/gridState.js": "./js/gridState.js?v=20261025-1407",
+				"./js/grooveData.js": "./js/grooveData.js?v=20261025-1407",
+				"./js/groove_utils.js": "./js/groove_utils.js?v=20261025-1407",
+				"./js/groove_writer.js": "./js/groove_writer.js?v=20261025-1407",
+				"./js/grooves.js": "./js/grooves.js?v=20261025-1407",
+				"./js/metronome.js": "./js/metronome.js?v=20261025-1407",
+				"./js/midiFile.js": "./js/midiFile.js?v=20261025-1407",
+				"./js/musicMath.js": "./js/musicMath.js?v=20261025-1407",
+				"./js/myGrooves.js": "./js/myGrooves.js?v=20261025-1407",
+				"./js/noteArrays.js": "./js/noteArrays.js?v=20261025-1407",
+				"./js/noteBlocks.js": "./js/noteBlocks.js?v=20261025-1407",
+				"./js/ornaments.js": "./js/ornaments.js?v=20261025-1407",
+				"./js/permutations.js": "./js/permutations.js?v=20261025-1407",
+				"./js/playAlong.js": "./js/playAlong.js?v=20261025-1407",
+				"./js/playAlongPanel.js": "./js/playAlongPanel.js?v=20261025-1407",
+				"./js/practiceSettings.js": "./js/practiceSettings.js?v=20261025-1407",
+				"./js/practiceTimer.js": "./js/practiceTimer.js?v=20261025-1407",
+				"./js/screenWakeLock.js": "./js/screenWakeLock.js?v=20261025-1407",
+				"./js/sections.js": "./js/sections.js?v=20261025-1407",
+				"./js/tempoSwitch.js": "./js/tempoSwitch.js?v=20261025-1407",
+				"./js/timeStretch.js": "./js/timeStretch.js?v=20261025-1407",
+				"./js/updateCheck.js": "./js/updateCheck.js?v=20261025-1407",
+				"./js/urlSerialization.js": "./js/urlSerialization.js?v=20261025-1407",
+				"./js/viewHtml.js": "./js/viewHtml.js?v=20261025-1407"
 			}
 		}
 		</script>
 
-		<link rel="stylesheet" type="text/css" href="font-awesome/4.7.0/css/font-awesome.min.css?v=20261024-2304">
-		<link rel="stylesheet" type="text/css" href="css/share-button.min.css?v=20261024-2304">
-	    <link rel="stylesheet" type="text/css" href="css/groove_writer_orange.css?v=20261024-2304">
-		<link rel="stylesheet" type="text/css" href="css/groove_display_orange.css?v=20261024-2304">
-		<link rel="stylesheet" type="text/css" href="css/infinity_theme.css?v=20261024-2304">
-		<link rel="stylesheet" type="text/css" href="css/infinity_layout.css?v=20261024-2304">
+		<link rel="stylesheet" type="text/css" href="font-awesome/4.7.0/css/font-awesome.min.css?v=20261025-1407">
+		<link rel="stylesheet" type="text/css" href="css/share-button.min.css?v=20261025-1407">
+	    <link rel="stylesheet" type="text/css" href="css/groove_writer_orange.css?v=20261025-1407">
+		<link rel="stylesheet" type="text/css" href="css/groove_display_orange.css?v=20261025-1407">
+		<link rel="stylesheet" type="text/css" href="css/infinity_theme.css?v=20261025-1407">
+		<link rel="stylesheet" type="text/css" href="css/infinity_layout.css?v=20261025-1407">
 		<link href='https://fonts.googleapis.com/css?family=Lato:400,700,300,900' rel='stylesheet' type='text/css'>
 
 		<!--   Other peoples JS libraries    -->
-		<!-- <script src="./MIDI.js/js/MIDI/MIDI.JS.min.js?v=20261024-2304" type="text/javascript"></script> -->
-		<script src="./MIDI.js/js/MIDI/AudioDetect.js?v=20261024-2304" type="text/javascript"></script>
-		<script src="./MIDI.js/js/MIDI/LoadPlugin.js?v=20261024-2304" type="text/javascript"></script>
-		<script src="./MIDI.js/js/MIDI/Plugin.js?v=20261024-2304" type="text/javascript"></script>
-		<script src="./MIDI.js/js/MIDI/Player.js?v=20261024-2304" type="text/javascript"></script>
-		<script src="./MIDI.js/inc/DOMLoader.XMLHttp.js?v=20261024-2304" type="text/javascript"></script>
-		<script src="./MIDI.js/inc/jasmid/stream.js?v=20261024-2304"></script>
-		<script src="./MIDI.js/inc/jasmid/midifile.js?v=20261024-2304"></script>
-		<script src="./MIDI.js/inc/jasmid/replayer.js?v=20261024-2304"></script>
-		<script src="./MIDI.js/inc/Base64.js?v=20261024-2304"></script>
-		<script src="./MIDI.js/inc/base64binary.js?v=20261024-2304"></script>
+		<!-- <script src="./MIDI.js/js/MIDI/MIDI.JS.min.js?v=20261025-1407" type="text/javascript"></script> -->
+		<script src="./MIDI.js/js/MIDI/AudioDetect.js?v=20261025-1407" type="text/javascript"></script>
+		<script src="./MIDI.js/js/MIDI/LoadPlugin.js?v=20261025-1407" type="text/javascript"></script>
+		<script src="./MIDI.js/js/MIDI/Plugin.js?v=20261025-1407" type="text/javascript"></script>
+		<script src="./MIDI.js/js/MIDI/Player.js?v=20261025-1407" type="text/javascript"></script>
+		<script src="./MIDI.js/inc/DOMLoader.XMLHttp.js?v=20261025-1407" type="text/javascript"></script>
+		<script src="./MIDI.js/inc/jasmid/stream.js?v=20261025-1407"></script>
+		<script src="./MIDI.js/inc/jasmid/midifile.js?v=20261025-1407"></script>
+		<script src="./MIDI.js/inc/jasmid/replayer.js?v=20261025-1407"></script>
+		<script src="./MIDI.js/inc/Base64.js?v=20261025-1407"></script>
+		<script src="./MIDI.js/inc/base64binary.js?v=20261025-1407"></script>
 
 		<!-- script to render ABC to an SVG image -->
-		<script type="text/javascript" src="./js/abc2svg-1.js?v=20261024-2304"></script>
+		<script type="text/javascript" src="./js/abc2svg-1.js?v=20261025-1407"></script>
 
 		<!-- script to convert SVG to PNGs for download -->
-		<script type="text/javascript" src="./js/pablo.min.js?v=20261024-2304"></script>
+		<script type="text/javascript" src="./js/pablo.min.js?v=20261025-1407"></script>
 
 		<!-- script for sharing to social sites -->
-		<script src="js/share-button.min.js?v=20261024-2304"></script>
+		<script src="js/share-button.min.js?v=20261025-1407"></script>
 
 
-		<!-- Minified version: <script src="./js/groove_writer.min.js?v=20261024-2304" type="text/javascript"></script> -->
+		<!-- Minified version: <script src="./js/groove_writer.min.js?v=20261025-1407" type="text/javascript"></script> -->
 
 		<!-- jsmidgen for generating a midi file -->
-		<script src="./js/jsmidgen.js?v=20261024-2304" type="text/javascript"></script>
+		<script src="./js/jsmidgen.js?v=20261025-1407" type="text/javascript"></script>
 		<!--   our custom JS is loaded as an ES module at the end of <body> (js/main.js).
 		       It creates window.myGrooveWriter, builds the dynamic DOM, and runs the
 		       page-load init. -->
@@ -312,6 +315,7 @@
 				<li class="metronomeOptionsContextMenuItem menuChecked" id="metronomeOptionsContextMenuAutoScroll" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("AutoScroll");' title="While playing, scroll the page to follow the playing bar of the music">Auto-scroll</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuCursorTiming" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("CursorTiming");' title="Line the blue playback cursor up with the sound on this device">Cursor timing</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuMusicSpacing" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("MusicSpacing");' title="How wide bars of music are drawn on this device: more or fewer on a line">Music spacing</li>
+				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuPlayAlong" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("PlayAlong");' title="Load a song from this device and play the groove along with it">Play along with a song</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuGraceNotes" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("GraceNotes");' title="How far apart and how loud the grace notes of flams, drags and ruffs are">Flams, drags &amp; ruffs</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuCountIn"   onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("CountIn");' title="One measure of metronome count in at the start" >Count it in</li>
 				<li class="metronomeOptionsContextMenuItem" id="metronomeOptionsContextMenuOffTheOne" onclick='myGrooveWriter.metronomeOptionsMenuPopupClick("OffTheOne");' title="Click on the e, &, or a">Offset click</li>
@@ -744,6 +748,62 @@
 			<div id="musicSpacingButtons"><button onclick="myGrooveWriter.musicSpacingReset();">Reset</button> <button onclick="myGrooveWriter.close_MusicSpacingConfiguration();">Done</button></div>
 		</div>
 
+		<!-- "Play along with a song" (Infinity Drumming, 2026), hidden by default -->
+		<div id="playAlongConfiguration" role="dialog" aria-labelledby="playAlongTitle">
+			<div id="playAlongTitle">Play along with a song</div>
+			<div class="playAlongText">Load a song and the groove plays along with it: the drums come in on the song's bar 1 and stay with it to the end. The song stays on this device: it's never uploaded.</div>
+			<div id="playAlongLinked" class="playAlongNote"></div>
+			<div class="playAlongRow playAlongSongRow">
+				<label class="playAlongFile"><input type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac" id="playAlongFile"><span>Choose a song&hellip;</span></label>
+				<span id="playAlongSongName">No song loaded</span>
+				<button type="button" id="playAlongRemove" style="display: none">Remove</button>
+			</div>
+			<div id="playAlongStatus" class="playAlongNote" aria-live="polite"></div>
+			<button type="button" id="playAlongUseLink" style="display: none">Use the link's tempo and bar 1 for this song</button>
+			<div id="playAlongSettings" style="display: none">
+				<div class="playAlongRow"><input type="checkbox" id="playAlongOn" checked><label for="playAlongOn">Play the song with the groove</label></div>
+				<div class="playAlongLabel">The song's tempo</div>
+				<div class="playAlongRow">
+					<input type="text" inputmode="decimal" id="playAlongBpm" size="5" aria-label="The song's tempo (beats per minute)"> bpm
+					<button type="button" id="playAlongTapTempo">Tap the beat</button>
+					<span id="playAlongTapCount" class="playAlongSmall"></span>
+				</div>
+				<div class="playAlongLabel">Speed</div>
+				<div class="playAlongRow"><span id="playAlongSpeed"></span></div>
+				<div class="playAlongRow" id="playAlongSpeeds"></div>
+				<div class="playAlongRow"><input type="checkbox" id="playAlongKeepPitch" checked><label for="playAlongKeepPitch">Keep the song's pitch when it's slower or faster</label></div>
+				<div class="playAlongLabel">Bar 1</div>
+				<div class="playAlongRow">
+					<input type="text" id="playAlongBar1" size="9" aria-label="Where bar 1 is in the song (minutes:seconds)">
+					<button type="button" id="playAlongNudgeDown" title="Bar 1 10 ms earlier">&minus;10 ms</button>
+					<button type="button" id="playAlongNudgeUp" title="Bar 1 10 ms later">+10 ms</button>
+					<button type="button" id="playAlongTapOne">Tap the 1</button>
+				</div>
+				<canvas id="playAlongOverview" aria-label="The whole song: click near bar 1"></canvas>
+				<canvas id="playAlongCloseUp" aria-label="Close up of bar 1: click on the 1"></canvas>
+				<div id="playAlongHint" class="playAlongSmall">Press Listen and tap the 1 when bar 1 comes, or click the wave on it: bar 1 moves to the hit there. The lines are the song's beats at its tempo; nudge bar 1 until they sit on its hits. While the groove plays along, nudges are heard straight away.</div>
+				<div class="playAlongLabel">Loop</div>
+				<div class="playAlongRow">
+					<input type="checkbox" id="playAlongLoop"><label for="playAlongLoop">Loop bars</label>
+					<input type="number" id="playAlongLoopFrom" min="1" value="1" inputmode="numeric" aria-label="The loop's first bar">
+					to
+					<input type="number" id="playAlongLoopTo" min="1" value="4" inputmode="numeric" aria-label="The loop's last bar">
+					<span id="playAlongLoopBars" class="playAlongSmall"></span>
+				</div>
+				<div id="playAlongLoopFit" class="playAlongNote"></div>
+				<div class="playAlongSmall">Play just some bars of the song, round and round: drag across the whole song's wave to pick them, or type them. The groove starts on the loop's first bar (with Count it in, over the bar before) and comes round with the song, so its grooves and fills land in the same places every time.</div>
+				<div class="playAlongLabel" id="playAlongStartLabel">Start from</div>
+				<div class="playAlongRow" id="playAlongStartRow">
+					<input type="radio" name="playAlongStart" id="playAlongStartBar1" value="bar1" checked><label for="playAlongStartBar1">Bar 1</label>
+					<input type="radio" name="playAlongStart" id="playAlongStartIntro" value="intro"><label for="playAlongStartIntro">The song's start (the drums come in on bar 1)</label>
+				</div>
+				<div class="playAlongVolume"><label for="playAlongSongVolume">Song</label><input type="range" min="0" max="150" step="5" value="100" id="playAlongSongVolume"><span id="playAlongSongVolumeOutput"></span></div>
+				<div class="playAlongVolume"><label for="playAlongDrumVolume">Drums</label><input type="range" min="0" max="150" step="5" value="100" id="playAlongDrumVolume"><span id="playAlongDrumVolumeOutput"></span></div>
+				<div class="playAlongSmall">This device remembers each song's settings, and the groove's link carries its name, tempo, bar 1 and loop: a student who loads the same song plays along in the same place.</div>
+			</div>
+			<div id="playAlongButtons"><button type="button" id="playAlongListen" style="display: none">Listen</button> <button type="button" id="playAlongDone">Done</button></div>
+		</div>
+
 		<!-- this is used by the metronome auto speed up option menu, and is hidden by default -->
 		<div id="metronomeAutoSpeedupConfiguration">
 			<div id="metronomeAutoSpeedupOutputText">
@@ -782,7 +842,7 @@
 
 
 		<!-- App entry point: ES module that boots the app and runs page-load init. -->
-		<script type="module" src="js/main.js?v=20261024-2304"></script>
+		<script type="module" src="js/main.js?v=20261025-1407"></script>
 
 
 	</div>

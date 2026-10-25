@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: a form of sections (ABAC), triplets keeping the phrase, a bar's eraser, copied notes in other tabs, sections (A, B) and bar numbers, 32nds beat by beat, tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes, practising some bars of a groove. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: playing along with a song, a form of sections (ABAC), triplets keeping the phrase, a bar's eraser, copied notes in other tabs, sections (A, B) and bar numbers, 32nds beat by beat, tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes, practising some bars of a groove. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -115,6 +115,7 @@ import { sectionRuns, formBars, barsOfSection, tidyForm, formOrderBars } from '.
 import * as _blocks from './noteBlocks.js';
 import * as _view from './viewHtml.js';
 import * as _grid from './gridState.js';
+import { createPlayAlongPanel } from './playAlongPanel.js';
 import {
   getFeelMarkings,
   addFeelMarking,
@@ -210,6 +211,7 @@ function GrooveWriter() {
   var class_metronome_auto_speed_up_active = false;
   var class_metronome_count_in_active = false;
   var class_metronome_count_in_is_playing = false;
+  var class_play_along = null; // the "Play along with a song" pop-up (Infinity Drumming, 2026)
   // "Groove / click bars" metronome option: play the groove for some bars, then
   // only the click for some bars, and repeat
   var class_groove_click_active = false;
@@ -1627,6 +1629,7 @@ function GrooveWriter() {
       root.updateCurrentURL();
     }, 300);
     scheduleTempoAtNextBar();
+    if (class_play_along) class_play_along.tempoChanged(); // (the song's speed)
   };
 
   // Infinity Drumming, 2026: a tempo change while playing is heard from the next
@@ -1926,6 +1929,10 @@ function GrooveWriter() {
 
       case 'MusicSpacing':
         root.show_MusicSpacingConfiguration();
+        break;
+
+      case 'PlayAlong':
+        if (class_play_along) class_play_along.open();
         break;
 
       case 'CursorTiming':
@@ -5696,6 +5703,20 @@ function GrooveWriter() {
 
     // add html for the midi player
     root.myGrooveUtils.AddMidiPlayerToPage('midiPlayer', class_time_division);
+    class_play_along = createPlayAlongPanel({
+      gu: root.myGrooveUtils,
+      meter: function () {
+        return barSigOf(0);
+      },
+      cycleBars: function () {
+        return class_groove_click_active
+          ? class_groove_click_groove_bars + class_groove_click_click_bars
+          : grooveClickSequenceLength();
+      },
+      changed: function () {
+        root.updateCurrentURL();
+      },
+    });
 
     // load the groove from the URL data if it was passed in.
     set_Default_notes(window.location.search);
@@ -5742,6 +5763,11 @@ function GrooveWriter() {
       }
       root.myGrooveUtils.loadMIDIFromURL(midiURL);
       root.updateGrooveDBSource();
+    };
+
+    // a song's bar 1 comes at the end of a count-in
+    root.myGrooveUtils.midiEventCallbacks.leadInPlaying = function () {
+      return class_metronome_count_in_is_playing;
     };
 
     root.myGrooveUtils.midiEventCallbacks.notePlaying = function (
@@ -8025,7 +8051,7 @@ function GrooveWriter() {
 
   function currentPracticeSettings() {
     var gu = root.myGrooveUtils;
-    return {
+    var settings = {
       permutation:
         class_permutation_type == 'none'
           ? null
@@ -8045,6 +8071,9 @@ function GrooveWriter() {
       mutes: currentMutes(),
       playBars: practiseBarsText(),
     };
+    var song = class_play_along && class_play_along.linkSetting();
+    if (song) settings.song = song;
+    return settings;
   }
 
   function setPermutationFromLink(perm) {
@@ -8137,6 +8166,7 @@ function GrooveWriter() {
       class_practise_bars = settings.playBars || '';
       resetGrooveClickPhase();
       showPractiseBars();
+      if (class_play_along) class_play_along.setLinkedSong(settings.song || null);
     } finally {
       class_applying_link_settings = false;
     }

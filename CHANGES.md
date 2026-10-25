@@ -11,6 +11,58 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-25 — Loop some bars of the song
+
+- Playing along, "Loop bars 17 to 24" (typed, or dragged across the song's wave,
+  snapped to bar lines) plays just those bars of the song round and round. The
+  groove starts on the loop's first bar (a count-in over the bar before) and
+  comes round with it, so its grooves and fills land in the same places every
+  time; the pop-up says how the groove's bars fit the loop. The song's place is
+  counted on as if it played straight through and comes round to the loop's
+  start at its end (`loopedPosition` in `js/playAlong.js`), so the drums stay on
+  its bars through any speed changes. The join falls on the loop's first hit
+  when there's one within 6 ms of its start (`loopSeam`). Played like a record,
+  the browser loops the song itself; keeping its pitch, the stretcher's windows
+  never reach past the loop's end or back before its start (`js/timeStretch.js`),
+  and the loop's first hit is placed exactly each time round. Saved per song and
+  in links (`SongLoop=17-24`); Listen plays the loop on its own.
+
+## 2026-10-25 — A slower song keeps its pitch
+
+- Playing along, the song keeps its pitch at any speed (the "Keep the song's
+  pitch" box, on unless switched off on the device): a phase vocoder of our own
+  (`js/timeStretch.js`): windows of about 46 ms, identity phase locking, and a
+  phase reset at each drum hit, whose window is placed so the hit lands exactly
+  on time; the windows before it leave it out, so there's no flam before it.
+  Each window's place in the song comes from the same time map as the drums, so
+  the song can't drift from them through any number of speed changes. The song
+  is stretched half a second ahead in pieces played one after another on the
+  audio clock (`js/playAlong.js` `createStretchedSongPlayer`); a speed change in
+  what's already made makes it again from there. At the song's own speed it
+  comes out untouched. Starting at bar 1, the song starts 50 ms before it, so
+  its first hit is whole.
+
+## 2026-10-25 — Playing along with a song
+
+- Options → Play along with a song: a song from the player's device (never
+  uploaded) plays with the groove, the drums coming in on its bar 1, starting
+  there or at the song's intro. The song's tempo is typed or tapped; bar 1 is
+  tapped while it plays, or clicked on its wave (it moves to the hit there), and
+  nudged 10 ms at a time, heard straight away while playing. Song and drum
+  volumes; the song's name in the play bar. This device remembers each song's
+  settings, and a link carries the song's name, tempo, bar 1 and start
+  (`Song=`, `SongBPM=`, `SongBar1=`, `SongStart=intro`, with the practice
+  settings) (`js/playAlongPanel.js`, `js/practiceSettings.js`, `index.html`).
+- While a song is loaded, a steady clock plays the rounds in place of MIDI.js's
+  player (which places its notes a chunk at a time from whenever a timer fires,
+  and wanders a few ms each round): every note goes on the audio clock from one
+  fixed start, a moment ahead of time; each round starts exactly where the one
+  before ends, Scribe hearing that a round has ended a moment early so it can
+  build the next. Every round's first bar plays its blank tick early, so every
+  bar is on the song's beat. The song speeds up and slows down with the groove's
+  tempo (a speed-up, a tempo change at the next bar line) (`js/playAlong.js`; `js/groove_utils.js` plays through it while a song is
+  on). Without a song nothing changes.
+
 ## 2026-10-24 — The alphabet written out as it plays
 
 - With trade bars or an order of its own, the alphabet's music is written out
