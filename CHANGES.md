@@ -11,6 +11,21 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-25 — A slower song keeps its pitch
+
+- Playing along, the song keeps its pitch at any speed (the "Keep the song's
+  pitch" box, on unless switched off on the device): a phase vocoder of our own
+  (`js/timeStretch.js`): windows of about 46 ms, identity phase locking, and a
+  phase reset at each drum hit, whose window is placed so the hit lands exactly
+  on time; the windows before it leave it out, so there's no flam before it.
+  Each window's place in the song comes from the same time map as the drums, so
+  the song can't drift from them through any number of speed changes. The song
+  is stretched half a second ahead in pieces played one after another on the
+  audio clock (`js/playAlong.js` `createStretchedSongPlayer`); a speed change in
+  what's already made makes it again from there. At the song's own speed it
+  comes out untouched. Starting at bar 1, the song starts 50 ms before it, so
+  its first hit is whole.
+
 ## 2026-10-25 — Playing along with a song
 
 - Options → Play along with a song: a song from the player's device (never
@@ -29,8 +44,7 @@ The original copyright notices and credits are unchanged.
   before ends, Scribe hearing that a round has ended a moment early so it can
   build the next. Every round's first bar plays its blank tick early, so every
   bar is on the song's beat. The song speeds up and slows down with the groove's
-  tempo (a speed-up, a tempo change at the next bar line), its pitch with it for
-  now (`js/playAlong.js`; `js/groove_utils.js` plays through it while a song is
+  tempo (a speed-up, a tempo change at the next bar line) (`js/playAlong.js`; `js/groove_utils.js` plays through it while a song is
   on). Without a song nothing changes.
 
 ## 2026-10-24 — The alphabet written out as it plays

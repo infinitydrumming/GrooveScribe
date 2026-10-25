@@ -20,8 +20,9 @@ import {
 } from './playAlong.js';
 import { songBpm } from './practiceSettings.js';
 
-/** Where this device keeps each song's settings. */
+/** Where this device keeps each song's settings, and whether songs keep their pitch. */
 var STORAGE_KEY = 'infinityScribePlayAlong';
+var PITCH_KEY = 'infinityScribePlayAlongPitch';
 /** The most songs remembered (the oldest go). */
 var MAX_STORED_SONGS = 40;
 /** How much of the song the close-up wave shows, before and after bar 1 (s). */
@@ -77,6 +78,24 @@ function storeSong(key, entry) {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(songs));
   } catch (err) {
     console.log('Play-along settings kept for this visit only: ' + err);
+  }
+}
+
+// whether songs keep their pitch when slower or faster (on unless switched off)
+function storedKeepPitch() {
+  try {
+    return window.localStorage.getItem(PITCH_KEY) != 'off';
+  } catch (err) {
+    console.log('Play-along pitch setting could not be read: ' + err);
+    return true;
+  }
+}
+
+function storeKeepPitch(on) {
+  try {
+    window.localStorage.setItem(PITCH_KEY, on ? 'on' : 'off');
+  } catch (err) {
+    console.log('Play-along pitch setting kept for this visit only: ' + err);
   }
 }
 
@@ -140,6 +159,7 @@ export function createPlayAlongPanel(deps) {
   /** @type {SongSetting|null} */
   var linked = null; // a link's song, until it is loaded
   var on = true;
+  var keepPitch = storedKeepPitch();
   var volumes = { song: 1, drums: 1 };
   var taps = [];
   var preview = null; // Listen: {player, output}
@@ -212,6 +232,7 @@ export function createPlayAlongPanel(deps) {
   function toEngine() {
     engine().setSong(on && song ? song.buffer : null, on && song ? setting : null);
     engine().setVolumes(volumes.song, volumes.drums);
+    engine().setKeepPitch(keepPitch);
     engine().onStart = function () {
       stopListening();
       animate(); // (the wave follows the song, if the pop-up is open)
@@ -452,7 +473,7 @@ export function createPlayAlongPanel(deps) {
         ' bpm: ' +
         Math.round((tempo / setting.bpm) * 100) +
         '% of the song' +
-        (Math.abs(tempo - setting.bpm) > setting.bpm * 0.02
+        (!keepPitch && Math.abs(tempo - setting.bpm) > setting.bpm * 0.02
           ? ' (its pitch changes with its speed)'
           : '')
     );
@@ -486,6 +507,8 @@ export function createPlayAlongPanel(deps) {
   function refreshSettings() {
     var onBox = input('playAlongOn');
     if (onBox) onBox.checked = on;
+    var pitchBox = input('playAlongKeepPitch');
+    if (pitchBox) pitchBox.checked = keepPitch;
     var bpm = input('playAlongBpm');
     if (bpm && document.activeElement !== bpm) bpm.value = String(setting.bpm);
     var bar1 = input('playAlongBar1');
@@ -548,6 +571,13 @@ export function createPlayAlongPanel(deps) {
       on = event.target.checked;
       toEngine();
       refreshChip();
+    });
+    on_('playAlongKeepPitch', 'change', function (event) {
+      stopPlaying();
+      keepPitch = event.target.checked;
+      storeKeepPitch(keepPitch);
+      engine().setKeepPitch(keepPitch);
+      refreshSpeed();
     });
     on_('playAlongBpm', 'change', function (event) {
       var bpm = songBpm(event.target.value);
@@ -638,6 +668,8 @@ export function createPlayAlongPanel(deps) {
       }
       refresh();
     },
+    /** The groove's tempo changed: the song's speed with it. */
+    tempoChanged: refreshSpeed,
     /** The song for the groove's link: the one loaded, or the link's still to load. */
     linkSetting: function () {
       if (song && setting) return Object.assign({}, setting);

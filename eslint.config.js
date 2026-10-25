@@ -99,6 +99,7 @@ export default [
       'js/tempoSwitch.js',
       'js/playAlong.js',
       'js/playAlongPanel.js',
+      'js/timeStretch.js',
       'js/noteBlocks.js',
       'js/sections.js',
       'js/musicMath.js',

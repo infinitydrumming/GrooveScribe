@@ -18,7 +18,10 @@
 //
 // The song's speed follows the groove's tempo (the groove's tempo / the song's),
 // so a slower tempo slows the song down, and a speed-up or a tempo change speeds
-// it up at the same bar line as the drums.
+// it up at the same bar line as the drums. Its pitch stays as it is (a phase
+// vocoder, timeStretch.js), or goes down and up with its speed, like a record.
+
+import { createStretcher, findHits, windowSize } from './timeStretch.js';
 
 /** How far ahead notes go on the audio clock (s). */
 var LOOKAHEAD = 0.35;
@@ -26,8 +29,15 @@ var LOOKAHEAD = 0.35;
 var HANDOVER = 0.25;
 /** How often the clock looks ahead (ms). */
 var TICK_MS = 25;
-/** From pressing play to the first sound (s): time to place the first notes. */
+/** From pressing play to the first sound (s): time to place the first notes
+ * (and to start stretching the song). */
 var START_DELAY = 0.15;
+var STRETCHED_START_DELAY = 0.25;
+/** How far ahead the stretched song is made (s), in pieces of so many frames. */
+var STRETCH_AHEAD = 0.5;
+var PIECE = 4096;
+/** A piece starting this soon can't be made again (s). */
+var PIECE_DUE = 0.03;
 /** No note goes on the clock closer to now than this (s). */
 var MARGIN = 0.005;
 /** A note this late is left out (s): a missed note, rather than a flam. */
@@ -39,6 +49,8 @@ var FADE_IN = 0.005;
 var FADE_OUT = 0.05;
 var END_FADE = 1.5;
 
+/** Starting at bar 1, the song starts this much before it (s), so its first hit is whole. */
+var RUN_UP = 0.05;
 /** Taps further apart than this start a new tempo (s). */
 export var TAP_RESET = 2;
 /** How far a tapped or clicked bar 1 moves to the hit near it (s). */
@@ -64,7 +76,8 @@ export function tapTempo(taps) {
  * When everything starts, from the moment the song's bar 1 plays (s).
  * `rate`: the song's speed (the groove's tempo / the song's); `leadIn`: how
  * long the drums play before bar 1 (a count-in), s. Returns when the song
- * starts and from where in it (s), and when the drums start.
+ * starts and from where in it (s; a moment before the drums, from bar 1), and
+ * when the drums start.
  * @param {SongSetting} song
  * @param {number} rate
  * @param {number} leadIn
@@ -72,7 +85,7 @@ export function tapTempo(taps) {
  */
 export function playAlongStart(song, rate, leadIn) {
   var drumsAt = leadIn ? -leadIn : 0;
-  var songFrom = song.start == 'intro' ? 0 : Math.max(0, song.bar1 + drumsAt * rate);
+  var songFrom = song.start == 'intro' ? 0 : Math.max(0, song.bar1 + drumsAt * rate - RUN_UP);
   return { songAt: (songFrom - song.bar1) / rate, songFrom: songFrom, drumsAt: drumsAt };
 }
 
@@ -239,6 +252,143 @@ export function createSongPlayer(ctx, buffer, output) {
   };
 }
 
+/**
+ * The same, keeping the song's pitch at any speed: it is stretched a moment
+ * ahead (timeStretch.js) and played in short pieces, one straight after
+ * another on the audio clock. A speed change in the part already made makes
+ * it again from there. `hits`: the song's hits (findHits), kept sharp.
+ * @param {any} ctx
+ * @param {any} buffer
+ * @param {any} output
+ * @param {number[]} hits
+ */
+function createStretchedSongPlayer(ctx, buffer, output, hits) {
+  var rate = buffer.sampleRate;
+  var size = windowSize(rate);
+  var channels = [];
+  for (var c = 0; c < Math.min(2, buffer.numberOfChannels); c++)
+    channels.push(buffer.getChannelData(c));
+  /** @type {Array<{at: number, from: number, rate: number}>} */
+  var changes = [];
+  var start = 0; // when output frame 0 plays (s)
+  var stretcher = null;
+  var gain = null;
+  var pieces = []; // [{from (frame), source, saved (the stretcher before it)}]
+  var made = 0; // frames made so far
+
+  function positionAt(time) {
+    return songPositionAt(changes, time);
+  }
+
+  function frameTime(frame) {
+    return start + frame / rate;
+  }
+
+  // the song stretched up to `now` + STRETCH_AHEAD, each piece on the clock
+  function makeMore(now) {
+    while (stretcher && frameTime(made) < now + STRETCH_AHEAD) {
+      if (positionAt(frameTime(made)) > buffer.duration + size / rate) return; // (the song's end)
+      var saved = stretcher.snapshot();
+      var data = stretcher.render(PIECE);
+      var audio = ctx.createBuffer(data.length, PIECE, rate);
+      data.forEach(function (samples, channel) {
+        audio.getChannelData(channel).set(samples);
+      });
+      var source = ctx.createBufferSource();
+      source.buffer = audio;
+      source.connect(gain);
+      var at = frameTime(made);
+      if (at >= now) source.start(at);
+      else source.start(now, Math.min(now - at, audio.duration)); // (late: in step all the same)
+      pieces.push({ from: made, source: source, saved: saved });
+      made += PIECE;
+    }
+    while (pieces.length > 1 && frameTime(pieces[1].from) < now - 1) pieces.shift();
+  }
+
+  function dropPiece(piece) {
+    try {
+      piece.source.stop(0);
+      piece.source.disconnect(0);
+    } catch (err) {
+      console.log('A piece of the song had already gone: ' + err);
+    }
+  }
+
+  // the song's speed changes from `at` on: what's made from there is made again
+  function remakeFrom(at) {
+    if (!stretcher) return;
+    var now = ctx.currentTime;
+    var frame = (at - start) * rate;
+    // (a piece's stretcher has looked half a window past its start)
+    var k = 0;
+    while (k + 1 < pieces.length && pieces[k + 1].from <= frame - size / 2) k++;
+    while (k < pieces.length && frameTime(pieces[k].from) < now + PIECE_DUE) k++;
+    if (k >= pieces.length) return;
+    stretcher.restore(pieces[k].saved);
+    made = pieces[k].from;
+    pieces.splice(k).forEach(dropPiece);
+    makeMore(now);
+  }
+
+  return {
+    duration: buffer.duration,
+    positionAt: positionAt,
+    play: function (at, from, speed) {
+      var offset = from;
+      if (from < 0) {
+        at -= from / speed; // (it waits for its start)
+        offset = 0;
+      }
+      start = Math.ceil(at * rate) / rate; // (on a frame: the pieces join exactly)
+      changes = [{ at: start, from: offset, rate: speed }];
+      gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(1, start + FADE_IN);
+      gain.connect(output);
+      stretcher = createStretcher(
+        channels,
+        hits,
+        function (n) {
+          return positionAt(frameTime(n)) * rate;
+        },
+        0,
+        rate
+      );
+      pieces = [];
+      made = 0;
+      makeMore(ctx.currentTime);
+    },
+    setRate: function (at, speed) {
+      if (!stretcher || speed == changes[changes.length - 1].rate) return;
+      changes.push({ at: at, from: positionAt(at), rate: speed });
+      remakeFrom(at);
+    },
+    cancelRatesFrom: function (at) {
+      changes = changes.filter(function (change, i) {
+        return i == 0 || change.at < at;
+      });
+      remakeFrom(at);
+    },
+    stop: function (at, fade) {
+      if (!gain) return;
+      gain.gain.cancelScheduledValues(at);
+      gain.gain.setValueAtTime(gain.gain.value, at);
+      gain.gain.linearRampToValueAtTime(0, at + fade);
+      pieces.forEach(function (piece) {
+        if (frameTime(piece.from) >= at + fade) dropPiece(piece);
+        else piece.source.stop(at + fade);
+      });
+      pieces = [];
+      stretcher = null;
+    },
+    // (the clock's tick: more of the song, ahead of time)
+    tick: function (now) {
+      makeMore(now);
+    },
+  };
+}
+
 // --- The steady clock -----------------------------------------------------------
 
 // A round's notes as MIDI.js counts them: ms from the start, which starts at 0.5
@@ -301,6 +451,16 @@ function noteTime(round, note) {
   return round.start + (note.now - 0.5 - note.early) / 1000;
 }
 
+// one channel to find the hits in (the channels mixed)
+function monoOf(buffer) {
+  if (buffer.numberOfChannels < 2) return buffer.getChannelData(0);
+  var left = buffer.getChannelData(0);
+  var right = buffer.getChannelData(1);
+  var mono = new Float32Array(left.length);
+  for (var i = 0; i < mono.length; i++) mono[i] = (left[i] + right[i]) / 2;
+  return mono;
+}
+
 // how far from a bar line a note can be and still be on it: the MIDI's whole
 // ticks round the bar lines a little (as in tempoSwitch.js)
 function onTheLine(barMs) {
@@ -338,6 +498,18 @@ export function createPlayAlong(env) {
 
   function clock() {
     return env.ctx().currentTime;
+  }
+
+  // a player for the song: keeping its pitch, or like a record
+  function newPlayer() {
+    var ctx = env.ctx();
+    if (!song.keepPitch) return createSongPlayer(ctx, song.buffer, song.output);
+    if (!song.hits) song.hits = findHits(monoOf(song.buffer), song.buffer.sampleRate);
+    return createStretchedSongPlayer(ctx, song.buffer, song.output, song.hits);
+  }
+
+  function startDelay() {
+    return song.keepPitch ? STRETCHED_START_DELAY : START_DELAY;
   }
   function rateFor(bpm) {
     return bpm / song.setting.bpm;
@@ -487,6 +659,7 @@ export function createPlayAlong(env) {
     }
     while (rounds.length > 1 && rounds[0].ended && rounds[0].start + rounds[0].length < now - 1)
       rounds.shift();
+    if (player && player.tick) player.tick(now);
     if (player && player.positionAt(now) >= player.duration) env.songEnded();
   }
 
@@ -534,13 +707,13 @@ export function createPlayAlong(env) {
     // as its last tick does
     if (env.leadsIn()) first.length -= first.lead / 1000;
     var plan = playAlongStart(song.setting, rate, env.leadsIn() ? first.length : 0);
-    var bar1At = now + START_DELAY - Math.min(plan.songAt, plan.drumsAt);
+    var bar1At = now + startDelay() - Math.min(plan.songAt, plan.drumsAt);
     first.start = bar1At + plan.drumsAt;
     rounds = [first];
     engine.playing = true;
     paused = null;
     setDrumVolume(song.drums);
-    player = createSongPlayer(env.ctx(), song.buffer, song.output);
+    player = newPlayer();
     player.play(bar1At + plan.songAt, plan.songFrom, rate);
     placeNotes(first, now);
     startTicking();
@@ -551,12 +724,12 @@ export function createPlayAlong(env) {
       engine.start();
       return;
     }
-    var at = clock() + START_DELAY;
+    var at = clock() + startDelay();
     var shift = at - paused.at;
     rounds.forEach(function (round) {
       round.start += shift;
     });
-    player = createSongPlayer(env.ctx(), song.buffer, song.output);
+    player = newPlayer();
     var position = paused.position;
     player.play(
       position < 0 ? at - position / paused.rate : at,
@@ -724,7 +897,19 @@ export function createPlayAlong(env) {
     var ctx = env.ctx();
     var output = ctx.createGain();
     output.connect(ctx.destination);
-    song = { buffer: buffer, setting: setting, output: output, drums: 1 };
+    song = {
+      buffer: buffer,
+      setting: setting,
+      output: output,
+      drums: 1,
+      keepPitch: true,
+      hits: null,
+    };
+  };
+
+  /** Whether the song keeps its pitch when it's slower or faster (from the next play). */
+  engine.setKeepPitch = function (on) {
+    if (song) song.keepPitch = !!on;
   };
 
   /** The song's settings changed (its tempo, bar 1, start). */

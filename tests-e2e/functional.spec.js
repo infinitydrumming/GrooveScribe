@@ -558,8 +558,8 @@ function kickSong(bpm, bar1, seconds) {
     for (let j = 0; j < rate * 0.15 && start + j < samples.length; j++)
       samples[start + j] +=
         (k % 4 ? 0.5 : 0.9) *
-        Math.exp(-j / (0.03 * rate)) *
-        Math.sin((2 * Math.PI * 60 * j) / rate);
+        (Math.exp(-j / (0.03 * rate)) * Math.sin((2 * Math.PI * 60 * j) / rate) +
+          0.5 * Math.exp(-j / (0.002 * rate)) * Math.sin((2 * Math.PI * 1500 * j) / rate)); // (the beater's click)
   }
   const wav = Buffer.alloc(44 + samples.length * 2);
   wav.write('RIFF', 0);
@@ -581,7 +581,7 @@ function kickSong(bpm, bar1, seconds) {
 }
 
 test.describe('play along with a song', () => {
-  test("the drums come in on the song's bar 1 and stay on its beats; the link carries the song", async ({
+  test("the drums come in on the song's bar 1 and stay on its beats, slowed down too; the link carries the song", async ({
     page,
   }) => {
     await loadGroove(
@@ -610,32 +610,64 @@ test.describe('play along with a song', () => {
 
     await page.evaluate(() => {
       window.__kicks = [];
-      window.__song = null;
+      window.__pieces = [];
       const midi = window.MIDI;
       const noteOn = midi.noteOn;
       midi.noteOn = function (channel, note, velocity, at) {
         if (note == 35) window.__kicks.push(at);
         return noteOn.apply(this, arguments);
       };
+      // the song comes in short pieces, stretched to keep its pitch
       const start = AudioBufferSourceNode.prototype.start;
       AudioBufferSourceNode.prototype.start = function (when, offset) {
-        if (this.buffer && this.buffer.duration > 10) window.__song = { when, offset };
+        if (this.buffer && this.buffer.length == 4096) {
+          const piece = {
+            when,
+            offset: offset || 0,
+            data: this.buffer.getChannelData(0),
+            stopped: null,
+          };
+          window.__pieces.push(piece);
+          const stop = this.stop.bind(this);
+          this.stop = (at) => {
+            piece.stopped = at;
+            return stop(at);
+          };
+        }
         return start.apply(this, arguments);
       };
+      window.myGrooveWriter.myGrooveUtils.setTempo(80); // (the song at 80%)
     });
+    await expect(page.locator('#playAlongSpeed')).toContainText('80%');
     await page.click('#playAlongDone');
     await page.click('[id^="midiPlayImage"]');
-    await page.waitForTimeout(3500); // more than a round
-    const played = await page.evaluate(() => {
+    await page.waitForTimeout(4000); // more than a round
+    const errors = await page.evaluate(async () => {
       window.myGrooveWriter.myGrooveUtils.stopMIDI_playback();
-      return { kicks: window.__kicks, song: window.__song };
+      // the song as it was heard: each piece at its time (not those made again)
+      const rate = window.MIDI.Player.ctx.sampleRate;
+      const pieces = window.__pieces.filter((p) => !(p.stopped !== null && p.stopped <= p.when));
+      const from = pieces[0].when;
+      const heard = new Float32Array(
+        Math.ceil((pieces[pieces.length - 1].when - from) * rate) + 4096
+      );
+      pieces.forEach((p) => {
+        const at = Math.round((p.when - from) * rate) - Math.round(p.offset * rate);
+        for (let i = Math.round(p.offset * rate); i < 4096; i++) heard[at + i] += p.data[i];
+      });
+      const { findHits } = await import('/js/timeStretch.js');
+      const hits = findHits(heard, rate).map((h) => from + h / rate);
+      return window.__kicks
+        .filter((at) => at < from + heard.length / rate - 0.3)
+        .map(
+          (at) =>
+            hits.reduce((best, h) => (Math.abs(h - at) < Math.abs(best - at) ? h : best), -1) - at
+        );
     });
-    expect(played.song.offset).toBeCloseTo(bar1, 2); // the song starts on bar 1...
-    expect(played.kicks.length).toBeGreaterThan(5);
-    played.kicks.forEach((at, k) => {
-      // ...and every kick is on its beat, to well under a ms
-      const position = played.song.offset + (at - played.song.when);
-      expect(Math.abs(position - (bar1 + k * 0.6))).toBeLessThan(0.0005);
-    });
+    // every kick has the song's hit with it: the same distance from each (bar 1 as
+    // found, a ms or so from the first kick), to well under a ms
+    expect(errors.length).toBeGreaterThan(3);
+    expect(Math.abs(errors[0])).toBeLessThan(0.004);
+    errors.forEach((error) => expect(Math.abs(error - errors[0])).toBeLessThan(0.0005));
   });
 });

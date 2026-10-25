@@ -1629,6 +1629,7 @@ function GrooveWriter() {
       root.updateCurrentURL();
     }, 300);
     scheduleTempoAtNextBar();
+    if (class_play_along) class_play_along.tempoChanged(); // (the song's speed)
   };
 
   // Infinity Drumming, 2026: a tempo change while playing is heard from the next

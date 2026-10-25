@@ -10,6 +10,7 @@ import {
   createPlayAlong,
 } from '../js/playAlong.js';
 import { firstHit, songKey } from '../js/playAlongPanel.js';
+import { findHits } from '../js/timeStretch.js';
 import {
   practiceSettingsToUrl,
   practiceSettingsFromUrl,
@@ -30,18 +31,16 @@ describe('the sums', () => {
     expect(tapTempo([1, 1.61])).toBeCloseTo(98.4, 9); // (one decimal)
   });
 
-  it('starts the song and the drums together on bar 1', () => {
-    expect(playAlongStart({ bar1: 3.5, start: 'bar1' }, 1, 0)).toEqual({
-      songAt: 0,
-      songFrom: 3.5,
-      drumsAt: 0,
-    });
+  it('starts the song and the drums together on bar 1 (the song a moment before)', () => {
+    const plain = playAlongStart({ bar1: 3.5, start: 'bar1' }, 1, 0);
+    expect(plain.songFrom).toBeCloseTo(3.45, 9);
+    expect(plain.songAt).toBeCloseTo(-0.05, 9);
+    expect(plain.drumsAt).toBe(0);
     // a count-in: the song starts with it, a bar before bar 1
-    expect(playAlongStart({ bar1: 3.5, start: 'bar1' }, 1, 2.4)).toEqual({
-      songAt: -2.4,
-      songFrom: 1.1,
-      drumsAt: -2.4,
-    });
+    const countIn = playAlongStart({ bar1: 3.5, start: 'bar1' }, 1, 2.4);
+    expect(countIn.songFrom).toBeCloseTo(1.05, 9);
+    expect(countIn.songAt).toBeCloseTo(-2.45, 9);
+    expect(countIn.drumsAt).toBeCloseTo(-2.4, 9);
     // ... or from its start, when bar 1 comes sooner than that
     const early = playAlongStart({ bar1: 1.2, start: 'bar1' }, 1, 2.4);
     expect(early.songFrom).toBe(0);
@@ -187,7 +186,9 @@ function fakeAudio() {
     get currentTime() {
       return Date.now() / 1000;
     },
+    sampleRate: 8000,
     destination: {},
+    createBuffer: (channels, length, rate) => fakeBuffer(channels, length, rate),
     createGain: () => ({ gain: param(1), connect() {} }),
     createBufferSource() {
       const source = {
@@ -199,11 +200,38 @@ function fakeAudio() {
         stop(t) {
           source.stopped = t;
         },
+        disconnect() {},
       };
       return source;
     },
   };
   return { ctx, started };
+}
+
+function fakeBuffer(channels, length, rate) {
+  const data = [];
+  for (let c = 0; c < channels; c++) data.push(new Float32Array(length));
+  return {
+    length,
+    sampleRate: rate,
+    duration: length / rate,
+    numberOfChannels: channels,
+    getChannelData: (c) => data[c],
+  };
+}
+
+// a song of clicks on its beats at `bpm` from bar 1 at `bar1` (s), over a hum
+function clickSong(seconds, bpm, bar1, rate = 8000) {
+  const song = fakeBuffer(1, seconds * rate, rate);
+  const samples = song.getChannelData(0);
+  for (let i = 0; i < samples.length; i++)
+    samples[i] = 0.05 * Math.sin((2 * Math.PI * 110 * i) / rate);
+  for (let t = bar1; t < seconds - 0.2; t += 60 / bpm) {
+    const start = Math.round(t * rate);
+    for (let j = 0; j < 400; j++)
+      samples[start + j] += 0.8 * Math.exp(-j / 60) * Math.sin((2 * Math.PI * 80 * j) / rate);
+  }
+  return song;
 }
 
 function fakeMidi() {
@@ -248,6 +276,7 @@ describe('the steady clock', () => {
       songEnded: vi.fn(),
     });
     engine.setSong({ duration: 200 }, { name: 'Song.mp3', bpm: 100, bar1: 10, start: 'bar1' });
+    engine.setKeepPitch(false); // (like a record: one source, its speed in playbackRate)
     engine.loop(true);
   });
 
@@ -259,12 +288,14 @@ describe('the steady clock', () => {
   const kicks = () =>
     midi.played.filter((n) => n.note == 35 && !n.stop.mock.calls.length).map((n) => n.at);
   const songStart = () => audio.started[audio.started.length - 1];
+  // when the song reaches bar 1 (at 10 s, at its own speed): the drums' first beat
+  const bar1At = (song) => song.when + (10 - song.offset);
 
   it('starts the song and the first bar together, every kick on the song’s beat', () => {
     engine.start();
     expect(engine.playing).toBe(true);
     const song = songStart();
-    expect(song.offset).toBe(10); // from bar 1
+    expect(song.offset).toBeCloseTo(9.95, 9); // from just before bar 1
     vi.advanceTimersByTime(10000); // four rounds and a bit
     const beats = kicks().map((at) => song.offset + (at - song.when) - 10);
     beats.forEach((beat, k) => expect(beat).toBeCloseTo(k * 0.6, 9));
@@ -281,7 +312,7 @@ describe('the steady clock', () => {
     const kicksTold = told.filter((d) => d.message == 144 && d.note == 35);
     expect(kicksTold.map((d) => Math.round(d.now))).toEqual([5, 605, 1205, 1805]);
     // (which is before the round has ended on the clock)
-    expect(Date.now() / 1000).toBeLessThan(song.when + 2.4);
+    expect(Date.now() / 1000).toBeLessThan(bar1At(song) + 2.4);
   });
 
   it('starts the round Scribe builds exactly where the last one ends', () => {
@@ -300,7 +331,7 @@ describe('the steady clock', () => {
     vi.advanceTimersByTime(7000);
     expect(built).toBe(true);
     expect(engine.playing).toBe(true);
-    const beats = kicks().map((at) => at - song.when);
+    const beats = kicks().map((at) => at - bar1At(song));
     beats.forEach((beat, k) => expect(beat).toBeCloseTo(k * 0.6, 9));
     expect(beats.length).toBeGreaterThan(9);
   });
@@ -313,7 +344,7 @@ describe('the steady clock', () => {
     };
     vi.advanceTimersByTime(3000);
     expect(engine.playing).toBe(false);
-    expect(song.source.stopped).toBeCloseTo(song.when + 2.4 + 1.5, 9);
+    expect(song.source.stopped).toBeCloseTo(bar1At(song) + 2.4 + 1.5, 9);
     expect(kicks()).toHaveLength(4); // (none after)
   });
 
@@ -324,7 +355,7 @@ describe('the steady clock', () => {
     loaded = { data: countIn, bpm: 100 };
     engine.start();
     const song = songStart();
-    expect(song.offset).toBeCloseTo(10 - 2.4, 9); // the song starts with the count-in
+    expect(song.offset).toBeCloseTo(10 - 2.4 - 0.05, 9); // the song starts with the count-in
     onTell = (data) => {
       if (data.now == data.end && leadsIn) {
         leadsIn = false;
@@ -387,14 +418,14 @@ describe('the steady clock', () => {
     ).toBe(true);
     const rate = song.source.playbackRate.changes;
     expect(rate).toHaveLength(1);
-    expect(rate[0][0]).toBeCloseTo(song.when + 2.4, 9);
+    expect(rate[0][0]).toBeCloseTo(bar1At(song) + 2.4, 9);
     expect(rate[0][1]).toBeCloseTo(1.25, 9);
     vi.advanceTimersByTime(1600);
     expect(switched).toHaveBeenCalledWith(1);
     vi.advanceTimersByTime(3000);
-    const line = song.when + 2.4;
+    const line = bar1At(song) + 2.4;
     kicks().forEach((at) => {
-      const position = at <= line ? at - song.when : 2.4 + (at - line) * 1.25;
+      const position = at <= line ? at - bar1At(song) : 2.4 + (at - line) * 1.25;
       expect(position / 0.6 - Math.round(position / 0.6)).toBeCloseTo(0, 6);
     });
   });
@@ -405,12 +436,51 @@ describe('the steady clock', () => {
     vi.advanceTimersByTime(1000);
     engine.moveBar1(0.01);
     vi.advanceTimersByTime(3000);
-    const later = kicks().filter((at) => at > song.when + 1.1);
+    const later = kicks().filter((at) => at > bar1At(song) + 1.1);
     later.forEach((at) => {
-      const beat = at - song.when - 0.01;
+      const beat = at - bar1At(song) - 0.01;
       expect(beat / 0.6 - Math.round(beat / 0.6)).toBeCloseTo(0, 6);
     });
     expect(later.length).toBeGreaterThan(3);
+  });
+
+  it('keeps the song’s pitch: stretched in pieces, one straight after another, its hits on the kicks', () => {
+    // a song at 125 bpm, played at 100 (80%): its hits come every 0.6 s, as the kicks do
+    engine.setSong(clickSong(20, 125, 2), { name: 'Song.mp3', bpm: 125, bar1: 2, start: 'bar1' });
+    engine.setKeepPitch(true);
+    loaded = { data: kickRound(4), bpm: 100 };
+    engine.start();
+    vi.advanceTimersByTime(1000);
+    // ... and from the second bar line at 125, the song back at its own speed
+    const faster = kickRound(4).map(([e, ms]) => [e, ms * 0.8]);
+    expect(
+      engine.switchTempoAtNextBar(faster, 125, [2400, 2400, 2400, 2400], [1920, 1920, 1920, 1920])
+    ).toBe(true);
+    vi.advanceTimersByTime(5000);
+    engine.pause();
+    const pieces = audio.started.filter(
+      (p) =>
+        p.source.buffer &&
+        p.source.buffer.length == 4096 &&
+        (p.source.stopped === undefined || p.source.stopped > p.when) // (not dropped to be made again)
+    );
+    pieces.forEach((piece, i) => {
+      if (i) expect(piece.when).toBeCloseTo(pieces[i - 1].when + 4096 / 8000, 9); // (no gaps)
+    });
+    // the song as it was heard, and its hits
+    const start = pieces[0].when;
+    const heard = new Float32Array(pieces.length * 4096);
+    pieces.forEach((piece, i) => heard.set(piece.source.buffer.getChannelData(0), i * 4096));
+    const hits = findHits(heard, 8000).map((h) => start + h / 8000);
+    const sounded = kicks().filter((at) => at < start + heard.length / 8000 - 0.3);
+    expect(sounded.length).toBeGreaterThan(8);
+    sounded.forEach((at) => {
+      const nearest = hits.reduce(
+        (best, h) => (Math.abs(h - at) < Math.abs(best - at) ? h : best),
+        -1
+      );
+      expect(Math.abs(nearest - at)).toBeLessThan(0.001);
+    });
   });
 
   it('is off without a song, and puts the drums’ volume back', () => {
