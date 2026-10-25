@@ -13,7 +13,9 @@
 // Where in the song each window comes from is asked of the caller for each
 // output frame (positionOfFrame), so the stretched song is exactly where the
 // time map says at every moment, through any number of speed changes: the drums
-// can't drift from it.
+// can't drift from it. Looping a part of the song, the map comes round to the
+// loop's start at its end; no window then reaches past the end, or back before
+// the start, so nothing from outside the loop is heard at the join.
 
 /**
  * Samples in a window (about 46 ms; a new one every quarter of that on the
@@ -141,6 +143,18 @@ function attackIn(samples, start, block) {
   return start;
 }
 
+// the first of the (sorted) hits at or after `sample`
+function firstHitFrom(hits, sample) {
+  var low = 0;
+  var high = hits.length;
+  while (low < high) {
+    var middle = (low + high) >> 1;
+    if (hits[middle] < sample) low = middle + 1;
+    else high = middle;
+  }
+  return low;
+}
+
 /**
  * A stretcher for a song's channels (1 or 2), from output frame `firstFrame`
  * on. `positionOfFrame(n)`: where in the song (in samples, fractions allowed,
@@ -150,8 +164,10 @@ function attackIn(samples, start, block) {
  * @param {(frame: number) => number} positionOfFrame
  * @param {number} firstFrame
  * @param {number} [sampleRate]  (44100 if not given)
+ * @param {{start: number, end: number}|null} [loop]  a part of the song played round
+ *   and round (samples): positionOfFrame comes back to `start` at `end`
  */
-export function createStretcher(channels, hits, positionOfFrame, firstFrame, sampleRate) {
+export function createStretcher(channels, hits, positionOfFrame, firstFrame, sampleRate, loop) {
   var WINDOW = windowSize(sampleRate || 44100);
   var HOP = WINDOW / 4;
   var BINS = WINDOW / 2 + 1;
@@ -176,6 +192,7 @@ export function createStretcher(channels, hits, positionOfFrame, firstFrame, sam
     sums: [new Float64Array(room), new Float64Array(room)], // windows added, from `next` on
     weights: new Float64Array(room), // how much window each of those frames has
     hit: 0, // the next hit to look out for
+    round: false, // the loop has come round: windows leave out what's before its start
   };
 
   // where window m comes from (a whole sample): a hit near its centre is placed
@@ -185,12 +202,16 @@ export function createStretcher(channels, hits, positionOfFrame, firstFrame, sam
   function windowPosition(m) {
     var where = hitPosition(m);
     where.position = Math.round(where.position);
+    var start = where.position - WINDOW / 2;
     var next = hits[state.hit];
-    var end = where.position + WINDOW / 2;
-    where.cut =
-      !where.reset && next !== undefined && next < end
-        ? next - (where.position - WINDOW / 2)
-        : WINDOW;
+    var cutAt = !where.reset && next !== undefined ? next : Infinity;
+    if (loop && where.position < loop.end) cutAt = Math.min(cutAt, loop.end); // (the loop's end)
+    where.cut = Math.max(0, Math.min(WINDOW, cutAt - start));
+    where.from = 0;
+    if (state.round) {
+      if (start < loop.start) where.from = loop.start - start;
+      else state.round = false;
+    }
     return where;
   }
 
@@ -198,7 +219,20 @@ export function createStretcher(channels, hits, positionOfFrame, firstFrame, sam
     var position = positionOfFrame(m * HOP);
     var before = positionOfFrame((m - 1) * HOP);
     var after = positionOfFrame((m + 1) * HOP);
-    while (state.hit < hits.length && hits[state.hit] < (before + position) / 2) state.hit++;
+    var low = (before + position) / 2;
+    if (loop) {
+      // (the windows either side of the loop coming round are a loop apart)
+      if (before > position + HOP) before = 2 * position - after;
+      if (after + HOP < position) after = 2 * position - before;
+      low = (before + position) / 2;
+      if (position + HOP < state.lastPosition) {
+        // round again: the loop's first hit is this window's to place
+        state.round = true;
+        state.hit = firstHitFrom(hits, loop.start - 1);
+        low = Math.min(low, loop.start - 1);
+      }
+    }
+    while (state.hit < hits.length && hits[state.hit] < low) state.hit++;
     var hit = hits[state.hit];
     if (hit === undefined || hit >= (position + after) / 2)
       return { position: position, reset: false, cut: WINDOW };
@@ -209,19 +243,25 @@ export function createStretcher(channels, hits, positionOfFrame, firstFrame, sam
     return { position: hit - (hit - position) / rate, reset: true, cut: WINDOW };
   }
 
-  // a channel's samples in the window, without anything from `cut` on (faded out just before)
-  function windowed(data, target, start, cut) {
+  // how much of sample i of a window counts: none before `from` or from `cut` on,
+  // faded in after `from` and out before `cut`
+  function kept(i, cut, from) {
+    if (i < from || i >= cut) return 0;
+    return Math.min(1, (cut - i) / CUT_FADE, from ? (i - from + 1) / CUT_FADE : 1);
+  }
+
+  // a channel's samples in the window, but for what's left out (kept)
+  function windowed(data, target, start, cut, from) {
     for (var i = 0; i < WINDOW; i++) {
       var at = start + i;
-      var fade = i < cut ? Math.min(1, (cut - i) / CUT_FADE) : 0;
-      target[i] = at >= 0 && at < length ? data[at] * hann[i] * fade : 0;
+      target[i] = at >= 0 && at < length ? data[at] * hann[i] * kept(i, cut, from) : 0;
     }
   }
 
   // the window's spectrum
-  function analyse(center, cut) {
-    windowed(channels[0], re, center - WINDOW / 2, cut);
-    if (count == 2) windowed(channels[1], im, center - WINDOW / 2, cut);
+  function analyse(center, cut, from) {
+    windowed(channels[0], re, center - WINDOW / 2, cut, from);
+    if (count == 2) windowed(channels[1], im, center - WINDOW / 2, cut, from);
     else im.fill(0);
     fft(re, im, false);
     // two real channels at once: left in the real part, right in the imaginary
@@ -282,7 +322,7 @@ export function createStretcher(channels, hits, positionOfFrame, firstFrame, sam
     }
   }
 
-  function synthesise(m, cut) {
+  function synthesise(m, cut, from) {
     for (var k = 0; k < BINS; k++) {
       var l = magnitude[0][k];
       var lr = l * Math.cos(state.outPhase[0][k]);
@@ -309,21 +349,20 @@ export function createStretcher(channels, hits, positionOfFrame, firstFrame, sam
       state.sums[0][offset + i] += re[i] * g;
       if (count == 2) state.sums[1][offset + i] += im[i] * g;
       // (a cut-short window doesn't count past its cut: the windows after it make up the sound)
-      if (i < cut)
-        state.weights[offset + i] += hann[i] * hann[i] * Math.min(1, (cut - i) / CUT_FADE);
+      state.weights[offset + i] += hann[i] * hann[i] * kept(i, cut, from);
     }
   }
 
   function addWindow() {
     var m = state.frame;
     var where = windowPosition(m);
-    analyse(where.position, where.cut);
+    analyse(where.position, where.cut, where.from);
     var hop = where.position - state.lastPosition;
     for (var ch = 0; ch < count; ch++) {
       newPhases(ch, hop, where.reset || isNaN(state.lastPosition));
       state.lastPhase[ch].set(phase[ch]);
     }
-    synthesise(m, where.cut);
+    synthesise(m, where.cut, where.from);
     state.lastPosition = where.position;
     state.frame++;
   }
@@ -355,6 +394,7 @@ export function createStretcher(channels, hits, positionOfFrame, firstFrame, sam
         frame: state.frame,
         lastPosition: state.lastPosition,
         hit: state.hit,
+        round: state.round,
         lastPhase: state.lastPhase.map(copy),
         outPhase: state.outPhase.map(copy),
         sums: state.sums.map(function (sums) {
@@ -368,6 +408,7 @@ export function createStretcher(channels, hits, positionOfFrame, firstFrame, sam
       state.frame = saved.frame;
       state.lastPosition = saved.lastPosition;
       state.hit = saved.hit;
+      state.round = saved.round;
       state.lastPhase = saved.lastPhase.map(copy);
       state.outPhase = saved.outPhase.map(copy);
       state.sums = saved.sums.map(function (sums) {

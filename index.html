@@ -782,14 +782,24 @@
 				<canvas id="playAlongOverview" aria-label="The whole song: click near bar 1"></canvas>
 				<canvas id="playAlongCloseUp" aria-label="Close up of bar 1: click on the 1"></canvas>
 				<div id="playAlongHint" class="playAlongSmall">Press Listen and tap the 1 when bar 1 comes, or click the wave on it: bar 1 moves to the hit there. The lines are the song's beats at its tempo; nudge bar 1 until they sit on its hits. While the groove plays along, nudges are heard straight away.</div>
-				<div class="playAlongLabel">Start from</div>
+				<div class="playAlongLabel">Loop</div>
 				<div class="playAlongRow">
+					<input type="checkbox" id="playAlongLoop"><label for="playAlongLoop">Loop bars</label>
+					<input type="number" id="playAlongLoopFrom" min="1" value="1" inputmode="numeric" aria-label="The loop's first bar">
+					to
+					<input type="number" id="playAlongLoopTo" min="1" value="4" inputmode="numeric" aria-label="The loop's last bar">
+					<span id="playAlongLoopBars" class="playAlongSmall"></span>
+				</div>
+				<div id="playAlongLoopFit" class="playAlongNote"></div>
+				<div class="playAlongSmall">Play just some bars of the song, round and round: drag across the whole song's wave to pick them, or type them. The groove starts on the loop's first bar (with Count it in, over the bar before) and comes round with the song, so its grooves and fills land in the same places every time.</div>
+				<div class="playAlongLabel" id="playAlongStartLabel">Start from</div>
+				<div class="playAlongRow" id="playAlongStartRow">
 					<input type="radio" name="playAlongStart" id="playAlongStartBar1" value="bar1" checked><label for="playAlongStartBar1">Bar 1</label>
 					<input type="radio" name="playAlongStart" id="playAlongStartIntro" value="intro"><label for="playAlongStartIntro">The song's start (the drums come in on bar 1)</label>
 				</div>
 				<div class="playAlongVolume"><label for="playAlongSongVolume">Song</label><input type="range" min="0" max="150" step="5" value="100" id="playAlongSongVolume"><span id="playAlongSongVolumeOutput"></span></div>
 				<div class="playAlongVolume"><label for="playAlongDrumVolume">Drums</label><input type="range" min="0" max="150" step="5" value="100" id="playAlongDrumVolume"><span id="playAlongDrumVolumeOutput"></span></div>
-				<div class="playAlongSmall">This device remembers each song's settings, and the groove's link carries its name, tempo and bar 1: a student who loads the same song plays along in the same place.</div>
+				<div class="playAlongSmall">This device remembers each song's settings, and the groove's link carries its name, tempo, bar 1 and loop: a student who loads the same song plays along in the same place.</div>
 			</div>
 			<div id="playAlongButtons"><button type="button" id="playAlongListen" style="display: none">Listen</button> <button type="button" id="playAlongDone">Done</button></div>
 		</div>

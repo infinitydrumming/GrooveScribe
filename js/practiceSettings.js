@@ -18,7 +18,8 @@
 //   CountIn=1  ClickSolo=1  ClickStart=AND
 //   Mute=hh:1:2,kick:3                          a line muted in some bars (1-based)
 //   Song=Name.mp3&SongBPM=92.4&SongBar1=3.215   a song to play along with: its file's
-//   &SongStart=intro                            name, tempo, bar 1 (s) and start
+//   &SongStart=intro&SongLoop=17-24             name, tempo, bar 1 (s), start, and
+//                                               the bars of it to loop
 
 /** The most bars between speed-ups (the speed-up pop-up's bars box). */
 export var MAX_SPEED_UP_BARS = 999;
@@ -51,11 +52,14 @@ var PERMUTATION_TYPES = [
  *   after) each bar of the run; links: "Trade=2x3a" (2 bars, 3 times, after)
  * @typedef {{amount: number, every: number, unit: string, keepGoing: boolean, target: number}} SpeedUpSetting
  *   unit 'm' (minutes) or 'b' (bars); target 0 = no "Stop at"
- * @typedef {{name: string, bpm: number, bar1: number, start: string}} SongSetting
+ * @typedef {{name: string, bpm: number, bar1: number, start: string,
+ *   loop?: ({from: number, to: number}|null)}} SongSetting
  *   a song to play along with (playAlong.js; Infinity Drumming, 2026): its file's
  *   name (the song itself stays on the player's device), its tempo (bpm, one
  *   decimal), where its bar 1 is (s, to the ms) and where play starts ('bar1', or
- *   'intro': from the song's start, the drums in on bar 1)
+ *   'intro': from the song's start, the drums in on bar 1); loop: bars of the
+ *   song played round and round (from bar 1 = its bar 1), the groove starting on
+ *   the first
  * @typedef {{permutation: (PermutationSetting|null), speedUp: (SpeedUpSetting|null),
  *   countIn: boolean, clickSolo: boolean, clickStart: string,
  *   mutes: Object<string, number[]>, playBars?: string, song?: (SongSetting|null)}} PracticeSettings
@@ -211,8 +215,22 @@ function songToUrl(song) {
     song.bpm +
     '&SongBar1=' +
     Math.round(song.bar1 * 1000) / 1000 +
-    (song.start == 'intro' ? '&SongStart=intro' : '')
+    (song.start == 'intro' ? '&SongStart=intro' : '') +
+    (song.loop ? '&SongLoop=' + song.loop.from + '-' + song.loop.to : '')
   );
+}
+
+/** The most bars a song can have (looping). */
+var MAX_SONG_BARS = 999;
+
+/** "17-24" (or "17") as the bars to loop, or null. */
+function songLoopFromText(text) {
+  var bars = /^\s*(\d+)(?:\s*-\s*(\d+))?\s*$/.exec(String(text || ''));
+  if (!bars) return null;
+  var from = parseInt(bars[1], 10);
+  var to = bars[2] ? parseInt(bars[2], 10) : from;
+  if (from < 1 || to < from || to > MAX_SONG_BARS) return null;
+  return { from: from, to: to };
 }
 
 /** @returns {SongSetting|null} */
@@ -232,6 +250,7 @@ function songFromUrl(get) {
     bpm: bpm,
     bar1: bar1 >= 0 && bar1 < 3600 ? Math.round(bar1 * 1000) / 1000 : 0,
     start: String(get('SongStart', '')).toLowerCase() == 'intro' ? 'intro' : 'bar1',
+    loop: songLoopFromText(get('SongLoop', '')),
   };
 }
 

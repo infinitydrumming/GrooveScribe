@@ -1959,6 +1959,24 @@ body.selectingNotes #measureContainer .notes-row-container {
 .playAlongFile input:focus-visible + span {
   outline: 2px solid var(--id-amber);
 }
+#playAlongLoopFrom,
+#playAlongLoopTo {
+  width: 64px;
+  padding: 4px 6px;
+  border: 1px solid var(--id-border);
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+}
+#playAlongLoopFit {
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(254, 159, 19, 0.15);
+}
+#playAlongOverview {
+  touch-action: none; /* (a drag picks bars to loop) */
+}
 #playAlongBpm,
 #playAlongBar1 {
   padding: 4px 6px;

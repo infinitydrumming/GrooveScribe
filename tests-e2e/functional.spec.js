@@ -548,10 +548,14 @@ test.describe('alphabet trade bars', () => {
   });
 });
 
-// a song of kicks (a 16-bit mono WAV): `bpm`, the first on `bar1` (s), louder on each 1
-function kickSong(bpm, bar1, seconds) {
+// a song of kicks (a 16-bit mono WAV): `bpm`, the first on `bar1` (s), louder on each 1;
+// `tone`: a 1 kHz tone for 50 ms from that time (s)
+function kickSong(bpm, bar1, seconds, tone) {
   const rate = 22050;
   const samples = new Float32Array(Math.round(rate * seconds));
+  if (tone)
+    for (let j = 0; j < rate * 0.05; j++)
+      samples[Math.round(tone * rate) + j] += 0.5 * Math.sin((2 * Math.PI * 1000 * j) / rate);
   const beats = Math.floor(((seconds - 0.2 - bar1) * bpm) / 60) + 1;
   for (let k = 0; k < beats; k++) {
     const start = Math.round((bar1 + (k * 60) / bpm) * rate);
@@ -670,5 +674,111 @@ test.describe('play along with a song', () => {
     expect(errors.length).toBeGreaterThan(3);
     expect(Math.abs(errors[0])).toBeLessThan(0.004);
     errors.forEach((error) => expect(Math.abs(error - errors[0])).toBeLessThan(0.0005));
+  });
+
+  test('loop mode: some bars of the song round and round, the groove on them every time', async ({
+    page,
+  }) => {
+    await loadGroove(
+      page,
+      grooveUrl(
+        '?TimeSig=4/4&Div=16&Tempo=100&Measures=1&H=|x-x-x-x-x-x-x-x-|&S=|----O-------O---|&K=|o---o---o---o---|'
+      )
+    );
+    await page.waitForFunction(() => window.MIDI && window.MIDI.Player && window.MIDI.Player.ctx);
+    await page.evaluate(() => window.myGrooveWriter.metronomeOptionsMenuPopupClick('PlayAlong'));
+    // a tone just past bar 3's end (bar 1 at 1.234 s, 2.4 s a bar)
+    await page.setInputFiles('#playAlongFile', {
+      name: 'LoopSong.wav',
+      mimeType: 'audio/wav',
+      buffer: kickSong(100, 1.234, 14, 1.234 + 3 * 2.4 + 0.02),
+    });
+    await expect(page.locator('#playAlongSongName')).toContainText('LoopSong.wav');
+    await page.fill('#playAlongBpm', '100');
+    await page.dispatchEvent('#playAlongBpm', 'change');
+    await page.check('#playAlongLoop');
+    await page.fill('#playAlongLoopFrom', '2');
+    await page.dispatchEvent('#playAlongLoopFrom', 'change');
+    await page.fill('#playAlongLoopTo', '3');
+    await page.dispatchEvent('#playAlongLoopTo', 'change');
+    await expect(page.locator('#playAlongLoopFit')).toContainText('2 times through');
+    await expect.poll(() => page.evaluate(() => location.search)).toContain('SongLoop=2-3');
+
+    await page.evaluate(() => {
+      window.__kicks = [];
+      window.__pieces = [];
+      const midi = window.MIDI;
+      const noteOn = midi.noteOn;
+      midi.noteOn = function (channel, note, velocity, at) {
+        if (note == 35) window.__kicks.push(at);
+        return noteOn.apply(this, arguments);
+      };
+      const start = AudioBufferSourceNode.prototype.start;
+      AudioBufferSourceNode.prototype.start = function (when, offset) {
+        if (this.buffer && this.buffer.length == 4096) {
+          const piece = {
+            when,
+            offset: offset || 0,
+            data: this.buffer.getChannelData(0),
+            stopped: null,
+          };
+          window.__pieces.push(piece);
+          const stop = this.stop.bind(this);
+          this.stop = (at) => {
+            piece.stopped = at;
+            return stop(at);
+          };
+        }
+        return start.apply(this, arguments);
+      };
+    });
+    await page.click('#playAlongDone');
+    await page.click('[id^="midiPlayImage"]');
+    await page.waitForTimeout(7000); // the loop is 4.8 s: once round, and on
+    const heard = await page.evaluate(async () => {
+      window.myGrooveWriter.myGrooveUtils.stopMIDI_playback();
+      const rate = window.MIDI.Player.ctx.sampleRate;
+      const pieces = window.__pieces.filter((p) => !(p.stopped !== null && p.stopped <= p.when));
+      const from = pieces[0].when;
+      const song = new Float32Array(
+        Math.ceil((pieces[pieces.length - 1].when - from) * rate) + 4096
+      );
+      pieces.forEach((p) => {
+        const at = Math.round((p.when - from) * rate) - Math.round(p.offset * rate);
+        for (let i = Math.round(p.offset * rate); i < 4096; i++) song[at + i] += p.data[i];
+      });
+      // the tone's loudness, 20 ms at a time
+      let tone = 0;
+      const span = Math.round(rate * 0.02);
+      for (let at = 0; at + span < song.length; at += span) {
+        let re = 0;
+        let im = 0;
+        for (let i = 0; i < span; i++) {
+          re += song[at + i] * Math.cos((2 * Math.PI * 1000 * i) / rate);
+          im += song[at + i] * Math.sin((2 * Math.PI * 1000 * i) / rate);
+        }
+        tone = Math.max(tone, Math.hypot(re, im) / span);
+      }
+      const stretcher = '/js/timeStretch.js'; // (the page's own module, served to it)
+      const { findHits } = await import(stretcher);
+      const hits = findHits(song, rate).map((h) => from + h / rate);
+      const kicks = window.__kicks.filter((at) => at < from + song.length / rate - 0.3);
+      return {
+        tone,
+        seconds: song.length / rate,
+        offsets: kicks.map(
+          (at) =>
+            hits.reduce((best, h) => (Math.abs(h - at) < Math.abs(best - at) ? h : best), -1) - at
+        ),
+      };
+    });
+    expect(heard.seconds).toBeGreaterThan(5.5); // (past the loop's first time round)
+    expect(heard.tone).toBeLessThan(0.02); // never heard (it's 0.25 in the song)
+    // every kick on the song's hit, the same each time round, to well under a ms
+    expect(heard.offsets.length).toBeGreaterThan(8);
+    expect(Math.abs(heard.offsets[1])).toBeLessThan(0.004);
+    heard.offsets
+      .slice(1)
+      .forEach((offset) => expect(Math.abs(offset - heard.offsets[1])).toBeLessThan(0.0005));
   });
 });

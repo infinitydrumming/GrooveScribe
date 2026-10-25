@@ -7,9 +7,12 @@ import {
   wavePeaks,
   songTimeText,
   songTimeFromText,
+  loopedPosition,
+  songLoop,
+  loopSeam,
   createPlayAlong,
 } from '../js/playAlong.js';
-import { firstHit, songKey } from '../js/playAlongPanel.js';
+import { firstHit, songKey, songBarAt, loopFitText } from '../js/playAlongPanel.js';
 import { findHits } from '../js/timeStretch.js';
 import {
   practiceSettingsToUrl,
@@ -99,6 +102,39 @@ describe('the sums', () => {
     expect(songTimeFromText('abc')).toBeNaN();
   });
 
+  it('comes round in a loop: a place past its end is that far into it again', () => {
+    const loop = { start: 10, end: 14 };
+    expect(loopedPosition(9, loop)).toBe(9); // (before it: the run-in)
+    expect(loopedPosition(13.5, loop)).toBe(13.5);
+    expect(loopedPosition(14, loop)).toBe(10);
+    expect(loopedPosition(19, loop)).toBeCloseTo(11, 9);
+    expect(loopedPosition(19, null)).toBe(19);
+  });
+
+  it('finds the bars to loop in the song, and comes round on the loop’s first hit', () => {
+    const setting = { name: 'A', bpm: 100, bar1: 1.5, start: 'bar1', loop: { from: 3, to: 4 } };
+    const loop = songLoop(setting, 2.4);
+    expect(loop.start).toBeCloseTo(6.3, 9);
+    expect(loop.end).toBeCloseTo(11.1, 9);
+    expect(songLoop(Object.assign({}, setting, { loop: null }), 2.4)).toBeNull();
+    // a hit 3 ms after the loop's start: both ends move onto it
+    const seam = loopSeam(loop, [6303], 1000);
+    expect(seam.start).toBeCloseTo(6.303, 9);
+    expect(seam.end).toBeCloseTo(11.103, 9);
+    expect(loopSeam(loop, [6400], 1000)).toEqual(loop); // (none that close)
+  });
+
+  it('picks bars by where they are in the song, and says how the groove fits the loop', () => {
+    expect(songBarAt(1.5, 1.5, 2.4, 10)).toBe(1);
+    expect(songBarAt(6.2, 1.5, 2.4, 10)).toBe(2);
+    expect(songBarAt(0.2, 1.5, 2.4, 10)).toBe(1);
+    expect(songBarAt(99, 1.5, 2.4, 10)).toBe(10);
+    expect(loopFitText(8, 8)).toContain('start together every time round');
+    expect(loopFitText(8, 2)).toContain('4 times through');
+    expect(loopFitText(8, 3)).toContain('won’t start together');
+    expect(loopFitText(8, 0)).toBe('');
+  });
+
   it('knows a song on this device by its name and length', () => {
     expect(songKey('Song.mp3', 183.4)).toBe('Song.mp3|183');
   });
@@ -126,7 +162,21 @@ describe('a song in a link', () => {
       bpm: 92.4,
       bar1: 3.215,
       start: 'intro',
+      loop: null,
     });
+  });
+
+  it('carries the bars to loop', () => {
+    const song = { name: 'A.mp3', bpm: 100, bar1: 1.5, start: 'bar1', loop: { from: 17, to: 24 } };
+    const url = practiceSettingsToUrl(Object.assign(emptyPracticeSettings(), { song }));
+    expect(url).toBe('&Song=A.mp3&SongBPM=100&SongBar1=1.5&SongLoop=17-24');
+    expect(practiceSettingsFromUrl(get(url.slice(1))).song).toEqual(song);
+    const loopOf = (text) =>
+      practiceSettingsFromUrl(get('Song=A.mp3&SongBPM=100&SongLoop=' + text)).song.loop;
+    expect(loopOf('5')).toEqual({ from: 5, to: 5 });
+    expect(loopOf('9-4')).toBeNull();
+    expect(loopOf('0-4')).toBeNull();
+    expect(loopOf('x')).toBeNull();
   });
 
   it('starts at bar 1 unless it says the intro, and needs a name and a tempo', () => {
@@ -135,6 +185,7 @@ describe('a song in a link', () => {
       bpm: 100,
       bar1: 0,
       start: 'bar1',
+      loop: null,
     });
     expect(practiceSettingsFromUrl(get('Song=A+b.mp3&SongBPM=100')).song.name).toBe('A b.mp3');
     expect(practiceSettingsFromUrl(get('Song=A.mp3&SongBPM=900')).song).toBeUndefined();
@@ -481,6 +532,32 @@ describe('the steady clock', () => {
       );
       expect(Math.abs(nearest - at)).toBeLessThan(0.001);
     });
+  });
+
+  it('loops bars of the song, the groove starting on the first and on the song’s bars every time round', () => {
+    engine.setSong(clickSong(20, 100, 10), { name: 'Song.mp3', bpm: 100, bar1: 10, start: 'bar1' });
+    engine.setKeepPitch(false);
+    const loop = { start: 12.4, end: 17.2 }; // bars 2-3 (bar 1 at 10 s, 2.4 s a bar)
+    engine.setLoop(loop);
+    engine.start();
+    const song = songStart();
+    expect(song.source.loop).toBe(true);
+    // (it comes round on the loop's first hit, found within a sample of its start)
+    expect(song.source.loopStart).toBeCloseTo(12.4, 3);
+    expect(song.source.loopEnd - song.source.loopStart).toBeCloseTo(4.8, 9);
+    expect(song.offset).toBeCloseTo(12.35, 9); // (from just before the loop)
+    vi.advanceTimersByTime(12000); // twice round, and more
+    const around = { start: song.source.loopStart, end: song.source.loopEnd };
+    const heard = kicks().map((at) => loopedPosition(song.offset + (at - song.when), around));
+    expect(heard[0]).toBeCloseTo(12.4, 9); // the groove starts on the loop's first bar
+    expect(heard.length).toBeGreaterThan(16);
+    heard.forEach((position) => {
+      expect(position).toBeGreaterThan(12.4 - 1e-6);
+      expect(position).toBeLessThan(around.end);
+      const beat = (position - 10) / 0.6;
+      expect(beat - Math.round(beat)).toBeCloseTo(0, 6);
+    });
+    expect(engine.playing).toBe(true); // (a loop never reaches the song's end)
   });
 
   it('is off without a song, and puts the drums’ volume back', () => {

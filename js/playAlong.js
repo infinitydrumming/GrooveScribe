@@ -20,6 +20,11 @@
 // so a slower tempo slows the song down, and a speed-up or a tempo change speeds
 // it up at the same bar line as the drums. Its pitch stays as it is (a phase
 // vocoder, timeStretch.js), or goes down and up with its speed, like a record.
+//
+// Loop mode plays some bars of the song round and round, the groove starting on
+// the loop's first bar. The song's place is counted on as if it played straight
+// through and comes round to the loop's start at its end (loopedPosition), so
+// the drums stay on the song's bars every time round.
 
 import { createStretcher, findHits, windowSize } from './timeStretch.js';
 
@@ -51,6 +56,8 @@ var END_FADE = 1.5;
 
 /** Starting at bar 1, the song starts this much before it (s), so its first hit is whole. */
 var RUN_UP = 0.05;
+/** A loop comes round on its first hit when there's one this close to its start (s). */
+var SEAM_HIT = 0.006;
 /** Taps further apart than this start a new tempo (s). */
 export var TAP_RESET = 2;
 /** How far a tapped or clicked bar 1 moves to the hit near it (s). */
@@ -101,6 +108,48 @@ export function songPositionAt(changes, time) {
   var change = changes[0];
   for (var i = 1; i < changes.length && changes[i].at <= time; i++) change = changes[i];
   return change.from + (time - change.at) * change.rate;
+}
+
+/**
+ * Where a song is, looping some of it: a place counted past the loop's end has
+ * come round again from its start (s). `loop`: {start, end} (s), or null.
+ * @param {number} position
+ * @param {{start: number, end: number}|null} loop
+ */
+export function loopedPosition(position, loop) {
+  if (!loop || position < loop.end) return position;
+  return loop.start + ((position - loop.start) % (loop.end - loop.start));
+}
+
+/**
+ * The part of a song to loop (s): from the start of bar `from` to the end of
+ * bar `to` (bar 1 at the song's bar 1, `barSeconds` a bar), or null for none.
+ * @param {SongSetting} setting
+ * @param {number} barSeconds
+ */
+export function songLoop(setting, barSeconds) {
+  var bars = setting && setting.loop;
+  if (!bars || !isFinite(barSeconds) || barSeconds <= 0) return null;
+  return {
+    start: setting.bar1 + (bars.from - 1) * barSeconds,
+    end: setting.bar1 + bars.to * barSeconds,
+  };
+}
+
+/**
+ * Where the song comes round (s): the loop moved onto its first hit, when one is
+ * that close to its start, so the join falls just before a hit at both ends.
+ * @param {{start: number, end: number}} loop
+ * @param {number[]} hits  (samples)
+ * @param {number} sampleRate
+ */
+export function loopSeam(loop, hits, sampleRate) {
+  var nearest = Infinity;
+  hits.forEach(function (hit) {
+    var away = hit / sampleRate - loop.start;
+    if (Math.abs(away) <= SEAM_HIT && Math.abs(away) < Math.abs(nearest)) nearest = away;
+  });
+  return nearest == Infinity ? loop : { start: loop.start + nearest, end: loop.end + nearest };
 }
 
 // the loudness of `length` samples from `from`
@@ -194,16 +243,18 @@ export function createSongPlayer(ctx, buffer, output) {
   var live = []; // [{source, gain}]: the newest is the one playing
   /** @type {Array<{at: number, from: number, rate: number}>} */
   var changes = [];
+  var loop = null;
 
   function positionAt(time) {
-    return songPositionAt(changes, time);
+    return loopedPosition(songPositionAt(changes, time), loop);
   }
 
   return {
     duration: buffer.duration,
     positionAt: positionAt,
-    // from `from` in the song (before its start if negative) at `at`, at `rate`
-    play: function (at, from, rate) {
+    // from `from` in the song (before its start if negative) at `at`, at `rate`,
+    // round and round `around` ({start, end}, s) if given
+    play: function (at, from, rate, around) {
       var offset = from;
       if (from < 0) {
         at -= from / rate; // (it waits for its start)
@@ -212,6 +263,12 @@ export function createSongPlayer(ctx, buffer, output) {
       var source = ctx.createBufferSource();
       source.buffer = buffer;
       source.playbackRate.value = rate;
+      loop = around || null;
+      if (loop) {
+        source.loop = true; // (the browser comes round exactly where positionAt does)
+        source.loopStart = loop.start;
+        source.loopEnd = loop.end;
+      }
       var gain = ctx.createGain();
       gain.gain.setValueAtTime(0, at);
       gain.gain.linearRampToValueAtTime(1, at + FADE_IN);
@@ -225,7 +282,7 @@ export function createSongPlayer(ctx, buffer, output) {
       var playing = live[live.length - 1];
       if (!playing || rate == changes[changes.length - 1].rate) return;
       playing.source.playbackRate.setValueAtTime(rate, at);
-      changes.push({ at: at, from: positionAt(at), rate: rate });
+      changes.push({ at: at, from: songPositionAt(changes, at), rate: rate }); // (counted on)
     },
     // the speed changes from `at` on are not to happen
     cancelRatesFrom: function (at) {
@@ -270,6 +327,7 @@ function createStretchedSongPlayer(ctx, buffer, output, hits) {
     channels.push(buffer.getChannelData(c));
   /** @type {Array<{at: number, from: number, rate: number}>} */
   var changes = [];
+  var loop = null;
   var start = 0; // when output frame 0 plays (s)
   var stretcher = null;
   var gain = null;
@@ -277,7 +335,7 @@ function createStretchedSongPlayer(ctx, buffer, output, hits) {
   var made = 0; // frames made so far
 
   function positionAt(time) {
-    return songPositionAt(changes, time);
+    return loopedPosition(songPositionAt(changes, time), loop);
   }
 
   function frameTime(frame) {
@@ -334,7 +392,7 @@ function createStretchedSongPlayer(ctx, buffer, output, hits) {
   return {
     duration: buffer.duration,
     positionAt: positionAt,
-    play: function (at, from, speed) {
+    play: function (at, from, speed, around) {
       var offset = from;
       if (from < 0) {
         at -= from / speed; // (it waits for its start)
@@ -342,6 +400,7 @@ function createStretchedSongPlayer(ctx, buffer, output, hits) {
       }
       start = Math.ceil(at * rate) / rate; // (on a frame: the pieces join exactly)
       changes = [{ at: start, from: offset, rate: speed }];
+      loop = around || null;
       gain = ctx.createGain();
       gain.gain.setValueAtTime(0, start);
       gain.gain.linearRampToValueAtTime(1, start + FADE_IN);
@@ -353,7 +412,8 @@ function createStretchedSongPlayer(ctx, buffer, output, hits) {
           return positionAt(frameTime(n)) * rate;
         },
         0,
-        rate
+        rate,
+        loop && { start: loop.start * rate, end: loop.end * rate }
       );
       pieces = [];
       made = 0;
@@ -361,7 +421,7 @@ function createStretchedSongPlayer(ctx, buffer, output, hits) {
     },
     setRate: function (at, speed) {
       if (!stretcher || speed == changes[changes.length - 1].rate) return;
-      changes.push({ at: at, from: positionAt(at), rate: speed });
+      changes.push({ at: at, from: songPositionAt(changes, at), rate: speed }); // (counted on)
       remakeFrom(at);
     },
     cancelRatesFrom: function (at) {
@@ -487,7 +547,7 @@ export function createPlayAlong(env) {
     playing: false,
     currentTime: 0,
   };
-  var song = null; // {buffer, setting, output (its volume), drums (their volume)}
+  var song = null; // {buffer, setting, output (its volume), drums (their volume), loop}
   var player = null; // the song playing (createSongPlayer)
   var rounds = [];
   var shouldLoop = false;
@@ -500,12 +560,21 @@ export function createPlayAlong(env) {
     return env.ctx().currentTime;
   }
 
+  function songHits() {
+    if (!song.hits) song.hits = findHits(monoOf(song.buffer), song.buffer.sampleRate);
+    return song.hits;
+  }
+
   // a player for the song: keeping its pitch, or like a record
   function newPlayer() {
     var ctx = env.ctx();
     if (!song.keepPitch) return createSongPlayer(ctx, song.buffer, song.output);
-    if (!song.hits) song.hits = findHits(monoOf(song.buffer), song.buffer.sampleRate);
-    return createStretchedSongPlayer(ctx, song.buffer, song.output, song.hits);
+    return createStretchedSongPlayer(ctx, song.buffer, song.output, songHits());
+  }
+
+  // where the song comes round, looping (null: it plays straight through)
+  function seam() {
+    return song.loop ? loopSeam(song.loop, songHits(), song.buffer.sampleRate) : null;
   }
 
   function startDelay() {
@@ -706,7 +775,9 @@ export function createPlayAlong(env) {
     // a count-in lasts its blank tick longer than its bar: the groove starts
     // as its last tick does
     if (env.leadsIn()) first.length -= first.lead / 1000;
-    var plan = playAlongStart(song.setting, rate, env.leadsIn() ? first.length : 0);
+    // (looping, the groove starts on the loop's first bar)
+    var from = song.loop ? { bar1: song.loop.start, start: 'bar1' } : song.setting;
+    var plan = playAlongStart(from, rate, env.leadsIn() ? first.length : 0);
     var bar1At = now + startDelay() - Math.min(plan.songAt, plan.drumsAt);
     first.start = bar1At + plan.drumsAt;
     rounds = [first];
@@ -714,7 +785,7 @@ export function createPlayAlong(env) {
     paused = null;
     setDrumVolume(song.drums);
     player = newPlayer();
-    player.play(bar1At + plan.songAt, plan.songFrom, rate);
+    player.play(bar1At + plan.songAt, plan.songFrom, rate, seam());
     placeNotes(first, now);
     startTicking();
   }
@@ -734,7 +805,8 @@ export function createPlayAlong(env) {
     player.play(
       position < 0 ? at - position / paused.rate : at,
       Math.max(0, position),
-      paused.rate
+      paused.rate,
+      seam()
     );
     applyRates(at); // (a round built before the pause at another tempo)
     paused = null;
@@ -904,6 +976,7 @@ export function createPlayAlong(env) {
       drums: 1,
       keepPitch: true,
       hits: null,
+      loop: null,
     };
   };
 
@@ -915,6 +988,14 @@ export function createPlayAlong(env) {
   /** The song's settings changed (its tempo, bar 1, start). */
   engine.setSetting = function (setting) {
     if (song) song.setting = setting;
+  };
+
+  /**
+   * The part of the song to loop ({start, end}, s; songLoop), or null to play it
+   * straight through (from the next play).
+   */
+  engine.setLoop = function (loop) {
+    if (song) song.loop = loop || null;
   };
 
   /** The song's and the drums' volumes (0-1, or more to boost). */

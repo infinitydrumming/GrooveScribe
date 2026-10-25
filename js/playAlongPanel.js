@@ -11,6 +11,7 @@
 import {
   TAP_RESET,
   HIT_RANGE,
+  songLoop,
   tapTempo,
   nearestHit,
   wavePeaks,
@@ -143,13 +144,60 @@ function readFile(file) {
   });
 }
 
+/** A drag across the wave further than this (px) picks bars to loop. */
+var DRAG_PX = 6;
+
+/**
+ * Bar `bar` of a song (from 1) at `time` (s): bar 1 starts at `bar1`, each lasts
+ * `barSeconds`; within 1 and `bars`.
+ */
+export function songBarAt(time, bar1, barSeconds, bars) {
+  return Math.min(bars, Math.max(1, Math.floor((time - bar1) / barSeconds + 1e-6) + 1));
+}
+
+/**
+ * How the groove's bars fit the loop's: '' when it's not known.
+ * @param {number} loopBars
+ * @param {number} grooveBars  bars the groove plays before it starts again
+ */
+export function loopFitText(loopBars, grooveBars) {
+  if (!grooveBars || grooveBars <= 0) return '';
+  if (grooveBars == loopBars)
+    return (
+      'The groove plays ' +
+      loopBars +
+      (loopBars == 1 ? ' bar' : ' bars') +
+      ' too: they start together every time round, so a fill in its last bar leads back into the loop.'
+    );
+  if (loopBars % grooveBars == 0)
+    return (
+      'The groove plays ' +
+      grooveBars +
+      (grooveBars == 1 ? ' bar' : ' bars') +
+      ': ' +
+      loopBars / grooveBars +
+      ' times through each time round.'
+    );
+  return (
+    'The groove plays ' +
+    grooveBars +
+    ' bars and the loop is ' +
+    loopBars +
+    ': they won’t start together every time round. Make the groove ' +
+    loopBars +
+    ' bars (its bars, sections or form) to line them up.'
+  );
+}
+
 /**
  * The pop-up and the song chip in the play bar.
  * deps:
  *   gu            the GrooveUtils (its playAlong clock, tempo, playing)
  *   meter()       the groove's time signature {top, bottom} (the wave's beat lines)
+ *   cycleBars()   bars the groove plays before it starts again (how it fits a loop)
  *   changed()     the song's settings changed (the link)
- * @param {{gu: any, meter: () => {top: number, bottom: number}, changed: () => void}} deps
+ * @param {{gu: any, meter: () => {top: number, bottom: number}, cycleBars: () => number,
+ *   changed: () => void}} deps
  */
 export function createPlayAlongPanel(deps) {
   var gu = deps.gu;
@@ -163,6 +211,8 @@ export function createPlayAlongPanel(deps) {
   var volumes = { song: 1, drums: 1 };
   var taps = [];
   var preview = null; // Listen: {player, output}
+  var lastLoop = null; // the bars last looped, to loop again ({from, to})
+  var drag = null; // a drag across the whole song's wave: {x, time, moved}
   var overviewPeaks = null;
   var drawing = false;
   var wired = false;
@@ -213,9 +263,16 @@ export function createPlayAlongPanel(deps) {
     };
     overviewPeaks = null;
     var stored = storedSongs()[song.key];
+    lastLoop = stored && stored.loop ? { from: stored.loop.from, to: stored.loop.to } : null;
     if (linked && linked.name == name) setting = Object.assign({}, linked);
     else if (stored)
-      setting = { name: name, bpm: stored.bpm, bar1: stored.bar1, start: stored.start };
+      setting = {
+        name: name,
+        bpm: stored.bpm,
+        bar1: stored.bar1,
+        start: stored.start,
+        loop: stored.loop && stored.loop.on ? lastLoop : null,
+      };
     else
       setting = {
         name: name,
@@ -235,6 +292,7 @@ export function createPlayAlongPanel(deps) {
     engine().setKeepPitch(keepPitch);
     engine().onStart = function () {
       stopListening();
+      engine().setLoop(loopTimes()); // (bars as long as the groove's time signature has them now)
       animate(); // (the wave follows the song, if the pop-up is open)
     };
   }
@@ -250,6 +308,7 @@ export function createPlayAlongPanel(deps) {
         bpm: setting.bpm,
         bar1: setting.bar1,
         start: setting.start,
+        loop: lastLoop && { from: lastLoop.from, to: lastLoop.to, on: !!setting.loop },
         song: volumes.song,
         drums: volumes.drums,
         at: Date.now(),
@@ -345,7 +404,100 @@ export function createPlayAlongPanel(deps) {
     setBar1(nearestHit(song.mono, song.sampleRate, time, range));
   }
 
-  // --- Listen: the song alone, from just before bar 1 ---
+  // --- the loop ---
+  function barSeconds() {
+    var meter = deps.meter();
+    return ((meter.top * 4) / meter.bottom) * (60 / setting.bpm);
+  }
+
+  // the song's bars from its bar 1 to its end
+  function songBars() {
+    return Math.max(1, Math.floor((song.duration - setting.bar1) / barSeconds() + 1e-6));
+  }
+
+  function loopTimes() {
+    return setting ? songLoop(setting, barSeconds()) : null;
+  }
+
+  // loop these bars (or none); playing, it starts again from the loop's start
+  function setLoop(bars) {
+    var was = setting.loop;
+    if (bars) {
+      var last = songBars();
+      var from = Math.min(Math.max(1, Math.round(bars.from) || 1), last);
+      var to = Math.min(Math.max(from, Math.round(bars.to) || from), last);
+      lastLoop = { from: from, to: to };
+    }
+    setting.loop = bars ? lastLoop : null;
+    settingsChanged();
+    var same =
+      was && setting.loop
+        ? was.from == lastLoop.from && was.to == lastLoop.to
+        : was == setting.loop;
+    if (same) return; // (a box left without a change)
+    if (gu.isPlaying()) {
+      gu.stopMIDI_playback();
+      gu.startMIDI_playback();
+    } else if (preview) {
+      stopListening();
+      listen();
+    }
+  }
+
+  function loopToggled(event) {
+    if (!event.target.checked) {
+      setLoop(null);
+      return;
+    }
+    // (to start with, as many bars as the groove plays: they line up)
+    var bars = deps.cycleBars();
+    setLoop(lastLoop || { from: 1, to: bars > 0 && bars <= 16 ? bars : 4 });
+  }
+
+  function overviewTime(event) {
+    var box = event.currentTarget.getBoundingClientRect();
+    return ((event.clientX - box.left) / box.width) * song.duration;
+  }
+
+  // a drag across the whole song's wave picks the bars to loop
+  function overviewDown(event) {
+    if (!song) return;
+    drag = { x: event.clientX, time: overviewTime(event), moved: false };
+    if (event.currentTarget.setPointerCapture)
+      event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function overviewMove(event) {
+    if (!drag) return;
+    if (Math.abs(event.clientX - drag.x) > DRAG_PX) drag.moved = true;
+    if (drag.moved) drawOverview(heardPosition(), [drag.time, overviewTime(event)]);
+  }
+
+  function overviewUp(event) {
+    var was = drag;
+    drag = null;
+    if (!was || !was.moved) return;
+    var times = [was.time, overviewTime(event)].sort(function (a, b) {
+      return a - b;
+    });
+    var bars = songBars();
+    setLoop({
+      from: songBarAt(times[0], setting.bar1, barSeconds(), bars),
+      to: songBarAt(times[1], setting.bar1, barSeconds(), bars),
+    });
+    drag = { picked: true }; // (the click that ends the drag doesn't move bar 1)
+  }
+
+  function overviewClicked(event) {
+    if (drag && drag.picked) {
+      drag = null;
+      return;
+    }
+    var range = Math.max(HIT_RANGE, song ? song.duration / event.currentTarget.clientWidth : 0);
+    waveClicked(event, 0, song ? song.duration : 0, range);
+  }
+
+  // --- Listen: the song alone, from just before bar 1 (or round its loop) ---
   function listen() {
     if (preview) {
       stopListening();
@@ -359,7 +511,9 @@ export function createPlayAlongPanel(deps) {
     output.gain.value = volumes.song;
     output.connect(audio.destination);
     var player = createSongPlayer(audio, song.buffer, output);
-    player.play(audio.currentTime + 0.05, Math.max(0, setting.bar1 - LISTEN_LEAD), 1);
+    var loop = loopTimes();
+    if (loop) player.play(audio.currentTime + 0.05, loop.start, 1, loop);
+    else player.play(audio.currentTime + 0.05, Math.max(0, setting.bar1 - LISTEN_LEAD), 1);
     preview = { player: player, output: output };
     setText('playAlongListen', 'Stop');
     animate();
@@ -404,8 +558,8 @@ export function createPlayAlongPanel(deps) {
     drawCloseUp(playing);
   }
 
-  // the whole song, bar 1 and where it's playing
-  function drawOverview(playing) {
+  // the whole song, bar 1, the loop (or the bars being picked) and where it's playing
+  function drawOverview(playing, picking) {
     var overview = /** @type {HTMLCanvasElement | null} */ (el('playAlongOverview'));
     var g = overview && sizeCanvas(overview);
     if (!g) return;
@@ -413,8 +567,15 @@ export function createPlayAlongPanel(deps) {
     if (!overviewPeaks || overviewPeaks.length != overview.width)
       overviewPeaks = wavePeaks(song.mono, song.sampleRate, 0, song.duration, overview.width);
     g.clearRect(0, 0, overview.width, overview.height);
-    drawPeaks(g, overview, overviewPeaks);
     var scale = overview.width / song.duration;
+    var loop = picking
+      ? { start: Math.min.apply(null, picking), end: Math.max.apply(null, picking) }
+      : loopTimes();
+    if (loop) {
+      g.fillStyle = 'rgba(254, 159, 19, 0.3)';
+      g.fillRect(loop.start * scale, 0, (loop.end - loop.start) * scale, overview.height);
+    }
+    drawPeaks(g, overview, overviewPeaks);
     drawLine(g, overview, setting.bar1 * scale, '#c55000', 2 * ratio);
     if (playing >= 0) drawLine(g, overview, playing * scale, '#0b76db', 2 * ratio);
   }
@@ -515,10 +676,31 @@ export function createPlayAlongPanel(deps) {
     if (bar1 && document.activeElement !== bar1) bar1.value = songTimeText(setting.bar1);
     var start = input(setting.start == 'intro' ? 'playAlongStartIntro' : 'playAlongStartBar1');
     if (start) start.checked = true;
+    refreshLoop();
     setVolumeOutput('playAlongSongVolume', volumes.song);
     setVolumeOutput('playAlongDrumVolume', volumes.drums);
     refreshSpeed();
     drawWaves();
+  }
+
+  function refreshLoop() {
+    var loop = setting.loop;
+    var shown = loop || lastLoop || { from: 1, to: 4 };
+    var box = input('playAlongLoop');
+    if (box) box.checked = !!loop;
+    ['From', 'To'].forEach(function (end) {
+      var field = input('playAlongLoop' + end);
+      if (!field) return;
+      field.max = String(songBars());
+      if (document.activeElement !== field)
+        field.value = String(end == 'From' ? shown.from : shown.to);
+    });
+    var bars = shown.to - shown.from + 1;
+    setText('playAlongLoopBars', '(' + bars + (bars == 1 ? ' bar)' : ' bars)'));
+    setText('playAlongLoopFit', loop ? loopFitText(bars, deps.cycleBars()) : '');
+    // (looping, the groove starts on the loop's first bar)
+    show('playAlongStartLabel', !loop);
+    show('playAlongStartRow', !loop);
   }
 
   function setVolumeOutput(id, volume) {
@@ -526,6 +708,13 @@ export function createPlayAlongPanel(deps) {
     if (slider && document.activeElement !== slider)
       slider.value = String(Math.round(volume * 100));
     setText(id + 'Output', Math.round(volume * 100) + '%');
+  }
+
+  function chipTitle(name) {
+    if (!song) return 'Load “' + name + '” to play along';
+    if (on && setting.loop)
+      return 'Looping bars ' + setting.loop.from + '-' + setting.loop.to + ' of ' + name;
+    return (on ? 'Playing along with ' : 'Not playing along with ') + name;
   }
 
   // the song in the play bar, by the tempo
@@ -546,13 +735,28 @@ export function createPlayAlongPanel(deps) {
     if (!chip) return;
     chip.style.display = name ? '' : 'none';
     chip.className = song && on ? 'playAlongOn' : '';
-    if (!song) chip.title = 'Load “' + name + '” to play along';
-    else chip.title = (on ? 'Playing along with ' : 'Not playing along with ') + name;
+    chip.title = chipTitle(name);
     chip.innerHTML = '<i class="fa fa-music"></i> <span class="playAlongChipName"></span>';
     chip.lastChild.textContent = name.replace(/\.[^.]+$/, '');
   }
 
   // --- the pop-up's controls ---
+  function wireLoop(on_) {
+    on_('playAlongOverview', 'pointerdown', overviewDown);
+    on_('playAlongOverview', 'pointermove', overviewMove);
+    on_('playAlongOverview', 'pointerup', overviewUp);
+    on_('playAlongOverview', 'click', overviewClicked);
+    on_('playAlongLoop', 'change', loopToggled);
+    ['playAlongLoopFrom', 'playAlongLoopTo'].forEach(function (id) {
+      on_(id, 'change', function () {
+        var from = parseInt(input('playAlongLoopFrom').value, 10);
+        var to = parseInt(input('playAlongLoopTo').value, 10);
+        if (id == 'playAlongLoopFrom' && to < from) to = from; // (a later start takes the end along)
+        setLoop({ from: from, to: to });
+      });
+    });
+  }
+
   function wire() {
     if (wired || !el('playAlongConfiguration')) return;
     wired = true;
@@ -597,10 +801,7 @@ export function createPlayAlongPanel(deps) {
       setBar1(setting.bar1 + 0.01);
     });
     on_('playAlongTapOne', 'click', tapOne);
-    on_('playAlongOverview', 'click', function (event) {
-      var range = Math.max(HIT_RANGE, song ? song.duration / event.currentTarget.clientWidth : 0);
-      waveClicked(event, 0, song ? song.duration : 0, range);
-    });
+    wireLoop(on_);
     on_('playAlongCloseUp', 'click', function (event) {
       waveClicked(event, setting.bar1 - CLOSE_UP_BEFORE, setting.bar1 + CLOSE_UP_AFTER, HIT_RANGE);
     });

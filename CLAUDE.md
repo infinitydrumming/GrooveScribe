@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1218 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **132 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1224 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **133 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -93,7 +93,7 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `audioSession.js` — while a groove plays, `navigator.audioSession.type = 'playback'` so iPhones
   play it through the silent switch; `'auto'` again on pause/stop.
 - `playAlong.js` — playing along with a song: the sums (tap tempo, where song and drums start, the song's
-  position through speed changes, the hit nearest a tap, wave peaks) and the steady clock (`createPlayAlong`)
+  position through speed changes and round a loop, the hit nearest a tap, wave peaks) and the steady clock (`createPlayAlong`)
   that plays the rounds in place of MIDI.Player while a song is on, with the song (`createSongPlayer`).
 - `timeStretch.js` — a slower or faster song keeping its pitch: a phase vocoder (phase locking, a phase reset placing
   each drum hit exactly on time) whose windows come from a time map (`positionOfFrame`), and the song's hits
@@ -182,7 +182,11 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   blank tick early (`firstBarOnTime`), a count-in ends a tick sooner, so all bars sit on the song's beats. The
   song's speed is the groove's tempo / the song's, changed at round starts and tempo switches
   (`switchTempoAtNextBar`); it keeps its pitch (`createStretchedSongPlayer`, made `STRETCH_AHEAD` ahead in
-  pieces, made again from a speed change) unless switched off (varispeed, `createSongPlayer`). Without a song MIDI.js plays as always (golden master untouched); the
+  pieces, made again from a speed change) unless switched off (varispeed, `createSongPlayer`). Loop mode
+  (`SongLoop=17-24`, `songLoop`): the groove starts on the loop's first bar; the players count the song's place on
+  linearly and wrap it at the loop (`loopedPosition`; varispeed sets the source's own `loop` / `loopStart` /
+  `loopEnd`, the stretcher cuts its windows at the join), so a rate change's `from` is the counted-on place, never
+  the wrapped one; the join moves onto a hit within 6 ms (`loopSeam`). Without a song MIDI.js plays as always (golden master untouched); the
   functional E2E checks kicks against a generated song's beats.
 - **Changing the note setting: phrase or timing** (`changeKeepsThePhrase`): the "Keep" switch
   (`#notesKeepToggle`, the phone's `#notesSelect` foot; localStorage `grooveScribeNotesKeep`, 'phrase' to

@@ -5708,6 +5708,11 @@ function GrooveWriter() {
       meter: function () {
         return barSigOf(0);
       },
+      cycleBars: function () {
+        return class_groove_click_active
+          ? class_groove_click_groove_bars + class_groove_click_click_bars
+          : grooveClickSequenceLength();
+      },
       changed: function () {
         root.updateCurrentURL();
       },

@@ -27,6 +27,21 @@ function clicks(seconds, first, every) {
   return { samples, at };
 }
 
+// how loud a tone of `frequency` gets, 25 ms at a time
+function loudest(samples, frequency) {
+  let most = 0;
+  for (let at = 0; at + 200 < samples.length; at += 100) {
+    let re = 0;
+    let im = 0;
+    for (let i = 0; i < 200; i++) {
+      re += samples[at + i] * Math.cos((2 * Math.PI * frequency * i) / RATE);
+      im += samples[at + i] * Math.sin((2 * Math.PI * frequency * i) / RATE);
+    }
+    most = Math.max(most, Math.hypot(re, im) / 200);
+  }
+  return most;
+}
+
 const nearest = (list, value) =>
   list.reduce((best, x) => (Math.abs(x - value) < Math.abs(best - value) ? x : best), -1e9);
 
@@ -102,6 +117,34 @@ describe('stretching a song', () => {
       .forEach((at) =>
         expect(Math.abs(nearest(heard, frameOf(at)) - frameOf(at))).toBeLessThanOrEqual(8)
       );
+  });
+
+  it('loops part of a song: nothing from outside it at the join, its first hit on time each time round', () => {
+    // clicks every 0.6 s from 0.3 s, and a tone just past the loop's end
+    const song = clicks(5, 0.3, 0.6);
+    const outside = Math.round(2.11 * RATE);
+    for (let j = 0; j < 400; j++)
+      song.samples[outside + j] += 0.5 * Math.sin((2 * Math.PI * 3000 * j) / RATE);
+    const hits = findHits(song.samples, RATE);
+    const loop = { start: 0.9 * RATE, end: 2.1 * RATE }; // two beats: hits at 0.9 and 1.5 s
+    const length = loop.end - loop.start;
+    for (const speed of [1, 0.8]) {
+      const from = loop.start - 0.1 * RATE;
+      const placeOf = (n) => {
+        const place = from + n * speed;
+        return place < loop.end ? place : loop.start + ((place - loop.start) % length);
+      };
+      const out = rendered(createStretcher([song.samples], hits, placeOf, 0, RATE, loop), RATE * 6);
+      expect(loudest(out, 3000)).toBeLessThan(0.01); // the tone is never heard (it was 0.25)
+      // the loop's hits, each time round, where the map puts them
+      const heard = findHits(out, RATE);
+      for (let round = 0; round < 3; round++)
+        for (const hit of [0.9 * RATE, 1.5 * RATE]) {
+          const frame = (hit + round * length - from) / speed;
+          if (frame > out.length - 500) continue;
+          expect(Math.abs(nearest(heard, frame) - frame)).toBeLessThanOrEqual(8);
+        }
+    }
   });
 
   it('stretches two channels at once, each its own', () => {

@@ -11,6 +11,22 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-25 — Loop some bars of the song
+
+- Playing along, "Loop bars 17 to 24" (typed, or dragged across the song's wave,
+  snapped to bar lines) plays just those bars of the song round and round. The
+  groove starts on the loop's first bar (a count-in over the bar before) and
+  comes round with it, so its grooves and fills land in the same places every
+  time; the pop-up says how the groove's bars fit the loop. The song's place is
+  counted on as if it played straight through and comes round to the loop's
+  start at its end (`loopedPosition` in `js/playAlong.js`), so the drums stay on
+  its bars through any speed changes. The join falls on the loop's first hit
+  when there's one within 6 ms of its start (`loopSeam`). Played like a record,
+  the browser loops the song itself; keeping its pitch, the stretcher's windows
+  never reach past the loop's end or back before its start (`js/timeStretch.js`),
+  and the loop's first hit is placed exactly each time round. Saved per song and
+  in links (`SongLoop=17-24`); Listen plays the loop on its own.
+
 ## 2026-10-25 — A slower song keeps its pitch
 
 - Playing along, the song keeps its pitch at any speed (the "Keep the song's
