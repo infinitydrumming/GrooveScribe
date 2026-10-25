@@ -655,7 +655,8 @@ test.describe('play along with a song', () => {
         const at = Math.round((p.when - from) * rate) - Math.round(p.offset * rate);
         for (let i = Math.round(p.offset * rate); i < 4096; i++) heard[at + i] += p.data[i];
       });
-      const { findHits } = await import('/js/timeStretch.js');
+      const stretcher = '/js/timeStretch.js'; // (the page's own module, served to it)
+      const { findHits } = await import(stretcher);
       const hits = findHits(heard, rate).map((h) => from + h / rate);
       return window.__kicks
         .filter((at) => at < from + heard.length / rate - 0.3)
