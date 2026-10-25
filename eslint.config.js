@@ -97,6 +97,8 @@ export default [
     files: [
       'js/constants.js',
       'js/tempoSwitch.js',
+      'js/playAlong.js',
+      'js/playAlongPanel.js',
       'js/noteBlocks.js',
       'js/sections.js',
       'js/musicMath.js',

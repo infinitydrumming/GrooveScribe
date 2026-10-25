@@ -17,6 +17,8 @@
 //                                               only once, stop at 120
 //   CountIn=1  ClickSolo=1  ClickStart=AND
 //   Mute=hh:1:2,kick:3                          a line muted in some bars (1-based)
+//   Song=Name.mp3&SongBPM=92.4&SongBar1=3.215   a song to play along with: its file's
+//   &SongStart=intro                            name, tempo, bar 1 (s) and start
 
 /** The most bars between speed-ups (the speed-up pop-up's bars box). */
 export var MAX_SPEED_UP_BARS = 999;
@@ -24,6 +26,9 @@ export var MAX_SPEED_UP_BARS = 999;
 var CLICK_STARTS = ['1', 'E', 'AND', 'A', 'ROTATE', 'TI', 'TA'];
 /** The lines that can be muted, as the mute buttons name them. */
 export var MUTE_LINES = ['hh', 'snare', 'kick', 'hhfoot', 'tom1', 'tom2', 'tom4', 'crash', 'ride'];
+/** The song tempos allowed (bpm). */
+var MIN_SONG_BPM = 20;
+var MAX_SONG_BPM = 300;
 /** The permutations that can be in a link. */
 var PERMUTATION_TYPES = [
   'kick_16ths',
@@ -46,10 +51,16 @@ var PERMUTATION_TYPES = [
  *   after) each bar of the run; links: "Trade=2x3a" (2 bars, 3 times, after)
  * @typedef {{amount: number, every: number, unit: string, keepGoing: boolean, target: number}} SpeedUpSetting
  *   unit 'm' (minutes) or 'b' (bars); target 0 = no "Stop at"
+ * @typedef {{name: string, bpm: number, bar1: number, start: string}} SongSetting
+ *   a song to play along with (playAlong.js; Infinity Drumming, 2026): its file's
+ *   name (the song itself stays on the player's device), its tempo (bpm, one
+ *   decimal), where its bar 1 is (s, to the ms) and where play starts ('bar1', or
+ *   'intro': from the song's start, the drums in on bar 1)
  * @typedef {{permutation: (PermutationSetting|null), speedUp: (SpeedUpSetting|null),
  *   countIn: boolean, clickSolo: boolean, clickStart: string,
- *   mutes: Object<string, number[]>, playBars?: string}} PracticeSettings
- *   playBars: the bars of a groove to practise ("1-3, 6"), '' for all
+ *   mutes: Object<string, number[]>, playBars?: string, song?: (SongSetting|null)}} PracticeSettings
+ *   playBars: the bars of a groove to practise ("1-3, 6"), '' for all;
+ *   song: only when the link has one
  */
 
 /** @returns {PracticeSettings} every setting off */
@@ -184,6 +195,46 @@ function tradeFromText(text) {
   };
 }
 
+/** A song tempo to one decimal, or 0 if it isn't one in range. */
+export function songBpm(value) {
+  var bpm = parseFloat(value);
+  if (!(bpm >= MIN_SONG_BPM && bpm <= MAX_SONG_BPM)) return 0;
+  return Math.round(bpm * 10) / 10;
+}
+
+/** @param {SongSetting} song */
+function songToUrl(song) {
+  return (
+    '&Song=' +
+    encodeURIComponent(song.name) +
+    '&SongBPM=' +
+    song.bpm +
+    '&SongBar1=' +
+    Math.round(song.bar1 * 1000) / 1000 +
+    (song.start == 'intro' ? '&SongStart=intro' : '')
+  );
+}
+
+/** @returns {SongSetting|null} */
+function songFromUrl(get) {
+  var name = String(get('Song', '') || '').replace(/\+/g, ' ');
+  try {
+    name = decodeURIComponent(name);
+  } catch (err) {
+    console.log('A song name kept as it was: ' + err);
+  }
+  name = name.slice(0, 200);
+  var bpm = songBpm(get('SongBPM', ''));
+  if (!name || !bpm) return null;
+  var bar1 = parseFloat(get('SongBar1', '0'));
+  return {
+    name: name,
+    bpm: bpm,
+    bar1: bar1 >= 0 && bar1 < 3600 ? Math.round(bar1 * 1000) / 1000 : 0,
+    start: String(get('SongStart', '')).toLowerCase() == 'intro' ? 'intro' : 'bar1',
+  };
+}
+
 /**
  * The practice settings that are on, as link parameters ('&Perm=...&CountIn=1').
  * @param {PracticeSettings} settings
@@ -199,6 +250,7 @@ export function practiceSettingsToUrl(settings) {
     url += '&ClickStart=' + settings.clickStart;
   var mutes = mutesToText(settings.mutes || {});
   if (mutes) url += '&Mute=' + mutes;
+  if (settings.song && settings.song.name) url += songToUrl(settings.song);
   return url;
 }
 
@@ -228,5 +280,7 @@ export function practiceSettingsFromUrl(get) {
   settings.clickStart = CLICK_STARTS.indexOf(start) >= 0 ? start : '1';
   settings.mutes = mutesFromText(get('Mute', ''));
   settings.playBars = barsFromUrl(get('PlayBars', ''));
+  var song = songFromUrl(get);
+  if (song) settings.song = song;
   return settings;
 }

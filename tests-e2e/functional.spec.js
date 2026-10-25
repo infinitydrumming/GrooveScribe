@@ -547,3 +547,93 @@ test.describe('alphabet trade bars', () => {
     expect(await page.locator('#ABCsource').inputValue()).toContain('Order: 2 1×2');
   });
 });
+
+// a song of kicks (a 16-bit mono WAV): `bpm`, the first on `bar1` (s), louder on each 1
+function kickSong(bpm, bar1, seconds) {
+  const rate = 22050;
+  const samples = new Float32Array(Math.round(rate * seconds));
+  for (let k = 0, t = bar1; t < seconds - 0.2; k++, t = bar1 + (k * 60) / bpm) {
+    const start = Math.round(t * rate);
+    for (let j = 0; j < rate * 0.15 && start + j < samples.length; j++)
+      samples[start + j] +=
+        (k % 4 ? 0.5 : 0.9) *
+        Math.exp(-j / (0.03 * rate)) *
+        Math.sin((2 * Math.PI * 60 * j) / rate);
+  }
+  const wav = Buffer.alloc(44 + samples.length * 2);
+  wav.write('RIFF', 0);
+  wav.writeUInt32LE(36 + samples.length * 2, 4);
+  wav.write('WAVEfmt ', 8);
+  wav.writeUInt32LE(16, 16);
+  wav.writeUInt16LE(1, 20); // PCM
+  wav.writeUInt16LE(1, 22); // mono
+  wav.writeUInt32LE(rate, 24);
+  wav.writeUInt32LE(rate * 2, 28);
+  wav.writeUInt16LE(2, 32);
+  wav.writeUInt16LE(16, 34);
+  wav.write('data', 36);
+  wav.writeUInt32LE(samples.length * 2, 40);
+  samples.forEach((x, i) =>
+    wav.writeInt16LE(Math.round(Math.max(-1, Math.min(1, x)) * 32767), 44 + i * 2)
+  );
+  return wav;
+}
+
+test.describe('play along with a song', () => {
+  test("the drums come in on the song's bar 1 and stay on its beats; the link carries the song", async ({
+    page,
+  }) => {
+    await loadGroove(
+      page,
+      grooveUrl(
+        '?TimeSig=4/4&Div=16&Tempo=100&Measures=1&H=|x-x-x-x-x-x-x-x-|&S=|----O-------O---|&K=|o---o---o---o---|'
+      )
+    );
+    await page.waitForFunction(() => window.MIDI && MIDI.Player && MIDI.Player.ctx);
+    await page.evaluate(() => window.myGrooveWriter.metronomeOptionsMenuPopupClick('PlayAlong'));
+    await page.setInputFiles('#playAlongFile', {
+      name: 'Kicks100.wav',
+      mimeType: 'audio/wav',
+      buffer: kickSong(100, 1.234, 12),
+    });
+    await expect(page.locator('#playAlongSongName')).toContainText('Kicks100.wav');
+    // bar 1 found on the first kick, to the ms or so
+    const bar1 = parseFloat((await page.inputValue('#playAlongBar1')).split(':')[1]);
+    expect(Math.abs(bar1 - 1.234)).toBeLessThan(0.003);
+    await page.fill('#playAlongBpm', '100');
+    await page.dispatchEvent('#playAlongBpm', 'change');
+    await expect
+      .poll(() => page.evaluate(() => location.search))
+      .toContain('Song=Kicks100.wav&SongBPM=100&SongBar1=');
+    await expect(page.locator('#playAlongChip')).toBeVisible();
+
+    await page.evaluate(() => {
+      window.__kicks = [];
+      window.__song = null;
+      const noteOn = MIDI.noteOn;
+      MIDI.noteOn = function (channel, note, velocity, at) {
+        if (note == 35) window.__kicks.push(at);
+        return noteOn.apply(this, arguments);
+      };
+      const start = AudioBufferSourceNode.prototype.start;
+      AudioBufferSourceNode.prototype.start = function (when, offset) {
+        if (this.buffer && this.buffer.duration > 10) window.__song = { when, offset };
+        return start.apply(this, arguments);
+      };
+    });
+    await page.click('#playAlongDone');
+    await page.click('[id^="midiPlayImage"]');
+    await page.waitForTimeout(3500); // more than a round
+    const played = await page.evaluate(() => {
+      window.myGrooveWriter.myGrooveUtils.stopMIDI_playback();
+      return { kicks: window.__kicks, song: window.__song };
+    });
+    expect(played.song.offset).toBeCloseTo(bar1, 2); // the song starts on bar 1...
+    expect(played.kicks.length).toBeGreaterThan(5);
+    played.kicks.forEach((at, k) => {
+      // ...and every kick is on its beat, to well under a ms
+      const position = played.song.offset + (at - played.song.when);
+      expect(Math.abs(position - (bar1 + k * 0.6))).toBeLessThan(0.0005);
+    });
+  });
+});

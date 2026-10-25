@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, plays through an iPhone's silent switch, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up, counting over the notes and its choices, menus kept on screen, more metronome clicks, a second tap closes a menu, a typed tempo kept to 30-300, tempo changes heard from the next bar line. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: playing along with a song, mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, plays through an iPhone's silent switch, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up, counting over the notes and its choices, menus kept on screen, more metronome clicks, a second tap closes a menu, a typed tempo kept to 30-300, tempo changes heard from the next bar line. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -68,6 +68,7 @@ import { createScreenWakeLock } from './screenWakeLock.js';
 import { createAudioSession } from './audioSession.js';
 import { metronomeIsOn } from './metronome.js';
 import { eventTimes, planTempoSwitch, catchUp } from './tempoSwitch.js';
+import { createPlayAlong } from './playAlong.js';
 import {
   DEFAULT_GRACE_SPACING_MS,
   DEFAULT_GRACE_VOLUME,
@@ -1086,6 +1087,11 @@ function GrooveUtils() {
     this.doesMidiDataNeedRefresh = function (root) {
       return root.midiEventCallbacks.noteHasChangedSinceLastDataLoad;
     };
+    // whether the MIDI just loaded leads in to the groove (a count-in), so a
+    // song's bar 1 comes at its end (Infinity Drumming, 2026)
+    this.leadInPlaying = function (root) {
+      return false;
+    };
     this.pauseEvent = function (root) {
       var icon = document.getElementById('midiPlayImage' + root.grooveUtilsUniqueIndex);
       if (icon) icon.className = 'midiPlayImage Paused';
@@ -1192,6 +1198,36 @@ function GrooveUtils() {
     return _create_MIDIURLFromGrooveData(root, myGrooveData, MIDI_type);
   };
 
+  // --- Playing along with a song (Infinity Drumming, 2026) ---------------------
+  // While a song is loaded, the play-along's steady clock plays the rounds in
+  // place of MIDI.js's player (with the same calls), and the song with them
+  // (playAlong.js). Without a song, MIDI.js plays them as always.
+  root.playAlong = createPlayAlong({
+    ctx: function () {
+      return MIDI.Player.ctx;
+    },
+    midi: function () {
+      return MIDI;
+    },
+    round: function () {
+      return { data: MIDI.Player.data, bpm: MIDI.Player.BPM };
+    },
+    leadsIn: function () {
+      return root.midiEventCallbacks.leadInPlaying(root.midiEventCallbacks.classRoot);
+    },
+    tell: function (data) {
+      ourMIDICallback(data);
+    },
+    songEnded: function () {
+      root.stopMIDI_playback();
+    },
+  });
+
+  // the player playing the rounds
+  function player() {
+    return root.playAlong.isOn() ? root.playAlong : MIDI.Player;
+  }
+
   root.loadMIDIFromURL = function (midiURL) {
     tempoSwitch = null; // (planned for the MIDI that was playing)
     MIDI.Player.timeWarp = 1; // speed the song is played back
@@ -1221,6 +1257,7 @@ function GrooveUtils() {
    */
   root.switchTempoAtNextBar = function (url, oldBarMs, newBarMs, onSwitched) {
     tempoSwitch = null;
+    if (player() !== MIDI.Player) return switchPlayAlongTempo(url, oldBarMs, newBarMs, onSwitched);
     if (!MIDI.Player.playing || !MIDI.Player.data || url.indexOf('base64,') < 0) return false;
     var midiData = window.atob(url.split(',')[1]);
     var newData = new Replayer(MidiFile(midiData), MIDI.Player.timeWarp).getData();
@@ -1235,6 +1272,18 @@ function GrooveUtils() {
     };
     return planTheTempoSwitch();
   };
+
+  // with a song: the steady clock moves to the new round at the bar line itself
+  function switchPlayAlongTempo(url, oldBarMs, newBarMs, onSwitched) {
+    if (!root.playAlong.playing || url.indexOf('base64,') < 0) return false;
+    var midiData = window.atob(url.split(',')[1]);
+    var newData = new Replayer(MidiFile(midiData), MIDI.Player.timeWarp).getData();
+    var tempo = root.getTempo();
+    if (!root.playAlong.switchTempoAtNextBar(newData, tempo, oldBarMs, newBarMs, onSwitched))
+      return false;
+    MIDI.Player.BPM = tempo;
+    return true;
+  }
 
   // the next bar line whose last note before it is still to come
   function planTheTempoSwitch() {
@@ -1299,7 +1348,7 @@ function GrooveUtils() {
       tempoSwitch = null;
       root.isMIDIPaused = true;
       root.midiEventCallbacks.pauseEvent(root.midiEventCallbacks.classRoot);
-      MIDI.Player.pause();
+      player().pause();
       screenWakeLock.keepAwake(false);
       audioSession.playing(false);
       root.cancelPendingCursorUpdates();
@@ -1310,7 +1359,7 @@ function GrooveUtils() {
 
   // play button or keypress
   root.startMIDI_playback = function () {
-    if (MIDI.Player.playing) return;
+    if (player().playing) return;
     audioSession.playing(true); // before any sound, so it plays on silent too
     if (
       root.isMIDIPaused &&
@@ -1318,15 +1367,15 @@ function GrooveUtils() {
     ) {
       global_current_midi_start_time = new Date();
       global_last_midi_update_time = 0;
-      MIDI.Player.resume();
+      player().resume();
     } else {
       MIDI.Player.ctx.resume();
       global_current_midi_start_time = new Date();
       global_last_midi_update_time = 0;
       root.midiEventCallbacks.loadMidiDataEvent(root.midiEventCallbacks.classRoot, true);
-      MIDI.Player.stop();
-      MIDI.Player.loop(root.shouldMIDIRepeat); // set the loop parameter
-      MIDI.Player.start();
+      player().stop();
+      player().loop(root.shouldMIDIRepeat); // set the loop parameter
+      player().start();
     }
     root.midiEventCallbacks.playEvent(root.midiEventCallbacks.classRoot);
     root.isMIDIPaused = false;
@@ -1335,10 +1384,10 @@ function GrooveUtils() {
 
   // stop button or keypress
   root.stopMIDI_playback = function () {
-    if (MIDI.Player.playing || root.isMIDIPaused) {
+    if (player().playing || root.isMIDIPaused) {
       tempoSwitch = null;
       root.isMIDIPaused = false;
-      MIDI.Player.stop();
+      player().stop();
       screenWakeLock.keepAwake(false);
       audioSession.playing(false);
       root.midiEventCallbacks.stopEvent(root.midiEventCallbacks.classRoot);
@@ -1351,7 +1400,7 @@ function GrooveUtils() {
 
   // modal play/stop button
   root.startOrStopMIDI_playback = function () {
-    if (MIDI.Player.playing) {
+    if (player().playing) {
       root.stopMIDI_playback();
     } else {
       root.startMIDI_playback();
@@ -1360,7 +1409,7 @@ function GrooveUtils() {
 
   // modal play/pause button
   root.startOrPauseMIDI_playback = function () {
-    if (MIDI.Player.playing) {
+    if (player().playing) {
       root.pauseMIDI_playback();
     } else {
       root.startMIDI_playback();
@@ -1368,16 +1417,16 @@ function GrooveUtils() {
   };
 
   root.isPlaying = function () {
-    return typeof MIDI != 'undefined' && !!MIDI.Player && !!MIDI.Player.playing;
+    return typeof MIDI != 'undefined' && !!MIDI.Player && !!player().playing;
   };
 
   root.repeatMIDI_playback = function () {
     if (root.shouldMIDIRepeat === false) {
       root.shouldMIDIRepeat = true;
-      MIDI.Player.loop(true);
+      player().loop(true);
     } else {
       root.shouldMIDIRepeat = false;
-      MIDI.Player.loop(false);
+      player().loop(false);
     }
     root.midiEventCallbacks.repeatChangeEvent(
       root.midiEventCallbacks.classRoot,
@@ -1486,7 +1535,7 @@ function GrooveUtils() {
       if (root.stopAtEndOfRound) {
         // the practice timer is up (Infinity Drumming, 2026)
         root.stopAtEndOfRound = false;
-        MIDI.Player.loop(false); // or the player starts the tune again by itself
+        player().loop(false); // or the player starts the tune again by itself
         root.stopMIDI_playback();
       } else if (root.shouldMIDIRepeat) {
         global_total_midi_repeats++;
@@ -1497,9 +1546,9 @@ function GrooveUtils() {
           root.advanceMetronomeOptionsOffsetClickStartRotation() ||
           root.midiEventCallbacks.doesMidiDataNeedRefresh(root.midiEventCallbacks.classRoot)
         ) {
-          MIDI.Player.stop();
+          player().stop();
           root.midiEventCallbacks.loadMidiDataEvent(root.midiEventCallbacks.classRoot, false);
-          MIDI.Player.start();
+          player().start();
           //  } else {
           // let midi.loop handle the repeat for us
           //MIDI.Player.stop();
@@ -1510,7 +1559,7 @@ function GrooveUtils() {
         }
       } else {
         // not repeating, so stopping
-        MIDI.Player.stop();
+        player().stop();
         screenWakeLock.keepAwake(false);
         audioSession.playing(false);
         root.midiEventCallbacks.percentProgress(root.midiEventCallbacks.classRoot, 100);

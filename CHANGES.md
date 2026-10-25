@@ -11,6 +11,28 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-25 — Playing along with a song
+
+- Options → Play along with a song: a song from the player's device (never
+  uploaded) plays with the groove, the drums coming in on its bar 1, starting
+  there or at the song's intro. The song's tempo is typed or tapped; bar 1 is
+  tapped while it plays, or clicked on its wave (it moves to the hit there), and
+  nudged 10 ms at a time, heard straight away while playing. Song and drum
+  volumes; the song's name in the play bar. This device remembers each song's
+  settings, and a link carries the song's name, tempo, bar 1 and start
+  (`Song=`, `SongBPM=`, `SongBar1=`, `SongStart=intro`, with the practice
+  settings) (`js/playAlongPanel.js`, `js/practiceSettings.js`, `index.html`).
+- While a song is loaded, a steady clock plays the rounds in place of MIDI.js's
+  player (which places its notes a chunk at a time from whenever a timer fires,
+  and wanders a few ms each round): every note goes on the audio clock from one
+  fixed start, a moment ahead of time; each round starts exactly where the one
+  before ends, Scribe hearing that a round has ended a moment early so it can
+  build the next. Every round's first bar plays its blank tick early, so every
+  bar is on the song's beat. The song speeds up and slows down with the groove's
+  tempo (a speed-up, a tempo change at the next bar line), its pitch with it for
+  now (`js/playAlong.js`; `js/groove_utils.js` plays through it while a song is
+  on). Without a song nothing changes.
+
 ## 2026-10-24 — The alphabet written out as it plays
 
 - With trade bars or an order of its own, the alphabet's music is written out

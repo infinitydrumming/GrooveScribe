@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1191 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **131 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1211 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **132 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -92,6 +92,12 @@ Pure / low-coupling core (extracted from the two big files, imported back):
   lines, keeping its shape; the kick line holds two grid rows (kick, hi-hat foot), kept apart.
 - `audioSession.js` — while a groove plays, `navigator.audioSession.type = 'playback'` so iPhones
   play it through the silent switch; `'auto'` again on pause/stop.
+- `playAlong.js` — playing along with a song: the sums (tap tempo, where song and drums start, the song's
+  position through speed changes, the hit nearest a tap, wave peaks) and the steady clock (`createPlayAlong`)
+  that plays the rounds in place of MIDI.Player while a song is on, with the song (`createSongPlayer`).
+- `playAlongPanel.js` — the "Play along with a song" pop-up and the song chip in the play bar; each song's
+  settings on this device (localStorage `infinityScribePlayAlong`). The link form (`Song=`...) is in
+  `practiceSettings.js`.
 - `gridState.js` — the DOM grid **read** layer: per-cell state (`is_*_on`/`get_*_state`)
   and whole-measure array readers (`get32NoteArrayFromClickableUI`, `muteArrayFromClickableUI`).
   Reads the ambient global `document`; caller state injected via ctx/callbacks.
@@ -164,6 +170,16 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   then its `replayer` / `data` / `currentTime` set and `resume()`, from a `setTimeout(0)` after that
   note's callback (inside it, `stop()` would cut the note still in MIDI.js's queue). The golden master
   doesn't cover it (no tempo changes); check it in a real browser by recording `MIDI.noteOn` times.
+- **Playing along with a song** (`playAlong.js`): while a song is loaded, groove_utils' `player()` is the
+  steady clock instead of MIDI.Player (same calls: start / resume / pause / stop / loop / playing; `loadFile`
+  still fills MIDI.Player.data, which the clock reads). It places notes `LOOKAHEAD` ahead on the audio clock
+  (`MIDI.noteOn` with absolute times) and tells `ourMIDICallback` each note as MIDI.js would; a round's end is
+  told `HANDOVER` early, and a `start()` during that call queues Scribe's next round exactly at the old one's
+  end (a `stop()` then is deferred: no `start()` means the groove ends). Every round's first bar is played a
+  blank tick early (`firstBarOnTime`), a count-in ends a tick sooner, so all bars sit on the song's beats. The
+  song's speed is the groove's tempo / the song's (varispeed for now), changed at round starts and tempo
+  switches (`switchTempoAtNextBar`). Without a song MIDI.js plays as always (golden master untouched); the
+  functional E2E checks kicks against a generated song's beats.
 - **Changing the note setting: phrase or timing** (`changeKeepsThePhrase`): the "Keep" switch
   (`#notesKeepToggle`, the phone's `#notesSelect` foot; localStorage `grooveScribeNotesKeep`, 'phrase' to
   start) picks `changeDivisionKeepingThePhrase`, where the notes keep their slot order across the groove
