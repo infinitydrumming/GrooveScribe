@@ -552,8 +552,9 @@ test.describe('alphabet trade bars', () => {
 function kickSong(bpm, bar1, seconds) {
   const rate = 22050;
   const samples = new Float32Array(Math.round(rate * seconds));
-  for (let k = 0, t = bar1; t < seconds - 0.2; k++, t = bar1 + (k * 60) / bpm) {
-    const start = Math.round(t * rate);
+  const beats = Math.floor(((seconds - 0.2 - bar1) * bpm) / 60) + 1;
+  for (let k = 0; k < beats; k++) {
+    const start = Math.round((bar1 + (k * 60) / bpm) * rate);
     for (let j = 0; j < rate * 0.15 && start + j < samples.length; j++)
       samples[start + j] +=
         (k % 4 ? 0.5 : 0.9) *
@@ -589,7 +590,7 @@ test.describe('play along with a song', () => {
         '?TimeSig=4/4&Div=16&Tempo=100&Measures=1&H=|x-x-x-x-x-x-x-x-|&S=|----O-------O---|&K=|o---o---o---o---|'
       )
     );
-    await page.waitForFunction(() => window.MIDI && MIDI.Player && MIDI.Player.ctx);
+    await page.waitForFunction(() => window.MIDI && window.MIDI.Player && window.MIDI.Player.ctx);
     await page.evaluate(() => window.myGrooveWriter.metronomeOptionsMenuPopupClick('PlayAlong'));
     await page.setInputFiles('#playAlongFile', {
       name: 'Kicks100.wav',
@@ -610,8 +611,9 @@ test.describe('play along with a song', () => {
     await page.evaluate(() => {
       window.__kicks = [];
       window.__song = null;
-      const noteOn = MIDI.noteOn;
-      MIDI.noteOn = function (channel, note, velocity, at) {
+      const midi = window.MIDI;
+      const noteOn = midi.noteOn;
+      midi.noteOn = function (channel, note, velocity, at) {
         if (note == 35) window.__kicks.push(at);
         return noteOn.apply(this, arguments);
       };
