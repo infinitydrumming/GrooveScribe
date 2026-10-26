@@ -11,6 +11,19 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-26 — Trade bars with notes of their own
+
+- The Alphabet's trade bars can have any notes, beat by beat: a beat of a trade
+  bar in 16ths, 32nds or triplets no longer turns the whole Alphabet into the
+  Mixed note setting (its figures had become 8th-note triplets written as 12-
+  tuplets). The Alphabet keeps its own note setting, taken from its ostinato
+  bars (`alphabetDivision` in `js/groove_writer.js`); its figures are placed on
+  the finer grid (`notesInBarOfSize` in `js/permutations.js`) and every bar is
+  written and played with its own beats, so the run sounds exactly as before.
+  The Notes buttons, and a beat of an ostinato bar, set the Alphabet's notes and
+  leave the trade bars' alone; trade bars back in the Alphabet's notes (or
+  removed) return the plain note setting. Links keep it all.
+
 ## 2026-10-26 — Accents and counts level at the start of a line
 
 - Sheet music: the music engine kept room over a line's first note for the bar

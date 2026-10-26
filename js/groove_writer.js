@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: playing along with a song, a form of sections (ABAC), triplets keeping the phrase, a bar's eraser, copied notes in other tabs, sections (A, B) and bar numbers, 32nds beat by beat, tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes, practising some bars of a groove, bar numbers starting lines kept out of the notes' way. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: playing along with a song, a form of sections (ABAC), triplets keeping the phrase, a bar's eraser, copied notes in other tabs, sections (A, B) and bar numbers, 32nds beat by beat, tom rim clicks, practise some bars of a permutation, an exercise's practice settings and instructions in its link, mid tom, hi-hat foot, crash and ride lines, collapsing tom lines, copy / paste a bar, metronome bar click and groove / click bars, tom ghosts and accents, page title, ride accent, snare click adds a normal hit, permutations from the figure layout with repeats, alternating kick / snare permutations, auto-scroll switch, Brazilian swing, swung click in click-only bars, straight bars in a swung groove, speed-up target tempo, groove / click bars counted bar by bar, cursor timing and Brazilian-swing cursor snapping, groove / click bars in permutations, no cursor during the count-in, cursor through the click-only bars, exact tempo for swung and triplet notes, practice timer and speed-up every so many bars, counting over the notes, Save & Share with My Grooves and our own short links, title and author in the header, flams / drags / ruffs on every drum, a time signature for each bar with classic x/8 grouping, more metronome clicks, diddles, triplets in x/8 bars, notes beat by beat (quarter-note triplets), the counting choices, dense bars one a line on phones, a copy of a bar right after it, copy / paste through the device clipboard, muted lines kept as bars come and go, fat back kick permutations, permutations over a multi-bar ostinato, long music put on the page quickly, permutations in more time signatures, tempo changes heard from the next bar line, the rep counter, the permutations called the Alphabet, copying some notes, practising some bars of a groove, bar numbers starting lines kept out of the notes' way, trade bars with notes of their own beat by beat. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -673,7 +673,10 @@ function GrooveWriter() {
     if (!menu || !hasBeatNotes(sig)) return;
     class_beat_menu_target = { bar: bar, beat: beat };
     var current = beatGrid() ? beatsOfBar(bar).charAt(beat) : '';
-    var html = '<li class="beatMenuTitle">Notes for beat ' + (beat + 1) + '</li>';
+    var html =
+      '<li class="beatMenuTitle">' +
+      (isAlphabetBar(bar) ? "The Alphabet's notes (every beat)" : 'Notes for beat ' + (beat + 1)) +
+      '</li>';
     beatChoices(sig).forEach(function (choice) {
       html += beatMenuItemHTML(choice, beat, sig, current);
     });
@@ -689,6 +692,13 @@ function GrooveWriter() {
   // One choice in a beat's menu: greyed out when it doesn't fit (a triplet over two
   // beats needs the next one; 32nd notes and triplets can't share a groove)
   function beatMenuItemHTML(choice, beat, sig, current) {
+    if (isAlphabetBar(class_beat_menu_target.bar))
+      return beatMenuItemLI(
+        choice,
+        current,
+        alphabetChoiceFits(choice.char),
+        alphabetChoiceNote(choice.char)
+      );
     var room = beat + choice.beats <= sig.top;
     var shares = room && gridOfBeats(beatsWithChoice(class_beat_menu_target, choice).join('')) >= 0;
     var fits = room && shares;
@@ -699,6 +709,10 @@ function GrooveWriter() {
     else if (choice.beats > 1 && fits)
       note = '(beats ' + (beat + 1) + '–' + (beat + choice.beats) + ')';
     else if (choice.beats > 1) note = '(needs the next beat)';
+    return beatMenuItemLI(choice, current, fits, note);
+  }
+
+  function beatMenuItemLI(choice, current, fits, note) {
     return (
       '<li data-beat-choice="' +
       choice.char +
@@ -723,12 +737,91 @@ function GrooveWriter() {
     var choice = beatChoices(sig).find(function (c) {
       return c.char == char;
     });
-    if (!choice || target.beat + choice.beats > sig.top) return;
+    if (!choice) return;
+    if (isAlphabetBar(target.bar)) {
+      if (alphabetChoiceFits(char)) setAlphabetNotes(char);
+      return;
+    }
+    if (target.beat + choice.beats > sig.top) return;
     var bars = beatsWithChoice(target, choice);
     if (gridOfBeats(bars.join('')) < 0) return; // 32nd notes and triplets
     if (!beatGrid() && !plainDivisionFitsBeatByBeat()) return;
     setGrooveBeats(bars);
   };
+
+  // --- The alphabet's notes, its trade bars' their own (Infinity Drumming, 2026) ---
+  // In an alphabet the ostinato's bars have its note setting on every beat; a
+  // beat's menu there (as the Notes buttons, once trade bars have notes of their
+  // own) sets the alphabet's notes. The trade bars keep theirs: a groove or fill
+  // there can have any notes, beat by beat (the groove then on a beat-by-beat grid).
+  function isAlphabetBar(bar) {
+    return class_permutation_type != 'none' && bar < get_ostinato_bars();
+  }
+
+  // every bar's beats with `char` on each beat of the ostinato's bars (null when
+  // one of them can't have notes beat by beat)
+  function alphabetBeats(char) {
+    var bars = grooveBeats();
+    for (var bar = 0; bar < get_ostinato_bars(); bar++) {
+      var sig = barSigOf(bar);
+      if (!hasBeatNotes(sig)) return null;
+      var beats = '';
+      for (var b = 0; b < sig.top; b++) beats += char;
+      bars[bar] = beats;
+    }
+    return bars;
+  }
+
+  // the alphabet's note setting with `char` on every beat (0 when there are no
+  // figures for it: quarter-note and 32nd-note triplets, or this time signature)
+  function alphabetDivisionOf(char) {
+    var sig = barSigOf(0);
+    var beats = '';
+    for (var b = 0; b < sig.top; b++) beats += char;
+    var division = divisionForBeats([beats], [sig], 48);
+    if (division == 48) return 0;
+    return _perm.getPermutationLayout(division, sig.top, sig.bottom) ? division : 0;
+  }
+
+  function alphabetChoiceFits(char) {
+    var bars = alphabetBeats(char);
+    return !!(alphabetDivisionOf(char) && bars && gridOfBeats(bars.join('')) >= 0);
+  }
+
+  function alphabetChoiceNote(char) {
+    if (!alphabetDivisionOf(char)) return '(no Alphabet figures in these)';
+    if (!alphabetChoiceFits(char))
+      return char == 'd' ? '(not with triplets in a trade bar)' : '(not with 32nds in a trade bar)';
+    return '';
+  }
+
+  // the alphabet's notes `char` on every beat of its ostinato's bars, the trade
+  // bars keeping theirs (when the groove's notes all end up the same, its plain
+  // note setting again)
+  function setAlphabetNotes(char) {
+    var bars = alphabetBeats(char);
+    if (!bars) return;
+    if (gridOfBeats(bars.join('')) < 0) {
+      window.alert(
+        char == 'd'
+          ? "32nds can't share the music with triplets in a trade bar: change the trade bar's triplets first."
+          : "Triplets can't share the music with 32nds in a trade bar: change the trade bar's 32nds first."
+      );
+      return;
+    }
+    setGrooveBeats(bars);
+  }
+
+  // The Notes buttons with an alphabet whose trade bars have notes of their own:
+  // the alphabet's notes (false: the whole groove's, as always)
+  function alphabetNotesButton(newDivision, keepTiming) {
+    if (keepTiming || !beatGrid() || class_permutation_type == 'none' || !tradeBars()) return false;
+    var char = beatCharForDivision(newDivision, barSigOf(0));
+    if (!char || !alphabetDivisionOf(char)) return false;
+    if (alphabetChoiceFits(char)) setAlphabetNotes(char);
+    else window.alert('That note setting ' + alphabetChoiceNote(char).replace(/[()]/g, '') + '.');
+    return true;
+  }
 
   // every bar's beats: a plain note setting's on every beat (16ths: 's')
   function grooveBeats() {
@@ -2043,7 +2136,11 @@ function GrooveWriter() {
   // in a note setting with figures for it (4/4 in any; Infinity Drumming, 2026:
   // x/4 and compound x/8 too, see permutations.getPermutationLayout)
   function permutationsAllowed() {
-    return !isMixedMeterGroove() && beatGrid() != 32 && !!get_permutation_layout();
+    return (
+      !isMixedMeterGroove() &&
+      (beatGrid() != 32 || ostinatoBeatsAlike()) &&
+      !!get_permutation_layout()
+    );
   }
 
   function setupPermutationMenu() {
@@ -2640,10 +2737,39 @@ function GrooveWriter() {
   // (null when there are none for the time signature and note setting)
   function get_permutation_layout() {
     return _perm.getPermutationLayout(
-      class_time_division,
+      alphabetDivision(),
       class_num_beats_per_measure,
       class_note_value_per_measure
     );
+  }
+
+  // The alphabet's note setting (Infinity Drumming, 2026): the groove's, or, when
+  // its trade bars have notes of their own beat by beat (the groove on the Mixed
+  // or the 32nds grid), the one every beat of its ostinato's bars has (16ths: 's'
+  // on each); the grid's own when they differ
+  function alphabetDivision() {
+    var grid = beatGrid();
+    if (!grid) return class_time_division;
+    var ostinato = ostinatoBeats();
+    return divisionForBeats(ostinato.bars, ostinato.sigs, grid);
+  }
+
+  // (its bars: those before the trade bars, also while a link's alphabet is set up)
+  function ostinatoBeats() {
+    var beats = { bars: [], sigs: [] };
+    var ostinato = Math.min(class_number_of_measures - class_trade.bars, _perm.MAX_OSTINATO_BARS);
+    for (var bar = 0; bar < ostinato; bar++) {
+      beats.bars.push(beatsOfBar(bar));
+      beats.sigs.push(barSigOf(bar));
+    }
+    return beats;
+  }
+
+  // whether every beat of the ostinato's bars has the same notes (on the 32nds
+  // grid, what an alphabet needs: its trade bars may differ)
+  function ostinatoBeatsAlike() {
+    var chars = ostinatoBeats().bars.join('');
+    return !!chars && /^(.)\1*$/.test(chars);
   }
 
   function isPermutationSectionShown(section) {
@@ -2975,6 +3101,10 @@ function GrooveWriter() {
       var el = document.getElementById(id);
       return !!(el && el.checked);
     };
+    // (the figure on the grid's bar, which may be finer: see alphabetDivision)
+    var onGrid = function (notes) {
+      return _perm.notesInBarOfSize(notes, Kick_Array.length);
+    };
     if (
       class_permutation_type == 'kick_snare_kick_lead' ||
       class_permutation_type == 'kick_snare_snare_lead'
@@ -2985,16 +3115,15 @@ function GrooveWriter() {
       );
       return {
         kick: _perm.merge_kick_arrays(
-          alternating.kick,
+          onGrid(alternating.kick),
           _perm.filter_kick_array_for_permutation(Kick_Array)
         ),
-        snare: alternating.snare,
+        snare: onGrid(alternating.snare),
       };
     }
     if (class_permutation_type == 'kick_16ths') {
-      var kick = _perm.getPermutationKickArray(
-        section,
-        checked('PermuationOptionsSkipSomeFirstNotes')
+      var kick = onGrid(
+        _perm.getPermutationKickArray(section, checked('PermuationOptionsSkipSomeFirstNotes'))
       );
       if (fatBackOn()) kick = _perm.fatBackKickArray(kick, Snare_Array);
       var hhFoot = _perm.filter_kick_array_for_permutation(Kick_Array);
@@ -3006,7 +3135,7 @@ function GrooveWriter() {
     else if (checked('PermuationOptionsAccentGrid')) style = 'accent';
     return {
       kick: Kick_Array,
-      snare: _perm.getPermutationSnareArray(section, style, get_permutation_layout().unit),
+      snare: onGrid(_perm.getPermutationSnareArray(section, style, get_permutation_layout().unit)),
     };
   }
 
@@ -3287,6 +3416,9 @@ function GrooveWriter() {
         return layOutBarRecords(records.slice(0, ostinato).concat(trade));
       }
     );
+    // (no trade bar with notes of its own left: the alphabet's note setting again)
+    var beats = grooveBeats().join('');
+    if (beatGrid() && /^(.)\1*$/.test(beats)) setGrooveBeats(grooveBeats());
   }
 
   // The alphabet's bars in the music: every shown figure once over the ostinato's
@@ -3301,14 +3433,15 @@ function GrooveWriter() {
         var bar = get_permutation_bar(shownSection.section, o.Kick, o.Snare);
         var part = practised ? practised.bars[written++] : shownSection.abc[k];
         abc += part.pre;
-        abc += labelled(permutationBarABC(o, bar, part.post), part.label);
+        abc += labelled(permutationBarABC(o, bar, part.post, k), part.label);
       });
     });
     return abc;
   }
 
-  // one bar of the alphabet's music, its notes mapped for the cursor (in order)
-  function permutationBarABC(o, bar, post) {
+  // one bar of the alphabet's music, its notes mapped for the cursor (in order);
+  // gridBar: the grid's bar it is written from (its beats, on a beat-by-beat grid)
+  function permutationBarABC(o, bar, post, gridBar) {
     var barABC = root.myGrooveUtils.create_ABC_from_snare_HH_kick_arrays(
       o.Sticking,
       o.HH,
@@ -3321,7 +3454,8 @@ function GrooveWriter() {
       o.num_notes,
       true,
       class_num_beats_per_measure,
-      class_note_value_per_measure
+      class_note_value_per_measure,
+      beatGrid() ? beatPlanOfBar(gridBar) : undefined
     );
     root.myGrooveUtils.note_mapping_array = root.myGrooveUtils.note_mapping_array.concat(
       root.myGrooveUtils.create_note_mapping_array_for_highlighting(
@@ -3363,6 +3497,7 @@ function GrooveWriter() {
       ostinato.forEach(function (o, k) {
         bars.push({
           o: o,
+          gridBar: k,
           notes: get_permutation_bar(section, o.Kick, o.Snare),
           number: entry.number,
           label: k === 0 ? label : '',
@@ -3380,7 +3515,7 @@ function GrooveWriter() {
       .map(function (bar, i) {
         var abc = i + 1 < bars.length ? '%%setbarnb ' + bars[i + 1].number + '\n' : '';
         var post = asPlayedLineEnd(bars, i, lines.barsPerLine);
-        var barABC = permutationBarABC(bar.o, bar.notes, post);
+        var barABC = permutationBarABC(bar.o, bar.notes, post, bar.gridBar);
         return abc + labelled(withRepeatSigns(barABC, bar, post, bars[i + 1]), bar.label);
       })
       .join('');
@@ -3390,6 +3525,7 @@ function GrooveWriter() {
     trade.forEach(function (o, t) {
       bars.push({
         o: o,
+        gridBar: get_ostinato_bars() + t,
         notes: { snare: o.Snare, kick: o.Kick }, // (as written)
         number: UNNUMBERED_BARS + bars.length,
         label: t === 0 ? 'Trade' : '',
@@ -3649,7 +3785,10 @@ function GrooveWriter() {
                 num_notes_for_swing,
                 swingForBar(get_ostinato_bars() + t),
                 class_num_beats_per_measure,
-                class_note_value_per_measure
+                class_note_value_per_measure,
+                undefined, // the player's swing style
+                undefined, // no cursor markers
+                slotSpansOfBar(get_ostinato_bars() + t, o.num_notes) // (beat by beat)
               );
             });
         };
@@ -3670,7 +3809,10 @@ function GrooveWriter() {
                 num_notes_for_swing,
                 swingForBar(k),
                 class_num_beats_per_measure,
-                class_note_value_per_measure
+                class_note_value_per_measure,
+                undefined, // the player's swing style
+                undefined, // no cursor markers
+                slotSpansOfBar(k, o.num_notes) // (beat by beat)
               );
             });
           if (class_trade.after) playTrade();
@@ -7405,7 +7547,10 @@ function GrooveWriter() {
       permutationSwingNotes(),
       class_straight_bars[at.gridBar] ? 0 : root.myGrooveUtils.getSwing() / 100,
       class_num_beats_per_measure,
-      class_note_value_per_measure
+      class_note_value_per_measure,
+      undefined, // the player's swing style
+      undefined, // no cursor markers
+      slotSpansOfBar(at.gridBar, o.num_notes) // (beat by beat)
     );
   }
 
@@ -8177,15 +8322,17 @@ function GrooveWriter() {
   }
 
   function setPermutationFromLink(perm) {
-    var allowed = !!perm && permutationsAllowed();
-    class_permutation_repeats = allowed ? perm.playEach : 1;
-    class_permutation_fat_back = allowed && !!perm.fatBack;
-    var trade = (allowed && perm.trade) || null;
+    // (the trade bars first: they may have notes of their own, see alphabetDivision)
+    var trade = (perm && perm.trade) || null;
     class_trade = {
       bars: trade ? trade.bars : 0,
       times: trade ? trade.times : 1,
       after: !!(trade && trade.after),
     };
+    var allowed = !!perm && permutationsAllowed();
+    if (!allowed) class_trade = { bars: 0, times: 1, after: false };
+    class_permutation_repeats = allowed ? perm.playEach : 1;
+    class_permutation_fat_back = allowed && !!perm.fatBack;
     root.permutationPopupClick(allowed ? perm.type : 'none');
     if (!allowed) return;
     // as many bars as the link's ostinato: links from before October 2026 played
@@ -8705,6 +8852,7 @@ function GrooveWriter() {
   // whatever the "Keep" switch says (see changeKeepsThePhrase)
   root.changeDivision = function (newDivision, keepTiming) {
     if (alreadyBeatByBeat(newDivision)) return;
+    if (alphabetNotesButton(newDivision, keepTiming)) return;
     var uiStickings = '|';
     var uiHH = '|';
     var uiTom1 = '|';

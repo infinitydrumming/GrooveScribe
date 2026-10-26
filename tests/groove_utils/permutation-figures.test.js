@@ -16,6 +16,7 @@ import {
   thirtySecondChapters,
   thirtySecondCount,
   getChapterSections,
+  notesInBarOfSize,
 } from '../../js/permutations.js';
 
 // Permutation figures per note setting (Infinity Drumming). Each figure is one
@@ -614,5 +615,26 @@ describe('an order of bars', () => {
     expect(text('1x4,2x2 , 1x4 3')).toBe('1x4 2x2 1x4 3');
     expect(text('1-3x2 4x2')).toBe('1-4x2');
     expect(text('1-4 1-4 7')).toBe('1-4 1-4 7');
+  });
+});
+
+// Infinity Drumming, 2026: figures in 8ths or 16ths over a groove on the Mixed grid
+// (its trade bars with notes of their own beat by beat)
+describe('a figure on a grid of another size', () => {
+  it('keeps each note at its time in the bar', () => {
+    const sixteenths = new Array(32).fill(false); // (a 4/4 bar, 32 slots)
+    sixteenths[0] = 'K';
+    sixteenths[2] = 'K'; // the "e"
+    sixteenths[30] = 'K'; // the last "a"
+    const mixed = notesInBarOfSize(sixteenths, 48);
+    expect(mixed).toHaveLength(48);
+    expect(mixed.map((note, i) => (note ? i : -1)).filter((i) => i >= 0)).toEqual([0, 3, 45]);
+    expect(notesInBarOfSize(mixed, 32)).toEqual(sixteenths);
+  });
+
+  it('leaves a bar of the same size as it is, and notes off the grid out', () => {
+    const bar = ['K', false, false, false];
+    expect(notesInBarOfSize(bar, 4)).toBe(bar);
+    expect(notesInBarOfSize(['K', 'K', false], 2)).toEqual(['K', false]); // (the second: no slot)
   });
 });
