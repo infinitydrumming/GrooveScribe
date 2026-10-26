@@ -14,15 +14,16 @@ The original copyright notices and credits are unchanged.
 ## 2026-10-26 — Every 32nd rhythm, in chapters
 
 - The alphabet in 1/32 notes has every rhythm a beat of 32nds can have (255),
-  in 14 chapters, the most used first (`thirtySecondChapters` in
-  `js/permutations.js`). A beat is two halves, each one of 16 shapes (the 16th
-  rhythms, twice as fast); chapter 1 puts four 32nds, two 16ths and an 8th
-  together every way round, chapter 2 adds rests, and each chapter after adds one
-  shape with every one before it, in either half of the beat. "32nd chapters" in
-  the Alphabet Options picks one (or all) to play instead of the ticked groups, a
-  bar a rhythm; its rhythms can be unticked one by one or a half at a time. Links
-  carry it as `PermChapter=3&PermPick=1-4,7`, outside `PermSet`, so older links
-  keep their ticks.
+  in 15 chapters built on the 16th alphabet (`thirtySecondChapters` in
+  `js/permutations.js`). Chapter 1 is the 16th alphabet over half a beat (the
+  1/32 groups, as one page); chapter 2 is it over the whole beat with every 16th
+  played as two 32nds. The chapters after play each 16th of a figure as a 16th,
+  a pair or the off-beat 32nd: fill-ins (16ths and pairs) first, then the
+  alphabet as 16ths and on the off-beat 32nds, then those mixed in. "32nd
+  chapters" in the Alphabet Options picks one (or all) to play instead of the
+  ticked groups, a bar a rhythm; its rhythms can be unticked one by one or a part
+  at a time. Links carry it as `PermChapter=3&PermPick=1-4,7`, outside `PermSet`,
+  so older links keep their ticks.
 - Sheet music: a note (or rest) lasting five 32nds was drawn as a triple-dotted
   quarter. Notes abc2svg can't draw as one are now written up to the next 8th
   (or 16th) of the bar, then rests (`drawnLengths` in `js/abcNotation.js`): an 8th

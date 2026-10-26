@@ -556,31 +556,32 @@ test.describe('alphabet 32nd chapters', () => {
   const inLink = (page, name) =>
     page.evaluate((name) => new URLSearchParams(location.search).get(name), name);
 
-  test('a chapter plays instead of the groups, a bar a rhythm; its ticks and the link follow', async ({
+  test('chapter 1 plays as the alphabet over half a beat; a chapter plays instead of the groups, its ticks and the link follow', async ({
     page,
   }) => {
-    // all 32nds, as the Quads figure plays them (the boxes: Quads alone)
-    await loadGroove(page, grooveUrl(groove + '&PermSet=' + '0'.repeat(20) + '1' + '0'.repeat(27)));
-    const quads = await playing(page);
+    // the 1/32 groups, every figure ticked: Singles, 16ths / off-beat 32nds, Doubles, Triples, Quads
+    await loadGroove(
+      page,
+      grooveUrl(groove + '&PermSet=00' + '11111' + '111' + '11111' + '11111' + '1' + '0'.repeat(27))
+    );
+    const alphabet = await playing(page);
 
-    await loadGroove(page, grooveUrl(groove));
+    await loadGroove(page, grooveUrl(groove + '&PermChapter=1'));
+    await expect(page.locator('#PermutationChapter')).toHaveValue('1');
+    expect(await playing(page)).toBe(alphabet);
+
     await page.selectOption('#PermutationChapter', '3');
     await expect.poll(() => inLink(page, 'PermChapter')).toBe('3');
     let abc = await page.locator('#ABCsource').inputValue();
-    expect(abc).toContain('P: Chapter 3: two 32nds and a 16th (1 a li)');
-    await expect(page.locator('#PermutationChapterOption .chapterRhythm')).toHaveCount(9);
+    expect(abc).toContain('P: Chapter 3: fill-ins on the 16ths');
+    await expect(page.locator('#PermutationChapterOption .chapterRhythm')).toHaveCount(15);
     await expect(page.locator('#PermuationOptionsSinglesGroup')).toHaveClass(/chapterOn/);
     // a rhythm unticked: one bar fewer, in the link too
     await page.click('label[for="PermutationChapterPick2"]');
-    await expect.poll(() => inLink(page, 'PermPick')).toBe('1,3-9');
+    await expect.poll(() => inLink(page, 'PermPick')).toBe('1,3-15');
     abc = await page.locator('#ABCsource').inputValue();
-    expect(abc).toContain('% Chapter 3: two 32nds and a 16th (1 a li) on "1 a li & a la ba"');
-    expect(abc).not.toContain('on "1 a li & la"');
-
-    // chapter 1's first rhythm: all 32nds, played as the Quads figure plays them
-    await loadGroove(page, grooveUrl(groove + '&PermChapter=1&PermPick=1'));
-    await expect(page.locator('#PermutationChapter')).toHaveValue('1');
-    expect(await playing(page)).toBe(quads);
+    expect(abc).toContain('% Chapter 3: fill-ins on the 16ths on "1 a li & la"');
+    expect(abc).not.toContain('on "1 li bi & la"');
 
     // off: the groups again, the link without a chapter
     await page.selectOption('#PermutationChapter', '0');

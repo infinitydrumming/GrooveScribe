@@ -121,118 +121,256 @@ function perBeatGroups(slots, unit, notesPerBeat, shapes) {
 
 // --- 32nd chapters (Infinity Drumming, 2026) ----------------------------------
 //
-// Every rhythm of a beat of 32nd notes (255 of them, the silent beat aside), in
-// chapters, the ones drummers use all the time first. A beat is two halves, an
-// 8th note each, and each half is one of 16 shapes: the 16th rhythms, twice as
-// fast. Chapter 1 puts the first three shapes together; each chapter after adds
-// one shape, in either half of the beat, with every shape before it: first in
-// the half where it is easier to place (the beat, or the & for a shape starting
-// with a rest), then in the other. Each rhythm is a bar, played every beat.
-
-// a half beat's 32nds ("1 a li bi" / "& a la ba"), most used first
-var CHAPTER_SHAPES = [
-  { notes: 'xxxx', name: 'four 32nds' },
-  { notes: 'x-x-', name: 'two 16ths' },
-  { notes: 'x---', name: 'an 8th' },
-  { notes: '----', name: 'rests' },
-  { notes: 'xxx-', name: 'two 32nds and a 16th' },
-  { notes: 'x-xx', name: 'a 16th and two 32nds' },
-  { notes: '--xx', name: 'the pickup pair' },
-  { notes: 'x--x', name: 'dotted 16th and 32nd' },
-  { notes: 'xx--', name: '32nd and dotted 16th' },
-  { notes: '---x', name: 'the pickup 32nd' },
-  { notes: '--x-', name: 'the off-beat 16th' },
-  { notes: '-xxx', name: 'three 32nds off the beat' },
-  { notes: 'xx-x', name: '32nd, 16th, 32nd' },
-  { notes: '-xx-', name: 'two 32nds off the beat' },
-  { notes: '-x-x', name: 'the off-beat 32nds' },
-  { notes: '-x--', name: 'the off-beat 32nd' },
-];
-
-// chapter 1: four 32nds, two 16ths and an 8th, every way round (shape numbers,
-// first half then second)
-var FIRST_CHAPTER = [
-  [0, 0],
-  [1, 1],
-  [0, 1],
-  [1, 0],
-  [2, 2],
-  [0, 2],
-  [2, 0],
-  [1, 2],
-  [2, 1],
-];
+// Every rhythm of a beat of 32nd notes (255, the silent beat aside), a chapter at
+// a time, built on the 16th alphabet the student knows. Chapter 1 is that
+// alphabet over half a beat (the 1/32 groups above, as one page); chapter 2 is it
+// over the whole beat with every 16th played as two 32nds. The chapters after play
+// each 16th of a figure one of three ways: as a 16th, as a pair (two 32nds) or as
+// the off-beat 32nd (the one after it). First pairs mixed in with 16ths (fill-ins),
+// then the figures as 16ths and on the off-beat 32nds, then those mixed in. Each
+// rhythm is a bar, played every beat. A few are in two chapters: all 32nds is the
+// alphabet's Quads as pairs and the 16ths all filled in, and chapter 1's are all
+// in a later one too.
 
 var COUNT_32 = ['1', 'a', 'li', 'bi', '&', 'a', 'la', 'ba'];
 
 /**
- * A beat of 32nds as its count says it: "1 a li & la", "(1) & a la ba".
+ * A beat of 32nds as its count says it: "1 a li & la", "(1) & a la ba", the &
+ * in brackets too when nothing plays on it but something after it ("1 (&) la ba").
  * @param {string} beat  8 characters, "x" a note
  */
 export function thirtySecondCount(beat) {
   var words = [beat.charAt(0) == 'x' ? '1' : '(1)'];
-  for (var i = 1; i < 8; i++) if (beat.charAt(i) == 'x') words.push(COUNT_32[i]);
+  for (var i = 1; i < 8; i++) {
+    if (i == 4 && beat.charAt(4) != 'x' && beat.indexOf('x', 5) >= 0) words.push('(&)');
+    if (beat.charAt(i) == 'x') words.push(COUNT_32[i]);
+  }
   return words.join(' ');
 }
 
-// a shape as its count says it in one half of the beat ("1 a li", "& a la")
-function shapeCount(shape, secondHalf) {
-  var words = [];
-  for (var i = 0; i < 4; i++)
-    if (shape.notes.charAt(i) == 'x') words.push(COUNT_32[i + (secondHalf ? 4 : 0)]);
-  return words.join(' ');
+// the 16th alphabet over a beat: each figure's 16ths (0 the 1, 1 the e, 2 the &, 3 the a)
+var ALPHABET_16 = [
+  { group: 'Singles', figures: [[0], [1], [2], [3]] },
+  {
+    group: '8ths / off-beat 16ths',
+    figures: [
+      [0, 2],
+      [1, 3],
+    ],
+    names: ['8ths', 'Off-beat 16ths'],
+  },
+  {
+    group: 'Doubles',
+    figures: [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 0],
+    ],
+  },
+  {
+    group: 'Triples',
+    figures: [
+      [0, 1, 2],
+      [1, 2, 3],
+      [2, 3, 0],
+      [3, 0, 1],
+    ],
+  },
+  { group: 'Quads', figures: [[0, 1, 2, 3]], names: ['Quads'] },
+];
+var SIXTEENTH = ['1', 'e', '&', 'a'];
+
+// the alphabet's figures in order: { group, name, notes }
+function alphabetFigures() {
+  var figures = [];
+  ALPHABET_16.forEach(function (g) {
+    g.figures.forEach(function (notes, i) {
+      var name = g.names ? g.names[i] : g.group + ' ' + SIXTEENTH[notes[0]];
+      figures.push({ group: g.group, name: name, notes: notes });
+    });
+  });
+  return figures;
+}
+
+// a 16th played as a 16th, a pair (two 32nds) or the off-beat 32nd (the one after it)
+var SIXTEENTH_WAY = { sixteenth: 'x-', pair: 'xx', off: '-x' };
+
+// a beat of the figure's 16ths, each played the way given for it (in its order)
+function beatPlaying(notes, ways) {
+  var cells = ['--', '--', '--', '--'];
+  notes.forEach(function (note, i) {
+    cells[note] = SIXTEENTH_WAY[ways[i]];
+  });
+  return cells.join('');
+}
+
+// a figure's own 16ths as the 32nd count says them ("1 li &")
+function sixteenthsCount(notes) {
+  return thirtySecondCount(
+    beatPlaying(
+      notes,
+      notes.map(() => 'sixteenth')
+    )
+  );
+}
+
+// some of a figure's notes (its 2nd and 3rd...: indexes) in order: one note,
+// then two (side by side first), never all of them
+function someNotes(count) {
+  var some = [];
+  for (var i = 0; i < count; i++) some.push([i]);
+  if (count == 3) some.push([0, 1], [1, 2], [0, 2]);
+  return some;
+}
+
+// a chapter of the figures given, each note played `rest` but some (in turn)
+// played `changed`: parts by figure
+function mixedChapter(name, figures, rest, changed) {
+  var rhythms = [];
+  var parts = [];
+  figures.forEach(function (figure, f) {
+    var part = 'f' + f;
+    parts.push({ part: part, name: figure.name + ': ' + sixteenthsCount(figure.notes) });
+    someNotes(figure.notes.length).forEach(function (some) {
+      var ways = figure.notes.map((_, i) => (some.indexOf(i) >= 0 ? changed : rest));
+      rhythms.push({ beat: beatPlaying(figure.notes, ways), part: part });
+    });
+  });
+  return { name: name, parts: parts, rhythms: rhythms };
+}
+
+// a chapter of the 16ths (all four) played `rest`, the alphabet's figures in turn
+// played `changed` (Quads too when `withQuads`): parts by the alphabet's groups
+function overTheSixteenths(name, rest, changed, withQuads) {
+  var rhythms = [];
+  var parts = [];
+  alphabetFigures().forEach(function (figure) {
+    if (figure.group == 'Quads' && !withQuads) return;
+    if (!parts.length || parts[parts.length - 1].name != figure.group)
+      parts.push({ part: 'g' + parts.length, name: figure.group });
+    var ways = [0, 1, 2, 3].map((note) => (figure.notes.indexOf(note) >= 0 ? changed : rest));
+    rhythms.push({ beat: beatPlaying([0, 1, 2, 3], ways), part: parts[parts.length - 1].part });
+  });
+  return { name: name, parts: parts, rhythms: rhythms };
+}
+
+// a chapter of every figure, every 16th of it played one way: parts by group
+function wholeAlphabet(name, way) {
+  var rhythms = [];
+  var parts = [];
+  alphabetFigures().forEach(function (figure) {
+    if (!parts.length || parts[parts.length - 1].name != figure.group)
+      parts.push({ part: 'g' + parts.length, name: figure.group });
+    var ways = figure.notes.map(() => way);
+    rhythms.push({ beat: beatPlaying(figure.notes, ways), part: parts[parts.length - 1].part });
+  });
+  return { name: name, parts: parts, rhythms: rhythms };
+}
+
+// chapter 1: the alphabet over half a beat, its figures in both halves (the 1/32
+// groups: Singles, 16ths / off-beat 32nds, Doubles, Triples, Quads)
+function halfBeatAlphabet() {
+  var rhythms = [];
+  var parts = [];
+  var groups = ['Singles', '16ths / off-beat 32nds', 'Doubles', 'Triples', 'Quads'];
+  ALPHABET_16.forEach(function (g, i) {
+    parts.push({ part: 'g' + i, name: groups[i] });
+    g.figures.forEach(function (notes) {
+      var beat = '--------'.split('');
+      notes.forEach(function (q) {
+        beat[q] = beat[q + 4] = 'x';
+      });
+      rhythms.push({ beat: beat.join(''), part: 'g' + i });
+    });
+  });
+  return { name: 'the alphabet over half a beat', parts: parts, rhythms: rhythms };
+}
+
+// the 16ths, pairs and off-beat 32nds all in one beat: Triples (each note a
+// different way) and Quads (the off-beat 32nds on one note or two)
+function allThreeWays(quads) {
+  var rhythms = [];
+  var parts = [];
+  if (!quads) {
+    alphabetFigures()
+      .filter((figure) => figure.group == 'Triples')
+      .forEach(function (figure, f) {
+        var part = 'f' + f;
+        parts.push({ part: part, name: figure.name + ': ' + sixteenthsCount(figure.notes) });
+        // the off-beat 32nd on each note in turn, the pair after it first
+        [0, 1, 2].forEach(function (off) {
+          [1, 2].forEach(function (step) {
+            var ways = ['', '', ''];
+            ways[off] = 'off';
+            ways[(off + step) % 3] = 'pair';
+            ways[(off + 3 - step) % 3] = 'sixteenth';
+            rhythms.push({ beat: beatPlaying(figure.notes, ways), part: part });
+          });
+        });
+      });
+    return { name: '16ths, pairs and off-beat 32nds: Triples', parts: parts, rhythms: rhythms };
+  }
+  // Quads: the off-beat 32nds on a Single (the others a pair or a 16th, some of
+  // each), or on two 16ths (the other two one of each)
+  alphabetFigures()
+    .filter((figure) => figure.notes.length <= 2)
+    .forEach(function (offs) {
+      var part = offs.notes.length == 1 ? 'one' : 'two';
+      if (!parts.length || parts[parts.length - 1].part != part)
+        parts.push({
+          part: part,
+          name: part == 'one' ? 'one off-beat 32nd' : 'two off-beat 32nds',
+        });
+      var others = [0, 1, 2, 3].filter((note) => offs.notes.indexOf(note) < 0);
+      someNotes(others.length).forEach(function (pairs) {
+        var ways = [0, 1, 2, 3].map(function (note) {
+          if (offs.notes.indexOf(note) >= 0) return 'off';
+          return pairs.indexOf(others.indexOf(note)) >= 0 ? 'pair' : 'sixteenth';
+        });
+        rhythms.push({ beat: beatPlaying([0, 1, 2, 3], ways), part: part });
+      });
+    });
+  return { name: '16ths, pairs and off-beat 32nds: Quads', parts: parts, rhythms: rhythms };
 }
 
 /**
- * The 32nd chapters: each one's name and rhythms, in order. A rhythm is its
- * beat (8 characters, "x" a note), its count, and where the chapter's new shape
- * is in it: 'beat' (the first half), 'and' (only the second half), or '' in
- * chapter 1, which is all new.
+ * The 32nd chapters: each one's name, its parts (to tick a part at a time) and
+ * rhythms in order. A rhythm is its beat (8 characters, "x" a note), its count,
+ * and its part.
  * @returns {Array<{name: string, parts: Array<{part: string, name: string}>,
  *   rhythms: Array<{beat: string, count: string, part: string}>}>}
  */
 export function thirtySecondChapters() {
-  var rhythm = function (first, second, part) {
-    var beat = CHAPTER_SHAPES[first].notes + CHAPTER_SHAPES[second].notes;
-    return { beat: beat, count: thirtySecondCount(beat), part: part };
-  };
+  var figures = alphabetFigures();
+  var twoNotes = figures.filter((figure) => figure.notes.length == 2);
+  var triples = figures.filter((figure) => figure.notes.length == 3);
   var chapters = [
-    {
-      name: 'Chapter 1: 32nds, 16ths and 8ths',
-      parts: [{ part: '', name: 'Every rhythm' }],
-      rhythms: FIRST_CHAPTER.map(function (pair) {
-        return rhythm(pair[0], pair[1], '');
-      }),
-    },
+    halfBeatAlphabet(),
+    wholeAlphabet('the alphabet as pairs', 'pair'),
+    overTheSixteenths('fill-ins on the 16ths', 'sixteenth', 'pair', true),
+    mixedChapter('fill-ins on 8ths and Doubles', twoNotes, 'sixteenth', 'pair'),
+    mixedChapter('fill-ins on Triples', triples, 'sixteenth', 'pair'),
+    wholeAlphabet('the alphabet as 16ths', 'sixteenth'),
+    wholeAlphabet('the alphabet on the off-beat 32nds', 'off'),
+    mixedChapter('16ths and off-beat 32nds: 8ths and Doubles', twoNotes, 'sixteenth', 'off'),
+    mixedChapter('16ths and off-beat 32nds: Triples', triples, 'sixteenth', 'off'),
+    overTheSixteenths('16ths and off-beat 32nds: Quads', 'sixteenth', 'off', false),
+    mixedChapter('pairs and off-beat 32nds: 8ths and Doubles', twoNotes, 'pair', 'off'),
+    mixedChapter('pairs and off-beat 32nds: Triples', triples, 'pair', 'off'),
+    overTheSixteenths('pairs and off-beat 32nds: Quads', 'pair', 'off', false),
+    allThreeWays(false),
+    allThreeWays(true),
   ];
-  for (var added = 3; added < CHAPTER_SHAPES.length; added++) {
-    var shape = CHAPTER_SHAPES[added];
-    var onBeat = [];
-    var onAnd = [];
-    for (var known = 0; known < added; known++) {
-      onBeat.push(rhythm(added, known, 'beat'));
-      onAnd.push(rhythm(known, added, 'and'));
-    }
-    if (shape.notes != '----') onBeat.push(rhythm(added, added, 'beat')); // (not the silent beat)
-    var beatFirst = shape.notes.charAt(0) == 'x';
-    var parts = [
-      { part: 'beat', name: shapeCount(shape, false) || 'rest', where: 'on the beat' },
-      { part: 'and', name: shapeCount(shape, true) || 'rest', where: 'on the &' },
-    ];
-    chapters.push({
-      name:
-        'Chapter ' +
-        (chapters.length + 1) +
-        ': ' +
-        shape.name +
-        (added > 3 ? ' (' + shapeCount(shape, false) + ')' : ''),
-      parts: (beatFirst ? parts : parts.reverse()).map(function (p) {
-        return { part: p.part, name: p.name + ' ' + p.where };
+  return chapters.map(function (chapter, c) {
+    return {
+      name: 'Chapter ' + (c + 1) + ': ' + chapter.name,
+      parts: chapter.parts,
+      rhythms: chapter.rhythms.map(function (r) {
+        return { beat: r.beat, count: thirtySecondCount(r.beat), part: r.part };
       }),
-      rhythms: beatFirst ? onBeat.concat(onAnd) : onAnd.concat(onBeat),
-    });
-  }
-  return chapters;
+    };
+  });
 }
 
 // the 32nd layout's chapters, each as a group of figures over the bar (every

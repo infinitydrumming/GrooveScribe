@@ -919,9 +919,9 @@ var escapeHTML = function (text) {
 };
 
 // "32nd chapters" (Infinity Drumming, 2026): every rhythm of a beat of 32nds, a
-// chapter at a time, the most used first (permutations.js). A chapter's rhythms
-// can be ticked off one by one, or a part at a time (its new shape on the beat,
-// on the &). Not the figures' ticks: the link has its own PermChapter / PermPick.
+// chapter at a time, built on the 16th alphabet (permutations.js). A chapter's
+// rhythms can be ticked off one by one, or a part at a time (a group or figure of
+// the alphabet). Not the figures' ticks: the link has its own PermChapter / PermPick.
 // `chosen`: 0 (off: the groups play), a chapter's number or 'all'; `picks`: the
 // chapter's rhythms to play (numbers from 1), null for all of them
 function chapterHTML(chapters, chosen, picks) {
