@@ -286,8 +286,9 @@ describe('GrooveWriter view & lifecycle', () => {
   });
 
   describe('displayNewSVG', () => {
-    // Reads #ABCsource.value, calls myGrooveUtils.renderABCtoSVG on it, and
-    // places the resulting svg/error_html into #svgTarget / #diverr.
+    // Reads #ABCsource.value, calls myGrooveUtils.renderABCtoSVG on it (the
+    // bar numbers starting lines by the clef), and places the resulting
+    // svg/error_html into #svgTarget / #diverr.
 
     it('places the rendered svg into #svgTarget and error_html into #diverr', async () => {
       const gw = await newGrooveWriter();
@@ -299,7 +300,7 @@ describe('GrooveWriter view & lifecycle', () => {
 
       gw.displayNewSVG();
 
-      expect(gw.myGrooveUtils.renderABCtoSVG).toHaveBeenCalledWith('X:1');
+      expect(gw.myGrooveUtils.renderABCtoSVG).toHaveBeenCalledWith('X:1', true);
       expect(document.getElementById('svgTarget').innerHTML).toBe('<svg>hi</svg>');
       expect(document.getElementById('diverr').innerHTML).toBe('');
     });

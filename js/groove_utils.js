@@ -5,7 +5,7 @@
 // Original Creation date: Feb 2015.
 //
 //  Copyright 2015-2020 Lou Montulli, Mike Johnston
-//  Modified by Infinity Drumming, 2026: playing along with a song, mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, plays through an iPhone's silent switch, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up, counting over the notes and its choices, menus kept on screen, more metronome clicks, a second tap closes a menu, a typed tempo kept to 30-300, tempo changes heard from the next bar line. See CHANGES.md.
+//  Modified by Infinity Drumming, 2026: playing along with a song, mid tom default groove, crash 2 / splash in the play-along highlight, sheet-music highlight hook for repeated permutation bars, auto-scroll, Brazilian swing, swing-change callback for straight bars, playback cursor delayed by the audio latency, no sheet-music cursor when there is nothing to follow, silent cursor markers, screen kept awake while playing, plays through an iPhone's silent switch, grace-note spacing and volume for flams / drags / ruffs, stopping when the practice timer is up, counting over the notes and its choices, menus kept on screen, more metronome clicks, a second tap closes a menu, a typed tempo kept to 30-300, tempo changes heard from the next bar line, bar numbers starting lines kept out of the music engine's layout. See CHANGES.md.
 //
 //  This file is part of Project Groove Scribe.
 //
@@ -119,6 +119,7 @@ import {
   figure_out_sticking_count_for_index as _figure_out_sticking_count_for_index,
   convert_sticking_counts_to_actual_counts as _convert_sticking_counts_to_actual_counts,
 } from './noteArrays.js';
+import { lineStartNumbers } from './lineStartNumbers.js';
 
 var global_num_GrooveUtilsCreated = 0;
 // This module's own URL, used by getGrooveUtilsBaseLocation() to locate sibling
@@ -825,16 +826,11 @@ function GrooveUtils() {
     };
 
     // for possible playback or linkage
+    // (Infinity Drumming, 2026: and the bar numbers starting lines, which the
+    // editor writes in itself, see lineStartNumbers.js)
+    this.numbering = null;
     this.get_abcmodel = function (tsfirst, voice_tb, music_types) {
-      /*
-			console.log(tsfirst);
-			var next = tsfirst.next;
-
-			while(next) {
-			console.log(next);
-			next = next.next;
-			}
-			 */
+      if (this.numbering) this.numbering.take(tsfirst);
     };
 
     // annotations
@@ -880,17 +876,24 @@ function GrooveUtils() {
 
   // converts incoming ABC notation source into an svg image.
   // returns an object with two items.   "svg" and "error_html"
-  root.renderABCtoSVG = function (abc_source) {
+  // (Infinity Drumming, 2026: numbersByTheClef, for music whose bar numbers
+  // starting lines engravedMusic moves by the clef: they take no room over the
+  // line's first note)
+  root.renderABCtoSVG = function (abc_source, numbersByTheClef) {
     root.abc_obj = new Abc(abcToSVGCallback);
     if ((root.myGrooveData && root.myGrooveData.showLegend) || root.isLegendVisable)
       root.abcNoteNumIndex = -15; // subtract out the legend notes for a proper index.
     else root.abcNoteNumIndex = 0;
     abcToSVGCallback.abc_svg_output = ''; // clear
     abcToSVGCallback.abc_error_output = ''; // clear
+    var numbering = numbersByTheClef ? lineStartNumbers(abc_source) : null;
+    abcToSVGCallback.numbering = numbering;
 
     root.abc_obj.tosvg('SOURCE', abc_source);
+    abcToSVGCallback.numbering = null;
+    var svg = abcToSVGCallback.abc_svg_output;
     return {
-      svg: abcToSVGCallback.abc_svg_output,
+      svg: numbering ? numbering.writtenIn(svg) : svg,
       error_html: abcToSVGCallback.abc_error_output,
     };
   };
