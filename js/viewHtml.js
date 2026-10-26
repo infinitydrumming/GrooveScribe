@@ -914,20 +914,109 @@ function tradeHTML(trade) {
   return html + '</span>\n';
 }
 
+var escapeHTML = function (text) {
+  return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+};
+
+// "32nd chapters" (Infinity Drumming, 2026): every rhythm of a beat of 32nds, a
+// chapter at a time, built on the 16th alphabet (permutations.js). A chapter's
+// rhythms can be ticked off one by one, or a part at a time (a group or figure of
+// the alphabet). Not the figures' ticks: the link has its own PermChapter / PermPick.
+// `chosen`: 0 (off: the groups play), a chapter's number or 'all'; `picks`: the
+// chapter's rhythms to play (numbers from 1), null for all of them
+function chapterHTML(chapters, chosen, picks) {
+  var option = function (value, label) {
+    return (
+      '<option value="' +
+      value +
+      '"' +
+      (String(chosen) == value ? ' selected' : '') +
+      '>' +
+      escapeHTML(label) +
+      '</option>'
+    );
+  };
+  var html =
+    '<div id="PermutationChapterOption"><span class="chapterPicker">' +
+    '<label for="PermutationChapter">32nd chapters</label> ' +
+    '<select id="PermutationChapter" onchange="myGrooveWriter.permutationChapterChange(event)">' +
+    option('0', 'off');
+  chapters.forEach(function (chapter, c) {
+    html += option(String(c + 1), chapter.name.replace(/^Chapter /, ''));
+  });
+  html += option('all', 'All ' + chapters.length + ' chapters') + '</select></span>';
+  var chapter = chosen && chosen != 'all' ? chapters[Number(chosen) - 1] : null;
+  if (chapter)
+    chapter.parts.forEach(function (part) {
+      var numbers = [];
+      chapter.figures.forEach(function (figure, i) {
+        if (figure.part == part.part) numbers.push(i + 1);
+      });
+      var picked = function (n) {
+        return !picks || picks.indexOf(n) >= 0;
+      };
+      var id = 'PermutationChapterPart' + (part.part || 'All');
+      html +=
+        '<div class="chapterPart"><span class="PermutationOption"><input type="checkbox" ' +
+        'class="myCheckbox" data-chapter="part" data-part="' +
+        part.part +
+        '" id="' +
+        id +
+        '" onClick="myGrooveWriter.chapterPartClick(event)"' +
+        (numbers.every(picked) ? ' checked' : '') +
+        '><label for="' +
+        id +
+        '">' +
+        escapeHTML(part.name) +
+        '</label></span><span class="chapterRhythms">';
+      numbers.forEach(function (n) {
+        html +=
+          '<span class="chapterRhythm"><input type="checkbox" class="myCheckbox" ' +
+          'data-chapter="pick" data-part="' +
+          part.part +
+          '" id="PermutationChapterPick' +
+          n +
+          '" onClick="myGrooveWriter.chapterPickClick(event)"' +
+          (picked(n) ? ' checked' : '') +
+          '><label for="PermutationChapterPick' +
+          n +
+          '">' +
+          escapeHTML(chapter.subLabels[n - 1]) +
+          '</label></span>';
+      });
+      html += '</span></div>';
+    });
+  return html + '</div>\n';
+}
+
+// the 32nd chapter picker ('' for other note settings) and whether a chapter
+// plays (the groups are off then)
+function chapterOptions(layout, chapter) {
+  var on = !!(layout.chapters && chapter && chapter.chosen);
+  if (!layout.chapters) return { on: false, html: '' };
+  return {
+    on: on,
+    html: chapterHTML(layout.chapters, on ? chapter.chosen : 0, on ? chapter.picks : null),
+  };
+}
+
 // `layout` is permutations.getPermutationLayout(...) for the current note
 // setting; `repeats` is the current "Play each ×" value.
 // fatBack: kick permutations leave out the kicks on the snare's backbeat
 // repCounter: the rep counter shows while it plays (a switch of this device's)
+// chapter: the 32nd chapter on, {chosen, picks} (see chapterHTML), for 1/32 notes
 export function buildPermutationOptionsHTML(
   permutationType,
   layout,
   repeats,
   fatBack,
   repCounter,
-  trade
+  trade,
+  chapter
 ) {
   if (permutationType == 'none') return '';
 
+  var chapters = chapterOptions(layout, chapter);
   var optionTypeArray = layout.groups.map(function (group) {
     return {
       id: group.id,
@@ -935,6 +1024,7 @@ export function buildPermutationOptionsHTML(
       name: group.name,
       SubOptions: group.subLabels,
       defaultOn: group.defaultOn,
+      groupClass: chapters.on ? 'PermutationOptionGroup chapterOn' : 'PermutationOptionGroup',
     };
   });
 
@@ -981,13 +1071,16 @@ export function buildPermutationOptionsHTML(
   newHTML += playEachHTML(repeats, repCounter);
   newHTML += tradeHTML(trade || { bars: 0, times: 1, after: false });
   // (the bars of the run to practise: the play bar's "Practise bars" box)
+  newHTML += chapters.html;
 
   newHTML += '<span class="PermutationOptionWrapper">';
 
   for (var optionType in optionTypeArray) {
     newHTML +=
       '' +
-      '<div class="PermutationOptionGroup" id="' +
+      '<div class="' +
+      (optionTypeArray[optionType].groupClass || 'PermutationOptionGroup') +
+      '" id="' +
       optionTypeArray[optionType].id +
       'Group">\n' +
       '<div class="PermutationOption">\n' +

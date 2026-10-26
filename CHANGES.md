@@ -11,6 +11,27 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-26 — Every 32nd rhythm, in chapters
+
+- The alphabet in 1/32 notes has every rhythm a beat of 32nds can have (255),
+  in 15 chapters built on the 16th alphabet (`thirtySecondChapters` in
+  `js/permutations.js`). Chapter 1 is the 16th alphabet over half a beat (the
+  1/32 groups, as one page); chapter 2 is it over the whole beat with every 16th
+  played as two 32nds. The chapters after play each 16th of a figure as a 16th,
+  a pair or the off-beat 32nd: fill-ins (16ths and pairs) first, then the
+  alphabet as 16ths and on the off-beat 32nds, then those mixed in. "32nd
+  chapters" in the Alphabet Options picks one (or all) to play instead of the
+  ticked groups, a bar a rhythm; its rhythms can be unticked one by one or a part
+  at a time. Links carry it as `PermChapter=3&PermPick=1-4,7`, outside `PermSet`,
+  so older links keep their ticks.
+- Sheet music: a note (or rest) lasting five 32nds was drawn as a triple-dotted
+  quarter. Notes abc2svg can't draw as one are now written up to the next 8th
+  (or 16th) of the bar, then rests (`drawnLengths` in `js/abcNotation.js`): an 8th
+  and a 32nd rest, a dotted 16th and a 16th rest, and so on.
+- A long alphabet run built its MIDI in one call that browsers refuse past about
+  64 KB (iPhones) or 125 KB (Chrome), so it didn't play. The same bytes are now
+  turned into the file a piece at a time (`codesToString` in `js/midiFile.js`).
+
 ## 2026-10-25 — Loop some bars of the song
 
 - Playing along, "Loop bars 17 to 24" (typed, or dragged across the song's wave,

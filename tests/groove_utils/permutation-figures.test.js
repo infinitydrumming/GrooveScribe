@@ -13,6 +13,9 @@ import {
   parseBarOrder,
   isPlainOrder,
   barOrderToText,
+  thirtySecondChapters,
+  thirtySecondCount,
+  getChapterSections,
 } from '../../js/permutations.js';
 
 // Permutation figures per note setting (Infinity Drumming). Each figure is one
@@ -384,6 +387,148 @@ describe('1/32 notes: the 1/16 figures over an 8th note, plus per-beat figures',
     expect(byName['16ths / Off-beat 32nds off 32nds']).toBe('-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o-o');
     expect(byName['Singles (per beat) 8']).toBe('-------o-------o-------o-------o');
     expect(byName['Triples (per beat) 7']).toBe('o-----ooo-----ooo-----ooo-----oo');
+  });
+});
+
+describe('1/32 notes: every rhythm of a beat in chapters, built on the 16th alphabet', () => {
+  const chapters = thirtySecondChapters();
+  const counts = (chapter) => chapter.rhythms.map((r) => r.count);
+  // a beat's 16ths, each played as a 16th (S), a pair (P), the off-beat 32nd (O) or not (-)
+  const ways = (beat) =>
+    [0, 2, 4, 6]
+      .map((i) => ({ 'x-': 'S', xx: 'P', '-x': 'O', '--': '-' })[beat.slice(i, i + 2)])
+      .join('');
+
+  it('has every rhythm of a beat of 32nds, the silent beat aside, a few in two chapters', () => {
+    const beats = chapters.flatMap((c) => c.rhythms.map((r) => r.beat));
+    expect(new Set(beats).size).toBe(255);
+    expect(beats).not.toContain('--------');
+    expect(beats).toHaveLength(255 + 16); // chapter 1's 15 again later, all 32nds twice
+    expect(chapters.map((c) => c.rhythms.length)).toEqual([
+      15, 15, 15, 12, 24, 15, 15, 12, 24, 14, 12, 24, 14, 24, 36,
+    ]);
+  });
+
+  it('starts with the alphabet over half a beat: the 1/32 groups, in their order', () => {
+    const layout = getPermutationLayout(32);
+    const groups = getPermutationSections(layout).filter(
+      (s) => s.groupIndex > 0 && !s.group.name.includes('per beat')
+    );
+    expect(chapters[0].name).toBe('Chapter 1: the alphabet over half a beat');
+    expect(chapters[0].rhythms.map((r) => r.beat)).toEqual(
+      groups.map((s) => tab(layout, s).slice(0, 8).replace(/o/g, 'x'))
+    );
+    expect(counts(chapters[0]).slice(0, 6)).toEqual([
+      '1 &',
+      '(1) a (&) a',
+      '(1) li (&) la',
+      '(1) bi (&) ba',
+      '1 li & la',
+      '(1) a bi (&) a ba',
+    ]);
+    expect(chapters[0].parts.map((p) => p.name)).toEqual([
+      'Singles',
+      '16ths / off-beat 32nds',
+      'Doubles',
+      'Triples',
+      'Quads',
+    ]);
+  });
+
+  it('then the 16th alphabet over the beat, every 16th played as two 32nds', () => {
+    expect(chapters[1].name).toBe('Chapter 2: the alphabet as pairs');
+    expect(counts(chapters[1])).toEqual([
+      '1 a',
+      '(1) li bi',
+      '(1) & a',
+      '(1) (&) la ba',
+      '1 a & a',
+      '(1) li bi (&) la ba',
+      '1 a li bi',
+      '(1) li bi & a',
+      '(1) & a la ba',
+      '1 a (&) la ba',
+      '1 a li bi & a',
+      '(1) li bi & a la ba',
+      '1 a & a la ba',
+      '1 a li bi (&) la ba',
+      '1 a li bi & a la ba',
+    ]);
+    expect(chapters[1].rhythms.every((r) => /^[P-]+$/.test(ways(r.beat)))).toBe(true);
+  });
+
+  it('then fill-ins: all four 16ths, the alphabet picking which are pairs', () => {
+    expect(chapters[2].name).toBe('Chapter 3: fill-ins on the 16ths');
+    expect(counts(chapters[2]).slice(0, 5)).toEqual([
+      '1 a li & la',
+      '1 li bi & la',
+      '1 li & a la',
+      '1 li & la ba',
+      '1 a li & a la',
+    ]);
+    expect(chapters[2].rhythms.every((r) => /^[SP]{4}$/.test(ways(r.beat)))).toBe(true);
+  });
+
+  it('plays each 16th of a figure as a 16th, a pair or the off-beat 32nd, a mix a chapter', () => {
+    const mixOf = (chapter) => [
+      ...new Set(chapter.rhythms.map((r) => ways(r.beat).replace(/-/g, ''))),
+    ];
+    const uses = (chapter) =>
+      [
+        ...new Set(
+          chapter.rhythms.flatMap((r) =>
+            [...new Set(ways(r.beat).replace(/-/g, ''))].sort().join('')
+          )
+        ),
+      ].sort();
+    expect(chapters.slice(3).map((c) => c.name.replace(/^Chapter \d+: /, ''))).toEqual([
+      'fill-ins on 8ths and Doubles',
+      'fill-ins on Triples',
+      'the alphabet as 16ths',
+      'the alphabet on the off-beat 32nds',
+      '16ths and off-beat 32nds: 8ths and Doubles',
+      '16ths and off-beat 32nds: Triples',
+      '16ths and off-beat 32nds: Quads',
+      'pairs and off-beat 32nds: 8ths and Doubles',
+      'pairs and off-beat 32nds: Triples',
+      'pairs and off-beat 32nds: Quads',
+      '16ths, pairs and off-beat 32nds: Triples',
+      '16ths, pairs and off-beat 32nds: Quads',
+    ]);
+    expect(uses(chapters[3])).toEqual(['PS']);
+    expect(uses(chapters[5])).toEqual(['S']);
+    expect(uses(chapters[6])).toEqual(['O']);
+    expect(uses(chapters[8])).toEqual(['OS']);
+    expect(uses(chapters[11])).toEqual(['OP']);
+    expect(uses(chapters[14])).toEqual(['OPS']);
+    expect(mixOf(chapters[13]).every((m) => m.length == 3)).toBe(true);
+    expect(counts(chapters[4]).slice(0, 4)).toEqual([
+      '1 a li &',
+      '1 li bi &',
+      '1 li & a',
+      '1 a li bi &',
+    ]);
+  });
+
+  it('plays a chapter rhythm every beat of the bar, in any x/4, and only for 1/32 notes', () => {
+    const layout = getPermutationLayout(32, 3, 4);
+    const sections = getChapterSections(layout, 3, [1, 5]);
+    expect(sections.map((s) => s.label)).toEqual(['1 a li & la', '1 a li & a la']);
+    expect(tab(layout, sections[0])).toBe('ooo-o-o-'.repeat(3));
+    expect(sections[0].group.name).toBe('Chapter 3: fill-ins on the 16ths');
+    expect(getChapterSections(layout, 3)).toHaveLength(15);
+    expect(getChapterSections(layout, 3, [])).toHaveLength(0);
+    expect(getChapterSections(layout, 'all')).toHaveLength(271);
+    expect(getPermutationLayout(16).chapters).toBeUndefined();
+    expect(getPermutationLayout(24).chapters).toBeUndefined();
+  });
+
+  it('says a beat as its count does, a silent 1 and & in brackets', () => {
+    expect(thirtySecondCount('xxxxxxxx')).toBe('1 a li bi & a la ba');
+    expect(thirtySecondCount('----x-xx')).toBe('(1) & la ba');
+    expect(thirtySecondCount('x-----xx')).toBe('1 (&) la ba');
+    expect(thirtySecondCount('-x------')).toBe('(1) a');
+    expect(thirtySecondCount('-----x--')).toBe('(1) (&) a');
   });
 });
 

@@ -13,6 +13,8 @@
 //                                               2 bars (1 if not given)
 //   FatBack=1                                   kick figures without the kicks
 //                                               on the snare's backbeat
+//   PermChapter=3&PermPick=1-4,7                a 32nd chapter (or all) instead of
+//                                               the ticked groups, some of its rhythms
 //   SpeedUp=5,2m  SpeedUp=5,16b,once,to120      bpm, every 2 minutes / 16 bars,
 //                                               only once, stop at 120
 //   CountIn=1  ClickSolo=1  ClickStart=AND
@@ -40,8 +42,12 @@ var PERMUTATION_TYPES = [
 
 /**
  * @typedef {{type: string, boxes: string, playEach: number, bars: string, fatBack?: boolean,
- *   ostinato?: number, trade?: (TradeSetting|null)}} PermutationSetting
+ *   ostinato?: number, trade?: (TradeSetting|null), chapter?: (number|string),
+ *   picks?: (number[]|null)}} PermutationSetting
  *   boxes: each permutation option checkbox, in order, '1' ticked / '0' not;
+ *   chapter: the 32nd chapter played instead of the ticked groups (a number,
+ *   or 'all'; Infinity Drumming, 2026), picks: its rhythms played (from 1), all
+ *   when null;
  *   bars: the bars of the run to practise ("3-6, 9"), '' for all;
  *   fatBack: a kick permutation leaves out the kicks on the snare's backbeat;
  *   ostinato: the groove's first bars the figures go over (links from before
@@ -180,7 +186,47 @@ function permutationToUrl(perm) {
   if (perm.fatBack) url += '&FatBack=1';
   if (perm.ostinato > 1) url += '&Ostinato=' + perm.ostinato;
   if (perm.trade && perm.trade.bars) url += '&Trade=' + tradeToText(perm.trade);
+  if (perm.chapter) {
+    url += '&PermChapter=' + perm.chapter;
+    if (perm.chapter != 'all' && perm.picks) url += '&PermPick=' + picksToText(perm.picks);
+  }
   return url;
+}
+
+// a chapter's rhythms as a link has them: "1-4,7" (two or more in a row as a range)
+function picksToText(picks) {
+  var sorted = picks.slice().sort(function (a, b) {
+    return a - b;
+  });
+  var parts = [];
+  for (var i = 0; i < sorted.length; i++) {
+    var from = sorted[i];
+    while (i + 1 < sorted.length && sorted[i + 1] == sorted[i] + 1) i++;
+    parts.push(sorted[i] > from ? from + '-' + sorted[i] : String(from));
+  }
+  return parts.join(',') || '0';
+}
+
+/** @returns {number[]} the rhythms in "1-4,7" (from 1, none for "0") */
+function picksFromText(text) {
+  var picks = [];
+  String(text)
+    .split(',')
+    .forEach(function (part) {
+      var range = /^\s*(\d+)(?:-(\d+))?\s*$/.exec(part);
+      if (!range) return;
+      var from = Number(range[1]);
+      var to = Math.min(Number(range[2] || range[1]), from + 99);
+      for (var n = from; n <= to; n++) if (n >= 1 && picks.indexOf(n) < 0) picks.push(n);
+    });
+  return picks;
+}
+
+/** @returns {number|string} a chapter's number, 'all', or 0 for none */
+function chapterFromText(text) {
+  var value = String(text || '').trim();
+  if (value.toLowerCase() == 'all') return 'all';
+  return whole(value || '0', 0, 99, 0);
 }
 
 /** @param {TradeSetting} trade */
@@ -290,6 +336,14 @@ export function practiceSettingsFromUrl(get) {
       fatBack: get('FatBack', '0') == '1',
       ostinato: whole(get('Ostinato', '1'), 1, 99, 1),
     };
+  if (settings.permutation) {
+    var chapter = chapterFromText(get('PermChapter', ''));
+    if (chapter) {
+      settings.permutation.chapter = chapter;
+      var picks = get('PermPick', '');
+      settings.permutation.picks = chapter != 'all' && picks !== '' ? picksFromText(picks) : null;
+    }
+  }
   var trade = settings.permutation && tradeFromText(get('Trade', ''));
   if (trade) settings.permutation.trade = trade;
   settings.speedUp = speedUpFromText(get('SpeedUp', ''));

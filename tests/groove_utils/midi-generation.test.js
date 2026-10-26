@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { newGrooveUtils, installMidiGlobal } from '../helpers/legacyLoader.js';
+import { codesToString, newExactTimeTrack } from '../../js/midiFile.js';
 
 // Regression coverage for the MIDI-generation functions in groove_utils.js:
 //   - create_MIDIURLFromGrooveData      (main entry: grooveData -> data: URL)
@@ -388,5 +389,30 @@ describe('GrooveUtils MIDI generation', () => {
       gu.midiResetNoteHasChanged();
       expect(cb.doesMidiDataNeedRefresh(gu)).toBe(false);
     });
+  });
+});
+
+// Infinity Drumming, 2026: a long run's MIDI. jsmidgen made each track's string
+// with one String.fromCharCode.apply call, which browsers refuse past 65,536
+// bytes (Safari) or about 125,000 (Chrome): a long alphabet run didn't play.
+describe('MIDI for a long run', () => {
+  beforeEach(async () => {
+    await installMidiGlobal();
+  });
+
+  it('makes the same string as one call would, a piece at a time', () => {
+    const bytes = Array.from({ length: 60000 }, (_, i) => (i * 7919) % 256);
+    expect(codesToString(bytes)).toBe(String.fromCharCode.apply(null, bytes));
+    expect(codesToString([])).toBe('');
+  });
+
+  it('builds a track far longer than a browser takes in one call', () => {
+    const track = newExactTimeTrack();
+    for (let i = 0; i < 60000; i++) track.addNoteOn(9, 38, 16, 85);
+    const file = new globalThis.Midi.File();
+    file.addTrack(track);
+    const bytes = file.toBytes();
+    expect(bytes.length).toBeGreaterThan(200000);
+    expect(bytes.slice(0, 4)).toBe('MThd');
   });
 });

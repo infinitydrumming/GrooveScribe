@@ -1730,6 +1730,58 @@ body.selectingNotes #measureContainer .notes-row-container {
   font-weight: 700;
   cursor: pointer;
 }
+/* "32nd chapters": every rhythm of a beat of 32nds, a chapter at a time
+ * (Infinity Drumming, 2026); while one plays, the groups below it are off */
+#PermutationChapterOption {
+  margin: 6px 0 10px 10px;
+}
+#PermutationChapterOption .chapterPicker {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 100%;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--id-navy-900);
+}
+#PermutationChapter {
+  max-width: 100%;
+  min-height: 36px;
+  padding: 4px 8px;
+  border: 2px solid var(--id-navy-900);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--id-navy-900);
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#PermutationChapterOption .chapterPart {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--id-border);
+}
+#PermutationChapterOption .chapterPart .PermutationOption {
+  display: block;
+  height: auto;
+  font-weight: 700;
+}
+#PermutationChapterOption .chapterRhythms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 4px 0 0 4px;
+}
+#PermutationChapterOption .chapterRhythm {
+  white-space: nowrap;
+}
+.PermutationOptionGroup.chapterOn {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
 /* a trade bar in the grid: every line shows, as it plays as written */
 #measureContainer .staff-container.tradeBar {
   border: 2px solid #e9b46a;

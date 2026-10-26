@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1224 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **133 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1236 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **134 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -66,7 +66,8 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `abcNotation.js` — grooveData → ABC (takes `gu`).
 - `browserInfo.js` — user-agent / touch probes.
 - `permutations.js` — pure permutation-mode note-array generators (+ kick-array merge/filter), and the
-  figure layouts per note setting and time signature (`getPermutationLayout(division, top, bottom)`).
+  figure layouts per note setting and time signature (`getPermutationLayout(division, top, bottom)`);
+  the 32nd layout's `chapters` (`thirtySecondChapters`: every rhythm of a beat of 32nds, built on the 16th alphabet).
 - `viewHtml.js` — pure HTML string builders (staff container, permutation-options menu).
 - `updateCheck.js` — the "new version is ready" bar (compares its own `?v=` with `version.json`).
 - `metronome.js` — the Click menu's settings (`MetronomeFreq`) and the exactly timed clicks
@@ -145,6 +146,19 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   `permutationCheckboxes()` (as "Fat back" does, `FatBack=1`, and the device's "Rep counter"
   switch), or new groups go through
   `layout.groupsInOlderLinks`.
+- **32nd chapters** (`PermChapter=3&PermPick=1-4,7`, `data-chapter` boxes outside `PermSet`): all 255
+  rhythms of a beat of 32nds in 15 chapters built on the 16th alphabet (`ALPHABET_16`): chapter 1 is it over
+  half a beat (= the 1/32 groups, byte-identical MIDI; the functional E2E checks it), chapter 2 over the beat
+  with every 16th as a pair; the rest play each 16th of a figure as a 16th, a pair or the off-beat 32nd
+  (`SIXTEENTH_WAY`), a mix a chapter. 16 rhythms are in two chapters. A chosen chapter replaces the ticked
+  groups (`tickedPermutationSections`), a bar a rhythm. Links number chapters and their rhythms by position:
+  reordering chapters after release changes what old links play.
+- **Note lengths abc2svg can't draw** (5/32 came out as a triple-dotted quarter): the straight-bar
+  writer cuts them at the next 8th (else 16th) of the bar, rests after (`drawnLengths`); hands and feet
+  only, the stickings voice keeps its `x` spacers.
+- **Long MIDI runs**: jsmidgen's `codes2Str` is one `String.fromCharCode.apply` per track, refused past
+  65,536 bytes on iPhones (~125,000 Chrome); `newExactTimeTrack` swaps in `codesToString` (same bytes,
+  8 KB at a time).
 - **Permutation runs** play over an ostinato of the groove's first bars (`get_ostinato_bars()`, up to
   `MAX_OSTINATO_BARS`): bar `n` of the run is figure `n / (repeats × bars)` over ostinato bar
   `n % bars`; the music writes each figure once over the bars. A link says its ostinato's bars

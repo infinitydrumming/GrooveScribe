@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { newGrooveUtils } from '../helpers/legacyLoader.js';
+import { drawnLengths } from '../../js/abcNotation.js';
 
 // Regression coverage for the ABC-notation generation functions in groove_utils.js:
 //   - get_top_ABC_BoilerPlate            (header/boilerplate string)
@@ -329,6 +330,54 @@ describe('GrooveUtils ABC notation generation', () => {
 
       expect(out).toContain('!accent![c8F8^d,8]');
       expect(out).not.toMatch(/F\^d,/);
+    });
+
+    // Infinity Drumming, 2026: abc2svg draws a 5/32 note as a triple-dotted quarter
+    it('writes a note or rest 5 32nds long as one to the next 8th note, then a rest', () => {
+      const handsOf = (bar) => {
+        const gd = gu.getGrooveDataFromUrlString(
+          '?TimeSig=4/4&Div=32&Tempo=60&Measures=1&H=|-|&K=|-|&S=|' + bar + '|'
+        );
+        const { sticking, hh, snare, kick, toms } = buildFullSizeArrays(gd);
+        const out = gu.create_ABC_from_snare_HH_kick_arrays(
+          sticking,
+          hh,
+          snare,
+          kick,
+          toms,
+          '|\n',
+          hh.length,
+          gd.timeDivision,
+          gu.notesPerMeasureInFullSizeArray(false, gd.numBeats, gd.noteValue),
+          true,
+          gd.numBeats,
+          gd.noteValue
+        );
+        return out.split('%%voicemap drum\n')[1].trim();
+      };
+      // 1 . . bi | 1 a (a double-dotted 8th: drawn right) | 1 . . . . a | 1 li bi
+      expect(handsOf('o--o----' + 'oo------' + 'o----o--' + 'o-oo----')).toBe(
+        'c3c1z4 c1c7 c4z1c3 c2c1c1z4 ||'
+      );
+      // a beat starting with 5 32nds' rest
+      expect(handsOf('-----o--' + 'o-------' + 'o-------' + 'o-------')).toBe('z4z1c3 c8 c8 c8 ||');
+    });
+  });
+
+  describe('drawnLengths: lengths abc2svg can draw', () => {
+    it('cuts a length it cannot at an 8th note, else a 16th, of the bar', () => {
+      expect(drawnLengths(0, 5)).toEqual([4, 1]);
+      expect(drawnLengths(1, 5)).toEqual([3, 2]);
+      expect(drawnLengths(2, 5)).toEqual([2, 3]);
+      expect(drawnLengths(3, 5)).toEqual([1, 4]);
+      expect(drawnLengths(0, 10)).toEqual([8, 2]); // (a 6/8 beat of 16ths)
+      expect(drawnLengths(4, 9)).toEqual([8, 1]);
+    });
+
+    it('leaves the lengths it can draw alone, dotted and double-dotted too', () => {
+      [1, 2, 3, 4, 6, 7, 8, 12].forEach((length) =>
+        expect(drawnLengths(length % 4, length)).toEqual([length])
+      );
     });
   });
 

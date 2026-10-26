@@ -548,6 +548,48 @@ test.describe('alphabet trade bars', () => {
   });
 });
 
+// Infinity Drumming, 2026: every rhythm of a beat of 32nds, a chapter at a time
+test.describe('alphabet 32nd chapters', () => {
+  const groove =
+    '?TimeSig=4/4&Div=32&Tempo=80&Measures=1&Perm=snare_16ths' +
+    '&H=|x---x---x---x---x---x---x---x---|&S=|-|&K=|o---------------o---------------|';
+  const inLink = (page, name) =>
+    page.evaluate((name) => new URLSearchParams(location.search).get(name), name);
+
+  test('chapter 1 plays as the alphabet over half a beat; a chapter plays instead of the groups, its ticks and the link follow', async ({
+    page,
+  }) => {
+    // the 1/32 groups, every figure ticked: Singles, 16ths / off-beat 32nds, Doubles, Triples, Quads
+    await loadGroove(
+      page,
+      grooveUrl(groove + '&PermSet=00' + '11111' + '111' + '11111' + '11111' + '1' + '0'.repeat(27))
+    );
+    const alphabet = await playing(page);
+
+    await loadGroove(page, grooveUrl(groove + '&PermChapter=1'));
+    await expect(page.locator('#PermutationChapter')).toHaveValue('1');
+    expect(await playing(page)).toBe(alphabet);
+
+    await page.selectOption('#PermutationChapter', '3');
+    await expect.poll(() => inLink(page, 'PermChapter')).toBe('3');
+    let abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('P: Chapter 3: fill-ins on the 16ths');
+    await expect(page.locator('#PermutationChapterOption .chapterRhythm')).toHaveCount(15);
+    await expect(page.locator('#PermuationOptionsSinglesGroup')).toHaveClass(/chapterOn/);
+    // a rhythm unticked: one bar fewer, in the link too
+    await page.click('label[for="PermutationChapterPick2"]');
+    await expect.poll(() => inLink(page, 'PermPick')).toBe('1,3-15');
+    abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('% Chapter 3: fill-ins on the 16ths on "1 a li & la"');
+    expect(abc).not.toContain('on "1 li bi & la"');
+
+    // off: the groups again, the link without a chapter
+    await page.selectOption('#PermutationChapter', '0');
+    await expect.poll(() => inLink(page, 'PermChapter')).toBe(null);
+    await expect(page.locator('#PermuationOptionsSinglesGroup')).not.toHaveClass(/chapterOn/);
+  });
+});
+
 // a song of kicks (a 16-bit mono WAV): `bpm`, the first on `bar1` (s), louder on each 1;
 // `tone`: a 1 kHz tone for 50 ms from that time (s)
 function kickSong(bpm, bar1, seconds, tone) {
