@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1236 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **134 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1247 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **135 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -105,6 +105,8 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `gridState.js` — the DOM grid **read** layer: per-cell state (`is_*_on`/`get_*_state`)
   and whole-measure array readers (`get32NoteArrayFromClickableUI`, `muteArrayFromClickableUI`).
   Reads the ambient global `document`; caller state injected via ctx/callbacks.
+- `lineStartNumbers.js` — the bar numbers starting lines, kept out of abc2svg's layout (through its
+  `get_abcmodel` hook) and written in afterwards where abc2svg would have put them (see the engraving gotcha).
 
 Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` etc.),
 `grooves.js` (built-in groove library).
@@ -176,6 +178,14 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   letters: `%%partsfont calibri-Bold 18 box` once a groove has sections, ×N as `"_×N"` before the feet's
   end repeat) get round corners, and a bar number starting a line (`x` under 100) moves by the clef just
   over the stave, as abc2svg stacks it over the first note's stem. `musicLineBroken` still reads the raw SVG.
+  abc2svg also keeps room over that first note for the number (`y_set` in its `draw_measnb`), which pushed
+  the note's accent, its count and the line's count row up (from bar 10 on; a wide page's buckets even
+  from bar 2), so the editor gives abc2svg none (`renderABCtoSVG(abc, true)`): `lineStartNumbers.js`
+  numbers each line-ending bar 0.5 in `get_abcmodel` (drawn neither at the bar nor at the next line's
+  start), then writes each number in where `draw_measnb` would have (`s.x - s.wl` of the line's first
+  symbol, `nl === false` after abc2svg cuts the lines), first in the stave's text group. Only the editor
+  does it (embeds and downloads keep abc2svg's numbers, which stay over the first note). The vendored
+  engine is untouched; the functional E2E checks the numbers match abc2svg's own.
 - **The editor puts each glyph on the page once** (`defineGlyphsOnce` in `displayNewSVG`): with
   `%%fullsvg`, abc2svg 1.3.2 repeats every earlier line's `<defs>` in each line (quadratic: seconds
   for a long permutation run). The golden master snapshots that page form; `musicLineBroken` still

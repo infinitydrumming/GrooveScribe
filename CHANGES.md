@@ -11,6 +11,18 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-26 — Accents and counts level at the start of a line
+
+- Sheet music: the music engine kept room over a line's first note for the bar
+  number starting the line, which the editor then moves by the clef. That pushed
+  the first note's accent (from bar 10 on), its count ("1", on a wide page) and
+  the line's whole row of counts up above the rest, and made those lines taller.
+  The engine is now given no bar number at a line's start, and the editor writes
+  each one in afterwards where the engine would have put it
+  (`js/lineStartNumbers.js`, through the engine's own `get_abcmodel` hook; the
+  engine itself is unchanged). Every line's accents and counts now sit in the same
+  rows. Downloads and embedded grooves draw their bar numbers as before.
+
 ## 2026-10-26 — Every 32nd rhythm, in chapters
 
 - The alphabet in 1/32 notes has every rhythm a beat of 32nds can have (255),

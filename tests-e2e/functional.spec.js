@@ -590,6 +590,80 @@ test.describe('alphabet 32nd chapters', () => {
   });
 });
 
+// Infinity Drumming, 2026: the editor writes in the bar numbers starting lines
+// (abc2svg kept room for them over the first note, which pushed its accent, its
+// count and the line's counts up, from bar 10 on)
+test.describe('bar numbers starting lines', () => {
+  test('are where abc2svg puts them, and leave every line of an accent grid level', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 412, height: 900 });
+    await loadGroove(
+      page,
+      grooveUrl(
+        '?TimeSig=4/4&Div=32&Tempo=80&Measures=1&H=|-|&K=|-|&S=|-|&Perm=snare_16ths&PermChapter=2' +
+          '&Count=bold&PermSet=1' +
+          '0'.repeat(47)
+      )
+    );
+    const music = await page.evaluate(() => {
+      const gu = window.myGrooveWriter.myGrooveUtils;
+      const abc = document.getElementById('ABCsource').value;
+      const stave = (line) => /<path class="stroke" d="m0\.00 ([\d.]+)\nh/.exec(line);
+      // each line's first bar number: its line, number and place across
+      const numbers = (svg) =>
+        svg
+          .split(/(?=<svg[\s>])/)
+          .filter(stave)
+          .map((line, i) => {
+            const n =
+              /<g transform="translate\(0,[-\d.]+\)">\n<text class="f\d+_\d+" x="([\d.]+)" y="[-\d.]+">(\d+)</.exec(
+                line
+              );
+            return n && i + ': ' + n[2] + ' at ' + n[1];
+          })
+          .filter(Boolean);
+      // on the page, each line's accents and counts: their heights over the stave
+      const rows = [...document.querySelectorAll('#svgTarget svg')]
+        .filter((svg) => stave(svg.outerHTML))
+        .map((svg) => {
+          const y = Number(stave(svg.outerHTML)[1]);
+          const heights = (elements, at) => [
+            ...new Set(elements.map((e) => (at(e) || 0).toFixed(2))),
+          ];
+          const group = svg.querySelector('g[transform="translate(0,' + y.toFixed(2) + ')"]');
+          return {
+            accents: heights(
+              [...svg.querySelectorAll('use')].filter(
+                (use) => use.getAttribute('xlink:href') == '#accent'
+              ),
+              (use) => y - Number(use.getAttribute('y'))
+            ),
+            // (the first line's counts are with its heading)
+            counts: heights(
+              [...(group ? group.querySelectorAll('text') : [])].filter(
+                (text) => !text.getAttribute('text-anchor')
+              ),
+              (text) => -Number(text.getAttribute('y'))
+            ),
+          };
+        });
+      return {
+        ours: numbers(gu.renderABCtoSVG(abc, true).svg),
+        abc2svg: numbers(gu.renderABCtoSVG(abc).svg),
+        rows,
+      };
+    });
+    expect(music.ours).toHaveLength(14); // (bars 2 to 15)
+    expect(music.ours).toEqual(music.abc2svg);
+    // every line after the first: one row of accents, one of counts, the same in each
+    const rows = music.rows.slice(1).map((row) => JSON.stringify(row));
+    expect(new Set(rows).size).toBe(1);
+    expect(music.rows[1].accents).toHaveLength(1);
+    expect(music.rows[1].counts).toHaveLength(1);
+  });
+});
+
 // a song of kicks (a 16-bit mono WAV): `bpm`, the first on `bar1` (s), louder on each 1;
 // `tone`: a 1 kHz tone for 50 ms from that time (s)
 function kickSong(bpm, bar1, seconds, tone) {
