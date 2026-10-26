@@ -728,6 +728,62 @@ function snare_HH_kick_ABC_for_triplets(
   return ABC_String;
 }
 
+// Infinity Drumming, 2026: the lengths (in 32nds) abc2svg draws as one note; a
+// 5/32 note comes out as a triple-dotted quarter, for one.
+var DRAWN_LENGTHS = [1, 2, 3, 4, 6, 7, 8, 12, 14, 16, 24, 28, 32];
+
+/**
+ * A length abc2svg can't draw, as lengths it can: the note's own first, up to an
+ * 8th note of the bar (else a 16th) as far as it can, then rests for the rest of
+ * it (a drum doesn't ring on), each ending on one too: a note on "1" lasting 5
+ * 32nds is an 8th and a 32nd rest, one on "a" a dotted 16th and a 16th rest.
+ * @param {number} at  where it starts in the bar (32nds)
+ * @param {number} length  how long it is (32nds)
+ * @returns {number[]}
+ */
+export function drawnLengths(at, length) {
+  var parts = [];
+  while (DRAWN_LENGTHS.indexOf(length) < 0) {
+    var part = 1;
+    [4, 2].some(function (grid) {
+      for (var m = length - 1; m >= 1; m--)
+        if (DRAWN_LENGTHS.indexOf(m) >= 0 && (at + m) % grid === 0) {
+          part = m;
+          return true;
+        }
+      return false;
+    });
+    parts.push(part);
+    at += part;
+    length -= part;
+  }
+  parts.push(length);
+  return parts;
+}
+
+// how many slots from `from` (counting it) until a note, `limit` at most
+function slotsToNextNote(arrays, from, limit) {
+  var slots = 1;
+  while (slots < limit && testArrayOfArraysForEquality(arrays, from + slots, false)) slots++;
+  return slots;
+}
+
+// A note at slot i as long as abc2svg can draw it (Infinity Drumming, 2026): one
+// it can't is cut short, rests after it; at a group's start, its rest likewise
+function drawnNoteABC(arrays, i, end_of_group, position) {
+  var abc = getABCforNote(arrays, i, end_of_group, 1);
+  if (!abc) return abc;
+  var parts = drawnLengths(position, slotsToNextNote(arrays, i, end_of_group));
+  if (parts.length == 1) return abc;
+  return getABCforNote(arrays, i, parts[0], 1) + 'z' + parts.slice(1).join('z');
+}
+
+function drawnRestABC(arrays, i, length, position) {
+  var abc = getABCforRest(arrays, i, length, 1, false);
+  if (!abc) return abc;
+  return 'z' + drawnLengths(position, slotsToNextNote(arrays, i, length)).join('z');
+}
+
 // The beamed group note i of a bar (in 32nd notes) is in: whether it starts or
 // ends the group, how far it is to the group's end, and how long a rest at its
 // start can be.  Even groups (abc_gen_note_grouping_size, the last one cut short
@@ -794,6 +850,7 @@ function snare_HH_kick_ABC_for_quads(
   var beamEnds = beamGroupEnds(timeSigTop, timeSigBottom, notes_per_measure);
   for (var i = 0; i < num_notes; i++) {
     var group = quadsBeamGroupAt(i, notes_per_measure, timeSigTop, timeSigBottom, beamEnds);
+    var position = i % notes_per_measure; // (the notes' lengths: drawnLengths)
     var grouping_size_for_rests = group.restLength;
     var end_of_group = group.toEnd;
 
@@ -807,36 +864,21 @@ function snare_HH_kick_ABC_for_quads(
         true
       );
 
-      if (kick_stems_up) {
-        hh_snare_voice_string += getABCforRest(
-          all_drum_array_of_array,
-          i,
-          grouping_size_for_rests,
-          scaler,
-          false
-        );
-        kick_voice_string = '';
-      } else {
-        hh_snare_voice_string += getABCforRest(
-          all_drum_array_of_array,
-          i,
-          grouping_size_for_rests,
-          scaler,
-          false
-        );
-        kick_voice_string += getABCforRest([kick_array], i, grouping_size_for_rests, scaler, false);
-      }
+      hh_snare_voice_string += drawnRestABC(
+        all_drum_array_of_array,
+        i,
+        grouping_size_for_rests,
+        position
+      );
+      if (kick_stems_up) kick_voice_string = '';
+      else kick_voice_string += drawnRestABC([kick_array], i, grouping_size_for_rests, position);
     }
 
     stickings_voice_string += getABCforNote([sticking_array], i, end_of_group, scaler);
 
-    if (kick_stems_up) {
-      hh_snare_voice_string += getABCforNote(all_drum_array_of_array, i, end_of_group, scaler);
-      kick_voice_string = '';
-    } else {
-      hh_snare_voice_string += getABCforNote(all_drum_array_of_array, i, end_of_group, scaler);
-      kick_voice_string += getABCforNote([kick_array], i, end_of_group, scaler);
-    }
+    hh_snare_voice_string += drawnNoteABC(all_drum_array_of_array, i, end_of_group, position);
+    if (kick_stems_up) kick_voice_string = '';
+    else kick_voice_string += drawnNoteABC([kick_array], i, end_of_group, position);
 
     if (group.isLast) {
       stickings_voice_string += ' ';

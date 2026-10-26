@@ -2099,6 +2099,7 @@ function GrooveWriter() {
         showHideCSS_ClassVisibility('.snare-container', true, true); // show it
         class_permutation_type = 'none';
         class_trade.bars = 0; // (its trade bars stay, as the groove's bars)
+        setPermutationChapter(0, null);
 
         unselectButton(document.getElementById('permutationAnchor'));
         document.getElementById('PermutationOptions').innerHTML = root.HTMLforPermutationOptions();
@@ -2653,6 +2654,102 @@ function GrooveWriter() {
     return !!(sub && sub.checked);
   }
 
+  // The 32nd chapters (Infinity Drumming, 2026): every rhythm of a beat of 32nds,
+  // a chapter at a time, the most used first. A chapter plays instead of the
+  // ticked groups: 0 none, a chapter's number, or 'all'; and of that chapter the
+  // rhythms ticked (their numbers from 1), null for all of them.
+  var class_permutation_chapter = /** @type {number|string} */ (0);
+  var class_chapter_picks = /** @type {number[]|null} */ (null);
+
+  function chapterOn(layout) {
+    return !!(class_permutation_chapter && layout && layout.chapters);
+  }
+
+  // the figures the run plays: the chapter's, or the ticked groups'
+  function tickedPermutationSections(layout) {
+    if (chapterOn(layout))
+      return _perm.getChapterSections(layout, class_permutation_chapter, class_chapter_picks);
+    return _perm.getPermutationSections(layout).filter(isPermutationSectionShown);
+  }
+
+  // a chapter (or 'all', or none) to play; a chapter's own number must be one the
+  // 32nd layout has, its picks some of its rhythms (any others are left out)
+  function setPermutationChapter(chapter, picks) {
+    var layout = get_permutation_layout();
+    var count = layout && layout.chapters ? layout.chapters.length : 0;
+    var n = parseInt(String(chapter), 10);
+    if (chapter == 'all') class_permutation_chapter = 'all';
+    else class_permutation_chapter = n >= 1 && n <= count ? n : 0;
+    var rhythms =
+      typeof class_permutation_chapter == 'number' && class_permutation_chapter
+        ? layout.chapters[class_permutation_chapter - 1].figures.length
+        : 0;
+    class_chapter_picks =
+      picks && rhythms
+        ? picks.filter(function (pick) {
+            return pick >= 1 && pick <= rhythms;
+          })
+        : null;
+  }
+
+  root.permutationChapterChange = function (event) {
+    setPermutationChapter(event.target.value, null);
+    class_permutation_bars = ''; // another run: all its bars
+    redrawPermutationOptions();
+    root.refresh_ABC();
+  };
+
+  // the chapter's rhythms ticked, null when they all are
+  function tickedChapterRhythms() {
+    var picks = [];
+    var all = true;
+    document
+      .querySelectorAll('#PermutationOptions input[data-chapter="pick"]')
+      .forEach(function (box) {
+        var n = parseInt(box.id.replace('PermutationChapterPick', ''), 10);
+        if (/** @type {HTMLInputElement} */ (box).checked) picks.push(n);
+        else all = false;
+      });
+    return all ? null : picks;
+  }
+
+  // a part's tick (the new shape on the beat / on the &) shows whether all its
+  // rhythms are ticked
+  function chapterPicksChanged() {
+    class_chapter_picks = tickedChapterRhythms();
+    document
+      .querySelectorAll('#PermutationOptions input[data-chapter="part"]')
+      .forEach(function (part) {
+        var rhythms = document.querySelectorAll(
+          '#PermutationOptions input[data-chapter="pick"][data-part="' +
+            part.getAttribute('data-part') +
+            '"]'
+        );
+        /** @type {HTMLInputElement} */ (part).checked = Array.prototype.every.call(
+          rhythms,
+          function (box) {
+            return box.checked;
+          }
+        );
+      });
+    class_permutation_bars = ''; // another run: all its bars
+    root.refresh_ABC();
+  }
+
+  root.chapterPickClick = function () {
+    chapterPicksChanged();
+  };
+
+  root.chapterPartClick = function (event) {
+    var part = event.target.getAttribute('data-part');
+    document
+      .querySelectorAll('#PermutationOptions input[data-chapter="pick"][data-part="' + part + '"]')
+      .forEach(function (box) {
+        /** @type {HTMLInputElement} */ (box).checked = event.target.checked;
+      });
+    chapterPicksChanged();
+  };
+
   // the shown figures in playing order, each with its ABC before / after: the
   // ticked figures, numbered 1, 2, ... as the music numbers its bars, and of
   // those only the bars to practise when some are chosen ("Practise bars");
@@ -2660,7 +2757,7 @@ function GrooveWriter() {
   function get_shown_permutation_sections(barsPerLine) {
     var layout = get_permutation_layout();
     if (!layout) return [];
-    var ticked = _perm.getPermutationSections(layout).filter(isPermutationSectionShown);
+    var ticked = tickedPermutationSections(layout);
     var chosen = chosenPermutationNumbers(ticked.length);
     var shown = [];
     ticked.forEach(function (section, i) {
@@ -2953,7 +3050,7 @@ function GrooveWriter() {
   function tickedPermutationCount() {
     var layout = get_permutation_layout();
     if (!layout) return 0;
-    return _perm.getPermutationSections(layout).filter(isPermutationSectionShown).length;
+    return tickedPermutationSections(layout).length;
   }
 
   function permutationOrder() {
@@ -3096,7 +3193,7 @@ function GrooveWriter() {
     if (class_permutation_type == 'none') return [];
     var layout = get_permutation_layout();
     if (!layout) return [];
-    var ticked = _perm.getPermutationSections(layout).filter(isPermutationSectionShown).length;
+    var ticked = tickedPermutationSections(layout).length;
     var chosen = chosenPermutationNumbers(ticked);
     var numbers = [];
     for (var n = 1; n <= ticked; n++) if (!chosen.length || chosen.indexOf(n) >= 0) numbers.push(n);
@@ -7928,11 +8025,12 @@ function GrooveWriter() {
     return /** @type {HTMLInputElement | null} */ (document.getElementById(id));
   }
 
-  // (not "Fat back", which the link has as its own setting)
+  // (not "Fat back", which the link has as its own setting, nor the 32nd chapter's
+  // ticks: PermChapter / PermPick)
   function permutationCheckboxes() {
     return /** @type {NodeListOf<HTMLInputElement>} */ (
       document.querySelectorAll(
-        '#PermutationOptions input[type="checkbox"]:not(#PermuationOptionsFatBack):not(#PermutationRepCounter)'
+        '#PermutationOptions input[type="checkbox"]:not(#PermuationOptionsFatBack):not(#PermutationRepCounter):not([data-chapter])'
       )
     );
   }
@@ -8063,6 +8161,8 @@ function GrooveWriter() {
               fatBack: fatBackOn(),
               ostinato: get_ostinato_bars(),
               trade: tradeBars() ? Object.assign({}, class_trade) : null,
+              chapter: chapterOn(get_permutation_layout()) ? class_permutation_chapter : 0,
+              picks: class_chapter_picks,
             },
       speedUp: currentSpeedUp(),
       countIn: class_metronome_count_in_active,
@@ -8091,6 +8191,7 @@ function GrooveWriter() {
     // as many bars as the link's ostinato: links from before October 2026 played
     // bar 1 only, and closed any others on opening (they still do)
     closeBarsPastOstinato(perm.ostinato || 1);
+    setPermutationChapter(perm.chapter || 0, perm.picks || null);
     class_permutation_bars = perm.bars || '';
     document.getElementById('PermutationOptions').innerHTML = root.HTMLforPermutationOptions();
     setPermutationBoxes(perm.boxes);
@@ -8853,7 +8954,8 @@ function GrooveWriter() {
       get_permutation_repeats(),
       class_permutation_fat_back,
       class_rep_counter,
-      class_trade
+      class_trade,
+      { chosen: class_permutation_chapter, picks: class_chapter_picks }
     );
   };
 } // end of class

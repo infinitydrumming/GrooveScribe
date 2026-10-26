@@ -119,6 +119,171 @@ function perBeatGroups(slots, unit, notesPerBeat, shapes) {
   });
 }
 
+// --- 32nd chapters (Infinity Drumming, 2026) ----------------------------------
+//
+// Every rhythm of a beat of 32nd notes (255 of them, the silent beat aside), in
+// chapters, the ones drummers use all the time first. A beat is two halves, an
+// 8th note each, and each half is one of 16 shapes: the 16th rhythms, twice as
+// fast. Chapter 1 puts the first three shapes together; each chapter after adds
+// one shape, in either half of the beat, with every shape before it: first in
+// the half where it is easier to place (the beat, or the & for a shape starting
+// with a rest), then in the other. Each rhythm is a bar, played every beat.
+
+// a half beat's 32nds ("1 a li bi" / "& a la ba"), most used first
+var CHAPTER_SHAPES = [
+  { notes: 'xxxx', name: 'four 32nds' },
+  { notes: 'x-x-', name: 'two 16ths' },
+  { notes: 'x---', name: 'an 8th' },
+  { notes: '----', name: 'rests' },
+  { notes: 'xxx-', name: 'two 32nds and a 16th' },
+  { notes: 'x-xx', name: 'a 16th and two 32nds' },
+  { notes: '--xx', name: 'the pickup pair' },
+  { notes: 'x--x', name: 'dotted 16th and 32nd' },
+  { notes: 'xx--', name: '32nd and dotted 16th' },
+  { notes: '---x', name: 'the pickup 32nd' },
+  { notes: '--x-', name: 'the off-beat 16th' },
+  { notes: '-xxx', name: 'three 32nds off the beat' },
+  { notes: 'xx-x', name: '32nd, 16th, 32nd' },
+  { notes: '-xx-', name: 'two 32nds off the beat' },
+  { notes: '-x-x', name: 'the off-beat 32nds' },
+  { notes: '-x--', name: 'the off-beat 32nd' },
+];
+
+// chapter 1: four 32nds, two 16ths and an 8th, every way round (shape numbers,
+// first half then second)
+var FIRST_CHAPTER = [
+  [0, 0],
+  [1, 1],
+  [0, 1],
+  [1, 0],
+  [2, 2],
+  [0, 2],
+  [2, 0],
+  [1, 2],
+  [2, 1],
+];
+
+var COUNT_32 = ['1', 'a', 'li', 'bi', '&', 'a', 'la', 'ba'];
+
+/**
+ * A beat of 32nds as its count says it: "1 a li & la", "(1) & a la ba".
+ * @param {string} beat  8 characters, "x" a note
+ */
+export function thirtySecondCount(beat) {
+  var words = [beat.charAt(0) == 'x' ? '1' : '(1)'];
+  for (var i = 1; i < 8; i++) if (beat.charAt(i) == 'x') words.push(COUNT_32[i]);
+  return words.join(' ');
+}
+
+// a shape as its count says it in one half of the beat ("1 a li", "& a la")
+function shapeCount(shape, secondHalf) {
+  var words = [];
+  for (var i = 0; i < 4; i++)
+    if (shape.notes.charAt(i) == 'x') words.push(COUNT_32[i + (secondHalf ? 4 : 0)]);
+  return words.join(' ');
+}
+
+/**
+ * The 32nd chapters: each one's name and rhythms, in order. A rhythm is its
+ * beat (8 characters, "x" a note), its count, and where the chapter's new shape
+ * is in it: 'beat' (the first half), 'and' (only the second half), or '' in
+ * chapter 1, which is all new.
+ * @returns {Array<{name: string, parts: Array<{part: string, name: string}>,
+ *   rhythms: Array<{beat: string, count: string, part: string}>}>}
+ */
+export function thirtySecondChapters() {
+  var rhythm = function (first, second, part) {
+    var beat = CHAPTER_SHAPES[first].notes + CHAPTER_SHAPES[second].notes;
+    return { beat: beat, count: thirtySecondCount(beat), part: part };
+  };
+  var chapters = [
+    {
+      name: 'Chapter 1: 32nds, 16ths and 8ths',
+      parts: [{ part: '', name: 'Every rhythm' }],
+      rhythms: FIRST_CHAPTER.map(function (pair) {
+        return rhythm(pair[0], pair[1], '');
+      }),
+    },
+  ];
+  for (var added = 3; added < CHAPTER_SHAPES.length; added++) {
+    var shape = CHAPTER_SHAPES[added];
+    var onBeat = [];
+    var onAnd = [];
+    for (var known = 0; known < added; known++) {
+      onBeat.push(rhythm(added, known, 'beat'));
+      onAnd.push(rhythm(known, added, 'and'));
+    }
+    if (shape.notes != '----') onBeat.push(rhythm(added, added, 'beat')); // (not the silent beat)
+    var beatFirst = shape.notes.charAt(0) == 'x';
+    var parts = [
+      { part: 'beat', name: shapeCount(shape, false) || 'rest', where: 'on the beat' },
+      { part: 'and', name: shapeCount(shape, true) || 'rest', where: 'on the &' },
+    ];
+    chapters.push({
+      name:
+        'Chapter ' +
+        (chapters.length + 1) +
+        ': ' +
+        shape.name +
+        (added > 3 ? ' (' + shapeCount(shape, false) + ')' : ''),
+      parts: (beatFirst ? parts : parts.reverse()).map(function (p) {
+        return { part: p.part, name: p.name + ' ' + p.where };
+      }),
+      rhythms: beatFirst ? onBeat.concat(onAnd) : onAnd.concat(onBeat),
+    });
+  }
+  return chapters;
+}
+
+// the 32nd layout's chapters, each as a group of figures over the bar (every
+// beat the same), for its runs: { id, name, subLabels, figures, parts }
+function withChapters(layout) {
+  layout.chapters = thirtySecondChapters().map(function (chapter, c) {
+    return {
+      id: 'PermutationChapter' + (c + 1),
+      name: chapter.name,
+      defaultOn: false,
+      subLabels: chapter.rhythms.map((r) => r.count),
+      parts: chapter.parts,
+      figures: chapter.rhythms.map(function (r) {
+        return {
+          hits: hitsArray(layout.slots, (slot) => r.beat.charAt(slot % 8) == 'x'),
+          part: r.part,
+        };
+      }),
+    };
+  });
+  return layout;
+}
+
+/**
+ * The figures of the chosen 32nd chapter(s) in playing order, as sections (as
+ * getPermutationSections has them): `chapter` a chapter's number or 'all';
+ * `picks` its rhythms' numbers (from 1) to play, all when null.
+ * @param {object} layout  with chapters (the 32nd layout)
+ * @param {number|string} chapter
+ * @param {number[]|null} [picks]
+ */
+export function getChapterSections(layout, chapter, picks) {
+  var chosen = chapter == 'all' ? layout.chapters : [layout.chapters[Number(chapter) - 1]];
+  var sections = [];
+  chosen.forEach(function (group) {
+    if (!group) return;
+    var c = layout.chapters.indexOf(group);
+    group.figures.forEach(function (figure, i) {
+      if (chapter != 'all' && picks && picks.indexOf(i + 1) < 0) return;
+      sections.push({
+        group: group,
+        groupIndex: c + 1, // (a heading over its first bar, never "Ostinato")
+        sub: i + 1,
+        label: group.subLabels[i],
+        figure: figure,
+      });
+    });
+  });
+  return sections;
+}
+
 // Straight figures: `unit` slots per grid note, 4 grid notes per pattern.
 // `labels` names the 4 positions. Only the 16ths layout in 4/4 keeps a link to
 // the original section numbers, for the hand-written "Simplify multiple kicks"
@@ -356,14 +521,16 @@ function quarterBeatsLayout(timeDivision, top) {
         top * 12
       );
     case 32:
-      return straightLayout(
-        'thirtyseconds',
-        1,
-        ['1st', '2nd', '3rd', '4th'],
-        '16ths / Off-beat 32nds',
-        ['16ths', 'off 32nds'],
-        perBeatGroups(straight, 1, 8),
-        straight
+      return withChapters(
+        straightLayout(
+          'thirtyseconds',
+          1,
+          ['1st', '2nd', '3rd', '4th'],
+          '16ths / Off-beat 32nds',
+          ['16ths', 'off 32nds'],
+          perBeatGroups(straight, 1, 8),
+          straight
+        )
       );
     case 8:
       if (top % 2) return null;

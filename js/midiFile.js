@@ -233,12 +233,31 @@ function eventTicks(event) {
 }
 
 /**
+ * Infinity Drumming, 2026: bytes as a string, a piece at a time.  The MIDI library
+ * makes each track's string with one String.fromCharCode.apply call, which a
+ * browser refuses for a long run (Safari past 65,536 bytes, Chrome about 125,000):
+ * the run wouldn't play.  The same string, made in pieces.
+ * @param {number[]} bytes
+ */
+export function codesToString(bytes) {
+  var text = '';
+  for (var i = 0; i < bytes.length; i += 8192)
+    text += String.fromCharCode.apply(null, bytes.slice(i, i + 8192));
+  return text;
+}
+
+function wholeTracksInPieces() {
+  if (Midi.Util.codes2Str !== codesToString) Midi.Util.codes2Str = codesToString;
+}
+
+/**
  * Infinity Drumming, 2026: exact timing.  The MIDI library drops the fraction of
  * every delta time (a triplet note is 10.67 ticks, written as 10), so swung and
  * triplet grooves used to play about 1.5% fast.  A track made here carries each
  * fraction over to its next event instead.  Whole-tick timing is unchanged.
  */
 export function newExactTimeTrack() {
+  wholeTracksInPieces();
   var track = new Midi.Track();
   var carried = 0;
   ['addNoteOn', 'addNoteOff'].forEach(function (name) {
