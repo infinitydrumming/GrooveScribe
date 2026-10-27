@@ -546,6 +546,57 @@ test.describe('alphabet trade bars', () => {
       .toBe('2_1x2');
     expect(await page.locator('#ABCsource').inputValue()).toContain('Order: 2 1×2');
   });
+
+  test("a trade bar's beats are its own: the alphabet keeps its notes, figures and sound", async ({
+    page,
+  }) => {
+    await loadGroove(
+      page,
+      grooveUrl(
+        '?TimeSig=4/4&Div=8&Tempo=80&Measures=1&Perm=kick_16ths&H=|xxxxxxxx|&S=|--O---O-|&K=|o---o---|'
+      )
+    );
+    await page.selectOption('#PermutationTradeBars', '1');
+    const inLink = (name) =>
+      page.evaluate((name) => new URLSearchParams(location.search).get(name), name);
+    await expect.poll(() => inLink('Trade')).toBe('1');
+    const permSet = await inLink('PermSet');
+    // the first round's sound, as it would play
+    const firstRound = () =>
+      page.evaluate(() => {
+        const gu = window.myGrooveWriter.myGrooveUtils;
+        const midi = [];
+        gu.loadMIDIFromURL = (url) => midi.push(url);
+        gu.midiEventCallbacks.loadMidiDataEvent(gu, true);
+        return midi[0];
+      });
+    const plain = await firstRound();
+    const chooseBeat = async (bar, beat, choice) => {
+      await page.evaluate(
+        ([bar, beat]) => window.myGrooveWriter.beatHeaderClick(null, bar, beat),
+        [bar, beat]
+      );
+      await page.click('#beatContextMenu li[data-beat-choice="' + choice + '"]');
+    };
+
+    // beat 1 of the trade bar in 16ths: the groove goes beat by beat, the alphabet stays in 8ths
+    await chooseBeat(2, 0, 's');
+    await expect.poll(() => inLink('Beats')).toBe('eeee,seee');
+    expect(await inLink('PermSet')).toBe(permSet);
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).not.toMatch(/\(\d+:\d+:\d+/); // (no tuplets: 8ths and 16ths, as written)
+    expect(await firstRound()).toBe(plain); // (its notes still on 8ths: the same sound)
+
+    // the Notes buttons set the alphabet's notes; the trade bar keeps its own
+    await page.evaluate(() => window.myGrooveWriter.changeDivision(16));
+    await expect.poll(() => inLink('Beats')).toBe('ssss,seee');
+    // the trade bar in 16ths again: the plain note setting
+    await chooseBeat(2, 1, 's');
+    await chooseBeat(2, 2, 's');
+    await chooseBeat(2, 3, 's');
+    await expect.poll(() => inLink('Div')).toBe('16');
+    expect(await inLink('Beats')).toBeNull();
+  });
 });
 
 // Infinity Drumming, 2026: every rhythm of a beat of 32nds, a chapter at a time

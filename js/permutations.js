@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: more time signatures, multi-bar ostinatos, fat back kick permutations, dense bars one a line on phones, practising some bars of a run (or a groove), bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: more time signatures, multi-bar ostinatos, fat back kick permutations, dense bars one a line on phones, practising some bars of a run (or a groove), bar numbers, permutation figures per note setting (1/8, 1/16, triplets), cross-rhythms, 1/16 triplet and 1/32 per-beat figures, every 1/16 triplet rhythm, alternating kick / snare, repeats, kick flams kept with the hi-hat foot, diddles, figures on a finer grid for trade bars with notes of their own. See CHANGES.md.
 // Permutation engine (Step 4 extraction from groove_writer.js).
 //
 // Pure combinatorial generators for the "permutation" practice modes: they build
@@ -1497,6 +1497,28 @@ export function filter_kick_array_for_permutation(old_kick_array) {
   }
 
   return new_kick_array;
+}
+
+/**
+ * A bar's notes in an array of another size, each at the same time in the bar
+ * (Infinity Drumming, 2026): figures in 8ths or 16ths (32 slots a 4/4 bar) over a
+ * groove on the Mixed grid (48), whose trade bars have notes of their own beat by
+ * beat. A note with no slot at its time is left out.
+ *
+ * @param {Array<string|false>} notes
+ * @param {number} size
+ * @returns {Array<string|false>}
+ */
+export function notesInBarOfSize(notes, size) {
+  if (notes.length == size) return notes;
+  /** @type {Array<string|false>} */
+  var resized = [];
+  for (var i = 0; i < size; i++) resized.push(false);
+  notes.forEach(function (note, i) {
+    var at = (i * size) / notes.length;
+    if (note && at % 1 === 0) resized[at] = note;
+  });
+  return resized;
 }
 
 // merge 2 kick arrays
