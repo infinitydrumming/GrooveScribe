@@ -1388,11 +1388,14 @@ function musicPageWidth(renderWidth) {
  * fit, else one; and a bar too wide even alone gets a wider page (drawn smaller
  * on the screen), as abc2svg would otherwise break it in the middle, losing its
  * beams. So a phone gets one dense bar a line; a desktop's lines are as before.
+ * A bar alone on its line with a count over 32nd notes gets at least `countRoom`
+ * of the page (see countRoom), so its two-letter counts keep apart on a phone.
  * @param {number} notesPerBar  the most notes a bar has at the note setting
  * @param {number} renderWidth
- * @param {{counted?: boolean, triplets?: boolean, oneBar?: boolean, keepWidth?: boolean}} how
+ * @param {{counted?: boolean, triplets?: boolean, oneBar?: boolean, keepWidth?: boolean, countRoom?: number}} how
  *   counted: a count over the notes (in 16px letters); oneBar: one bar a line
- *   anyway; keepWidth: never a wider page (bars beat by beat, whose notes vary)
+ *   anyway; keepWidth: never a wider page for the notes (bars beat by beat, whose
+ *   notes vary)
  * @returns {{barsPerLine: number, renderWidth: number, bar: number}}  bar: the
  *   page a bar needs at least
  */
@@ -1400,11 +1403,30 @@ export function musicLayout(notesPerBar, renderWidth, how) {
   var perNote = (how.counted ? 10 : 8) * (how.triplets ? 1.1 : 1);
   var bar = notesPerBar * perNote;
   var page = musicPageWidth(renderWidth);
+  var barsPerLine = how.oneBar || 2 * bar > page ? 1 : 2;
+  var needs = how.keepWidth ? 0 : bar;
+  if (barsPerLine == 1 && how.countRoom > Math.max(needs, page)) needs = how.countRoom;
   return {
-    barsPerLine: how.oneBar || 2 * bar > page ? 1 : 2,
-    renderWidth: bar > page && !how.keepWidth ? Math.ceil(bar / 0.75) : renderWidth,
-    bar: bar,
+    barsPerLine: barsPerLine,
+    renderWidth: needs > page ? Math.ceil(needs / 0.75) : renderWidth,
+    bar: barsPerLine == 1 ? Math.max(bar, how.countRoom || 0) : bar,
   };
+}
+
+// a quarter note of 32nd notes with a count over them ("1 a li bi & a la ba", in
+// 11px letters): this much of the page (about 11 a note), so "la ba" keep apart
+var COUNT_ROOM_PER_QUARTER = 90;
+
+/**
+ * Infinity Drumming, 2026: the page a bar of `notesPerBar` slots (at `division`)
+ * needs for a count over 32nd notes (0 for no such count, or the click's).
+ * @param {Object} gu  its showCounts, countSmall (32nd notes) and countMode
+ * @param {number} notesPerBar
+ * @param {number} division
+ */
+export function countRoom(gu, notesPerBar, division) {
+  if (!gu.showCounts || !gu.countSmall || gu.countMode == 'click') return 0;
+  return ((notesPerBar * 4) / division) * COUNT_ROOM_PER_QUARTER;
 }
 
 // a moderate bar: this much of the page a quarter note at most (a 4/4 bar about
@@ -2120,6 +2142,7 @@ function grooveDataABC(gu, myGrooveData, renderWidth) {
       triplets: is_triplet_division,
       oneBar: myGrooveData.notesPerMeasure >= 32,
       keepWidth: isBeatByBeat(myGrooveData),
+      countRoom: countRoom(gu, myGrooveData.notesPerMeasure, myGrooveData.timeDivision),
     }
   );
 
@@ -2294,6 +2317,11 @@ function createMixedMeterABC(gu, myGrooveData, renderWidth) {
       triplets: triplets,
       oneBar: gd.timeDivision >= 32,
       keepWidth: isBeatByBeat(gd),
+      countRoom: countRoom(
+        gu,
+        barStride(gd.timeDivision, gd.barTimeSigs, gd.numberOfMeasures, gd.numBeats, gd.noteValue),
+        gd.timeDivision
+      ),
     }
   );
   var abc = gu.get_top_ABC_BoilerPlate(

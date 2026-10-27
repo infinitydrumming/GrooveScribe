@@ -127,6 +127,7 @@ import {
   musicLineBroken,
   notesOnALine,
   layoutNotes,
+  countRoom,
   defineGlyphsOnce,
   engravedMusic,
   UNNUMBERED_BARS,
@@ -4307,6 +4308,11 @@ function GrooveWriter() {
         triplets: usingTriplets(),
         oneBar: class_permutation_type == 'none' && class_notes_per_measure >= 32,
         keepWidth: beatGrid() !== 0,
+        countRoom: countRoom(
+          root.myGrooveUtils,
+          barStrideFor(class_time_division),
+          class_time_division
+        ),
       }
     );
     // this device's Music spacing (Infinity Drumming, 2026)

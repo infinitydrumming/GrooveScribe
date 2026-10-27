@@ -11,6 +11,14 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-27 — Room for 32nd-note counts on a phone
+
+- With a count over 32nd notes, a bar alone on its line (a phone's) now gets at
+  least 90 units of the page a quarter note, so two-letter counts ("la ba") no
+  longer run together; the bar is drawn a little smaller on the screen
+  (`countRoom` and `musicLayout` in `js/abcNotation.js`, `js/groove_writer.js`).
+  Desktops, already wider, and every other bar are drawn as before.
+
 ## 2026-10-27 — The sheet music's font on every device
 
 - The sheet music is written in Calibri, which phones and Macs don't have: they
