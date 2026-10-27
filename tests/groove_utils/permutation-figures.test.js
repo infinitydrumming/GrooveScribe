@@ -459,7 +459,7 @@ describe('1/32 notes: every rhythm of a beat in chapters, built on the 16th alph
   });
 
   it('then fill-ins: all four 16ths, the alphabet picking which are pairs', () => {
-    expect(chapters[2].name).toBe('Chapter 3: fill-ins on the 16ths');
+    expect(chapters[2].name).toBe('Chapter 3: the alphabet as pairs, the 16ths filled in');
     expect(counts(chapters[2]).slice(0, 5)).toEqual([
       '1 a li & la',
       '1 li bi & la',
@@ -516,7 +516,7 @@ describe('1/32 notes: every rhythm of a beat in chapters, built on the 16th alph
     const sections = getChapterSections(layout, 3, [1, 5]);
     expect(sections.map((s) => s.label)).toEqual(['1 a li & la', '1 a li & a la']);
     expect(tab(layout, sections[0])).toBe('ooo-o-o-'.repeat(3));
-    expect(sections[0].group.name).toBe('Chapter 3: fill-ins on the 16ths');
+    expect(sections[0].group.name).toBe('Chapter 3: the alphabet as pairs, the 16ths filled in');
     expect(getChapterSections(layout, 3)).toHaveLength(15);
     expect(getChapterSections(layout, 3, [])).toHaveLength(0);
     expect(getChapterSections(layout, 'all')).toHaveLength(271);

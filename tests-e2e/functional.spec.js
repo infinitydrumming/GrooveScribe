@@ -668,14 +668,16 @@ test.describe('alphabet 32nd chapters', () => {
     await page.selectOption('#PermutationChapter', '3');
     await expect.poll(() => inLink(page, 'PermChapter')).toBe('3');
     let abc = await page.locator('#ABCsource').inputValue();
-    expect(abc).toContain('P: Chapter 3: fill-ins on the 16ths');
+    expect(abc).toContain('P: Chapter 3: the alphabet as pairs, the 16ths filled in');
     await expect(page.locator('#PermutationChapterOption .chapterRhythm')).toHaveCount(15);
     await expect(page.locator('#PermuationOptionsSinglesGroup')).toHaveClass(/chapterOn/);
     // a rhythm unticked: one bar fewer, in the link too
     await page.click('label[for="PermutationChapterPick2"]');
     await expect.poll(() => inLink(page, 'PermPick')).toBe('1,3-15');
     abc = await page.locator('#ABCsource').inputValue();
-    expect(abc).toContain('% Chapter 3: fill-ins on the 16ths on "1 a li & la"');
+    expect(abc).toContain(
+      '% Chapter 3: the alphabet as pairs, the 16ths filled in on "1 a li & la"'
+    );
     expect(abc).not.toContain('on "1 li bi & la"');
 
     // off: the groups again, the link without a chapter

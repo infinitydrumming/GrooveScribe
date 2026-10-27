@@ -11,6 +11,13 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-27 — Chapter 3's name
+
+- The 32nd chapters: chapter 3 is now called "the alphabet as pairs, the 16ths
+  filled in" (it was "fill-ins on the 16ths"), as it is chapter 2's rhythms in
+  the same order with the other 16ths filled in (`js/permutations.js`). What it
+  plays, and links to it, are unchanged.
+
 ## 2026-10-27 — Room for 32nd-note counts on a phone
 
 - With a count over 32nd notes, a bar alone on its line (a phone's) now gets at
