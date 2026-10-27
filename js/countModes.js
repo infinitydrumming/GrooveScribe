@@ -39,6 +39,8 @@ export function countModeToUrl(show, mode) {
 /**
  * The count's fonts, for the ABC header: smaller for 32nd notes (so a bar of
  * them fits on a phone), and for the bold counts $1 (the rhythm) and $2 (the rest).
+ * Over 32nd notes the bold ones are as small as the rest (bigger, a bar of them
+ * ran together and past its end), told apart by their weight and colour.
  * @param {string} mode
  * @param {boolean} small
  */
@@ -47,7 +49,7 @@ export function countFonts(mode, small) {
   if (mode == 'bold' || mode == 'ghosts')
     fonts +=
       '%%setfont-1 calibriBold ' +
-      (small ? 14 : 16) +
+      (small ? 11 : 16) +
       '\n%%setfont-2 calibri;fill:#8c8c8c ' +
       (small ? 11 : 13) +
       '\n';

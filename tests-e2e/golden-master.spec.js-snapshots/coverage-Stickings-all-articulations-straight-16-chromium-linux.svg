@@ -12,13 +12,13 @@
 	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
 </g>
 </defs><g transform="scale(0.75)"><g transform="translate(0,78.70)">
-<text class="f2_1" x="43.80" y="-42.56">R</text>
-<text class="f2_1" x="96.87" y="-42.56">L</text>
-<text class="f2_1" x="145.84" y="-42.56">R/L</text>
-<text class="f2_1" x="201.81" y="-42.56">R</text>
-<text class="f2_1" x="254.87" y="-42.56">L</text>
-<text class="f2_1" x="303.84" y="-42.56">R/L</text>
-<text class="f2_1" x="359.03" y="-42.56">&amp;</text>
+<text class="f2_1" x="48.50" y="-42.56" text-anchor="middle">R</text>
+<text class="f2_1" x="101.17" y="-42.56" text-anchor="middle">L</text>
+<text class="f2_1" x="153.84" y="-42.56" text-anchor="middle">R/L</text>
+<text class="f2_1" x="206.51" y="-42.56" text-anchor="middle">R</text>
+<text class="f2_1" x="259.17" y="-42.56" text-anchor="middle">L</text>
+<text class="f2_1" x="311.84" y="-42.56" text-anchor="middle">R/L</text>
+<text class="f2_1" x="364.51" y="-42.56" text-anchor="middle">&amp;</text>
 </g>
 <path class="stroke" d="m885.33 100.04v-24.00"></path>
 <path class="stroke" d="m882.33 100.04v-24.00"></path>

@@ -1231,6 +1231,61 @@ export function defineGlyphsOnce(svg) {
 }
 
 /**
+ * Infinity Drumming, 2026: the counts and stickings centred over their notes.
+ * abc2svg writes a chord symbol ("1", "R") from a little left of its note: 0.4 of
+ * the width it takes the text to be (gch_build), and it takes a count's too small
+ * (it skips the letter after a font change, "$1"), so each count started at its
+ * note and ran on to the right, a 32nd note's into the next one's. `texts` is where
+ * abc2svg wrote each chord symbol and annotation, in order (from its anno_start);
+ * annotations over or under a note ("^Straight", "_×4") stay where they are.
+ * @param {string} svg  abc2svg's output
+ * @param {{start: number, x: number, w: number}[]} texts  each text's symbol (its
+ *   place in the ABC), and the x and width abc2svg wrote it at
+ * @param {string} abc
+ * @returns {string}
+ */
+export function centredChordTexts(svg, texts, abc) {
+  var symbols = {};
+  // (a chord symbol, not an annotation over or under the note)
+  var plain = texts.map(function (text) {
+    var symbol =
+      symbols[text.start] || (symbols[text.start] = { texts: quotedTexts(abc, text.start), k: 0 });
+    return !/^[\^_<>@]/.test(symbol.texts[symbol.k++] || '');
+  });
+  var next = 0;
+  return String(svg).replace(
+    /<text class="([^"]+)" x="([-\d.]+)" y="([-\d.]+)">/g,
+    function (tag, font, x, y) {
+      var text = texts[next];
+      if (!text || Math.abs(Number(x) - text.x) > 0.01) return tag;
+      if (!plain[next++]) return tag;
+      var shift = Math.min(text.w * 0.4, 8); // (where abc2svg started it from its note)
+      return (
+        '<text class="' +
+        font +
+        '" x="' +
+        (Number(x) + shift).toFixed(2) +
+        '" y="' +
+        y +
+        '" text-anchor="middle">'
+      );
+    }
+  );
+}
+
+// the texts in quotes at the start of a symbol in the ABC ('"$11"x1': ['$11'])
+function quotedTexts(abc, start) {
+  var texts = [];
+  var quoted = /^[^"\s|]*"([^"]*)"/;
+  var rest = abc.slice(start, start + 400);
+  for (var match = quoted.exec(rest); match; match = quoted.exec(rest)) {
+    texts.push(match[1]);
+    rest = rest.slice(match[0].length);
+  }
+  return texts;
+}
+
+/**
  * Infinity Drumming, 2026: the music's finishing touches, as a score has them. A
  * section's letter (a part label in a box) gets round corners and a little room,
  * and a bar number starting a line sits by the clef just over the stave, not up

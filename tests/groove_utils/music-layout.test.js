@@ -7,6 +7,7 @@ import {
   musicLineBroken,
   defineGlyphsOnce,
   engravedMusic,
+  centredChordTexts,
 } from '../../js/abcNotation.js';
 import { clickCountNotes } from '../../js/countModes.js';
 
@@ -221,5 +222,36 @@ describe('glyphs defined once on the page', () => {
         )
       )
     ).not.toContain('9001');
+  });
+});
+
+// Infinity Drumming, 2026: abc2svg writes a chord symbol from a little left of its
+// note (0.4 of the width it takes it to be, at most 8); counts and stickings are
+// centred on the note instead, annotations ("_×4") stay where they are
+describe('counts and stickings centred over their notes', () => {
+  const abc = 'V:Stickings\n"$11"x1 "R"x1 "_×4"x1 |\n';
+  const at = (text) => abc.indexOf(text);
+  const svg =
+    '<text class="f1_1" x="12.00" y="-30.00">2</text>\n' + // (a bar number: no chord symbol)
+    '<text class="f2_1" x="48.50" y="-34.56"><tspan class="f4_1">1</tspan></text>\n' +
+    '<text class="f2_1" x="56.00" y="-34.56">R</text>\n' +
+    '<text class="f2_1" x="70.00" y="-50.00">×4</text>\n';
+  const texts = () => [
+    { start: at('"$11"'), x: 48.5, w: 0 },
+    { start: at('"R"'), x: 56, w: 5 },
+    { start: at('"_×4"'), x: 70, w: 12 },
+  ];
+
+  it('moves each to its note and centres it there', () => {
+    const out = centredChordTexts(svg, texts(), abc);
+    expect(out).toContain('<text class="f2_1" x="48.50" y="-34.56" text-anchor="middle"><tspan');
+    expect(out).toContain('<text class="f2_1" x="58.00" y="-34.56" text-anchor="middle">R</text>');
+  });
+
+  it('leaves annotations and every other text as they are', () => {
+    const out = centredChordTexts(svg, texts(), abc);
+    expect(out).toContain('<text class="f2_1" x="70.00" y="-50.00">×4</text>');
+    expect(out).toContain('<text class="f1_1" x="12.00" y="-30.00">2</text>');
+    expect(centredChordTexts(svg, [], abc)).toBe(svg);
   });
 });

@@ -31,10 +31,10 @@
 "<path class="stroke" d="m686.87 -37.36v-3.00l145.21 0.00v3.00"></path>
 <rect fill="white" x="752.87" y="-46.36" width="13.20" height="12"></rect>
 <text style="font:italic 12px serif" x="759.47" y="-36.36" text-anchor="middle">3</text>
-"<text class="f2_1" x="43.80" y="-56.56">R</text>
-<text class="f2_1" x="124.65" y="-56.56">L</text>
-<text class="f2_1" x="201.40" y="-56.56">R/L</text>
-<text class="f2_1" x="274.23" y="-56.56">2</text>
+"<text class="f2_1" x="48.50" y="-56.56" text-anchor="middle">R</text>
+<text class="f2_1" x="128.95" y="-56.56" text-anchor="middle">L</text>
+<text class="f2_1" x="209.40" y="-56.56" text-anchor="middle">R/L</text>
+<text class="f2_1" x="277.75" y="-56.56" text-anchor="middle">2</text>
 </g>
 <path class="stroke" d="m885.33 114.04v-24.00"></path>
 <path class="stroke" d="m882.33 114.04v-24.00"></path>

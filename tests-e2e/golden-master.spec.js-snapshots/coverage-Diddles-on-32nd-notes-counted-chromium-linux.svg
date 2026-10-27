@@ -20,38 +20,38 @@
 	<use x="1.9" y="2" xlink:href="#r8e"></use>
 </g>
 </defs><g transform="scale(0.75)"><g transform="translate(0,64.70)">
-<text class="f2_1" x="46.08" y="-32.56">1</text>
-<text class="f2_1" x="72.59" y="-32.56">a</text>
-<text class="f2_1" x="98.29" y="-32.56">li</text>
-<text class="f2_1" x="123.46" y="-32.56">bi</text>
-<text class="f2_1" x="149.70" y="-32.56">&amp;</text>
-<text class="f2_1" x="177.56" y="-32.56">a</text>
-<text class="f2_1" x="202.46" y="-32.56">la</text>
-<text class="f2_1" x="227.63" y="-32.56">ba</text>
-<text class="f2_1" x="256.02" y="-32.56">2</text>
-<text class="f2_1" x="282.53" y="-32.56">a</text>
-<text class="f2_1" x="308.23" y="-32.56">li</text>
-<text class="f2_1" x="333.40" y="-32.56">bi</text>
-<text class="f2_1" x="359.64" y="-32.56">&amp;</text>
-<text class="f2_1" x="387.50" y="-32.56">a</text>
-<text class="f2_1" x="412.40" y="-32.56">la</text>
-<text class="f2_1" x="437.56" y="-32.56">ba</text>
-<text class="f2_1" x="465.95" y="-32.56">3</text>
-<text class="f2_1" x="492.47" y="-32.56">a</text>
-<text class="f2_1" x="518.17" y="-32.56">li</text>
-<text class="f2_1" x="543.34" y="-32.56">bi</text>
-<text class="f2_1" x="569.58" y="-32.56">&amp;</text>
-<text class="f2_1" x="597.44" y="-32.56">a</text>
-<text class="f2_1" x="622.33" y="-32.56">la</text>
-<text class="f2_1" x="647.50" y="-32.56">ba</text>
-<text class="f2_1" x="675.89" y="-32.56">4</text>
-<text class="f2_1" x="702.41" y="-32.56">a</text>
-<text class="f2_1" x="728.11" y="-32.56">li</text>
-<text class="f2_1" x="753.27" y="-32.56">bi</text>
-<text class="f2_1" x="779.51" y="-32.56">&amp;</text>
-<text class="f2_1" x="807.37" y="-32.56">a</text>
-<text class="f2_1" x="832.27" y="-32.56">la</text>
-<text class="f2_1" x="857.44" y="-32.56">ba</text>
+<text class="f2_1" x="48.50" y="-32.56" text-anchor="middle">1</text>
+<text class="f2_1" x="74.74" y="-32.56" text-anchor="middle">a</text>
+<text class="f2_1" x="100.98" y="-32.56" text-anchor="middle">li</text>
+<text class="f2_1" x="127.23" y="-32.56" text-anchor="middle">bi</text>
+<text class="f2_1" x="153.47" y="-32.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="179.71" y="-32.56" text-anchor="middle">a</text>
+<text class="f2_1" x="205.95" y="-32.56" text-anchor="middle">la</text>
+<text class="f2_1" x="232.20" y="-32.56" text-anchor="middle">ba</text>
+<text class="f2_1" x="258.44" y="-32.56" text-anchor="middle">2</text>
+<text class="f2_1" x="284.68" y="-32.56" text-anchor="middle">a</text>
+<text class="f2_1" x="310.92" y="-32.56" text-anchor="middle">li</text>
+<text class="f2_1" x="337.17" y="-32.56" text-anchor="middle">bi</text>
+<text class="f2_1" x="363.41" y="-32.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="389.65" y="-32.56" text-anchor="middle">a</text>
+<text class="f2_1" x="415.89" y="-32.56" text-anchor="middle">la</text>
+<text class="f2_1" x="442.13" y="-32.56" text-anchor="middle">ba</text>
+<text class="f2_1" x="468.37" y="-32.56" text-anchor="middle">3</text>
+<text class="f2_1" x="494.62" y="-32.56" text-anchor="middle">a</text>
+<text class="f2_1" x="520.86" y="-32.56" text-anchor="middle">li</text>
+<text class="f2_1" x="547.11" y="-32.56" text-anchor="middle">bi</text>
+<text class="f2_1" x="573.35" y="-32.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="599.59" y="-32.56" text-anchor="middle">a</text>
+<text class="f2_1" x="625.82" y="-32.56" text-anchor="middle">la</text>
+<text class="f2_1" x="652.07" y="-32.56" text-anchor="middle">ba</text>
+<text class="f2_1" x="678.31" y="-32.56" text-anchor="middle">4</text>
+<text class="f2_1" x="704.56" y="-32.56" text-anchor="middle">a</text>
+<text class="f2_1" x="730.80" y="-32.56" text-anchor="middle">li</text>
+<text class="f2_1" x="757.04" y="-32.56" text-anchor="middle">bi</text>
+<text class="f2_1" x="783.28" y="-32.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="809.52" y="-32.56" text-anchor="middle">a</text>
+<text class="f2_1" x="835.76" y="-32.56" text-anchor="middle">la</text>
+<text class="f2_1" x="862.01" y="-32.56" text-anchor="middle">ba</text>
 </g>
 <path class="stroke" d="m885.33 86.04v-24.00"></path>
 <path class="stroke" d="m882.33 86.04v-24.00"></path>

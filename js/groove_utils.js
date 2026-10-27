@@ -91,6 +91,7 @@ import {
   get_top_ABC_BoilerPlate as _get_top_ABC_BoilerPlate,
   create_ABC_from_snare_HH_kick_arrays as _create_ABC_from_snare_HH_kick_arrays,
   createABCFromGrooveData as _createABCFromGrooveData,
+  centredChordTexts,
 } from './abcNotation.js';
 import {
   parseTimeSigString as _parseTimeSigString,
@@ -834,7 +835,13 @@ function GrooveUtils() {
     };
 
     // annotations
-    this.anno_start = function (type, start, stop, x, y, w, h) {};
+    // (Infinity Drumming, 2026: where each chord symbol is written, to centre the
+    // counts and stickings over their notes)
+    this.chordTexts = null;
+    this.anno_start = function (type, start, stop, x, y, w, h) {
+      if (type == 'annot' && this.chordTexts)
+        this.chordTexts.push({ start: start, x: x + 2, w: w - 4 });
+    };
     this.svg_highlight_y = 0;
     this.svg_highlight_h = 44;
     this.anno_stop = function (type, start, stop, x, y, w, h) {
@@ -905,12 +912,14 @@ function GrooveUtils() {
     abcToSVGCallback.abc_svg_output = ''; // clear
     abcToSVGCallback.abc_error_output = ''; // clear
     abcToSVGCallback.numbering = numbering;
+    var chordTexts = (abcToSVGCallback.chordTexts = []);
     try {
       root.abc_obj.tosvg('SOURCE', abc_source);
     } finally {
       abcToSVGCallback.numbering = null;
+      abcToSVGCallback.chordTexts = null;
     }
-    var svg = abcToSVGCallback.abc_svg_output;
+    var svg = centredChordTexts(abcToSVGCallback.abc_svg_output, chordTexts, abc_source);
     return {
       svg: numbering ? numbering.writtenIn(svg) : svg,
       error_html: abcToSVGCallback.abc_error_output,

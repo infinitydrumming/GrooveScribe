@@ -13,40 +13,40 @@
 </g>
 </defs><g transform="scale(0.75)"><g transform="translate(0,98.80)">
 <text class="f1_1" x="456.19" y="-10.66">2</text>
-<text class="f2_1" x="48.00" y="-65.86">Swing</text>
-<text class="f2_1" x="60.19" y="-39.56">1</text>
-<text class="f2_1" x="85.65" y="-39.56">e</text>
-<text class="f2_1" x="108.37" y="-39.56">&amp;</text>
-<text class="f2_1" x="135.80" y="-39.56">a</text>
-<text class="f2_1" x="160.47" y="-39.56">2</text>
-<text class="f2_1" x="185.94" y="-39.56">e</text>
-<text class="f2_1" x="208.66" y="-39.56">&amp;</text>
-<text class="f2_1" x="236.08" y="-39.56">a</text>
-<text class="f2_1" x="260.76" y="-39.56">3</text>
-<text class="f2_1" x="286.22" y="-39.56">e</text>
-<text class="f2_1" x="308.94" y="-39.56">&amp;</text>
-<text class="f2_1" x="336.36" y="-39.56">a</text>
-<text class="f2_1" x="361.04" y="-39.56">4</text>
-<text class="f2_1" x="386.51" y="-39.56">e</text>
-<text class="f2_1" x="409.23" y="-39.56">&amp;</text>
-<text class="f2_1" x="436.65" y="-39.56">a</text>
-<text class="f2_1" x="471.27" y="-65.86">Straight</text>
-<text class="f2_1" x="483.46" y="-39.56">1</text>
-<text class="f2_1" x="508.93" y="-39.56">e</text>
-<text class="f2_1" x="531.65" y="-39.56">&amp;</text>
-<text class="f2_1" x="559.07" y="-39.56">a</text>
-<text class="f2_1" x="583.75" y="-39.56">2</text>
-<text class="f2_1" x="609.21" y="-39.56">e</text>
-<text class="f2_1" x="631.93" y="-39.56">&amp;</text>
-<text class="f2_1" x="659.35" y="-39.56">a</text>
-<text class="f2_1" x="684.03" y="-39.56">3</text>
-<text class="f2_1" x="709.50" y="-39.56">e</text>
-<text class="f2_1" x="732.22" y="-39.56">&amp;</text>
-<text class="f2_1" x="759.64" y="-39.56">a</text>
-<text class="f2_1" x="784.31" y="-39.56">4</text>
-<text class="f2_1" x="809.78" y="-39.56">e</text>
-<text class="f2_1" x="832.50" y="-39.56">&amp;</text>
-<text class="f2_1" x="859.92" y="-39.56">a</text>
+<text class="f2_1" x="56.00" y="-65.86" text-anchor="middle">Swing</text>
+<text class="f2_1" x="63.71" y="-39.56" text-anchor="middle">1</text>
+<text class="f2_1" x="88.78" y="-39.56" text-anchor="middle">e</text>
+<text class="f2_1" x="113.85" y="-39.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="138.93" y="-39.56" text-anchor="middle">a</text>
+<text class="f2_1" x="163.99" y="-39.56" text-anchor="middle">2</text>
+<text class="f2_1" x="189.07" y="-39.56" text-anchor="middle">e</text>
+<text class="f2_1" x="214.14" y="-39.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="239.21" y="-39.56" text-anchor="middle">a</text>
+<text class="f2_1" x="264.28" y="-39.56" text-anchor="middle">3</text>
+<text class="f2_1" x="289.35" y="-39.56" text-anchor="middle">e</text>
+<text class="f2_1" x="314.42" y="-39.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="339.49" y="-39.56" text-anchor="middle">a</text>
+<text class="f2_1" x="364.56" y="-39.56" text-anchor="middle">4</text>
+<text class="f2_1" x="389.64" y="-39.56" text-anchor="middle">e</text>
+<text class="f2_1" x="414.71" y="-39.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="439.78" y="-39.56" text-anchor="middle">a</text>
+<text class="f2_1" x="479.27" y="-65.86" text-anchor="middle">Straight</text>
+<text class="f2_1" x="486.98" y="-39.56" text-anchor="middle">1</text>
+<text class="f2_1" x="512.06" y="-39.56" text-anchor="middle">e</text>
+<text class="f2_1" x="537.13" y="-39.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="562.20" y="-39.56" text-anchor="middle">a</text>
+<text class="f2_1" x="587.27" y="-39.56" text-anchor="middle">2</text>
+<text class="f2_1" x="612.34" y="-39.56" text-anchor="middle">e</text>
+<text class="f2_1" x="637.41" y="-39.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="662.48" y="-39.56" text-anchor="middle">a</text>
+<text class="f2_1" x="687.55" y="-39.56" text-anchor="middle">3</text>
+<text class="f2_1" x="712.63" y="-39.56" text-anchor="middle">e</text>
+<text class="f2_1" x="737.70" y="-39.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="762.77" y="-39.56" text-anchor="middle">a</text>
+<text class="f2_1" x="787.83" y="-39.56" text-anchor="middle">4</text>
+<text class="f2_1" x="812.91" y="-39.56" text-anchor="middle">e</text>
+<text class="f2_1" x="837.98" y="-39.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="863.05" y="-39.56" text-anchor="middle">a</text>
 </g>
 <path class="stroke" d="m459.27 120.14v-24.00"></path>
 <path class="stroke" d="m885.33 120.14v-24.00"></path>
