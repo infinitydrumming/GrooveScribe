@@ -880,23 +880,42 @@ function GrooveUtils() {
   // starting lines engravedMusic moves by the clef: they take no room over the
   // line's first note)
   root.renderABCtoSVG = function (abc_source, numbersByTheClef) {
+    try {
+      return renderedABC(abc_source, numbersByTheClef ? lineStartNumbers(abc_source) : null);
+    } catch (err) {
+      // (Infinity Drumming, 2026) abc2svg can't number a line starting with a
+      // flam's grace notes: drawn once to see where its lines end, then again with
+      // those lines' numbers written in (see lineStartNumbers.js)
+      var stack = String((err && err.stack) || '');
+      /** @type {{lineEnds: boolean, leadIns: 'all' | number[]}} */
+      var how = { lineEnds: !!numbersByTheClef, leadIns: 'all' };
+      var probe = lineStartNumbers(abc_source, how);
+      if (!probe || (stack && stack.indexOf('draw_measnb') < 0)) throw err;
+      renderedABC(abc_source, probe);
+      how.leadIns = probe.barsEndingLines();
+      return renderedABC(abc_source, lineStartNumbers(abc_source, how));
+    }
+  };
+
+  function renderedABC(abc_source, numbering) {
     root.abc_obj = new Abc(abcToSVGCallback);
     if ((root.myGrooveData && root.myGrooveData.showLegend) || root.isLegendVisable)
       root.abcNoteNumIndex = -15; // subtract out the legend notes for a proper index.
     else root.abcNoteNumIndex = 0;
     abcToSVGCallback.abc_svg_output = ''; // clear
     abcToSVGCallback.abc_error_output = ''; // clear
-    var numbering = numbersByTheClef ? lineStartNumbers(abc_source) : null;
     abcToSVGCallback.numbering = numbering;
-
-    root.abc_obj.tosvg('SOURCE', abc_source);
-    abcToSVGCallback.numbering = null;
+    try {
+      root.abc_obj.tosvg('SOURCE', abc_source);
+    } finally {
+      abcToSVGCallback.numbering = null;
+    }
     var svg = abcToSVGCallback.abc_svg_output;
     return {
       svg: numbering ? numbering.writtenIn(svg) : svg,
       error_html: abcToSVGCallback.abc_error_output,
     };
-  };
+  }
 
   root.isElementOnScreen = function (element) {
     var rect = element.getBoundingClientRect();

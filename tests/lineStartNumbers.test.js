@@ -11,6 +11,7 @@ import {
 // abc2svg 1.3.2's symbol types
 const BAR = 0,
   CLEF = 1,
+  GRACE = 4,
   KEY = 5,
   REST = 10,
   NOTE = 8;
@@ -155,5 +156,48 @@ describe('writing them in', () => {
     expect(numbering.writtenIn(line('113.04', '') + line('66.70', ''))).toContain(
       '<g transform="translate(0,66.70)">\n<text class="f1_1" x="24.00" y="-32.00">3</text>\n</g>\n'
     );
+  });
+});
+
+// abc2svg can't number a line whose first symbol is in a voice the line's clef
+// isn't in (a flam's grace notes before the Stickings voice's first note)
+describe('bars before a lead-in (a flam at the start of the next bar)', () => {
+  // bar 2's music starts with grace notes in the hands voice (v 1), before the
+  // stickings voice's (v 0) first symbol; bar 3's with the stickings voice
+  const leadIn = () =>
+    linked([
+      note({ v: 0 }),
+      { ...bar(2), v: 0 },
+      { ...bar(undefined), v: 1 },
+      { type: GRACE, st: 0, v: 1, x: 30, wl: 9 },
+      { type: REST, st: 0, v: 0 },
+      note({ v: 1 }),
+      { ...bar(3), v: 0 },
+      { type: REST, st: 0, v: 0 },
+      note({ v: 1 }),
+      { ...bar(4, true), v: 0 },
+    ]);
+
+  it('keeps their numbers unless asked for them (all, or some by their place)', () => {
+    const numbers = (how) => {
+      const symbols = leadIn();
+      lineStartNumbers('%%measurenb 1\n', how).take(symbols[0]);
+      return symbols.map((s) => s.bar_num).filter(Boolean);
+    };
+    expect(numbers()).toEqual([2, 3, 0.5]);
+    expect(numbers({ lineEnds: true, leadIns: 'all' })).toEqual([0.5, 3, 0.5]);
+    expect(numbers({ lineEnds: false, leadIns: 'all' })).toEqual([0.5, 3, 4]);
+    expect(numbers({ lineEnds: false, leadIns: [1] })).toEqual([0.5, 3, 4]);
+    expect(numbers({ lineEnds: false, leadIns: [6] })).toEqual([2, 3, 4]); // (bar 3: no lead-in)
+  });
+
+  it('tells which of them end a line once laid out, and writes their numbers over the grace notes', () => {
+    const symbols = leadIn();
+    const numbering = lineStartNumbers('%%measurenb 1\n', { lineEnds: false, leadIns: 'all' });
+    numbering.take(symbols[0]);
+    expect(numbering.barsEndingLines()).toEqual([]);
+    symbols[3].nl = false; // abc2svg started a line with the grace notes (nothing before them)
+    expect(numbering.barsEndingLines()).toEqual([1]);
+    expect(numbersAtLineStarts(symbols, [0])).toEqual([{ line: 1, number: 2, x: 21 }]);
   });
 });
