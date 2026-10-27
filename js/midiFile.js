@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: 32nds beat by beat, tom rim clicks, crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar, exact tempo for swung and triplet notes, more metronome clicks, diddles, swing in notes beat by beat. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: 32nds and triplets together (the fine grid), 32nds beat by beat, tom rim clicks, crash and ride lines, crash 2 and splash sounds, one metronome click per bar, tom ghosts and accents, ride accent, Brazilian swing, swing in any time signature, straight bars, silent cursor markers, flams / drags / ruffs played as grace notes on any drum, a time signature per bar, exact tempo for swung and triplet notes, more metronome clicks, diddles, swing in notes beat by beat. See CHANGES.md.
 // MIDI-file generation (Step 2 extraction from groove_utils.js). Builds a
 // data:audio/midi URL from grooveData. Takes a GrooveUtils instance (gu) for
 // the note-scaling / triplet / metronome helpers; GrooveUtils delegates here.
@@ -79,7 +79,11 @@ import {
   constant_OUR_MIDI_VELOCITY_TOM_GHOST,
   constant_OUR_MIDI_VELOCITY_NORMAL,
 } from './constants.js';
-import { isTripletDivisionFromNotesPerMeasure, scaleNoteArrayToFullSize } from './musicMath.js';
+import {
+  FINE_DIVISION,
+  isTripletDivisionFromNotesPerMeasure,
+  scaleNoteArrayToFullSize,
+} from './musicMath.js';
 import { barSig, fullSizeBar, isMixedMeter } from './barMeters.js';
 import { beatGroups, groupAt, hasBeatNotes } from './beatNotes.js';
 import {
@@ -144,7 +148,7 @@ function takeDiddles(HH_Array, Snare_Array, Kick_Array, Toms_Array, num_notes) {
  * stroke); undefined otherwise.
  */
 function slotSpansOf(gd, bar, slots) {
-  if (gd.timeDivision != 48 && gd.timeDivision != 32) return undefined;
+  if ([48, 32, FINE_DIVISION].indexOf(gd.timeDivision) < 0) return undefined;
   if (!gd.beatNotes || !gd.beatNotes[bar]) return undefined;
   var sig = barSig(gd.barTimeSigs, bar, gd.numBeats, gd.noteValue);
   if (!hasBeatNotes(sig)) return undefined;
@@ -468,6 +472,8 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   if (midiTrack.graceFloor === undefined) midiTrack.graceFloor = midiTrack.events.length - 1;
 
   var isTriplets = isTripletDivisionFromNotesPerMeasure(num_notes, timeSigTop, timeSigBottom);
+  var quarterSlots = slotsPerQuarter(num_notes, timeSigTop, timeSigBottom);
+  var slotTicks = 128 / quarterSlots; // ticks: 16 for 32nd notes, 10.67 for 48th triplets
   var offsetClickStartBeat = gu.getMetronomeOptionsOffsetClickStartRotation(isTriplets);
   var delay_for_next_note = 0;
 
@@ -491,10 +497,10 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   for (var slot = 0; slot < num_notes; slot++)
     durations.push(
       slot_spans
-        ? beatSlotDuration(slot, isTriplets, slot_spans[slot], swing_percentage, swing_style)
+        ? beatSlotDuration(slot, slotTicks, slot_spans[slot], swing_percentage, swing_style)
         : slotDuration(
             slot,
-            isTriplets,
+            slotTicks,
             num_notes,
             num_notes_for_swing,
             swing_percentage,
@@ -548,9 +554,9 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
     var metronome_velocity = constant_OUR_MIDI_VELOCITY_ACCENT;
     // (the newer clicks are among the extra hits)
     if (metronome_frequency > 0 && !isTimedClick(metronome_frequency)) {
-      var quarterNoteFrequency = isTriplets ? 12 : 8;
-      var eighthNoteFrequency = isTriplets ? 6 : 4;
-      var sixteenthNoteFrequency = isTriplets ? 2 : 2;
+      var quarterNoteFrequency = CLICK_SLOTS[quarterSlots][0];
+      var eighthNoteFrequency = CLICK_SLOTS[quarterSlots][1];
+      var sixteenthNoteFrequency = CLICK_SLOTS[quarterSlots][2];
 
       var metronome_specific_index = i;
       switch (offsetClickStartBeat) {
@@ -922,28 +928,36 @@ export function MIDI_from_HH_Snare_Kick_Arrays(
   if (delay_for_next_note) midiTrack.addNoteOff(0, 60, delay_for_next_note - leadBlankTicks); // add a blank note for spacing
 } // end of function
 
-// How long one slot of a bar lasts, in ticks: 16 for a 32nd note (10.67 for a
-// 32nd triplet), the 1 and & a little longer and the e and a shorter when swung.
-function slotDuration(
-  i,
-  isTriplets,
-  num_notes,
-  num_notes_for_swing,
-  swing_percentage,
-  swing_style
-) {
-  var duration = isTriplets ? 128 / 12 : 16; // "ticks"   16 for 32nd notes.  10.67 for 48th triplets
+// Slots a quarter note on a bar's grid: 8 (32nd notes), 12 (triplets), or 24 (the
+// fine grid, Infinity Drumming, 2026: 32nd notes and triplets in one groove).
+function slotsPerQuarter(num_notes, timeSigTop, timeSigBottom) {
+  if ((num_notes / timeSigTop) * timeSigBottom == FINE_DIVISION) return 24;
+  return isTripletDivisionFromNotesPerMeasure(num_notes, timeSigTop, timeSigBottom) ? 12 : 8;
+}
+
+// The older clicks' spacing in slots (quarter, 8th and 16th notes) by slots a
+// quarter note: in triplets the 16th notes are sextuplets.
+var CLICK_SLOTS = { 8: [8, 4, 2], 12: [12, 6, 2], 24: [24, 12, 4] };
+
+// How long one slot of a bar lasts, in ticks: `slotTicks` (16 for a 32nd note,
+// 10.67 for a 32nd triplet), the 1 and & a little longer and the e and a shorter
+// when swung.
+function slotDuration(i, slotTicks, num_notes, num_notes_for_swing, swing_percentage, swing_style) {
+  var duration = slotTicks;
   if (swing_percentage === 0) return duration;
   var scaler = num_notes / num_notes_for_swing;
   return duration + duration * swing_percentage * swingDirection(i, scaler, swing_style);
 }
 
 // How long one slot of a bar of notes beat by beat lasts: a beat of 8ths or 16ths
-// swings like the 8ths or 16ths setting (its notes `step` slots apart: 6 or 3);
-// triplets, and 32nd-note triplets, play straight.
-function beatSlotDuration(i, isTriplets, step, swing_percentage, swing_style) {
-  var duration = slotDuration(i, isTriplets, 1, 1, 0, swing_style);
-  if (swing_percentage === 0 || (step != 3 && step != 6)) return duration;
+// swings like the 8ths or 16ths setting (its notes `step` slots apart: a half or a
+// quarter of a quarter note's, 6 or 3 on the Mixed grid); triplets, 32nd notes and
+// 32nd-note triplets play straight.
+function beatSlotDuration(i, slotTicks, step, swing_percentage, swing_style) {
+  var duration = slotDuration(i, slotTicks, 1, 1, 0, swing_style);
+  var quarter = Math.round(128 / slotTicks); // (slots a quarter note)
+  var swung = step == quarter / 2 || step == quarter / 4;
+  if (swing_percentage === 0 || !swung) return duration;
   return duration + duration * swing_percentage * swingDirection(i, step, swing_style);
 }
 

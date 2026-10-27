@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: section letters boxed and bar numbers by the stave, 32nds beat by beat, tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices, dense bars one a line on phones, each glyph defined once in the music on the page. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: 32nds and triplets together (the fine grid), section letters boxed and bar numbers by the stave, 32nds beat by beat, tom rim clicks, bar numbers in permutations, mid tom, crash 2 and splash; crash and ride lines; full note length for the kick & hi-hat foot in a chord; straight / swing markings, grace notes (flams, drags, ruffs) on any drum, a time signature per bar, classic beaming in x/8 bars, counting over the notes, swing / straight markings above the counts, diddles, triplets in x/8 bars, quarter-note triplets and beat-by-beat notes, the counting choices, dense bars one a line on phones, each glyph defined once in the music on the page. See CHANGES.md.
 // ABC-notation generation (Step 2 extraction from groove_utils.js).
 // The public functions take a GrooveUtils instance (gu) for the note-scaling /
 // triplet / sticking-count helpers that remain in GrooveUtils; the internal
@@ -12,13 +12,14 @@ import {
 } from './constants.js';
 import {
   beamGroupEnds,
+  FINE_DIVISION,
+  fullSizeSlots,
   isTripletDivision,
   isTripletDivisionFromNotesPerMeasure,
-  notesPerMeasureInFullSizeArray,
   scaleNoteArrayToFullSize,
 } from './musicMath.js';
 import { barSig, barStride, fullSizeBar, isMixedMeter } from './barMeters.js';
-import { hasBeatNotes, makeBeatPlan } from './beatNotes.js';
+import { gridOfBeats, hasBeatNotes, makeBeatPlan } from './beatNotes.js';
 import {
   clickCountBar,
   clickCountNotes,
@@ -32,7 +33,7 @@ import {
 
 // notes beat by beat: Mixed, or 32nds with beats of their own
 function isBeatByBeat(gd) {
-  if (gd.timeDivision == 48) return true;
+  if (gd.timeDivision == 48 || gd.timeDivision == FINE_DIVISION) return true;
   return gd.timeDivision == 32 && (gd.beatNotes || []).some(Boolean);
 }
 
@@ -272,7 +273,22 @@ function straightBeatABC(
   while (!endsBeam(end - 1) && end % notes_per_measure !== 0 && stepOfBeat(end) === step)
     end += beat;
   var units = (step * 2) / 3; // a 16th note is 2 (of 1/32), an 8th note 4
-  var count = (end - start) / step;
+  var written = evenNotesABC(
+    sticking_array,
+    drums,
+    kick_array,
+    start,
+    step,
+    (end - start) / step,
+    units
+  );
+  written.span = end - start;
+  return written;
+}
+
+// `count` notes `step` slots apart from `start`, each `units` 32nds long, in the
+// stickings, hands and feet voices (each note, count or sticking lasting until the next)
+function evenNotesABC(sticking_array, drums, kick_array, start, step, count, units) {
   // the beats' own notes, side by side
   var compact = function (array) {
     var notes = [];
@@ -288,8 +304,197 @@ function straightBeatABC(
     stickings: write([compact(sticking_array)], true),
     hands: write(drums.map(compact), false),
     feet: write([compact(kick_array)], true),
-    span: end - start,
+    span: 0,
   };
+}
+
+// --- The fine grid (Infinity Drumming, 2026) ------------------------------------
+// A bar on the fine grid (24 slots a quarter note: 32nd notes and triplets in one
+// groove) is written as the grid its beats need would write it: without 32nd notes
+// as on the Mixed grid, without triplets as on the 32nds grid (the same music, to
+// the byte), and with both as on the Mixed grid, its beats of 32nd notes written
+// from the fine grid's own slots (fineBeatABC).
+
+function fineGridABC(
+  gu,
+  sticking_array,
+  HH_array,
+  snare_array,
+  kick_array,
+  toms_array,
+  post_voice_abc,
+  num_notes,
+  notes_per_measure,
+  kick_stems_up,
+  timeSigTop,
+  timeSigBottom,
+  beatPlan
+) {
+  var all = {
+    sticking: sticking_array,
+    hh: HH_array,
+    snare: snare_array,
+    kick: kick_array,
+    toms: toms_array || [],
+  };
+  var sig = { top: timeSigTop, bottom: timeSigBottom };
+  var bars = Math.max(1, Math.round(num_notes / notes_per_measure));
+  var abc = '';
+  for (var bar = 0; bar < bars; bar++)
+    abc += fineBarABC(
+      gu,
+      all,
+      bar * notes_per_measure,
+      notes_per_measure,
+      beatPlan ? beatPlan.groups[bar] || [] : [],
+      sig,
+      kick_stems_up,
+      bar < bars - 1 ? '\n' : post_voice_abc
+    );
+  return abc;
+}
+
+// a bar's beats ("dxqq") from its groups in a beat plan
+function beatsOfGroups(groups) {
+  return groups
+    .map(function (group) {
+      return new Array(group.beats + 1).join(group.char);
+    })
+    .join('');
+}
+
+// a bar's lines (`count` slots from `from`), every `step`-th slot of them: a coarser grid's
+function barLines(all, from, count, step) {
+  var slots = function (array) {
+    var out = [];
+    for (var i = from; i < from + count; i += step) out.push(array[i]);
+    return out;
+  };
+  return {
+    sticking: slots(all.sticking),
+    hh: slots(all.hh),
+    snare: slots(all.snare),
+    kick: slots(all.kick),
+    toms: all.toms.map(slots),
+  };
+}
+
+// one bar on the fine grid (its slots from `from`), written as the grid its beats need
+function fineBarABC(gu, all, from, count, groups, sig, kick_stems_up, post) {
+  var beats = beatsOfGroups(groups);
+  var needs = gridOfBeats(beats);
+  var grid = needs == 32 ? 32 : 48; // (8ths and 16ths alone: as the Mixed grid writes them)
+  var step = FINE_DIVISION / grid;
+  var coarse = barLines(all, from, count, step);
+  var fine =
+    needs == FINE_DIVISION
+      ? fineBar(gu, barLines(all, from, count, 1), beats, sig, kick_stems_up)
+      : null;
+  // (on the Mixed grid a beat of 32nd notes is room for fineBeatABC's)
+  var plain = fine ? beats.replace(/d/g, 's') : beats;
+  return create_ABC_from_snare_HH_kick_arrays(
+    gu,
+    coarse.sticking,
+    coarse.hh,
+    coarse.snare,
+    coarse.kick,
+    coarse.toms,
+    post,
+    count / step,
+    grid,
+    count / step,
+    kick_stems_up,
+    sig.top,
+    sig.bottom,
+    beats ? makeBeatPlan([plain], [sig], grid) : null,
+    fine
+  );
+}
+
+// a bar with both 32nd notes and triplets, on the fine grid, for fineBeatABC: its
+// lines (the hands voice's as the writers have them, diddled notes ending at their
+// grid note) and beat plan
+function fineBar(gu, lines, beats, sig, kick_stems_up) {
+  var count = lines.hh.length;
+  var plan = makeBeatPlan([beats], [sig], FINE_DIVISION);
+  var drums = [lines.snare, lines.hh].concat(kick_stems_up ? [lines.kick] : []).concat(lines.toms);
+  var stops = diddleStops(
+    [lines.hh, lines.snare, lines.kick].concat(lines.toms),
+    count,
+    count,
+    function (slot) {
+      return plan.slotsPerNoteAt(slot, 0);
+    }
+  );
+  if (stops) drums.push(stops);
+  return {
+    sticking: lines.sticking,
+    hh: lines.hh,
+    snare: lines.snare,
+    kick: lines.kick,
+    toms: lines.toms,
+    drums: drums,
+    plan: plan,
+    notes_per_measure: count,
+    gu: gu,
+    counted: null, // (its stickings with counts, once worked out)
+  };
+}
+
+// A beat of 32nd notes in a bar on the fine grid written on the Mixed grid, from
+// the fine grid's slots (null for any other beat): at slot `i` of the Mixed bar,
+// its counts said as the 32nds note setting says them
+function fineBeatABC(fine, i, beat) {
+  var at = (i % (fine.notes_per_measure / 2)) * 2;
+  var group = fine.plan.groups[0].find(function (g) {
+    return g.start == at;
+  });
+  if (!group || group.char != 'd') return null;
+  var sticking = fineCounts(fine).slice();
+  var written = evenNotesABC(
+    sticking,
+    fine.drums,
+    fine.kick,
+    at,
+    group.step,
+    group.span / group.step,
+    1
+  );
+  written.span = beat;
+  return written;
+}
+
+// the fine bar's stickings with its counts in them, as create_ABC_from_snare_HH_kick_arrays
+// counts a bar (worked out once a bar)
+function fineCounts(fine) {
+  if (fine.counted) return fine.counted;
+  var gu = fine.gu;
+  var mode = gu.showCounts ? gu.countMode || 'all' : '';
+  var counted = fine.sticking.slice();
+  if (mode && mode != 'click') {
+    addPlanCounting(counted, fine.plan, fine.notes_per_measure);
+    var slots = [];
+    counted.forEach(function (sticking, slot) {
+      if (sticking == constant_ABC_STICK_COUNT) slots.push(slot);
+    });
+    convertPlanCounts(counted, fine.plan, fine.notes_per_measure);
+    if (['bold', 'ghosts', 'rhythm'].indexOf(mode) >= 0)
+      styleCounts(
+        counted,
+        slots,
+        mode,
+        {
+          hh: fine.hh,
+          snare: fine.snare,
+          kick: fine.kick,
+          toms: fine.toms.slice(0, constant_NUMBER_OF_TOMS),
+          cymbals: fine.toms.slice(constant_NUMBER_OF_TOMS),
+        },
+        gu.countRhythmLines || null
+      );
+  }
+  fine.counted = counted;
+  return counted;
 }
 
 function snare_HH_kick_ABC_for_triplets(
@@ -307,7 +512,8 @@ function snare_HH_kick_ABC_for_triplets(
   timeSigBottom,
   numberOfMeasuresPerLine,
   beatPlan,
-  beatMarks
+  beatMarks,
+  fineBeats
 ) {
   var scaler = 1; // we are always in 48 notes here, and the ABC needs to think we are in 48 since the specified division is 1/32
   // Each beat is 12 slots (a quarter note), or in x/8 bars of 16th triplets and
@@ -365,20 +571,24 @@ function snare_HH_kick_ABC_for_triplets(
 
       // Look for some special cases that will format beats as non triplet groups.   Quarter notes, 1/8th and 1/16th notes only.
 
+      // a beat of 32nd notes, in a bar on the fine grid (Infinity Drumming, 2026)
+      var fineBeat = fineBeats ? fineBeatABC(fineBeats, i, beat) : null;
       // beat by beat (Infinity Drumming, 2026): a beat of 8ths or 16ths, written
       // as in the 8ths and 16ths note settings, with all its counts
-      var straightBeat = beatPlan
-        ? straightBeatABC(
-            sticking_array,
-            all_drum_array_of_array,
-            kick_array,
-            beatPlan,
-            i,
-            beat,
-            endsBeam,
-            notes_per_measure
-          )
-        : null;
+      var straightBeat =
+        fineBeat ||
+        (beatPlan
+          ? straightBeatABC(
+              sticking_array,
+              all_drum_array_of_array,
+              kick_array,
+              beatPlan,
+              i,
+              beat,
+              endsBeam,
+              notes_per_measure
+            )
+          : null);
       // a triplet over two beats (Infinity Drumming, 2026): quarter-note triplets,
       // or 8th-note triplets in an x/8 bar, from the bar's beat plan
       var longTriplet = beatPlan
@@ -927,6 +1137,14 @@ function snare_HH_kick_ABC_for_quads(
  * @param {number} bottom
  * @param {boolean} triplets
  */
+/**
+ * Infinity Drumming, 2026: a bar's notes for its layout: a fine-grid bar's as the
+ * Mixed grid has them (it is written as the Mixed grid writes it).
+ */
+export function layoutNotes(division, notesPerBar) {
+  return division == FINE_DIVISION ? notesPerBar / 2 : notesPerBar;
+}
+
 export function notesOnALine(gu, notesPerBar, top, bottom, triplets) {
   if (!gu.showCounts || gu.countMode != 'click') return notesPerBar;
   var click = gu.countClick || {};
@@ -1332,11 +1550,7 @@ export function get_top_ABC_BoilerPlate(
  * setting.  A beat with stickings keeps just its stickings ("R L", not "R e L a").
  */
 function addCounting(sticking_array, time_division, timeSigTop, timeSigBottom) {
-  var fullSlots = notesPerMeasureInFullSizeArray(
-    isTripletDivision(time_division),
-    timeSigTop,
-    timeSigBottom
-  );
+  var fullSlots = fullSizeSlots(time_division, timeSigTop, timeSigBottom);
   var step = fullSlots / ((time_division / 4) * timeSigTop * (4 / timeSigBottom));
   var beat = fullSlots / timeSigTop;
   // 8th-note triplets in x/8 time: three over every two beats
@@ -1423,8 +1637,25 @@ export function create_ABC_from_snare_HH_kick_arrays(
   kick_stems_up,
   timeSigTop,
   timeSigBottom,
-  beatPlan
+  beatPlan,
+  fineBeats
 ) {
+  if (time_division == FINE_DIVISION)
+    return fineGridABC(
+      gu,
+      sticking_array,
+      HH_array,
+      snare_array,
+      kick_array,
+      toms_array,
+      post_voice_abc,
+      num_notes,
+      notes_per_measure,
+      kick_stems_up,
+      timeSigTop,
+      timeSigBottom,
+      beatPlan
+    );
   var tripletBar = isTripletDivisionFromNotesPerMeasure(
     notes_per_measure,
     timeSigTop,
@@ -1499,7 +1730,8 @@ export function create_ABC_from_snare_HH_kick_arrays(
       timeSigBottom,
       numberOfMeasuresPerLine,
       beatPlan,
-      beatMarks
+      beatMarks,
+      fineBeats
     );
   } else {
     abc = snare_HH_kick_ABC_for_quads(
@@ -1738,7 +1970,10 @@ export function createABCFromGrooveData(gu, myGrooveData, renderWidth) {
   };
   gu.showCounts = !!myGrooveData.showCounts;
   gu.countMode = myGrooveData.countMode || 'all';
-  gu.countSmall = myGrooveData.timeDivision == 32;
+  gu.countSmall =
+    myGrooveData.timeDivision == 32 ||
+    (myGrooveData.timeDivision == FINE_DIVISION &&
+      /d/.test((myGrooveData.beatNotes || []).join('')));
   gu.countClick = {
     frequency: myGrooveData.metronomeFrequency,
     start: (myGrooveData.practice && myGrooveData.practice.clickStart) || '1',
@@ -1819,7 +2054,7 @@ function grooveDataABC(gu, myGrooveData, renderWidth) {
   var layout = musicLayout(
     notesOnALine(
       gu,
-      myGrooveData.notesPerMeasure,
+      layoutNotes(myGrooveData.timeDivision, myGrooveData.notesPerMeasure),
       myGrooveData.numBeats,
       myGrooveData.noteValue,
       is_triplet_division
@@ -1853,7 +2088,7 @@ function grooveDataABC(gu, myGrooveData, renderWidth) {
     myGrooveData.swingStyle,
     is_triplet_division
   );
-  if (feelMarkings.some(Boolean)) {
+  if (feelMarkings.some(Boolean) || myGrooveData.timeDivision == FINE_DIVISION) {
     // bar by bar (like the editor), so each bar can carry its "Straight" / "Swing"
     fullABC += createMeasureByMeasureABC(
       gu,
@@ -1879,11 +2114,7 @@ function grooveDataABC(gu, myGrooveData, renderWidth) {
     '|\n',
     FullNoteHHArray.length,
     myGrooveData.timeDivision,
-    notesPerMeasureInFullSizeArray(
-      is_triplet_division,
-      myGrooveData.numBeats,
-      myGrooveData.noteValue
-    ), // notes_per_measure, We scaled up to 48/32 above
+    fullSizeSlots(myGrooveData.timeDivision, myGrooveData.numBeats, myGrooveData.noteValue), // notes_per_measure, We scaled up to 48/32 above
     myGrooveData.kickStemsUp,
     myGrooveData.numBeats,
     myGrooveData.noteValue,
@@ -1916,8 +2147,8 @@ function createMeasureByMeasureABC(
   kickArray,
   tomsArrays
 ) {
-  var notesPerMeasure = notesPerMeasureInFullSizeArray(
-    is_triplet_division,
+  var notesPerMeasure = fullSizeSlots(
+    myGrooveData.timeDivision,
     myGrooveData.numBeats,
     myGrooveData.noteValue
   );
@@ -1994,7 +2225,10 @@ function createMixedMeterABC(gu, myGrooveData, renderWidth) {
   var layout = musicLayout(
     notesOnALine(
       gu,
-      barStride(gd.timeDivision, gd.barTimeSigs, gd.numberOfMeasures, gd.numBeats, gd.noteValue),
+      layoutNotes(
+        gd.timeDivision,
+        barStride(gd.timeDivision, gd.barTimeSigs, gd.numberOfMeasures, gd.numBeats, gd.noteValue)
+      ),
       gd.numBeats,
       gd.noteValue,
       triplets

@@ -331,12 +331,6 @@ test.describe('32nds on one beat', () => {
     await expect.poll(() => inLink(page, 'S')).toBe('|--------O---------------Oo-o----|');
     const beatByBeat = await playing(page);
 
-    // the triplets aren't for this groove now
-    await page.click('#beatSlot0');
-    await page.waitForTimeout(150);
-    await expect(page.locator('#beatContextMenu li[data-beat-choice="t"]')).toHaveClass(/disabled/);
-    await page.keyboard.press('Escape');
-
     // the same notes in the 32nds note setting sound the same
     await loadGroove(
       page,
@@ -346,6 +340,56 @@ test.describe('32nds on one beat', () => {
       )
     );
     expect(await playing(page)).toBe(beatByBeat);
+  });
+
+  test('triplets on another beat keep the 32nds: the fine grid, and Mixed again without them', async ({
+    page,
+  }) => {
+    // a line of the fine grid (24 slots a quarter note): { slot: note }
+    const fine = (notes) =>
+      '|' + Array.from({ length: 96 }, (_, slot) => notes[slot] || '-').join('') + '|';
+    await loadGroove(page, grooveUrl(sixteenths));
+    await choose(page, 12, 'd'); // beat 4
+    await expect.poll(() => inLink(page, 'Div')).toBe('32');
+    await page.click('#snare25');
+    await page.click('#snare27');
+    await expect.poll(() => inLink(page, 'S')).toBe('|--------O---------------Oo-o----|');
+    await choose(page, 0, 't'); // beat 1: 8th triplets
+    await expect.poll(() => inLink(page, 'Div')).toBe('96');
+    expect(await inLink(page, 'Beats')).toBe('tssd');
+    expect(await inLink(page, 'S')).toBe(fine({ 24: 'O', 72: 'O', 75: 'o', 81: 'o' }));
+    await page.click('#snare8'); // the triplet's middle note
+    await expect
+      .poll(() => inLink(page, 'S'))
+      .toBe(fine({ 8: 'o', 24: 'O', 72: 'O', 75: 'o', 81: 'o' }));
+    // every choice is open (quarter-note triplets on beat 4 need a fifth beat)
+    await page.click('#beatSlot72');
+    await page.waitForTimeout(150);
+    await expect(page.locator('#beatContextMenu li.disabled')).toHaveCount(1);
+    await expect(page.locator('#beatContextMenu li.disabled')).toHaveAttribute(
+      'data-beat-choice',
+      'q'
+    );
+    await page.keyboard.press('Escape');
+    // it plays as the same notes written on the fine grid would
+    const played = await playing(page);
+    const hats = { 0: 'x', 24: 'x', 36: 'x', 48: 'x', 60: 'x', 72: 'x', 84: 'x' };
+    await loadGroove(
+      page,
+      grooveUrl(
+        '?TimeSig=4/4&Div=96&Tempo=80&Measures=1&Beats=tssd&H=' +
+          fine(hats) +
+          '&S=' +
+          fine({ 8: 'o', 24: 'O', 72: 'O', 75: 'o', 81: 'o' }) +
+          '&K=' +
+          fine({ 0: 'o', 48: 'o' })
+      )
+    );
+    expect(await playing(page)).toBe(played);
+    // 16ths again on beat 4: Mixed, the triplets kept
+    await choose(page, 72, 's');
+    await expect.poll(() => inLink(page, 'Div')).toBe('48');
+    expect(await inLink(page, 'Beats')).toBe('tsss');
   });
 
   test('16ths again on that beat take the groove back to 16ths', async ({ page }) => {

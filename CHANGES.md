@@ -11,6 +11,20 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-27 — 32nds and triplets in one groove
+
+- Notes beat by beat: any beat of any bar can have any notes. Before, a beat of
+  32nds and a beat of triplets couldn't be in the same groove (with triplets in
+  one bar, 32nds were greyed out in every other). Such a groove now goes on a
+  finer grid (`Div=96`, 24 slots to a quarter note; `js/beatNotes.js`,
+  `js/musicMath.js`), and back to the Mixed or 32nds grid as soon as it no
+  longer has both. Each bar is written as before (a bar without both, to the
+  byte; `js/abcNotation.js`), and the sound, counting, cursor, links, the
+  Alphabet's trade bars and embedded grooves follow (`js/midiFile.js`,
+  `js/urlSerialization.js`, `js/barMeters.js`, `js/groove_writer.js`,
+  `js/groove_utils.js`). With swing, beats of 8ths and 16ths on the 32nds grid
+  now swing as they do in Mixed.
+
 ## 2026-10-26 — Trade bars with notes of their own
 
 - The Alphabet's trade bars can have any notes, beat by beat: a beat of a trade

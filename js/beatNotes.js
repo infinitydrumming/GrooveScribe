@@ -18,13 +18,16 @@
 // 32nds grid instead (Div=32 with Beats=, 8 slots to a quarter note), where a
 // beat has 8ths, 16ths or
 //   d  32nd notes
-// Triplets and 32nd notes can't share a groove.  The functions below take the
-// grid (48 or 32) last, 48 when it isn't given.
+// A groove with both triplets and 32nd notes is on the fine grid (Div=96, 24 slots
+// to a quarter note, Infinity Drumming, 2026), where a beat can have any of them;
+// only such a groove is, so the others keep their grids and links.  The functions
+// below take the grid (48, 32 or 96) last, 48 when it isn't given.
 
 // slots between the notes of each choice, on each grid
 var STEPS = {
   48: { e: 6, s: 3, t: 4, x: 2, q: 8, a: 1 },
   32: { e: 4, s: 2, d: 1 },
+  96: { e: 12, s: 6, d: 3, t: 8, x: 4, q: 16, a: 2 },
 };
 
 // the choices for a beat, in menu order, by the bottom of the time signature
@@ -57,13 +60,13 @@ export function gridOfChoice(char) {
   return char == 'e' || char == 's' ? 0 : 48;
 }
 
-/** The grid some beats need (32 or 48, 0 for either), or -1 when they can't share one. */
+/** The grid some beats need: 32 or 48, 0 for either, 96 for both (32nds and triplets). */
 export function gridOfBeats(text) {
   var grid = 0;
   var chars = String(text || '').split('');
   for (var c = 0; c < chars.length; c++) {
     var needs = gridOfChoice(chars[c]);
-    if (needs && grid && needs != grid) return -1;
+    if (needs && grid && needs != grid) return 96;
     grid = needs || grid;
   }
   return grid;
@@ -74,7 +77,7 @@ export function hasBeatNotes(sig) {
   return !!sig && !!CHOICES[sig.bottom];
 }
 
-/** How many grid slots a beat has: 12 in x/4, 6 in x/8 (8 and 4 on the 32nds grid). */
+/** How many grid slots a beat has: 12 in x/4, 6 in x/8 (8 and 4 on the 32nds grid, 24 and 12 on the fine grid). */
 export function beatSlots(sig, grid) {
   return (grid || 48) / sig.bottom;
 }
@@ -182,6 +185,8 @@ export function inferBeats(lines, start, sig, grid) {
   var step = STEPS[grid || 48];
   var order = sig.bottom == 8 ? ['e', 's', 'x', 'a'] : ['e', 's', 't', 'x', 'a'];
   if (grid == 32) order = ['e', 's', 'd'];
+  if (grid == 96)
+    order = sig.bottom == 8 ? ['e', 's', 'd', 'x', 'a'] : ['e', 's', 'd', 't', 'x', 'a'];
   var chars = [];
   for (var beat = 0; beat < sig.top; beat++) {
     var offsets = [];
@@ -220,7 +225,7 @@ export function inferBeats(lines, start, sig, grid) {
  * 32) otherwise.
  * @param {string[]} bars  each bar's beats
  * @param {{top: number, bottom: number}[]} sigs  each bar's time signature
- * @param {number} [grid]  48 or 32
+ * @param {number} [grid]  48, 32 or 96
  */
 export function divisionForBeats(bars, sigs, grid) {
   grid = grid || 48;
@@ -288,8 +293,16 @@ var COUNTS = {
 function countAt(groups, sig, slot, grid) {
   var group = groupAt(groups, slot);
   if (!group) return null;
+  var place = slot - group.start;
+  // (the fine grid: as the 32nds grid counts 32nd notes, the Mixed one the rest)
+  if (grid == 96) {
+    var thirtySeconds = group.char == 'd';
+    if (place % (thirtySeconds ? 3 : 2)) return null;
+    place /= thirtySeconds ? 3 : 2;
+    grid = thirtySeconds ? 32 : 48;
+  }
   var table = ((grid == 32 ? COUNTS_32 : COUNTS)[sig.bottom] || {})[group.char] || {};
-  var said = table[slot - group.start];
+  var said = table[place];
   if (!said) return null;
   return said == 'N' ? String(group.beat + 1) : said;
 }
@@ -297,7 +310,7 @@ function countAt(groups, sig, slot, grid) {
 /**
  * The beat plan of some bars (each bar's beats and time signature, every bar
  * `slotsPerBar` slots apart), for the music writers: slot i is in bar
- * floor(i / slotsPerBar).  `grid`: 48 (Mixed, the default) or 32.
+ * floor(i / slotsPerBar).  `grid`: 48 (Mixed, the default), 32 or 96.
  */
 export function makeBeatPlan(bars, sigs, grid) {
   var groups = bars.map(function (beats, b) {

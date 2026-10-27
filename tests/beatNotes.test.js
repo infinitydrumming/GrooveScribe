@@ -143,11 +143,11 @@ describe('a groove of beats', () => {
 });
 
 describe('32nd notes, on the 32nds grid', () => {
-  it('need their own grid: they share it with 8ths and 16ths, never with triplets', () => {
+  it('need their own grid: they share it with 8ths and 16ths, with triplets the fine grid', () => {
     expect(gridOfBeats('sssd')).toBe(32);
     expect(gridOfBeats('ssst')).toBe(48);
     expect(gridOfBeats('eess')).toBe(0); // either grid
-    expect(gridOfBeats('sdst')).toBe(-1);
+    expect(gridOfBeats('sdst')).toBe(96);
     expect(normalizeBeats('sssd', FOUR, 's', 32)).toBe('sssd');
     expect(normalizeBeats('sssd', FOUR)).toBe('ssss'); // not on the Mixed grid
     expect(normalizeBeats('ssst', FOUR, 's', 32)).toBe('ssss');
@@ -191,5 +191,44 @@ describe('32nd notes, on the 32nds grid', () => {
     expect(plan.slotsPerNoteAt(25, 0)).toBe(1);
     const eight = makeBeatPlan(['ssd'], [sig(3, 8)], 32);
     expect([8, 9, 10, 11].map((slot) => eight.countAt(slot, 0)).join(' ')).toBe('3 e & a');
+  });
+});
+
+describe('the fine grid: 32nd notes and triplets in one groove', () => {
+  it('has every choice, 24 slots a quarter note (12 an 8th)', () => {
+    expect(gridOfBeats('dxte')).toBe(96);
+    expect(gridOfBeats('sssd') + ' ' + gridOfBeats('ssxs')).toBe('32 48');
+    expect(beatSlots(FOUR, 96)).toBe(24);
+    expect(beatSlots(sig(7, 8), 96)).toBe(12);
+    expect(normalizeBeats('dtqq', FOUR, 's', 96)).toBe('dtqq');
+    const groups = beatGroups('daxqq', sig(5, 4), 96);
+    expect(groups.map((g) => [g.char, g.start, g.span, g.step])).toEqual([
+      ['d', 0, 24, 3],
+      ['a', 24, 24, 2],
+      ['x', 48, 24, 4],
+      ['q', 72, 48, 16],
+    ]);
+  });
+
+  it('is found from the notes, and stays the grid while 32nds and triplets mix', () => {
+    const notes = Array(96).fill(false);
+    [0, 3, 6, 9, 12, 15, 18, 21, 24, 32, 40, 48, 60, 72, 76, 80, 84, 88, 92].forEach(
+      (slot) => (notes[slot] = 'x')
+    );
+    expect(inferBeats([notes], 0, FOUR, 96)).toBe('dtex');
+    expect(divisionForBeats(['dtex'], [FOUR], 96)).toBe(96);
+    expect(divisionForBeats(['dddd'], [FOUR], 96)).toBe(32);
+  });
+
+  it('counts 32nd notes as the 32nds grid does, every other beat as the Mixed one', () => {
+    const fine = makeBeatPlan(['dxte'], [FOUR], 96);
+    const at = (slots) => slots.map((slot) => fine.countAt(slot, 0)).join(' ');
+    expect(at([0, 3, 6, 9, 12, 15, 18, 21])).toBe('1 a li bi & a la ba');
+    expect(at([24, 28, 32, 36, 40, 44])).toBe('2 a li & a la');
+    expect(at([48, 56, 64, 72, 84])).toBe('3 & a 4 &');
+    expect(fine.countAt(1, 0)).toBeNull();
+    expect(fine.countAt(26, 0)).toBeNull();
+    expect(fine.slotsPerNoteAt(3, 0) + ' ' + fine.slotsPerNoteAt(30, 0)).toBe('3 4');
+    expect(fine.straightStepAt(80, 0)).toBe(12);
   });
 });

@@ -1,4 +1,4 @@
-// Modified by Infinity Drumming, 2026: a form of sections (ABAC), sections (A, B) and bar numbers, 32nds beat by beat, an exercise's practice settings and instructions, mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting and its choices, more metronome clicks, diddle lines, beat-by-beat notes. See CHANGES.md.
+// Modified by Infinity Drumming, 2026: 32nds and triplets together (the fine grid), a form of sections (ABAC), sections (A, B) and bar numbers, 32nds beat by beat, an exercise's practice settings and instructions, mid tom, crash and ride lines in URLs, full-editor links point to groove.infinitydrumming.com, ride accent, Brazilian swing, straight bars, flams / drags / ruffs on any line, a time signature per bar, practice timer, counting and its choices, more metronome clicks, diddle lines, beat-by-beat notes. See CHANGES.md.
 // URL <-> grooveData serialization (Step 2 extraction from groove_utils.js).
 // Pure module: it depends only on other pure modules (grooveData, musicMath,
 // noteArrays) — no GrooveUtils instance. GrooveUtils delegates its
@@ -134,7 +134,7 @@ function readBeatNotes(myGrooveData, encodedURLData) {
   myGrooveData.beatNotes = [];
   var list = getQueryVariableFromString('Beats', '', encodedURLData);
   var grid = myGrooveData.timeDivision;
-  if (grid != 48 && !(grid == 32 && list)) return;
+  if (grid != 48 && grid != 96 && !(grid == 32 && list)) return;
   var listed = beatsFromList(list, myGrooveData.numberOfMeasures);
   var lines = [
     myGrooveData.hh_array,
@@ -643,7 +643,7 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
   fullURL += barSigsForUrl(myGrooveData);
 
   // the Mixed note setting's beats, bar by bar (and 32nds with beats of their own)
-  var beatGrid = myGrooveData.timeDivision == 48 || myGrooveData.timeDivision == 32;
+  var beatGrid = [48, 32, 96].indexOf(myGrooveData.timeDivision) >= 0;
   if (beatGrid && (myGrooveData.beatNotes || []).some(Boolean))
     fullURL += '&Beats=' + beatsToList(myGrooveData.beatNotes);
 

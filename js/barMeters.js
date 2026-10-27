@@ -10,12 +10,7 @@
 // bar uses the first of its slots and leaves the rest empty, so bar b always
 // starts at b * stride, as it does when all bars are the same.
 
-import {
-  calc_notes_per_measure,
-  isTripletDivision,
-  notesPerMeasureInFullSizeArray,
-  scaleNoteArrayToFullSize,
-} from './musicMath.js';
+import { calc_notes_per_measure, fullSizeSlots, scaleNoteArrayToFullSize } from './musicMath.js';
 
 var SIG_PATTERN = /^(\d{1,2})\/(\d{1,2})$/;
 var BOTTOMS = [2, 4, 8, 16];
@@ -145,11 +140,7 @@ export function fullSizeBar(gd, bar) {
   });
   return {
     sig: sig,
-    fullCount: notesPerMeasureInFullSizeArray(
-      isTripletDivision(gd.timeDivision),
-      sig.top,
-      sig.bottom
-    ),
+    fullCount: fullSizeSlots(gd.timeDivision, sig.top, sig.bottom),
     sticking: full(gd.sticking_array),
     hh: full(gd.hh_array),
     snare: full(gd.snare_array),
