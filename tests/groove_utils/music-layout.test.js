@@ -8,6 +8,7 @@ import {
   defineGlyphsOnce,
   engravedMusic,
   centredChordTexts,
+  countRoom,
 } from '../../js/abcNotation.js';
 import { clickCountNotes } from '../../js/countModes.js';
 
@@ -253,5 +254,36 @@ describe('counts and stickings centred over their notes', () => {
     expect(out).toContain('<text class="f2_1" x="70.00" y="-50.00">×4</text>');
     expect(out).toContain('<text class="f1_1" x="12.00" y="-30.00">2</text>');
     expect(centredChordTexts(svg, [], abc)).toBe(svg);
+  });
+});
+
+// Infinity Drumming, 2026: a count over 32nd notes needs about 11px of the page a
+// note ("la ba" kept apart), which a phone's one bar a line gets from a wider page
+describe('room for a count over 32nd notes', () => {
+  const counting = (more) => ({ showCounts: true, countSmall: true, countMode: 'all', ...more });
+
+  it('is 90 a quarter note, for counts over 32nd notes only (not the click)', () => {
+    expect(countRoom(counting(), 32, 32)).toBe(360);
+    expect(countRoom(counting(), 96, 96)).toBe(360); // (the fine grid)
+    expect(countRoom(counting(), 28, 32)).toBe(315); // (7/8)
+    expect(countRoom(counting({ countSmall: false }), 16, 16)).toBe(0);
+    expect(countRoom(counting({ showCounts: false }), 32, 32)).toBe(0);
+    expect(countRoom(counting({ countMode: 'click' }), 32, 32)).toBe(0);
+  });
+
+  it('widens the page of a bar alone on its line (a phone), never a desktop line', () => {
+    const phone = musicLayout(32, 300, { oneBar: true, countRoom: 360 });
+    expect(phone.renderWidth).toBe(480); // (a page of 360)
+    expect(phone.bar).toBe(360);
+    const desktop = musicLayout(32, 885, { oneBar: true, countRoom: 360 });
+    expect(desktop.renderWidth).toBe(885);
+    const two = musicLayout(32, 1200, { countRoom: 360 }); // (two bars a line)
+    expect(two.barsPerLine).toBe(2);
+    expect(two.renderWidth).toBe(1200);
+    // bars beat by beat too, whose notes never widen the page
+    expect(
+      musicLayout(48, 300, { oneBar: true, keepWidth: true, countRoom: 360 }).renderWidth
+    ).toBe(480);
+    expect(musicLayout(48, 300, { oneBar: true, keepWidth: true }).renderWidth).toBe(300);
   });
 });

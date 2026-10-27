@@ -348,7 +348,7 @@ export function thirtySecondChapters() {
   var chapters = [
     halfBeatAlphabet(),
     wholeAlphabet('the alphabet as pairs', 'pair'),
-    overTheSixteenths('fill-ins on the 16ths', 'sixteenth', 'pair', true),
+    overTheSixteenths('the alphabet as pairs, the 16ths filled in', 'sixteenth', 'pair', true),
     mixedChapter('fill-ins on 8ths and Doubles', twoNotes, 'sixteenth', 'pair'),
     mixedChapter('fill-ins on Triples', triples, 'sixteenth', 'pair'),
     wholeAlphabet('the alphabet as 16ths', 'sixteenth'),

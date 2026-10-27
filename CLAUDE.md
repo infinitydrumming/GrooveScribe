@@ -17,7 +17,7 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1273 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm test`             | Vitest unit suite — **1275 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
 | `npm run test:e2e`     | Playwright golden-master — **137 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
@@ -140,7 +140,9 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
 - Vendored globals (don't redefine): `Midi`, `MIDI`, `Abc`, `Share`, `ShareButton`, `Pablo`.
 - **Bars per line** come from `abcNotation.musicLayout` (two only when they fit the page; a bar too
   wide alone gets a wider page), and the editor redraws wider if abc2svg still breaks a line
-  mid-bar (`musicLineBroken`). Triplet-grid bars are written 12 units a quarter note (their
+  mid-bar (`musicLineBroken`). A bar alone on its line with a count over 32nds gets at least
+  `countRoom` of the page (90 a quarter note, so "la ba" keep apart; a phone's page is wider, drawn
+  smaller; desktops are already wider). Triplet-grid bars are written 12 units a quarter note (their
   tuplets only labels) but plain beats 8: anything laid over them (counts, the click's count)
   must follow the writer's beats (`withCountsOver`), never assume a length.
 - **Permutation ticks** (`PermSet`) are every option checkbox in DOM order: a new box shifts them and
@@ -196,7 +198,9 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   letter after a `$1` font change, so counts started at their note and ran right. Its `anno_start`
   ("annot", just before each chord symbol's `xy_str`) gives x and w; each matching `<text>` (same x, in
   order) moves to the note and gets `text-anchor="middle"`. Annotations (`"^Straight"`, `"_×4"`, the
-  legend) stay. Over 32nds the bold count font is as small as the rest (11).
+  legend) stay. Over 32nds the bold count font is as small as the rest (11). The music's font
+  `calibri` is an `@font-face` in `css/groove_display*.css`: the device's Calibri, else Carlito (the same
+  widths, OFL, `fonts/carlito/`) — phones had put a much wider font in its place.
 - **The editor puts each glyph on the page once** (`defineGlyphsOnce` in `displayNewSVG`): with
   `%%fullsvg`, abc2svg 1.3.2 repeats every earlier line's `<defs>` in each line (quadratic: seconds
   for a long permutation run). The golden master snapshots that page form; `musicLineBroken` still

@@ -11,6 +11,30 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-27 — Chapter 3's name
+
+- The 32nd chapters: chapter 3 is now called "the alphabet as pairs, the 16ths
+  filled in" (it was "fill-ins on the 16ths"), as it is chapter 2's rhythms in
+  the same order with the other 16ths filled in (`js/permutations.js`). What it
+  plays, and links to it, are unchanged.
+
+## 2026-10-27 — Room for 32nd-note counts on a phone
+
+- With a count over 32nd notes, a bar alone on its line (a phone's) now gets at
+  least 90 units of the page a quarter note, so two-letter counts ("la ba") no
+  longer run together; the bar is drawn a little smaller on the screen
+  (`countRoom` and `musicLayout` in `js/abcNotation.js`, `js/groove_writer.js`).
+  Desktops, already wider, and every other bar are drawn as before.
+
+## 2026-10-27 — The sheet music's font on every device
+
+- The sheet music is written in Calibri, which phones and Macs don't have: they
+  put a much wider font in its place (or a serif one), so the counts crowded
+  together over 32nd notes. Scribe now carries Carlito, a free font with
+  Calibri's exact letter widths (SIL Open Font License, `fonts/carlito/`), and
+  uses it wherever Calibri isn't installed (`css/groove_display.css`,
+  `css/groove_display_orange.css`). The music itself is unchanged.
+
 ## 2026-10-27 — Counts centred over their notes
 
 - Sheet music: the counts (and stickings) were written starting at their note

@@ -1,3 +1,22 @@
+/* Infinity Drumming, 2026: the sheet music's font is Calibri where a device has it,
+   else Carlito (the same letter widths; SIL Open Font License, fonts/carlito/OFL.txt).
+   Without it a phone put a much wider font in Calibri's place, crowding the counts. */
+@font-face {
+  font-family: calibri;
+  font-weight: 400;
+  src:
+    local('Calibri'),
+    url('../fonts/carlito/Carlito-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: calibri;
+  font-weight: 700;
+  src:
+    local('Calibri Bold'),
+    local('Calibri-Bold'),
+    url('../fonts/carlito/Carlito-Bold.woff2') format('woff2');
+}
+
 /* this is for debugging layout issues - puts a read border around everything */
 /* body * { border: 1px solid red; }		 */
 body {
