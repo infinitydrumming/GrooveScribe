@@ -3,7 +3,7 @@
 // delegates its matching methods here.
 //
 // Modified by Infinity Drumming, 2026: classic beam groups for x/8 bars
-// (beamGroupEnds). See CHANGES.md.
+// (beamGroupEnds), the fine grid for 32nds and triplets together. See CHANGES.md.
 
 export function parseTimeSigString(timeSigString) {
   var split_arr = timeSigString.split('/');
@@ -80,6 +80,16 @@ export function notesPerMeasureInFullSizeArray(is_triplet_division, timeSigTop, 
   // TODO: should we support triplets here?
   if (is_triplet_division) return 48 * (timeSigTop / timeSigBottom);
   else return 32 * (timeSigTop / timeSigBottom);
+}
+
+// The fine grid (Infinity Drumming, 2026): 24 slots to a quarter note, for a groove
+// whose beats have both 32nd notes and triplets (see beatNotes.js).
+export var FINE_DIVISION = 96;
+
+/** A bar's full-size slots in a note setting (notesPerMeasureInFullSizeArray), 24 a quarter note on the fine grid. */
+export function fullSizeSlots(division, timeSigTop, timeSigBottom) {
+  if (division == FINE_DIVISION) return FINE_DIVISION * (timeSigTop / timeSigBottom);
+  return notesPerMeasureInFullSizeArray(isTripletDivision(division), timeSigTop, timeSigBottom);
 }
 
 export function getNoteScaler(notes_per_measure, timeSigTop, timeSigBottom) {

@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1249 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **136 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1267 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **137 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -74,8 +74,8 @@ Pure / low-coupling core (extracted from the two big files, imported back):
   (triplets, sextuplets, swung 8ths/16ths, dotted quarters) as ticks per bar.
 - `beatNotes.js` — notes beat by beat in the Mixed setting (`Beats=ssqq`): each beat's choice,
   which grid slots it uses, inference from notes, counting, and the beat plan the ABC/MIDI writers take.
-  A beat of 32nds (`d`) needs the 32nds grid instead (`Div=32&Beats=sssd`, 8 slots a beat); functions take
-  the grid (48 / 32) last.
+  A beat of 32nds (`d`) needs the 32nds grid instead (`Div=32&Beats=sssd`, 8 slots a beat), 32nds with
+  triplets the fine grid (`Div=96`, 24 a beat); functions take the grid (48 / 32 / 96) last.
 - `ornaments.js` — flams/drags/ruffs (grace groups) and diddles (`!/!`) inside note tokens.
 - `barMeters.js` — a time signature per bar; which note settings fit a bar.
 - `practiceSettings.js` — an exercise's practice settings in its link (`Perm`/`PermSet`/`PlayEach`/`PermBars`/`FatBack`/`Ostinato`,
@@ -278,12 +278,18 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   tempo switches, the cursor) goes through it. The music writes every bar once (`withSectionMarks`: an
   inline `[P:A ×4]` and `|:` / `:|` in each voice; the last bar's line end becomes `\n` so it isn't
   `:||`), numbered (`%%measurenb 1`) from 2 bars up.
-- **Two beat-by-beat grids**: Mixed (`Div=48`, 12 slots a quarter: 8ths, 16ths, every triplet) and
-  32nds with `Beats=` (`Div=32`, 8 a quarter: 8ths, 16ths, 32nds); `beatGrid()` says which (0: plain).
-  32nds and triplets never share a groove (`gridOfBeats` → -1; the beat menu greys them out). Grid
-  changes go through `setGrooveBeats` / `divisionRoute` (by way of 16ths, so notes keep their places;
-  a direct 48↔32 change would fall back to the default groove). A plain `Div=32` link has no
-  `Beats=` and stays byte-identical.
+- **Three beat-by-beat grids**: Mixed (`Div=48`, 12 slots a quarter: 8ths, 16ths, every triplet),
+  32nds with `Beats=` (`Div=32`, 8 a quarter: 8ths, 16ths, 32nds), and the fine grid (`Div=96`,
+  `FINE_DIVISION`, 24 a quarter: every choice), only for a groove whose beats mix 32nds and triplets
+  (`gridOfBeats` → 96); `beatGrid()` says which (0: plain). Grid changes go through `setGrooveBeats` /
+  `divisionRoute` (by way of 16ths, so notes keep their places; a direct 48↔32 change would fall back
+  to the default groove), so a groove leaves 96 as soon as its 32nds or triplets go. A plain `Div=32`
+  link has no `Beats=` and stays byte-identical. A fine-grid bar is written as the grid its own beats
+  need would write it (`fineGridABC`: no 32nds → every 2nd slot through the Mixed writer, no triplets →
+  every 3rd through the 32nds writer, byte-identical music and MIDI, unit-tested), and with both
+  through the Mixed writer with each `d` beat written from the fine slots (`fineBeatABC`, its counts
+  and diddle stops from the fine beat plan). Its layout counts its notes as Mixed (`layoutNotes`).
+  Beats of 8ths and 16ths swing on every grid (`beatSlotDuration`, by slots a quarter note).
 - **Bar copies** go to localStorage and the device clipboard (`Infinity Scribe bar {json}`, with an
   `at` time; paste takes the newer): each origin, home-screen app and private tab has its own
   storage. Anything that lays the grid out again (add / remove / paste / "Add a copy") goes through
