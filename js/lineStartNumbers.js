@@ -9,6 +9,11 @@
 // is numbered 0.5 just before the music is laid out: abc2svg draws no number for
 // it, nor at the next line's start), and each is written in afterwards where
 // abc2svg would have put it, for engravedMusic to move as before.
+//
+// abc2svg also can't number a line whose first symbol is in a voice the line's
+// clef isn't in (a flam's grace notes, which come before the Stickings voice's
+// first note): it reads the symbol before it, and there is none. The music then
+// is drawn again with those numbers written in the same way (leadIns, below).
 
 // abc2svg 1.3.2's symbol types
 var BAR = 0,
@@ -30,9 +35,16 @@ var NUMBER_Y = '-32.00';
  * its lines' first bar numbers out of abc2svg's layout and writes them in after.
  * Null for other music (it draws no numbers).
  * @param {string} abc
- * @returns {{take: function(Object): void, writtenIn: function(string): string} | null}
+ * @param {{lineEnds: boolean, leadIns: 'all' | number[]}} [how]  which bars: those
+ *   ending written lines (the editor's, the default), and bars before a lead-in
+ *   (a voice the line's clef isn't in first after them): all of them, or those at
+ *   these places among the music's symbols (barsEndingLines of a first drawing)
+ * @returns {{take: function(Object): void, writtenIn: function(string): string,
+ *   barsEndingLines: function(): number[]} | null}
  */
-export function lineStartNumbers(abc) {
+export function lineStartNumbers(abc, how) {
+  var lineEnds = how ? how.lineEnds : true;
+  var leadIns = how ? how.leadIns : [];
   var every = 0;
   String(abc).replace(/^%%measurenb\s+(\d+)/gm, function (all, n) {
     every = Number(n);
@@ -48,10 +60,13 @@ export function lineStartNumbers(abc) {
     take: function (tsfirst) {
       tunes.push(symbols.length);
       for (var s = tsfirst; s; s = s.ts_next) {
+        var at = symbols.length;
         symbols.push(s);
-        // a bar ending a line (the line's top voice ends on it) whose number
-        // abc2svg would write at the next line's start
-        if (s.type == BAR && s.eoln && s.bar_num > 1 && s.bar_num % every == 0) {
+        // a bar whose number abc2svg would write at the next line's start: one
+        // ending a line (the line's top voice ends on it), or before a lead-in
+        if (s.type != BAR || !s.bar_num || s.bar_num <= 1 || s.bar_num % every) continue;
+        var leadIn = leadIns == 'all' || leadIns.indexOf(at) >= 0;
+        if ((lineEnds && s.eoln) || (leadIn && leadsIn(s))) {
           s.lineEndNumber = s.bar_num;
           s.bar_num = NOT_DRAWN;
         }
@@ -60,7 +75,32 @@ export function lineStartNumbers(abc) {
     writtenIn: function (svg) {
       return withLineStartNumbers(svg, numbersAtLineStarts(symbols, tunes));
     },
+    // (once laid out) where the bars it took a number from that end a line are
+    barsEndingLines: function () {
+      return barsEndingLines(symbols, tunes);
+    },
   };
+}
+
+// Whether the music after a bar starts, on its stave, in another voice than the
+// bar's (the one a line's clef goes in): a flam's grace notes before the first note
+function leadsIn(bar) {
+  var s = bar.ts_next;
+  while (s && (s.type == BAR || LINE_HEAD.indexOf(s.type) >= 0 || s.st != bar.st)) s = s.ts_next;
+  return !!s && s.v != bar.v;
+}
+
+// where the bars numbered NOT_DRAWN that end a line are among the symbols
+function barsEndingLines(symbols, tunes) {
+  var ends = [];
+  var lineEnd = -1;
+  symbols.forEach(function (s, i) {
+    if (tunes.indexOf(i) >= 0) lineEnd = -1;
+    else if (s.nl === false && lineEnd >= 0) ends.push(lineEnd);
+    if (s.nl === false) lineEnd = -1;
+    if (s.lineEndNumber) lineEnd = i;
+  });
+  return ends;
 }
 
 /**

@@ -732,4 +732,34 @@ describe('GrooveUtils.renderABCtoSVG (real abc2svg-1.js)', () => {
     expect(result.svg).toContain('<svg');
     expect(result.svg).toContain('abc2s'); // abc2svg's own <title> marker
   });
+
+  // Infinity Drumming, 2026: abc2svg can't number a line it starts with a flam's
+  // grace notes (they come before the stickings voice): the number is written in
+  it('numbers a line that starts with a flam, in the editor and elsewhere', async () => {
+    if (!AbcCtor) return;
+    const gu = await newGrooveUtils();
+    const bars = (one, two) => `|${one}|${two}|`;
+    const groove = gu.getGrooveDataFromUrlString(
+      '?TimeSig=4/4&Div=16&Measures=2' +
+        `&H=${bars('x'.repeat(16), 'x'.repeat(16))}` +
+        `&S=${bars('----O-------o---', 'o---O-------O---')}` +
+        `&K=${bars('o-------o-------', 'o-------o-------')}` +
+        `&SO=${bars('----f-------d---', 'F---r-------f---')}` +
+        `&KO=${bars('--------d-------', 'r---------------')}` +
+        `&HO=${bars('--------f-------', '----------------')}`
+    );
+    // numbered as the editor numbers its bars, bar 2 starting a line written so, or
+    // one abc2svg starts itself (the bars written on one line, too narrow for both)
+    const written = gu.createABCFromGrooveData(groove, 300).replace(/^K:/m, '%%measurenb 1\nK:');
+    const broken = written.replace(/ \|\n(?=[^V])/g, ' |\\\n');
+    for (const [abc, editor] of [
+      [written, false],
+      [broken, false],
+      [broken, true],
+    ]) {
+      const { svg } = gu.renderABCtoSVG(abc, editor);
+      expect(svg.match(/<svg[\s>]/g).length).toBe(2);
+      expect(svg).toMatch(/<text class="f\d+_\d+" x="[\d.]+" y="-32\.00">2<\/text>/);
+    }
+  });
 });

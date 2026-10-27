@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-27 — Flams at the start of a line
+
+- Sheet music: a line starting with a flam, drag or ruff (on a phone, where the
+  bars go on more lines) made the music engine fail to draw anything ("Cannot
+  read properties of null"). The engine looks for the symbol before the line's
+  first note to place the bar number, and grace notes in the hands voice have
+  none. Such music is now drawn again with that line's bar number written in
+  where the engine would have put it (`js/lineStartNumbers.js`,
+  `js/groove_utils.js`); the engine itself is unchanged, and all other music is
+  drawn exactly as before.
+
 ## 2026-10-27 — 32nds and triplets in one groove
 
 - Notes beat by beat: any beat of any bar can have any notes. Before, a beat of

@@ -17,7 +17,7 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1267 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm test`             | Vitest unit suite — **1270 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
 | `npm run test:e2e`     | Playwright golden-master — **137 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
@@ -185,7 +185,12 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   start), then writes each number in where `draw_measnb` would have (`s.x - s.wl` of the line's first
   symbol, `nl === false` after abc2svg cuts the lines), first in the stave's text group. Only the editor
   does it (embeds and downloads keep abc2svg's numbers, which stay over the first note). The vendored
-  engine is untouched; the functional E2E checks the numbers match abc2svg's own.
+  engine is untouched; the functional E2E checks the numbers match abc2svg's own. abc2svg also crashes
+  numbering a line that starts with a flam's grace notes (they sort before the Stickings voice, the
+  line's clef is only in that voice, `s.prev` is null): `renderABCtoSVG` catches it (`draw_measnb`)
+  and draws twice, once to see which bars before a lead-in end a line (`leadIns: 'all'`,
+  `barsEndingLines`), then with just those numbers written in the same way; music that doesn't crash
+  is drawn once, as before.
 - **The editor puts each glyph on the page once** (`defineGlyphsOnce` in `displayNewSVG`): with
   `%%fullsvg`, abc2svg 1.3.2 repeats every earlier line's `<defs>` in each line (quadratic: seconds
   for a long permutation run). The golden master snapshots that page form; `musicLineBroken` still
