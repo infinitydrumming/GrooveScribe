@@ -11,6 +11,15 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-27 — The sheet music's font on every device
+
+- The sheet music is written in Calibri, which phones and Macs don't have: they
+  put a much wider font in its place (or a serif one), so the counts crowded
+  together over 32nd notes. Scribe now carries Carlito, a free font with
+  Calibri's exact letter widths (SIL Open Font License, `fonts/carlito/`), and
+  uses it wherever Calibri isn't installed (`css/groove_display.css`,
+  `css/groove_display_orange.css`). The music itself is unchanged.
+
 ## 2026-10-27 — Counts centred over their notes
 
 - Sheet music: the counts (and stickings) were written starting at their note

@@ -196,7 +196,9 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   letter after a `$1` font change, so counts started at their note and ran right. Its `anno_start`
   ("annot", just before each chord symbol's `xy_str`) gives x and w; each matching `<text>` (same x, in
   order) moves to the note and gets `text-anchor="middle"`. Annotations (`"^Straight"`, `"_×4"`, the
-  legend) stay. Over 32nds the bold count font is as small as the rest (11).
+  legend) stay. Over 32nds the bold count font is as small as the rest (11). The music's font
+  `calibri` is an `@font-face` in `css/groove_display*.css`: the device's Calibri, else Carlito (the same
+  widths, OFL, `fonts/carlito/`) — phones had put a much wider font in its place.
 - **The editor puts each glyph on the page once** (`defineGlyphsOnce` in `displayNewSVG`): with
   `%%fullsvg`, abc2svg 1.3.2 repeats every earlier line's `<defs>` in each line (quadratic: seconds
   for a long permutation run). The golden master snapshots that page form; `musicLineBroken` still
