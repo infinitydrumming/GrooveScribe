@@ -734,10 +734,11 @@ test.describe('bar numbers starting lines', () => {
               ),
               (use) => y - Number(use.getAttribute('y'))
             ),
-            // (the first line's counts are with its heading)
+            // (the first line's counts are with its heading; a bar number by the
+            // clef ends at its x, a count is centred on its note)
             counts: heights(
               [...(group ? group.querySelectorAll('text') : [])].filter(
-                (text) => !text.getAttribute('text-anchor')
+                (text) => text.getAttribute('text-anchor') != 'end'
               ),
               (text) => -Number(text.getAttribute('y'))
             ),

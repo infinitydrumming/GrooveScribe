@@ -14,22 +14,22 @@
 	<path d="m-4 0l8 -2l-8 -2" style="stroke-width:1.2"></path>
 </g>
 </defs><g transform="scale(0.75)"><g transform="translate(0,75.70)">
-<text class="f2_1" x="48.50" y="-39.56"><tspan class="f3_1">1</tspan></text>
-<text class="f2_1" x="101.17" y="-39.56"><tspan class="f4_1">e</tspan></text>
-<text class="f2_1" x="153.84" y="-39.56"><tspan class="f4_1">&amp;</tspan></text>
-<text class="f2_1" x="206.50" y="-39.56"><tspan class="f4_1">a</tspan></text>
-<text class="f2_1" x="259.17" y="-39.56"><tspan class="f3_1">2</tspan></text>
-<text class="f2_1" x="311.84" y="-39.56"><tspan class="f4_1">e</tspan></text>
-<text class="f2_1" x="364.51" y="-39.56"><tspan class="f3_1">&amp;</tspan></text>
-<text class="f2_1" x="417.17" y="-39.56"><tspan class="f3_1">a</tspan></text>
-<text class="f2_1" x="469.84" y="-39.56"><tspan class="f4_1">3</tspan></text>
-<text class="f2_1" x="522.51" y="-39.56"><tspan class="f4_1">e</tspan></text>
-<text class="f2_1" x="575.18" y="-39.56"><tspan class="f3_1">&amp;</tspan></text>
-<text class="f2_1" x="627.85" y="-39.56"><tspan class="f4_1">a</tspan></text>
-<text class="f2_1" x="680.51" y="-39.56"><tspan class="f3_1">4</tspan></text>
-<text class="f2_1" x="733.18" y="-39.56"><tspan class="f3_1">e</tspan></text>
-<text class="f2_1" x="785.85" y="-39.56"><tspan class="f4_1">&amp;</tspan></text>
-<text class="f2_1" x="838.52" y="-39.56"><tspan class="f4_1">a</tspan></text>
+<text class="f2_1" x="48.50" y="-39.56" text-anchor="middle"><tspan class="f3_1">1</tspan></text>
+<text class="f2_1" x="101.17" y="-39.56" text-anchor="middle"><tspan class="f4_1">e</tspan></text>
+<text class="f2_1" x="153.84" y="-39.56" text-anchor="middle"><tspan class="f4_1">&amp;</tspan></text>
+<text class="f2_1" x="206.50" y="-39.56" text-anchor="middle"><tspan class="f4_1">a</tspan></text>
+<text class="f2_1" x="259.17" y="-39.56" text-anchor="middle"><tspan class="f3_1">2</tspan></text>
+<text class="f2_1" x="311.84" y="-39.56" text-anchor="middle"><tspan class="f4_1">e</tspan></text>
+<text class="f2_1" x="364.51" y="-39.56" text-anchor="middle"><tspan class="f3_1">&amp;</tspan></text>
+<text class="f2_1" x="417.17" y="-39.56" text-anchor="middle"><tspan class="f3_1">a</tspan></text>
+<text class="f2_1" x="469.84" y="-39.56" text-anchor="middle"><tspan class="f4_1">3</tspan></text>
+<text class="f2_1" x="522.51" y="-39.56" text-anchor="middle"><tspan class="f4_1">e</tspan></text>
+<text class="f2_1" x="575.18" y="-39.56" text-anchor="middle"><tspan class="f3_1">&amp;</tspan></text>
+<text class="f2_1" x="627.85" y="-39.56" text-anchor="middle"><tspan class="f4_1">a</tspan></text>
+<text class="f2_1" x="680.51" y="-39.56" text-anchor="middle"><tspan class="f3_1">4</tspan></text>
+<text class="f2_1" x="733.18" y="-39.56" text-anchor="middle"><tspan class="f3_1">e</tspan></text>
+<text class="f2_1" x="785.85" y="-39.56" text-anchor="middle"><tspan class="f4_1">&amp;</tspan></text>
+<text class="f2_1" x="838.52" y="-39.56" text-anchor="middle"><tspan class="f4_1">a</tspan></text>
 </g>
 <path class="stroke" d="m885.33 97.04v-24.00"></path>
 <path class="stroke" d="m882.33 97.04v-24.00"></path>

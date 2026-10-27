@@ -13,8 +13,8 @@
 </g>
 </defs><g transform="scale(0.75)"><g transform="translate(0,66.50)">
 <text class="f1_1" x="453.87" y="-10.66">2</text>
-<text class="f2_1" x="40.50" y="-33.56">Swing</text>
-<text class="f2_1" x="468.88" y="-33.56">Straight</text>
+<text class="f2_1" x="48.50" y="-33.56" text-anchor="middle">Swing</text>
+<text class="f2_1" x="476.88" y="-33.56" text-anchor="middle">Straight</text>
 </g>
 <path class="stroke" d="m456.95 87.84v-24.00"></path>
 <path class="stroke" d="m885.33 87.84v-24.00"></path>
@@ -183,8 +183,8 @@ l76.06 0.00v3.20l-76.06 0.00"></path>
 </defs><g transform="scale(0.75)"><g transform="translate(0,66.50)">
 <text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f1_1" x="446.34" y="-32.00">4</text>
-<text class="f2_1" x="28.50" y="-54.90">Swing</text>
-<text class="f2_1" x="461.57" y="-54.90">Straight</text>
+<text class="f2_1" x="36.50" y="-54.90" text-anchor="middle">Swing</text>
+<text class="f2_1" x="469.57" y="-54.90" text-anchor="middle">Straight</text>
 </g>
 <path class="stroke" d="m449.42 66.50v-24.00"></path>
 <path class="stroke" d="m885.33 66.50v-24.00"></path>

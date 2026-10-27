@@ -13,24 +13,24 @@
 </g>
 </defs><g transform="scale(0.75)"><g transform="translate(0,75.70)">
 <text class="f1_1" x="636.35" y="-10.66">2</text>
-<text class="f2_1" x="43.80" y="-39.56">R</text>
-<text class="f2_1" x="119.11" y="-39.56">L</text>
-<text class="f2_1" x="193.62" y="-39.56">R</text>
-<text class="f2_1" x="268.92" y="-39.56">L</text>
-<text class="f2_1" x="344.61" y="-39.56">3</text>
-<text class="f2_1" x="382.46" y="-39.56">e</text>
-<text class="f2_1" x="417.56" y="-39.56">&amp;</text>
-<text class="f2_1" x="457.36" y="-39.56">a</text>
-<text class="f2_1" x="494.42" y="-39.56">4</text>
-<text class="f2_1" x="532.27" y="-39.56">e</text>
-<text class="f2_1" x="567.37" y="-39.56">&amp;</text>
-<text class="f2_1" x="607.18" y="-39.56">a</text>
-<text class="f2_1" x="665.41" y="-39.56">1</text>
-<text class="f2_1" x="700.91" y="-39.56">&amp;</text>
-<text class="f2_1" x="740.32" y="-39.56">2</text>
-<text class="f2_1" x="775.82" y="-39.56">&amp;</text>
-<text class="f2_1" x="815.23" y="-39.56">3</text>
-<text class="f2_1" x="850.73" y="-39.56">&amp;</text>
+<text class="f2_1" x="48.50" y="-39.56" text-anchor="middle">R</text>
+<text class="f2_1" x="123.41" y="-39.56" text-anchor="middle">L</text>
+<text class="f2_1" x="198.32" y="-39.56" text-anchor="middle">R</text>
+<text class="f2_1" x="273.22" y="-39.56" text-anchor="middle">L</text>
+<text class="f2_1" x="348.13" y="-39.56" text-anchor="middle">3</text>
+<text class="f2_1" x="385.59" y="-39.56" text-anchor="middle">e</text>
+<text class="f2_1" x="423.04" y="-39.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="460.49" y="-39.56" text-anchor="middle">a</text>
+<text class="f2_1" x="497.94" y="-39.56" text-anchor="middle">4</text>
+<text class="f2_1" x="535.40" y="-39.56" text-anchor="middle">e</text>
+<text class="f2_1" x="572.85" y="-39.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="610.31" y="-39.56" text-anchor="middle">a</text>
+<text class="f2_1" x="668.93" y="-39.56" text-anchor="middle">1</text>
+<text class="f2_1" x="706.39" y="-39.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="743.84" y="-39.56" text-anchor="middle">2</text>
+<text class="f2_1" x="781.30" y="-39.56" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="818.75" y="-39.56" text-anchor="middle">3</text>
+<text class="f2_1" x="856.21" y="-39.56" text-anchor="middle">&amp;</text>
 </g>
 <path class="stroke" d="m639.43 97.04v-24.00"></path>
 <path class="stroke" d="m885.33 97.04v-24.00"></path>
@@ -118,16 +118,16 @@ l150.49 0.00v3.20l-150.49 0.00"></path>
 
 </defs><g transform="scale(0.75)"><g transform="translate(0,69.70)">
 <text class="f1_1" x="22.00" y="-27.00" text-anchor="end">3</text>
-<text class="f2_1" x="44.98" y="-54.90">1</text>
-<text class="f2_1" x="127.65" y="-54.90">&amp;</text>
-<text class="f2_1" x="214.23" y="-54.90">2</text>
-<text class="f2_1" x="296.89" y="-54.90">&amp;</text>
-<text class="f2_1" x="383.47" y="-54.90">3</text>
-<text class="f2_1" x="466.14" y="-54.90">&amp;</text>
-<text class="f2_1" x="552.72" y="-54.90">4</text>
-<text class="f2_1" x="635.39" y="-54.90">&amp;</text>
-<text class="f2_1" x="721.97" y="-54.90">5</text>
-<text class="f2_1" x="804.64" y="-54.90">&amp;</text>
+<text class="f2_1" x="48.50" y="-54.90" text-anchor="middle">1</text>
+<text class="f2_1" x="133.13" y="-54.90" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="217.75" y="-54.90" text-anchor="middle">2</text>
+<text class="f2_1" x="302.37" y="-54.90" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="386.99" y="-54.90" text-anchor="middle">3</text>
+<text class="f2_1" x="471.62" y="-54.90" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="556.24" y="-54.90" text-anchor="middle">4</text>
+<text class="f2_1" x="640.87" y="-54.90" text-anchor="middle">&amp;</text>
+<text class="f2_1" x="725.49" y="-54.90" text-anchor="middle">5</text>
+<text class="f2_1" x="810.12" y="-54.90" text-anchor="middle">&amp;</text>
 </g>
 <path class="stroke" d="m885.33 69.70v-24.00"></path>
 <path class="stroke" d="m882.33 69.70v-24.00"></path>

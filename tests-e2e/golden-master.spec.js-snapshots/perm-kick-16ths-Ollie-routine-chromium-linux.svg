@@ -16,26 +16,26 @@
 <text class="f3_1" x="38.50" y="65.01">Singles   (play each ×4)</text>
 <g transform="translate(0,100.70)">
 <text class="f2_1" x="411.80" y="15.01">2</text>
-<text class="f3_1" x="44.98" y="-13.89">1</text>
-<text class="f3_1" x="90.13" y="-13.89">&amp;</text>
-<text class="f3_1" x="139.19" y="-13.89">2</text>
-<text class="f3_1" x="184.34" y="-13.89">&amp;</text>
-<text class="f3_1" x="233.40" y="-13.89">3</text>
-<text class="f3_1" x="278.55" y="-13.89">&amp;</text>
-<text class="f3_1" x="327.62" y="-13.89">4</text>
-<text class="f3_1" x="372.77" y="-13.89">&amp;</text>
-<text class="f3_1" x="437.53" y="-13.89">1</text>
-<text class="f3_1" x="471.22" y="-13.89">e</text>
-<text class="f3_1" x="502.16" y="-13.89">&amp;</text>
-<text class="f3_1" x="551.22" y="-13.89">2</text>
-<text class="f3_1" x="584.90" y="-13.89">e</text>
-<text class="f3_1" x="615.84" y="-13.89">&amp;</text>
-<text class="f3_1" x="664.91" y="-13.89">3</text>
-<text class="f3_1" x="698.59" y="-13.89">e</text>
-<text class="f3_1" x="729.53" y="-13.89">&amp;</text>
-<text class="f3_1" x="778.59" y="-13.89">4</text>
-<text class="f3_1" x="812.28" y="-13.89">e</text>
-<text class="f3_1" x="843.22" y="-13.89">&amp;</text>
+<text class="f3_1" x="48.50" y="-13.89" text-anchor="middle">1</text>
+<text class="f3_1" x="95.61" y="-13.89" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="142.71" y="-13.89" text-anchor="middle">2</text>
+<text class="f3_1" x="189.82" y="-13.89" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="236.92" y="-13.89" text-anchor="middle">3</text>
+<text class="f3_1" x="284.03" y="-13.89" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="331.14" y="-13.89" text-anchor="middle">4</text>
+<text class="f3_1" x="378.25" y="-13.89" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="441.05" y="-13.89" text-anchor="middle">1</text>
+<text class="f3_1" x="474.35" y="-13.89" text-anchor="middle">e</text>
+<text class="f3_1" x="507.64" y="-13.89" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="554.74" y="-13.89" text-anchor="middle">2</text>
+<text class="f3_1" x="588.03" y="-13.89" text-anchor="middle">e</text>
+<text class="f3_1" x="621.32" y="-13.89" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="668.43" y="-13.89" text-anchor="middle">3</text>
+<text class="f3_1" x="701.72" y="-13.89" text-anchor="middle">e</text>
+<text class="f3_1" x="735.01" y="-13.89" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="782.11" y="-13.89" text-anchor="middle">4</text>
+<text class="f3_1" x="815.41" y="-13.89" text-anchor="middle">e</text>
+<text class="f3_1" x="848.70" y="-13.89" text-anchor="middle">&amp;</text>
 </g>
 <path class="stroke" d="m414.88 147.71v-24.00"></path>
 <path class="stroke" d="m885.33 147.71v-24.00"></path>
@@ -160,26 +160,26 @@ l33.29 0.00v3.20l-33.29 0.00"></path>
 </defs><g transform="scale(0.75)"><g transform="translate(0,78.70)">
 <text class="f2_1" x="22.00" y="-27.00" text-anchor="end">3</text>
 <text class="f2_1" x="402.07" y="-32.00">4</text>
-<text class="f3_1" x="32.98" y="-63.90">1</text>
-<text class="f3_1" x="78.42" y="-63.90">&amp;</text>
-<text class="f3_1" x="127.78" y="-63.90">2</text>
-<text class="f3_1" x="173.22" y="-63.90">&amp;</text>
-<text class="f3_1" x="222.57" y="-63.90">3</text>
-<text class="f3_1" x="268.01" y="-63.90">&amp;</text>
-<text class="f3_1" x="317.37" y="-63.90">4</text>
-<text class="f3_1" x="362.81" y="-63.90">&amp;</text>
-<text class="f3_1" x="427.97" y="-63.90">1</text>
-<text class="f3_1" x="473.41" y="-63.90">&amp;</text>
-<text class="f3_1" x="509.26" y="-63.90">a</text>
-<text class="f3_1" x="542.36" y="-63.90">2</text>
-<text class="f3_1" x="587.80" y="-63.90">&amp;</text>
-<text class="f3_1" x="623.65" y="-63.90">a</text>
-<text class="f3_1" x="656.75" y="-63.90">3</text>
-<text class="f3_1" x="702.19" y="-63.90">&amp;</text>
-<text class="f3_1" x="738.04" y="-63.90">a</text>
-<text class="f3_1" x="771.14" y="-63.90">4</text>
-<text class="f3_1" x="816.58" y="-63.90">&amp;</text>
-<text class="f3_1" x="852.43" y="-63.90">a</text>
+<text class="f3_1" x="36.50" y="-63.90" text-anchor="middle">1</text>
+<text class="f3_1" x="83.90" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="131.30" y="-63.90" text-anchor="middle">2</text>
+<text class="f3_1" x="178.70" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="226.09" y="-63.90" text-anchor="middle">3</text>
+<text class="f3_1" x="273.49" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="320.89" y="-63.90" text-anchor="middle">4</text>
+<text class="f3_1" x="368.29" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="431.49" y="-63.90" text-anchor="middle">1</text>
+<text class="f3_1" x="478.89" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="512.39" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="545.88" y="-63.90" text-anchor="middle">2</text>
+<text class="f3_1" x="593.28" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="626.78" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="660.27" y="-63.90" text-anchor="middle">3</text>
+<text class="f3_1" x="707.67" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="741.17" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="774.66" y="-63.90" text-anchor="middle">4</text>
+<text class="f3_1" x="822.06" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="855.56" y="-63.90" text-anchor="middle">a</text>
 </g>
 <path class="stroke" d="m405.15 78.70v-24.00"></path>
 <path class="stroke" d="m885.33 78.70v-24.00"></path>
@@ -306,30 +306,30 @@ l33.50 0.00v3.20l-33.50 0.00"></path>
 <g transform="translate(0,103.70)">
 <text class="f2_1" x="22.00" y="-27.00" text-anchor="end">5</text>
 <text class="f2_1" x="370.91" y="-32.00">6</text>
-<text class="f3_1" x="32.98" y="-63.90">1</text>
-<text class="f3_1" x="74.41" y="-63.90">&amp;</text>
-<text class="f3_1" x="119.76" y="-63.90">2</text>
-<text class="f3_1" x="161.20" y="-63.90">&amp;</text>
-<text class="f3_1" x="206.55" y="-63.90">3</text>
-<text class="f3_1" x="247.98" y="-63.90">&amp;</text>
-<text class="f3_1" x="293.33" y="-63.90">4</text>
-<text class="f3_1" x="334.76" y="-63.90">&amp;</text>
-<text class="f3_1" x="394.58" y="-63.90">1</text>
-<text class="f3_1" x="425.63" y="-63.90">e</text>
-<text class="f3_1" x="453.95" y="-63.90">&amp;</text>
-<text class="f3_1" x="486.97" y="-63.90">a</text>
-<text class="f3_1" x="517.24" y="-63.90">2</text>
-<text class="f3_1" x="548.30" y="-63.90">e</text>
-<text class="f3_1" x="576.61" y="-63.90">&amp;</text>
-<text class="f3_1" x="609.63" y="-63.90">a</text>
-<text class="f3_1" x="639.90" y="-63.90">3</text>
-<text class="f3_1" x="670.96" y="-63.90">e</text>
-<text class="f3_1" x="699.27" y="-63.90">&amp;</text>
-<text class="f3_1" x="732.29" y="-63.90">a</text>
-<text class="f3_1" x="762.56" y="-63.90">4</text>
-<text class="f3_1" x="793.62" y="-63.90">e</text>
-<text class="f3_1" x="821.93" y="-63.90">&amp;</text>
-<text class="f3_1" x="854.95" y="-63.90">a</text>
+<text class="f3_1" x="36.50" y="-63.90" text-anchor="middle">1</text>
+<text class="f3_1" x="79.89" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="123.28" y="-63.90" text-anchor="middle">2</text>
+<text class="f3_1" x="166.68" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="210.07" y="-63.90" text-anchor="middle">3</text>
+<text class="f3_1" x="253.46" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="296.85" y="-63.90" text-anchor="middle">4</text>
+<text class="f3_1" x="340.24" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="398.10" y="-63.90" text-anchor="middle">1</text>
+<text class="f3_1" x="428.76" y="-63.90" text-anchor="middle">e</text>
+<text class="f3_1" x="459.43" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="490.10" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="520.76" y="-63.90" text-anchor="middle">2</text>
+<text class="f3_1" x="551.43" y="-63.90" text-anchor="middle">e</text>
+<text class="f3_1" x="582.09" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="612.76" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="643.42" y="-63.90" text-anchor="middle">3</text>
+<text class="f3_1" x="674.09" y="-63.90" text-anchor="middle">e</text>
+<text class="f3_1" x="704.75" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="735.42" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="766.08" y="-63.90" text-anchor="middle">4</text>
+<text class="f3_1" x="796.75" y="-63.90" text-anchor="middle">e</text>
+<text class="f3_1" x="827.41" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="858.08" y="-63.90" text-anchor="middle">a</text>
 </g>
 <path class="stroke" d="m373.99 103.70v-24.00"></path>
 <path class="stroke" d="m885.33 103.70v-24.00"></path>
@@ -476,30 +476,30 @@ l92.00 0.00v3.20l-92.00 0.00"></path>
 <g transform="translate(0,100.70)">
 <text class="f2_1" x="22.00" y="-27.00" text-anchor="end">7</text>
 <text class="f2_1" x="445.69" y="-32.00">8</text>
-<text class="f3_1" x="32.98" y="-60.90">1</text>
-<text class="f3_1" x="64.27" y="-60.90">e</text>
-<text class="f3_1" x="92.81" y="-60.90">&amp;</text>
-<text class="f3_1" x="138.48" y="-60.90">2</text>
-<text class="f3_1" x="169.76" y="-60.90">e</text>
-<text class="f3_1" x="198.30" y="-60.90">&amp;</text>
-<text class="f3_1" x="243.97" y="-60.90">3</text>
-<text class="f3_1" x="275.26" y="-60.90">e</text>
-<text class="f3_1" x="303.80" y="-60.90">&amp;</text>
-<text class="f3_1" x="349.47" y="-60.90">4</text>
-<text class="f3_1" x="380.76" y="-60.90">e</text>
-<text class="f3_1" x="409.30" y="-60.90">&amp;</text>
-<text class="f3_1" x="469.54" y="-60.90">1</text>
-<text class="f3_1" x="500.83" y="-60.90">e</text>
-<text class="f3_1" x="529.37" y="-60.90">&amp;</text>
-<text class="f3_1" x="575.04" y="-60.90">2</text>
-<text class="f3_1" x="606.32" y="-60.90">e</text>
-<text class="f3_1" x="634.86" y="-60.90">&amp;</text>
-<text class="f3_1" x="680.53" y="-60.90">3</text>
-<text class="f3_1" x="711.82" y="-60.90">e</text>
-<text class="f3_1" x="740.36" y="-60.90">&amp;</text>
-<text class="f3_1" x="786.03" y="-60.90">4</text>
-<text class="f3_1" x="817.32" y="-60.90">e</text>
-<text class="f3_1" x="845.86" y="-60.90">&amp;</text>
+<text class="f3_1" x="36.50" y="-60.90" text-anchor="middle">1</text>
+<text class="f3_1" x="67.40" y="-60.90" text-anchor="middle">e</text>
+<text class="f3_1" x="98.29" y="-60.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="142.00" y="-60.90" text-anchor="middle">2</text>
+<text class="f3_1" x="172.89" y="-60.90" text-anchor="middle">e</text>
+<text class="f3_1" x="203.78" y="-60.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="247.49" y="-60.90" text-anchor="middle">3</text>
+<text class="f3_1" x="278.39" y="-60.90" text-anchor="middle">e</text>
+<text class="f3_1" x="309.28" y="-60.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="352.99" y="-60.90" text-anchor="middle">4</text>
+<text class="f3_1" x="383.89" y="-60.90" text-anchor="middle">e</text>
+<text class="f3_1" x="414.78" y="-60.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="473.06" y="-60.90" text-anchor="middle">1</text>
+<text class="f3_1" x="503.96" y="-60.90" text-anchor="middle">e</text>
+<text class="f3_1" x="534.85" y="-60.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="578.56" y="-60.90" text-anchor="middle">2</text>
+<text class="f3_1" x="609.45" y="-60.90" text-anchor="middle">e</text>
+<text class="f3_1" x="640.34" y="-60.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="684.05" y="-60.90" text-anchor="middle">3</text>
+<text class="f3_1" x="714.95" y="-60.90" text-anchor="middle">e</text>
+<text class="f3_1" x="745.84" y="-60.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="789.55" y="-60.90" text-anchor="middle">4</text>
+<text class="f3_1" x="820.45" y="-60.90" text-anchor="middle">e</text>
+<text class="f3_1" x="851.34" y="-60.90" text-anchor="middle">&amp;</text>
 </g>
 <path class="stroke" d="m448.77 100.70v-24.00"></path>
 <path class="stroke" d="m885.33 100.70v-24.00"></path>
@@ -656,30 +656,30 @@ l30.89 0.00v3.20l-30.89 0.00"></path>
 </defs><g transform="scale(0.75)"><g transform="translate(0,78.70)">
 <text class="f2_1" x="22.00" y="-27.00" text-anchor="end">9</text>
 <text class="f2_1" x="441.05" y="-32.00">10</text>
-<text class="f3_1" x="32.98" y="-63.90">1</text>
-<text class="f3_1" x="74.27" y="-63.90">&amp;</text>
-<text class="f3_1" x="107.19" y="-63.90">a</text>
-<text class="f3_1" x="137.35" y="-63.90">2</text>
-<text class="f3_1" x="178.64" y="-63.90">&amp;</text>
-<text class="f3_1" x="211.56" y="-63.90">a</text>
-<text class="f3_1" x="241.73" y="-63.90">3</text>
-<text class="f3_1" x="283.02" y="-63.90">&amp;</text>
-<text class="f3_1" x="315.93" y="-63.90">a</text>
-<text class="f3_1" x="346.10" y="-63.90">4</text>
-<text class="f3_1" x="387.39" y="-63.90">&amp;</text>
-<text class="f3_1" x="420.31" y="-63.90">a</text>
-<text class="f3_1" x="467.71" y="-63.90">1</text>
-<text class="f3_1" x="509.00" y="-63.90">&amp;</text>
-<text class="f3_1" x="541.92" y="-63.90">a</text>
-<text class="f3_1" x="572.09" y="-63.90">2</text>
-<text class="f3_1" x="613.38" y="-63.90">&amp;</text>
-<text class="f3_1" x="646.29" y="-63.90">a</text>
-<text class="f3_1" x="676.46" y="-63.90">3</text>
-<text class="f3_1" x="717.75" y="-63.90">&amp;</text>
-<text class="f3_1" x="750.67" y="-63.90">a</text>
-<text class="f3_1" x="780.83" y="-63.90">4</text>
-<text class="f3_1" x="822.13" y="-63.90">&amp;</text>
-<text class="f3_1" x="855.04" y="-63.90">a</text>
+<text class="f3_1" x="36.50" y="-63.90" text-anchor="middle">1</text>
+<text class="f3_1" x="79.75" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="110.32" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="140.87" y="-63.90" text-anchor="middle">2</text>
+<text class="f3_1" x="184.12" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="214.69" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="245.25" y="-63.90" text-anchor="middle">3</text>
+<text class="f3_1" x="288.50" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="319.06" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="349.62" y="-63.90" text-anchor="middle">4</text>
+<text class="f3_1" x="392.87" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="423.44" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="471.23" y="-63.90" text-anchor="middle">1</text>
+<text class="f3_1" x="514.48" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="545.05" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="575.61" y="-63.90" text-anchor="middle">2</text>
+<text class="f3_1" x="618.86" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="649.42" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="679.98" y="-63.90" text-anchor="middle">3</text>
+<text class="f3_1" x="723.23" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="753.80" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="784.35" y="-63.90" text-anchor="middle">4</text>
+<text class="f3_1" x="827.61" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="858.17" y="-63.90" text-anchor="middle">a</text>
 </g>
 <path class="stroke" d="m447.21 78.70v-24.00"></path>
 <path class="stroke" d="m885.33 78.70v-24.00"></path>
@@ -842,34 +842,34 @@ l30.56 0.00v3.20l-30.56 0.00"></path>
 <g transform="translate(0,99.70)">
 <text class="f2_1" x="22.00" y="-27.00" text-anchor="end">11</text>
 <text class="f2_1" x="409.09" y="-32.00">12</text>
-<text class="f3_1" x="32.98" y="-59.90">1</text>
-<text class="f3_1" x="61.75" y="-59.90">e</text>
-<text class="f3_1" x="87.78" y="-59.90">&amp;</text>
-<text class="f3_1" x="129.90" y="-59.90">2</text>
-<text class="f3_1" x="158.67" y="-59.90">e</text>
-<text class="f3_1" x="184.70" y="-59.90">&amp;</text>
-<text class="f3_1" x="226.82" y="-59.90">3</text>
-<text class="f3_1" x="255.59" y="-59.90">e</text>
-<text class="f3_1" x="281.62" y="-59.90">&amp;</text>
-<text class="f3_1" x="323.73" y="-59.90">4</text>
-<text class="f3_1" x="352.51" y="-59.90">e</text>
-<text class="f3_1" x="378.54" y="-59.90">&amp;</text>
-<text class="f3_1" x="434.04" y="-59.90">1</text>
-<text class="f3_1" x="462.81" y="-59.90">e</text>
-<text class="f3_1" x="488.84" y="-59.90">&amp;</text>
-<text class="f3_1" x="519.57" y="-59.90">a</text>
-<text class="f3_1" x="547.56" y="-59.90">2</text>
-<text class="f3_1" x="576.33" y="-59.90">e</text>
-<text class="f3_1" x="602.36" y="-59.90">&amp;</text>
-<text class="f3_1" x="633.09" y="-59.90">a</text>
-<text class="f3_1" x="661.08" y="-59.90">3</text>
-<text class="f3_1" x="689.85" y="-59.90">e</text>
-<text class="f3_1" x="715.88" y="-59.90">&amp;</text>
-<text class="f3_1" x="746.61" y="-59.90">a</text>
-<text class="f3_1" x="774.60" y="-59.90">4</text>
-<text class="f3_1" x="803.37" y="-59.90">e</text>
-<text class="f3_1" x="829.40" y="-59.90">&amp;</text>
-<text class="f3_1" x="860.13" y="-59.90">a</text>
+<text class="f3_1" x="36.50" y="-59.90" text-anchor="middle">1</text>
+<text class="f3_1" x="64.88" y="-59.90" text-anchor="middle">e</text>
+<text class="f3_1" x="93.26" y="-59.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="133.42" y="-59.90" text-anchor="middle">2</text>
+<text class="f3_1" x="161.80" y="-59.90" text-anchor="middle">e</text>
+<text class="f3_1" x="190.18" y="-59.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="230.34" y="-59.90" text-anchor="middle">3</text>
+<text class="f3_1" x="258.72" y="-59.90" text-anchor="middle">e</text>
+<text class="f3_1" x="287.10" y="-59.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="327.25" y="-59.90" text-anchor="middle">4</text>
+<text class="f3_1" x="355.64" y="-59.90" text-anchor="middle">e</text>
+<text class="f3_1" x="384.02" y="-59.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="437.56" y="-59.90" text-anchor="middle">1</text>
+<text class="f3_1" x="465.94" y="-59.90" text-anchor="middle">e</text>
+<text class="f3_1" x="494.32" y="-59.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="522.70" y="-59.90" text-anchor="middle">a</text>
+<text class="f3_1" x="551.08" y="-59.90" text-anchor="middle">2</text>
+<text class="f3_1" x="579.46" y="-59.90" text-anchor="middle">e</text>
+<text class="f3_1" x="607.84" y="-59.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="636.22" y="-59.90" text-anchor="middle">a</text>
+<text class="f3_1" x="664.60" y="-59.90" text-anchor="middle">3</text>
+<text class="f3_1" x="692.98" y="-59.90" text-anchor="middle">e</text>
+<text class="f3_1" x="721.36" y="-59.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="749.74" y="-59.90" text-anchor="middle">a</text>
+<text class="f3_1" x="778.12" y="-59.90" text-anchor="middle">4</text>
+<text class="f3_1" x="806.50" y="-59.90" text-anchor="middle">e</text>
+<text class="f3_1" x="834.88" y="-59.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="863.26" y="-59.90" text-anchor="middle">a</text>
 </g>
 <path class="stroke" d="m415.25 99.70v-24.00"></path>
 <path class="stroke" d="m885.33 99.70v-24.00"></path>
@@ -1050,34 +1050,34 @@ l85.14 0.00v3.20l-85.14 0.00"></path>
 </defs><g transform="scale(0.75)"><g transform="translate(0,78.70)">
 <text class="f2_1" x="22.00" y="-27.00" text-anchor="end">13</text>
 <text class="f2_1" x="409.13" y="-32.00">14</text>
-<text class="f3_1" x="32.98" y="-63.90">1</text>
-<text class="f3_1" x="70.91" y="-63.90">&amp;</text>
-<text class="f3_1" x="101.45" y="-63.90">a</text>
-<text class="f3_1" x="129.24" y="-63.90">2</text>
-<text class="f3_1" x="167.17" y="-63.90">&amp;</text>
-<text class="f3_1" x="197.71" y="-63.90">a</text>
-<text class="f3_1" x="225.51" y="-63.90">3</text>
-<text class="f3_1" x="263.44" y="-63.90">&amp;</text>
-<text class="f3_1" x="293.98" y="-63.90">a</text>
-<text class="f3_1" x="321.77" y="-63.90">4</text>
-<text class="f3_1" x="359.70" y="-63.90">&amp;</text>
-<text class="f3_1" x="390.24" y="-63.90">a</text>
-<text class="f3_1" x="433.93" y="-63.90">1</text>
-<text class="f3_1" x="462.51" y="-63.90">e</text>
-<text class="f3_1" x="488.35" y="-63.90">&amp;</text>
-<text class="f3_1" x="518.89" y="-63.90">a</text>
-<text class="f3_1" x="546.68" y="-63.90">2</text>
-<text class="f3_1" x="575.27" y="-63.90">e</text>
-<text class="f3_1" x="601.10" y="-63.90">&amp;</text>
-<text class="f3_1" x="631.64" y="-63.90">a</text>
-<text class="f3_1" x="659.44" y="-63.90">3</text>
-<text class="f3_1" x="688.02" y="-63.90">e</text>
-<text class="f3_1" x="713.86" y="-63.90">&amp;</text>
-<text class="f3_1" x="744.40" y="-63.90">a</text>
-<text class="f3_1" x="772.19" y="-63.90">4</text>
-<text class="f3_1" x="800.77" y="-63.90">e</text>
-<text class="f3_1" x="826.61" y="-63.90">&amp;</text>
-<text class="f3_1" x="857.15" y="-63.90">a</text>
+<text class="f3_1" x="36.50" y="-63.90" text-anchor="middle">1</text>
+<text class="f3_1" x="76.39" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="104.58" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="132.76" y="-63.90" text-anchor="middle">2</text>
+<text class="f3_1" x="172.65" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="200.84" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="229.03" y="-63.90" text-anchor="middle">3</text>
+<text class="f3_1" x="268.92" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="297.11" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="325.29" y="-63.90" text-anchor="middle">4</text>
+<text class="f3_1" x="365.18" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="393.37" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="437.45" y="-63.90" text-anchor="middle">1</text>
+<text class="f3_1" x="465.64" y="-63.90" text-anchor="middle">e</text>
+<text class="f3_1" x="493.83" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="522.02" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="550.20" y="-63.90" text-anchor="middle">2</text>
+<text class="f3_1" x="578.40" y="-63.90" text-anchor="middle">e</text>
+<text class="f3_1" x="606.58" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="634.77" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="662.96" y="-63.90" text-anchor="middle">3</text>
+<text class="f3_1" x="691.15" y="-63.90" text-anchor="middle">e</text>
+<text class="f3_1" x="719.34" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="747.53" y="-63.90" text-anchor="middle">a</text>
+<text class="f3_1" x="775.71" y="-63.90" text-anchor="middle">4</text>
+<text class="f3_1" x="803.90" y="-63.90" text-anchor="middle">e</text>
+<text class="f3_1" x="832.09" y="-63.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="860.28" y="-63.90" text-anchor="middle">a</text>
 </g>
 <path class="stroke" d="m415.29 78.70v-24.00"></path>
 <path class="stroke" d="m885.33 78.70v-24.00"></path>
@@ -1263,22 +1263,22 @@ l84.57 0.00v3.20l-84.57 0.00"></path>
 </defs><g transform="scale(0.75)"><text class="f3_1" x="26.50" y="18.00">Quads   (play each ×4)</text>
 <g transform="translate(0,99.70)">
 <text class="f2_1" x="22.00" y="-27.00" text-anchor="end">15</text>
-<text class="f3_1" x="32.98" y="-59.90">1</text>
-<text class="f3_1" x="62.14" y="-59.90">e</text>
-<text class="f3_1" x="88.55" y="-59.90">&amp;</text>
-<text class="f3_1" x="119.67" y="-59.90">a</text>
-<text class="f3_1" x="148.04" y="-59.90">2</text>
-<text class="f3_1" x="177.19" y="-59.90">e</text>
-<text class="f3_1" x="203.61" y="-59.90">&amp;</text>
-<text class="f3_1" x="234.72" y="-59.90">a</text>
-<text class="f3_1" x="263.09" y="-59.90">3</text>
-<text class="f3_1" x="292.25" y="-59.90">e</text>
-<text class="f3_1" x="318.66" y="-59.90">&amp;</text>
-<text class="f3_1" x="349.78" y="-59.90">a</text>
-<text class="f3_1" x="378.15" y="-59.90">4</text>
-<text class="f3_1" x="407.31" y="-59.90">e</text>
-<text class="f3_1" x="433.72" y="-59.90">&amp;</text>
-<text class="f3_1" x="464.83" y="-59.90">a</text>
+<text class="f3_1" x="36.50" y="-59.90" text-anchor="middle">1</text>
+<text class="f3_1" x="65.27" y="-59.90" text-anchor="middle">e</text>
+<text class="f3_1" x="94.03" y="-59.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="122.80" y="-59.90" text-anchor="middle">a</text>
+<text class="f3_1" x="151.56" y="-59.90" text-anchor="middle">2</text>
+<text class="f3_1" x="180.32" y="-59.90" text-anchor="middle">e</text>
+<text class="f3_1" x="209.09" y="-59.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="237.85" y="-59.90" text-anchor="middle">a</text>
+<text class="f3_1" x="266.61" y="-59.90" text-anchor="middle">3</text>
+<text class="f3_1" x="295.38" y="-59.90" text-anchor="middle">e</text>
+<text class="f3_1" x="324.14" y="-59.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="352.91" y="-59.90" text-anchor="middle">a</text>
+<text class="f3_1" x="381.67" y="-59.90" text-anchor="middle">4</text>
+<text class="f3_1" x="410.44" y="-59.90" text-anchor="middle">e</text>
+<text class="f3_1" x="439.20" y="-59.90" text-anchor="middle">&amp;</text>
+<text class="f3_1" x="467.96" y="-59.90" text-anchor="middle">a</text>
 </g>
 <path class="stroke" d="m493.53 99.70v-24.00"></path>
 <path class="stroke" d="m490.53 99.70v-24.00"></path>

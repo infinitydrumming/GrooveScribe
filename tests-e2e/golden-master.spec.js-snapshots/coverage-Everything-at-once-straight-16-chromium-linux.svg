@@ -17,13 +17,13 @@
 <circle id="opend" class="stroke" cx="0" cy="-3" r="2.5"></circle>
 <path id="dplus" class="stroke" style="stroke-width:1.7" d="m0 -0.5v-6m-3 3h6"></path>
 </defs><g transform="scale(0.75)"><g transform="translate(0,94.70)">
-<text class="f2_1" x="43.80" y="-58.56">R</text>
-<text class="f2_1" x="95.58" y="-58.56">L</text>
-<text class="f2_1" x="153.47" y="-58.56">R/L</text>
-<text class="f2_1" x="218.37" y="-58.56">R</text>
-<text class="f2_1" x="270.15" y="-58.56">L</text>
-<text class="f2_1" x="317.83" y="-58.56">R/L</text>
-<text class="f2_1" x="371.74" y="-58.56">&amp;</text>
+<text class="f2_1" x="48.50" y="-58.56" text-anchor="middle">R</text>
+<text class="f2_1" x="99.88" y="-58.56" text-anchor="middle">L</text>
+<text class="f2_1" x="161.47" y="-58.56" text-anchor="middle">R/L</text>
+<text class="f2_1" x="223.07" y="-58.56" text-anchor="middle">R</text>
+<text class="f2_1" x="274.45" y="-58.56" text-anchor="middle">L</text>
+<text class="f2_1" x="325.83" y="-58.56" text-anchor="middle">R/L</text>
+<text class="f2_1" x="377.22" y="-58.56" text-anchor="middle">&amp;</text>
 </g>
 <path class="stroke" d="m885.33 116.04v-24.00"></path>
 <path class="stroke" d="m882.33 116.04v-24.00"></path>

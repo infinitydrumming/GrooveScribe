@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-27 — Counts centred over their notes
+
+- Sheet music: the counts (and stickings) were written starting at their note
+  and running to the right, the way the music engine places chord names, so each
+  sat a little after its note; over 32nd notes they ran into one another and a
+  beat's number looked as if it belonged between the last "ba" and the beat.
+  Each is now centred over its own note (`centredChordTexts` in
+  `js/abcNotation.js`, from where the engine reports writing it,
+  `js/groove_utils.js`). Over 32nd notes, the bold counts of "Rhythm in bold" are
+  now as small as the others (`js/countModes.js`), so a bar of them fits a phone.
+
 ## 2026-10-27 — Flams at the start of a line
 
 - Sheet music: a line starting with a flam, drag or ruff (on a phone, where the

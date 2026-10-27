@@ -84,6 +84,17 @@ describe('counting over the notes', () => {
       );
     });
 
+    it('over 32nd notes, as small as the rest (a bar of bold counts fits a phone)', () => {
+      const abc = gu.createABCFromGrooveData(
+        gu.getGrooveDataFromUrlString(
+          '?TimeSig=4/4&Div=32&Measures=1&Count=bold&S=|' + 'O'.repeat(32) + '|'
+        ),
+        300
+      );
+      expect(abc).toContain('%%gchordfont calibri 11\n%%setfont-1 calibriBold 11\n');
+      expect(abc).toContain('%%setfont-2 calibri;fill:#8c8c8c 11\n');
+    });
+
     it('with ghosts: the ghost note on the "a" of 2 is bold too', () => {
       expect(counts(bold.replace('Count=bold', 'Count=ghosts')).join(' ')).toBe(
         '$11 $2e $2& $2a $12 $2e $1& $1a $23 $2e $1& $2a $14 $1e $2& $2a'
