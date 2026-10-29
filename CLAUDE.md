@@ -118,6 +118,14 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
 - `tests-e2e/` — Playwright (Chromium). `golden-master.spec.js` snapshots SVG+MIDI for a
   groove corpus; `fixtures.js` blocks non-localhost requests for hermetic runs.
 
+## Standing rule: what belongs in Scribe (Matt, 2026-10-29)
+
+Scribe gets fixes and polish. A **new feature that carries Matt's teaching method** (a practice
+system, a sequence of exercises, push-button directions for a student) belongs in his private app,
+not in this public repo. Before building any new feature here, check it against this rule; if it
+crosses the line, or might, say so and ask Matt before writing any code. (The sextuplet chapters
+waiting on the old task list are on the private side now.)
+
 ## Conventions & gotchas
 
 - **Releases are version-stamped:** run `npm run stamp` before each release (writes `?v=<version>` on
