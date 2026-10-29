@@ -450,6 +450,25 @@ describe('HTMLforPermutationOptions', () => {
       expect(html).toContain('>a</label>');
       expect(html).not.toMatch(/PermuationOptionsSingles_sub\d">e</);
     });
+
+    it('1/8 triplets: the chapter picker, chapter 2 the groups (no "off", no "all")', async () => {
+      window.history.pushState({}, '', '/?Div=12');
+      document.body.innerHTML = '';
+      gw = await newGrooveWriter();
+      scaffoldForStateMutatingCalls(gw);
+      swallowingKnownHarnessGap(() => gw.permutationPopupClick('kick_16ths'));
+
+      const html = gw.HTMLforPermutationOptions();
+      expect(html).toContain('<label for="PermutationChapter">Chapters</label>');
+      const picker = html.split('<select id="PermutationChapter"')[1].split('</select>')[0];
+      const options = [
+        ...picker.matchAll(/<option value="(\w+)"( selected)?>([^<]+)<\/option>/g),
+      ].map((m) => m[1] + (m[2] ? '*' : '') + ' ' + m[3]);
+      expect(options).toEqual(['1 1: swung 8ths over 2 beats', '0* 2: the triplet alphabet']);
+      // chapter 2 playing: the groups are on
+      expect(html).not.toContain('chapterOn');
+      expect(html).not.toContain('data-chapter="pick"');
+    });
   });
 
   describe('"snare_16ths" permutation type', () => {

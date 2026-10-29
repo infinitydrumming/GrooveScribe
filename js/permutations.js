@@ -422,6 +422,63 @@ export function getChapterSections(layout, chapter, picks) {
   return sections;
 }
 
+// --- Triplet chapters (Infinity Drumming, 2026) --------------------------------
+//
+// The 1/8 triplet alphabet in two chapters. Chapter 1 is the 8th alphabet over two
+// beats (its 15 figures, the silent one aside) on the swung 8ths: the 1st and 3rd
+// notes of each triplet. Chapter 2 is the triplet alphabet itself: its groups, the
+// ticked ones playing as they did before there were chapters (a link has no
+// PermChapter for it, so older links play as they did).
+
+var EIGHTHS_GROUPS = ['Singles', 'Quarter notes / Off-beat 8ths', 'Doubles', 'Triples', 'Quads'];
+var SWUNG_SLOTS = [0, 8, 12, 20]; // two beats' swung 8ths, 1/8 triplets of 4 slots
+
+/**
+ * Two beats of swung 8ths as the triplet count says them: "1 a 2", "(1) a (2) a"
+ * (the 1 in brackets when silent, the 2 when silent but its "a" plays).
+ * @param {number[]} notes  the 8ths that play: 0 the 1, 1 its "a", 2 the 2, 3 its "a"
+ */
+export function swungEighthsCount(notes) {
+  var words = [notes.indexOf(0) >= 0 ? '1' : '(1)'];
+  if (notes.indexOf(1) >= 0) words.push('a');
+  if (notes.indexOf(2) >= 0) words.push('2');
+  else if (notes.indexOf(3) >= 0) words.push('(2)');
+  if (notes.indexOf(3) >= 0) words.push('a');
+  return words.join(' ');
+}
+
+// the 1/8 triplet layout's chapter 1 (two-beat figures: x/4 bars of an even number
+// of beats), and the picker's name for the groups, chapter 2
+function withTripletChapters(layout) {
+  if ((layout.slots / 12) % 2) return layout;
+  var parts = [];
+  var figures = [];
+  var subLabels = [];
+  ALPHABET_16.forEach(function (g, i) {
+    parts.push({ part: 'g' + i, name: EIGHTHS_GROUPS[i] });
+    g.figures.forEach(function (notes) {
+      var at = notes.map((n) => SWUNG_SLOTS[n]);
+      figures.push({
+        hits: hitsArray(layout.slots, (slot) => at.indexOf(slot % 24) >= 0),
+        part: 'g' + i,
+      });
+      subLabels.push(swungEighthsCount(notes));
+    });
+  });
+  layout.chapters = [
+    {
+      id: 'PermutationChapter1',
+      name: 'Chapter 1: swung 8ths over 2 beats',
+      defaultOn: false,
+      subLabels: subLabels,
+      parts: parts,
+      figures: figures,
+    },
+  ];
+  layout.chapterPicker = { label: 'Chapters', groups: 'Chapter 2: the triplet alphabet' };
+  return layout;
+}
+
 // Straight figures: `unit` slots per grid note, 4 grid notes per pattern.
 // `labels` names the 4 positions. Only the 16ths layout in 4/4 keeps a link to
 // the original section numbers, for the hand-written "Simplify multiple kicks"
@@ -641,13 +698,8 @@ function quarterBeatsLayout(timeDivision, top) {
   var straight = top * 8; // the bar's 32nd notes
   switch (timeDivision) {
     case 12:
-      return tripletLayout(
-        'triplets8',
-        4,
-        ['1', '&', 'a'],
-        ['1', '&'],
-        ['1', '&', 'a', '2'],
-        top * 12
+      return withTripletChapters(
+        tripletLayout('triplets8', 4, ['1', '&', 'a'], ['1', '&'], ['1', '&', 'a', '2'], top * 12)
       );
     case 24:
       return tripletLayout(

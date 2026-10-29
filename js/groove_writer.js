@@ -2772,12 +2772,20 @@ function GrooveWriter() {
   // The 32nd chapters (Infinity Drumming, 2026): every rhythm of a beat of 32nds,
   // a chapter at a time, the most used first. A chapter plays instead of the
   // ticked groups: 0 none, a chapter's number, or 'all'; and of that chapter the
-  // rhythms ticked (their numbers from 1), null for all of them.
+  // rhythms ticked (their numbers from 1), null for all of them. The 1/8 triplets
+  // have chapters too (swung 8ths over 2 beats): a chapter belongs to the note
+  // setting it was chosen in (`class_chapter_mode`, its layout's mode).
   var class_permutation_chapter = /** @type {number|string} */ (0);
   var class_chapter_picks = /** @type {number[]|null} */ (null);
+  var class_chapter_mode = '';
 
   function chapterOn(layout) {
-    return !!(class_permutation_chapter && layout && layout.chapters);
+    return !!(
+      class_permutation_chapter &&
+      layout &&
+      layout.chapters &&
+      layout.mode == class_chapter_mode
+    );
   }
 
   // the figures the run plays: the chapter's, or the ticked groups'
@@ -2788,10 +2796,11 @@ function GrooveWriter() {
   }
 
   // a chapter (or 'all', or none) to play; a chapter's own number must be one the
-  // 32nd layout has, its picks some of its rhythms (any others are left out)
+  // layout has, its picks some of its rhythms (any others are left out)
   function setPermutationChapter(chapter, picks) {
     var layout = get_permutation_layout();
     var count = layout && layout.chapters ? layout.chapters.length : 0;
+    class_chapter_mode = layout ? layout.mode : '';
     var n = parseInt(String(chapter), 10);
     if (chapter == 'all') class_permutation_chapter = 'all';
     else class_permutation_chapter = n >= 1 && n <= count ? n : 0;
@@ -9107,7 +9116,7 @@ function GrooveWriter() {
       class_permutation_fat_back,
       class_rep_counter,
       class_trade,
-      { chosen: class_permutation_chapter, picks: class_chapter_picks }
+      { chosen: chapterOn(layout) ? class_permutation_chapter : 0, picks: class_chapter_picks }
     );
   };
 } // end of class

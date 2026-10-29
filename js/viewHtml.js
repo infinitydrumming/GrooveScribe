@@ -923,8 +923,10 @@ var escapeHTML = function (text) {
 // rhythms can be ticked off one by one, or a part at a time (a group or figure of
 // the alphabet). Not the figures' ticks: the link has its own PermChapter / PermPick.
 // `chosen`: 0 (off: the groups play), a chapter's number or 'all'; `picks`: the
-// chapter's rhythms to play (numbers from 1), null for all of them
-function chapterHTML(chapters, chosen, picks) {
+// chapter's rhythms to play (numbers from 1), null for all of them. `picker`: the
+// 1/8 triplet one's label and its groups' chapter (the last, value 0: no "off",
+// no "all"), absent for the 32nd chapters
+function chapterHTML(chapters, chosen, picks, picker) {
   var option = function (value, label) {
     return (
       '<option value="' +
@@ -938,13 +940,18 @@ function chapterHTML(chapters, chosen, picks) {
   };
   var html =
     '<div id="PermutationChapterOption"><span class="chapterPicker">' +
-    '<label for="PermutationChapter">32nd chapters</label> ' +
+    '<label for="PermutationChapter">' +
+    (picker ? picker.label : '32nd chapters') +
+    '</label> ' +
     '<select id="PermutationChapter" onchange="myGrooveWriter.permutationChapterChange(event)">' +
-    option('0', 'off');
+    (picker ? '' : option('0', 'off'));
   chapters.forEach(function (chapter, c) {
     html += option(String(c + 1), chapter.name.replace(/^Chapter /, ''));
   });
-  html += option('all', 'All ' + chapters.length + ' chapters') + '</select></span>';
+  html += picker
+    ? option('0', picker.groups.replace(/^Chapter /, ''))
+    : option('all', 'All ' + chapters.length + ' chapters');
+  html += '</select></span>';
   var chapter = chosen && chosen != 'all' ? chapters[Number(chosen) - 1] : null;
   if (chapter)
     chapter.parts.forEach(function (part) {
@@ -989,14 +996,19 @@ function chapterHTML(chapters, chosen, picks) {
   return html + '</div>\n';
 }
 
-// the 32nd chapter picker ('' for other note settings) and whether a chapter
-// plays (the groups are off then)
+// the chapter picker (1/32 notes and 1/8 triplets; '' for other note settings)
+// and whether a chapter plays (the groups are off then)
 function chapterOptions(layout, chapter) {
   var on = !!(layout.chapters && chapter && chapter.chosen);
   if (!layout.chapters) return { on: false, html: '' };
   return {
     on: on,
-    html: chapterHTML(layout.chapters, on ? chapter.chosen : 0, on ? chapter.picks : null),
+    html: chapterHTML(
+      layout.chapters,
+      on ? chapter.chosen : 0,
+      on ? chapter.picks : null,
+      layout.chapterPicker
+    ),
   };
 }
 
@@ -1004,7 +1016,7 @@ function chapterOptions(layout, chapter) {
 // setting; `repeats` is the current "Play each ×" value.
 // fatBack: kick permutations leave out the kicks on the snare's backbeat
 // repCounter: the rep counter shows while it plays (a switch of this device's)
-// chapter: the 32nd chapter on, {chosen, picks} (see chapterHTML), for 1/32 notes
+// chapter: the chapter on, {chosen, picks} (see chapterHTML), for 1/32 notes and 1/8 triplets
 export function buildPermutationOptionsHTML(
   permutationType,
   layout,

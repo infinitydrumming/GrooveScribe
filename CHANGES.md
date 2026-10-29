@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-10-29 — Chapters in the triplet alphabet
+
+- The alphabet in 1/8 triplets (x/4 bars of an even number of beats, and 4/4 in the
+  Mixed setting) has two chapters, picked next to "Chapters" in the Alphabet
+  Options. Chapter 1, "swung 8ths over 2 beats", is the 8th alphabet over two beats
+  (its 15 figures) on the 1st and 3rd notes of each triplet, a bar a figure, its
+  rhythms ticked off one by one or a part at a time; chapter 2, "the triplet
+  alphabet", is the groups as before (`js/permutations.js`, `js/viewHtml.js`,
+  `js/groove_writer.js`). Links say `PermChapter=1` for chapter 1; links without
+  it play as they did.
+
 ## 2026-10-27 — Chapter 3's name
 
 - The 32nd chapters: chapter 3 is now called "the alphabet as pairs, the 16ths
