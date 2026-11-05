@@ -319,6 +319,7 @@ function GrooveWriter() {
   function writtenBarABC(barABC, shownBars, shown, numbered, addon) {
     var bar = shownBars[shown];
     var before = shown > 0 ? shownBars[shown - 1] : 0;
+    barABC = withTradeMark(barABC, bar);
     if (barSigLabel(bar) != barSigLabel(before)) barABC = addMeterChange(barABC, barSigOf(bar));
     if (!numbered) return withSectionMarks(barABC, bar, addon);
     var next = shownBars[shown + 1];
@@ -342,6 +343,7 @@ function GrooveWriter() {
   function musicBarsHeading() {
     return (
       sectionLetterFont() +
+      grooveRunHeading() +
       (practisedBarsHeading() ||
         formHeading() + (class_number_of_measures > 1 ? '%%measurenb 1\n' : ''))
     );
@@ -2772,12 +2774,20 @@ function GrooveWriter() {
   // The 32nd chapters (Infinity Drumming, 2026): every rhythm of a beat of 32nds,
   // a chapter at a time, the most used first. A chapter plays instead of the
   // ticked groups: 0 none, a chapter's number, or 'all'; and of that chapter the
-  // rhythms ticked (their numbers from 1), null for all of them.
+  // rhythms ticked (their numbers from 1), null for all of them. The 1/8 triplets
+  // have chapters too (swung 8ths over 2 beats): a chapter belongs to the note
+  // setting it was chosen in (`class_chapter_mode`, its layout's mode).
   var class_permutation_chapter = /** @type {number|string} */ (0);
   var class_chapter_picks = /** @type {number[]|null} */ (null);
+  var class_chapter_mode = '';
 
   function chapterOn(layout) {
-    return !!(class_permutation_chapter && layout && layout.chapters);
+    return !!(
+      class_permutation_chapter &&
+      layout &&
+      layout.chapters &&
+      layout.mode == class_chapter_mode
+    );
   }
 
   // the figures the run plays: the chapter's, or the ticked groups'
@@ -2788,10 +2798,11 @@ function GrooveWriter() {
   }
 
   // a chapter (or 'all', or none) to play; a chapter's own number must be one the
-  // 32nd layout has, its picks some of its rhythms (any others are left out)
+  // layout has, its picks some of its rhythms (any others are left out)
   function setPermutationChapter(chapter, picks) {
     var layout = get_permutation_layout();
     var count = layout && layout.chapters ? layout.chapters.length : 0;
+    class_chapter_mode = layout ? layout.mode : '';
     var n = parseInt(String(chapter), 10);
     if (chapter == 'all') class_permutation_chapter = 'all';
     else class_permutation_chapter = n >= 1 && n <= count ? n : 0;
@@ -3335,6 +3346,10 @@ function GrooveWriter() {
 
   // `groovePercent`: how far through the run playing is (as the cursor has it)
   function updateRepCounter(note_type, groovePercent) {
+    if (class_rep_counter && class_permutation_type == 'none' && grooveRepeatsOrTrades()) {
+      updateGrooveRepCounter(note_type);
+      return;
+    }
     if (!class_rep_counter || class_permutation_type == 'none') {
       showRepCounter('');
       return;
@@ -3557,11 +3572,13 @@ function GrooveWriter() {
     return start + (class_trade.after ? 0 : tradeBars()) + at.ostinatoBar + fraction;
   }
 
-  // a trade bar playing: "Trade · 2 of 3 · bar 1/2"
-  function tradeCounterText(at) {
+  // a trade bar playing: "Trade · 2 of 3 · bar 1/2" (`trade`: the groove page's,
+  // the alphabet's when absent)
+  function tradeCounterText(at, trade) {
+    trade = trade || class_trade;
     var text = 'Trade';
-    if (class_trade.times > 1) text += ' \u00b7 ' + (at.tradeTime + 1) + ' of ' + class_trade.times;
-    if (class_trade.bars > 1) text += ' \u00b7 bar ' + (at.trade + 1) + '/' + class_trade.bars;
+    if (trade.times > 1) text += ' \u00b7 ' + (at.tradeTime + 1) + ' of ' + trade.times;
+    if (trade.bars > 1) text += ' \u00b7 bar ' + (at.trade + 1) + '/' + trade.bars;
     return text;
   }
 
@@ -7155,8 +7172,16 @@ function GrooveWriter() {
   }
 
   // The groove's bars in the order they play (0-based): those practised, or the
-  // sections each as many times as it says; [] when that's every bar once, in order
+  // sections each as many times as it says, each bar "Play each bar" times and the
+  // trade bars between; [] when that's every bar once, in order
   function playedBars() {
+    return grooveRun().map(function (step) {
+      return step.bar;
+    });
+  }
+
+  // the order before "Play each bar" and the trade bars
+  function plainPlayedBars() {
     var practised = practisedBars();
     if (practised.length || class_permutation_type != 'none') return practised;
     var form = formOrder();
@@ -7168,6 +7193,162 @@ function GrooveWriter() {
         return bar == i;
       });
     return inOrder ? [] : form;
+  }
+
+  // --- Each bar's repeats and trade bars on the groove page (Infinity Drumming, 2026)
+  // The alphabet's "Play each bar" and "Trade" for a groove of more than one bar:
+  // each bar of the playing order plays so many times, and the groove's last bars
+  // (its trade bars, marked so in the grid) so many times before (or after) each.
+  // In the link as PlayEach= and Trade= (without Perm=).
+  var class_groove_each = 1;
+  var class_groove_trade = { bars: 0, times: 1, after: false };
+  var class_groove_options_html = '';
+  var class_playing_step = -1; // the step of grooveRun() playing (for the rep counter)
+
+  // "Play each bar" ×, 1 with a permutation (it has its own)
+  function grooveEach() {
+    return class_permutation_type == 'none' ? class_groove_each : 1;
+  }
+
+  // how many of the groove's last bars are traded (0 with a permutation): a bar
+  // is always left to trade with
+  function grooveTradeBars() {
+    if (class_permutation_type != 'none') return 0;
+    return Math.max(0, Math.min(class_groove_trade.bars, class_number_of_measures - 1));
+  }
+
+  function grooveRepeatsOrTrades() {
+    return grooveEach() > 1 || grooveTradeBars() > 0;
+  }
+
+  // The groove's bars as they play, each a step: { bar (0-based), rep, times }, or
+  // for a trade bar { bar, trade (which of them), tradeTime }; [] when that's every
+  // bar once, in order
+  function grooveRun() {
+    var order = plainPlayedBars();
+    var each = grooveEach();
+    var trade = grooveTradeBars();
+    if (each < 2 && !trade)
+      return order.map(function (bar) {
+        return { bar: bar, rep: 0, times: 1 };
+      });
+    if (!order.length) order = allBars();
+    var firstTrade = class_number_of_measures - trade;
+    var bars = order.filter(function (bar) {
+      return bar < firstTrade;
+    });
+    if (!bars.length) {
+      bars = order; // (only trade bars practised: they play as any bars)
+      trade = 0;
+    }
+    var traded = [];
+    for (var time = 0; trade && time < class_groove_trade.times; time++)
+      for (var k = 0; k < trade; k++)
+        traded.push({ bar: firstTrade + k, trade: k, tradeTime: time });
+    var run = [];
+    bars.forEach(function (bar) {
+      if (!class_groove_trade.after) run = run.concat(traded);
+      for (var rep = 0; rep < each; rep++) run.push({ bar: bar, rep: rep, times: each });
+      if (class_groove_trade.after) run = run.concat(traded);
+    });
+    return run;
+  }
+
+  // over the music: how the bars play ("Each bar ×2, then the trade bar ×3"), ''
+  // when once each
+  function grooveRunHeading() {
+    var each = grooveEach();
+    var trade = grooveTradeBars();
+    if (each < 2 && !trade) return '';
+    var bars = 'each bar' + (each > 1 ? ' \u00d7' + each : '');
+    if (!trade) return '%%center Play ' + bars + '\n';
+    var traded =
+      'the trade bar' +
+      (trade > 1 ? 's' : '') +
+      (class_groove_trade.times > 1 ? ' \u00d7' + class_groove_trade.times : '');
+    var text = class_groove_trade.after ? bars + ', then ' + traded : traded + ', then ' + bars;
+    return '%%center ' + text.charAt(0).toUpperCase() + text.slice(1) + '\n';
+  }
+
+  // the first trade bar in the groove's music, marked "Trade" (unless a section's
+  // letter is over it)
+  function withTradeMark(barABC, bar) {
+    var trade = grooveTradeBars();
+    if (!trade || bar != class_number_of_measures - trade) return barABC;
+    var startsSection = currentSectionRuns().some(function (run) {
+      return run.from == bar;
+    });
+    return startsSection ? barABC : labelled(barABC, 'Trade');
+  }
+
+  // the panel over the music: "Play each bar", the rep counter's switch, "Trade"
+  // (a groove of more than one bar, no permutation)
+  function showGrooveOptions() {
+    var panel = document.getElementById('GrooveOptions');
+    if (!panel) return;
+    var shown = class_permutation_type == 'none' && class_number_of_measures > 1;
+    var html = shown
+      ? _view.buildGrooveOptionsHTML(
+          class_groove_each,
+          class_rep_counter,
+          {
+            bars: grooveTradeBars(),
+            times: class_groove_trade.times,
+            after: class_groove_trade.after,
+          },
+          Math.min(MAX_TRADE_BARS, class_number_of_measures - 1)
+        )
+      : '';
+    if (html != class_groove_options_html) {
+      panel.innerHTML = html;
+      class_groove_options_html = html;
+    }
+    addOrRemoveKeywordFromClassById('GrooveOptions', 'displayed', shown);
+  }
+
+  root.grooveRepeatChange = function (event) {
+    class_groove_each = Math.min(Math.max(parseInt(event.target.value, 10) || 1, 1), 16);
+    resetGrooveClickPhase();
+    updateSheetMusic(); // the music's heading, the next time round, the link
+  };
+
+  root.grooveTradeChange = function () {
+    var number = function (id, fallback, least, most) {
+      var element = /** @type {HTMLSelectElement | null} */ (document.getElementById(id));
+      var value = element ? parseInt(element.value, 10) : fallback;
+      return isNaN(value) ? fallback : Math.min(Math.max(value, least), most);
+    };
+    var where = /** @type {HTMLSelectElement | null} */ (
+      document.getElementById('GrooveTradeWhere')
+    );
+    class_groove_trade = {
+      bars: number('GrooveTradeBars', class_groove_trade.bars, 0, MAX_TRADE_BARS),
+      times: number('GrooveTradeTimes', class_groove_trade.times, 1, MAX_TRADE_TIMES),
+      after: where ? where.value == 'after' : class_groove_trade.after,
+    };
+    resetGrooveClickPhase();
+    updateSheetMusic();
+  };
+
+  // the rep counter while a groove plays its bars more than once, or trades:
+  // "Bar 3 · Rep 2 of 4", "Trade · 2 of 3"
+  function updateGrooveRepCounter(note_type) {
+    if (class_metronome_count_in_is_playing) {
+      showRepCounter('Count-in');
+      return;
+    }
+    if (note_type == 'complete' || note_type == 'clear' || class_playing_step < 0) return;
+    var step = grooveRun()[class_playing_step];
+    if (!step) return;
+    if (step.trade !== undefined) {
+      showRepCounter(
+        tradeCounterText(step, { bars: grooveTradeBars(), times: class_groove_trade.times })
+      );
+      return;
+    }
+    var text = 'Bar ' + (step.bar + 1);
+    if (step.times > 1) text += ' \u00b7 Rep ' + (step.rep + 1) + ' of ' + step.times;
+    showRepCounter(text);
   }
 
   // the groove's bars that are practised (0-based), [] for all of them
@@ -7264,6 +7445,7 @@ function GrooveWriter() {
       if (staff) staff.classList.toggle('notPractised', bars.length > 0 && bars.indexOf(bar) < 0);
     }
     showTradeBars();
+    showGrooveOptions();
   }
 
   // The alphabet's lines in the grid, bar by bar (Infinity Drumming, 2026): the
@@ -7277,7 +7459,10 @@ function GrooveWriter() {
     for (var bar = 0; bar < class_number_of_measures; bar++) {
       var staff = document.getElementById('staff-container' + (bar + 1));
       if (!staff) continue;
-      var trade = bar >= ostinato && bar < ostinato + tradeBars();
+      var trade =
+        class_permutation_type == 'none'
+          ? bar >= class_number_of_measures - grooveTradeBars()
+          : bar >= ostinato && bar < ostinato + tradeBars();
       staff.classList.toggle('tradeBar', trade);
       setLinesVisible(staff, '.kick-container', trade || !hideKick);
       setLinesVisible(staff, '.snare-container', trade || !hideSnare);
@@ -7355,12 +7540,14 @@ function GrooveWriter() {
       for (var c = 0; c < cycleBars; c++)
         cycle.push(sequenceBar((class_groove_click_playing_start_bar + c) % length));
       var where = positionInBars(percent_complete, cycle);
+      class_playing_step = (class_groove_click_playing_start_bar + where.index) % length;
       return groovePercentAt(cycle[where.index], where.fraction);
     }
     var position = percent_complete * cycleBars;
     var barInCycle = Math.min(Math.floor(position), cycleBars - 1);
     if (length < 1) return -1;
-    var grooveBar = sequenceBar((class_groove_click_playing_start_bar + barInCycle) % length);
+    class_playing_step = (class_groove_click_playing_start_bar + barInCycle) % length;
+    var grooveBar = sequenceBar(class_playing_step);
     var bars = class_permutation_type == 'none' ? class_number_of_measures : length;
     return (grooveBar + (position - barInCycle)) / bars;
   }
@@ -7368,6 +7555,7 @@ function GrooveWriter() {
   // The playback position (a fraction of the MIDI now playing) as a position in the
   // groove for the cursor, or -1 when there is nothing to follow (the count-in).
   function playingPercentToGroovePercent(percent) {
+    class_playing_step = -1;
     if (percent < 0) return percent;
     if (class_metronome_count_in_is_playing) return -1;
     if (class_practice_ending) {
@@ -7382,6 +7570,7 @@ function GrooveWriter() {
     var played = playedBars();
     if (played.length) {
       var where = positionInBars(percent, played);
+      class_playing_step = where.index;
       return groovePercentAt(played[where.index], where.fraction);
     }
     return percent;
@@ -8315,10 +8504,23 @@ function GrooveWriter() {
       clickStart: gu.getMetronomeOffsetClickStart() || '1',
       mutes: currentMutes(),
       playBars: practiseBarsText(),
+      eachBar: currentEachBar(),
     };
     var song = class_play_along && class_play_along.linkSetting();
     if (song) settings.song = song;
     return settings;
+  }
+
+  // the groove page's "Play each bar" and trade bars for its link, null when off
+  function currentEachBar() {
+    if (!grooveRepeatsOrTrades()) return null;
+    var trade = grooveTradeBars();
+    return {
+      times: grooveEach(),
+      trade: trade
+        ? { bars: trade, times: class_groove_trade.times, after: class_groove_trade.after }
+        : null,
+    };
   }
 
   function setPermutationFromLink(perm) {
@@ -8412,6 +8614,12 @@ function GrooveWriter() {
         root.metronomeOptionsMenuOffsetClickPopupClick(settings.clickStart);
       setMutesFromLink(settings.mutes || {});
       class_practise_bars = settings.playBars || '';
+      var eachBar = settings.eachBar || null;
+      class_groove_each = eachBar ? eachBar.times : 1;
+      class_groove_trade =
+        eachBar && eachBar.trade
+          ? Object.assign({}, eachBar.trade)
+          : { bars: 0, times: 1, after: false };
       resetGrooveClickPhase();
       showPractiseBars();
       if (class_play_along) class_play_along.setLinkedSong(settings.song || null);
@@ -9107,7 +9315,7 @@ function GrooveWriter() {
       class_permutation_fat_back,
       class_rep_counter,
       class_trade,
-      { chosen: class_permutation_chapter, picks: class_chapter_picks }
+      { chosen: chapterOn(layout) ? class_permutation_chapter : 0, picks: class_chapter_picks }
     );
   };
 } // end of class

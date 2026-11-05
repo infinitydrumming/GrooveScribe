@@ -304,6 +304,38 @@ test.describe('practising some bars', () => {
     expect(abc).toContain('P:Bars 2-3');
     expect(abc.match(/%%setbarnb \d+/g)).toEqual(['%%setbarnb 3']);
   });
+
+  // Infinity Drumming, 2026: the alphabet's "Play each bar" and "Trade" on the groove page
+  test('each bar more than once, the last bar traded, plays as the bars written out would', async ({
+    page,
+  }) => {
+    await loadGroove(page, grooveUrl(groove([0, 0, 3, 1, 1, 3, 2, 2, 3])));
+    const writtenOut = await playing(page);
+
+    await loadGroove(page, grooveUrl(groove([0, 1, 2, 3])));
+    await page.selectOption('#GrooveRepeat', '2');
+    await page.selectOption('#GrooveTradeBars', '1');
+    await page.selectOption('#GrooveTradeWhere', 'after');
+    await expect.poll(() => page.evaluate(() => location.search)).toContain('&PlayEach=2&Trade=1a');
+    await expect(page.locator('.staff-container.tradeBar')).toHaveCount(1);
+    await expect(page.locator('#staff-container4')).toHaveClass(/tradeBar/);
+    expect(await playing(page)).toBe(writtenOut);
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('%%center Each bar ×2, then the trade bar\n');
+    expect(abc.match(/\[P:Trade\]/g)).toHaveLength(1);
+
+    // from a link: the trade bar twice before each bar, with the bars practised
+    await loadGroove(page, grooveUrl(groove([3, 3, 1, 3, 3, 2])));
+    const practised = await playing(page);
+    await loadGroove(page, grooveUrl(groove([0, 1, 2, 3]) + '&Trade=1x2&PlayBars=2-4'));
+    await expect(page.locator('#GrooveTradeTimes')).toHaveValue('2');
+    expect(await playing(page)).toBe(practised);
+
+    // off again: the link without them, a bar of its own no longer marked
+    await page.selectOption('#GrooveTradeBars', '0');
+    await expect.poll(() => page.evaluate(() => location.search)).not.toContain('Trade=');
+    await expect(page.locator('.staff-container.tradeBar')).toHaveCount(0);
+  });
 });
 
 // Infinity Drumming, 2026: a beat of 32nd notes in a groove of 16ths
@@ -684,6 +716,56 @@ test.describe('alphabet 32nd chapters', () => {
     await page.selectOption('#PermutationChapter', '0');
     await expect.poll(() => inLink(page, 'PermChapter')).toBe(null);
     await expect(page.locator('#PermuationOptionsSinglesGroup')).not.toHaveClass(/chapterOn/);
+  });
+});
+
+// Infinity Drumming, 2026: the 1/8 triplet alphabet's chapters: chapter 1 the 8th
+// alphabet over 2 beats on the swung 8ths, chapter 2 the triplet alphabet (its groups)
+test.describe('alphabet triplet chapters', () => {
+  const groove =
+    '?TimeSig=4/4&Div=12&Tempo=80&Measures=1&Perm=snare_16ths' + '&H=|-|&S=|-|&K=|o--x--o--x--|';
+  // the accent grid, and of the groups only the Singles on the 1 and on the a
+  const singlesOn1AndA = '&PermSet=1' + '0' + '1' + '101' + '0'.repeat(12);
+  const inLink = (page, name) =>
+    page.evaluate((name) => new URLSearchParams(location.search).get(name), name);
+
+  test('chapter 1 plays the swung 8ths, chapter 2 the groups; a chapter keeps to its note setting', async ({
+    page,
+  }) => {
+    await loadGroove(page, grooveUrl(groove + singlesOn1AndA));
+    await expect(page.locator('#PermutationChapter')).toHaveValue('0');
+    const singles = await playing(page);
+
+    // its quarter notes and off-beat 8ths, swung: the triplets' 1 and a of every beat
+    await loadGroove(page, grooveUrl(groove + singlesOn1AndA + '&PermChapter=1&PermPick=5-6'));
+    await expect(page.locator('#PermutationChapter')).toHaveValue('1');
+    expect(await playing(page)).toBe(singles);
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('P: Chapter 1: swung 8ths over 2 beats');
+    expect(abc).toContain('% Chapter 1: swung 8ths over 2 beats on "(1) a (2) a"');
+
+    // chapter 2: the groups again, the link without a chapter; chapter 1 all 15
+    await page.selectOption('#PermutationChapter', '0');
+    await expect.poll(() => inLink(page, 'PermChapter')).toBe(null);
+    await expect(page.locator('#PermuationOptionsSinglesGroup')).not.toHaveClass(/chapterOn/);
+    await page.selectOption('#PermutationChapter', '1');
+    await expect.poll(() => inLink(page, 'PermChapter')).toBe('1');
+    expect(await inLink(page, 'PermPick')).toBeNull();
+    await expect(page.locator('#PermutationChapterOption .chapterRhythm')).toHaveCount(15);
+    await expect(page.locator('#PermuationOptionsSinglesGroup')).toHaveClass(/chapterOn/);
+
+    // a 32nd chapter stays with the 32nds: the triplets open on their groups
+    await loadGroove(
+      page,
+      grooveUrl(
+        '?TimeSig=4/4&Div=32&Tempo=80&Measures=1&Perm=snare_16ths&H=|-|&S=|-|&K=|-|&PermChapter=3'
+      )
+    );
+    await page.evaluate(() => window.myGrooveWriter.changeDivision(12));
+    await expect(page.locator('#PermutationChapter')).toHaveValue('0');
+    await expect.poll(() => inLink(page, 'PermChapter')).toBe(null);
+    await page.evaluate(() => window.myGrooveWriter.changeDivision(32));
+    await expect(page.locator('#PermutationChapter')).toHaveValue('3');
   });
 });
 

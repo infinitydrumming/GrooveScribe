@@ -63,6 +63,27 @@ describe('practice settings in a link', () => {
     expect(fromQuery('&Perm=kick_16ths&PermBars=1x4_2_1x4_3').permutation.bars).toBe('1x4 2 1x4 3');
   });
 
+  it("keeps a groove's Play each bar and trade bars, the alphabet's its own", () => {
+    const eachBar = { times: 3, trade: { bars: 1, times: 2, after: true } };
+    const settings = { ...emptyPracticeSettings(), eachBar };
+    expect(practiceSettingsToUrl(settings)).toBe('&PlayEach=3&Trade=1x2a');
+    expect(fromQuery('&PlayEach=3&Trade=1x2a')).toEqual(settings);
+    expect(fromQuery('&PlayEach=2').eachBar).toEqual({ times: 2, trade: null });
+    expect(fromQuery('&Trade=2').eachBar).toEqual({
+      times: 1,
+      trade: { bars: 2, times: 1, after: false },
+    });
+    expect(fromQuery('&PlayEach=1').eachBar).toBeUndefined();
+    // with the alphabet on, they are the alphabet's (and a groove's are left out)
+    const perm = fromQuery('&Perm=kick_16ths&PlayEach=3&Trade=1x2a');
+    expect(perm.eachBar).toBeUndefined();
+    expect(perm.permutation.playEach).toBe(3);
+    expect(perm.permutation.trade).toEqual({ bars: 1, times: 2, after: true });
+    expect(practiceSettingsToUrl({ ...perm, eachBar })).toBe(
+      '&Perm=kick_16ths&PlayEach=3&Trade=1x2a'
+    );
+  });
+
   // links from before multi-bar ostinatos (October 2026) played bar 1 only
   it('writes the ostinato only past one bar, and reads 1 bar when a link has none', () => {
     const perm = { type: 'kick_16ths', boxes: '', playEach: 1, bars: '', fatBack: false };

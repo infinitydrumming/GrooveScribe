@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1275 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **137 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1282 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **139 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -67,7 +67,8 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `browserInfo.js` — user-agent / touch probes.
 - `permutations.js` — pure permutation-mode note-array generators (+ kick-array merge/filter), and the
   figure layouts per note setting and time signature (`getPermutationLayout(division, top, bottom)`);
-  the 32nd layout's `chapters` (`thirtySecondChapters`: every rhythm of a beat of 32nds, built on the 16th alphabet).
+  the 32nd layout's `chapters` (`thirtySecondChapters`: every rhythm of a beat of 32nds, built on the 16th alphabet)
+  and the 1/8 triplet layout's (swung 8ths over 2 beats).
 - `viewHtml.js` — pure HTML string builders (staff container, permutation-options menu).
 - `updateCheck.js` — the "new version is ready" bar (compares its own `?v=` with `version.json`).
 - `metronome.js` — the Click menu's settings (`MetronomeFreq`) and the exactly timed clicks
@@ -79,7 +80,8 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `ornaments.js` — flams/drags/ruffs (grace groups) and diddles (`!/!`) inside note tokens.
 - `barMeters.js` — a time signature per bar; which note settings fit a bar.
 - `practiceSettings.js` — an exercise's practice settings in its link (`Perm`/`PermSet`/`PlayEach`/`PermBars`/`FatBack`/`Ostinato`,
-  `PlayBars`, `SpeedUp`, `CountIn`, `ClickSolo`, `ClickStart`, `Mute`); only those that are on. Save & Share's
+  `PlayBars`, `SpeedUp`, `CountIn`, `ClickSolo`, `ClickStart`, `Mute`; a groove's own `PlayEach`/`Trade` without `Perm`,
+  `eachBar`); only those that are on. Save & Share's
   "Include practice settings" box sets `grooveData.includePractice`; `Instructions` always travel.
 - `countModes.js` — the Count menu's choices (`Count=1|bold|ghosts|rhythm|click`): the bold / small styling of
   counts, rhythm-only counts with bracketed silent beats, and the click's own count as a hidden
@@ -117,6 +119,15 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   `groove_display/`). Legacy source is loaded via `tests/helpers/` shims. See `tests/README.md`.
 - `tests-e2e/` — Playwright (Chromium). `golden-master.spec.js` snapshots SVG+MIDI for a
   groove corpus; `fixtures.js` blocks non-localhost requests for hermetic runs.
+
+## Standing rule: what belongs in Scribe (Matt, 2026-10-29)
+
+Scribe gets fixes and polish. A **new feature that carries Matt's teaching method** (a practice
+system, a sequence of exercises, push-button directions for a student) belongs in his private app,
+not in this public repo. Before building any new feature here, check it against this rule; if it
+crosses the line, or might, say so and ask Matt before writing any code. (The sextuplet chapters
+waiting on the old task list are on the private side now. Asked, Matt put the triplet alphabet's
+swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
 
 ## Conventions & gotchas
 
@@ -157,6 +168,11 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   (`SIXTEENTH_WAY`), a mix a chapter. 16 rhythms are in two chapters. A chosen chapter replaces the ticked
   groups (`tickedPermutationSections`), a bar a rhythm. Links number chapters and their rhythms by position:
   reordering chapters after release changes what old links play.
+- **Triplet chapters** (1/8 triplets, x/4 of an even number of beats, and 4/4 Mixed): `withTripletChapters`
+  gives the layout one chapter, the 8th alphabet over 2 beats (`ALPHABET_16`'s 15 figures) on the swung 8ths
+  (`SWUNG_SLOTS`), and `chapterPicker`: the picker reads "Chapters", its "2: the triplet alphabet" is value 0,
+  the groups (so links without `PermChapter` play as before), and there is no "off" or "all". A chosen chapter
+  belongs to its layout's mode (`class_chapter_mode`): a 32nd chapter is off in triplets and back in 32nds.
 - **Note lengths abc2svg can't draw** (5/32 came out as a triple-dotted quarter): the straight-bar
   writer cuts them at the next 8th (else 16th) of the bar, rests after (`drawnLengths`); hands and feet
   only, the stickings voice keeps its `x` spacers.
@@ -285,6 +301,14 @@ Entry/support: `main.js` (index.html bootstrap, wires `window.myGrooveWriter` et
   (`alphabetNotesButton`); trade bars all back to the alphabet's notes (or removed) return the plain note setting.
   On a beat grid the run's MIDI, cursor and grid highlight are byte-identical to the same run in its plain setting
   (the functional E2E checks the MIDI). The 32nds grid allows an alphabet only with alike ostinato beats.
+- **A groove's Play each bar and Trade** (`#GrooveOptions` over the music, a groove of 2+ bars, no
+  permutation; `PlayEach=2&Trade=1x2a` without `Perm`): `grooveRun()` is the playing order as steps
+  (`{bar, rep, times}`, a trade bar's `{bar, trade, tradeTime}`): `plainPlayedBars()` (below) without the trade bars (the
+  groove's last `grooveTradeBars()`, at most bars − 1), each bar `grooveEach()` times, the trade bars around each;
+  `playedBars()` is its bars, so everything bar by bar follows. The music is written once, a `%%center` heading
+  (`grooveRunHeading`) and `[P:Trade]` over the first trade bar; `class_playing_step` (set where the cursor maps
+  the playing position) drives the rep counter. A groove written out in that order plays byte-identical MIDI
+  (the functional E2E checks it). The alphabet's own `class_trade` / repeats are separate.
 - **Sections & the playing order**: `playedBars()` is the order the groove's bars play: the practised
   bars, else the typed form (`Form=ABCA-ABCA`, `#sectionForm` above the bars once there are sections:
   `formOrderBars`, each letter every section with it, its repeats; `%%center Form: A B A C` over the

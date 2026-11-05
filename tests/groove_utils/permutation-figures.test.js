@@ -15,6 +15,7 @@ import {
   barOrderToText,
   thirtySecondChapters,
   thirtySecondCount,
+  swungEighthsCount,
   getChapterSections,
   notesInBarOfSize,
 } from '../../js/permutations.js';
@@ -511,7 +512,7 @@ describe('1/32 notes: every rhythm of a beat in chapters, built on the 16th alph
     ]);
   });
 
-  it('plays a chapter rhythm every beat of the bar, in any x/4, and only for 1/32 notes', () => {
+  it('plays a chapter rhythm every beat of the bar, in any x/4 (no 1/16 or 1/16-triplet chapters)', () => {
     const layout = getPermutationLayout(32, 3, 4);
     const sections = getChapterSections(layout, 3, [1, 5]);
     expect(sections.map((s) => s.label)).toEqual(['1 a li & la', '1 a li & a la']);
@@ -530,6 +531,97 @@ describe('1/32 notes: every rhythm of a beat in chapters, built on the 16th alph
     expect(thirtySecondCount('x-----xx')).toBe('1 (&) la ba');
     expect(thirtySecondCount('-x------')).toBe('(1) a');
     expect(thirtySecondCount('-----x--')).toBe('(1) (&) a');
+  });
+});
+
+describe('1/8 triplets: chapter 1 the 8th alphabet over 2 beats, swung', () => {
+  const layout = getPermutationLayout(12);
+  const chapter = layout.chapters[0];
+  // a figure on the triplet grid, a beat at a time ("X" a note)
+  const beats = (figure) =>
+    figure.hits
+      .filter((_, slot) => slot % layout.unit === 0)
+      .map((hit) => (hit ? 'X' : '-'))
+      .join('')
+      .match(/.../g)
+      .join(' ');
+
+  it("has the 8th alphabet's 15 figures, in its order, on the 1st and 3rd triplet notes", () => {
+    expect(chapter.name).toBe('Chapter 1: swung 8ths over 2 beats');
+    expect(chapter.figures.map(beats)).toEqual([
+      'X-- --- X-- ---',
+      '--X --- --X ---',
+      '--- X-- --- X--',
+      '--- --X --- --X',
+      'X-- X-- X-- X--',
+      '--X --X --X --X',
+      'X-X --- X-X ---',
+      '--X X-- --X X--',
+      '--- X-X --- X-X',
+      'X-- --X X-- --X',
+      'X-X X-- X-X X--',
+      '--X X-X --X X-X',
+      'X-- X-X X-- X-X',
+      'X-X --X X-X --X',
+      'X-X X-X X-X X-X',
+    ]);
+    expect(chapter.parts.map((p) => p.name)).toEqual([
+      'Singles',
+      'Quarter notes / Off-beat 8ths',
+      'Doubles',
+      'Triples',
+      'Quads',
+    ]);
+    expect(chapter.figures.map((f) => f.part).join('')).toBe('g0g0g0g0g1g1g2g2g2g2g3g3g3g3g4');
+    expect(chapter.subLabels.slice(0, 6)).toEqual([
+      '1',
+      '(1) a',
+      '(1) 2',
+      '(1) (2) a',
+      '1 2',
+      '(1) a (2) a',
+    ]);
+  });
+
+  it('counts two beats of swung 8ths, a silent 1 (and a silent 2 before its a) in brackets', () => {
+    expect(swungEighthsCount([0, 1, 2, 3])).toBe('1 a 2 a');
+    expect(swungEighthsCount([3, 0])).toBe('1 (2) a');
+    expect(swungEighthsCount([1, 2])).toBe('(1) a 2');
+    expect(swungEighthsCount([2])).toBe('(1) 2');
+  });
+
+  it('plays its figures instead of the groups, the picks only', () => {
+    const sections = getChapterSections(layout, 1, [2, 15]);
+    expect(sections.map((s) => s.label)).toEqual(['(1) a', '1 a 2 a']);
+    expect(sections[0].group.name).toBe('Chapter 1: swung 8ths over 2 beats');
+    expect(getChapterSections(layout, 1)).toHaveLength(15);
+  });
+
+  it("chapter 2 is the triplet alphabet's groups, with no chapter of its own", () => {
+    expect(layout.chapters).toHaveLength(1);
+    expect(layout.chapterPicker).toEqual({
+      label: 'Chapters',
+      groups: 'Chapter 2: the triplet alphabet',
+    });
+    expect(layout.groups.map((g) => g.name)).toEqual([
+      'Ostinato',
+      'Singles',
+      'Doubles',
+      'Cross-rhythm: every 2nd note',
+      'Cross-rhythm: every 4th note',
+    ]);
+  });
+
+  it('is in x/4 bars of an even number of beats, and the 4/4 Mixed setting', () => {
+    expect(getPermutationLayout(12, 2, 4).chapters[0].figures[4].hits).toHaveLength(24);
+    expect(beats(getPermutationLayout(12, 6, 4).chapters[0].figures[0])).toBe(
+      'X-- --- X-- --- X-- ---'
+    );
+    expect(getPermutationLayout(48).chapters[0].figures).toHaveLength(15);
+    expect(getPermutationLayout(12, 3, 4).chapters).toBeUndefined();
+    expect(getPermutationLayout(12, 5, 4).chapters).toBeUndefined();
+    expect(getPermutationLayout(8, 6, 8).chapters).toBeUndefined();
+    expect(getPermutationLayout(24).chapters).toBeUndefined();
   });
 });
 

@@ -9,6 +9,8 @@
 //                                               (in the options' order), × each
 //   PermBars=3-6,9                              just these bars of the run
 //   PlayBars=1-2  PlayBars=B                    just these bars (or sections) of a groove
+//   PlayEach=2&Trade=1x2a  (no Perm)            a groove's bars each twice, its last bar
+//                                               traded twice after each
 //   Ostinato=2                                  the figures go over the first
 //                                               2 bars (1 if not given)
 //   FatBack=1                                   kick figures without the kicks
@@ -66,11 +68,15 @@ var PERMUTATION_TYPES = [
  *   'intro': from the song's start, the drums in on bar 1); loop: bars of the
  *   song played round and round (from bar 1 = its bar 1), the groove starting on
  *   the first
+ * @typedef {{times: number, trade: (TradeSetting|null)}} EachBarSetting
+ *   a groove's bars each played `times` times, its last `trade.bars` bars traded
+ *   with them (Infinity Drumming, 2026; the alphabet's own are in its setting)
  * @typedef {{permutation: (PermutationSetting|null), speedUp: (SpeedUpSetting|null),
  *   countIn: boolean, clickSolo: boolean, clickStart: string,
- *   mutes: Object<string, number[]>, playBars?: string, song?: (SongSetting|null)}} PracticeSettings
+ *   mutes: Object<string, number[]>, playBars?: string, song?: (SongSetting|null),
+ *   eachBar?: (EachBarSetting|null)}} PracticeSettings
  *   playBars: the bars of a groove to practise ("1-3, 6"), '' for all;
- *   song: only when the link has one
+ *   song: only when the link has one; eachBar: only for a groove (no permutation)
  */
 
 /** @returns {PracticeSettings} every setting off */
@@ -229,6 +235,16 @@ function chapterFromText(text) {
   return whole(value || '0', 0, 99, 0);
 }
 
+/**
+ * A groove's "Play each bar" and trade bars as link parameters, '' for neither.
+ * @param {EachBarSetting} eachBar
+ */
+function eachBarToUrl(eachBar) {
+  var url = eachBar.times > 1 ? '&PlayEach=' + eachBar.times : '';
+  if (eachBar.trade && eachBar.trade.bars) url += '&Trade=' + tradeToText(eachBar.trade);
+  return url;
+}
+
 /** @param {TradeSetting} trade */
 function tradeToText(trade) {
   return trade.bars + (trade.times > 1 ? 'x' + trade.times : '') + (trade.after ? 'a' : '');
@@ -307,6 +323,7 @@ function songFromUrl(get) {
 export function practiceSettingsToUrl(settings) {
   if (!settings) return '';
   var url = permutationToUrl(settings.permutation);
+  if (!settings.permutation && settings.eachBar) url += eachBarToUrl(settings.eachBar);
   if (settings.playBars) url += '&PlayBars=' + barsToUrl(settings.playBars);
   if (settings.speedUp) url += '&SpeedUp=' + speedUpToText(settings.speedUp);
   if (settings.countIn) url += '&CountIn=1';
@@ -344,8 +361,11 @@ export function practiceSettingsFromUrl(get) {
       settings.permutation.picks = chapter != 'all' && picks !== '' ? picksFromText(picks) : null;
     }
   }
-  var trade = settings.permutation && tradeFromText(get('Trade', ''));
-  if (trade) settings.permutation.trade = trade;
+  var trade = tradeFromText(get('Trade', ''));
+  if (trade && settings.permutation) settings.permutation.trade = trade;
+  var times = whole(get('PlayEach', '1'), 1, 16, 1);
+  if (!settings.permutation && (times > 1 || trade))
+    settings.eachBar = { times: times, trade: trade || null };
   settings.speedUp = speedUpFromText(get('SpeedUp', ''));
   settings.countIn = get('CountIn', '0') == '1';
   settings.clickSolo = get('ClickSolo', '0') == '1';

@@ -850,11 +850,20 @@ export function straightBarButtonHTML(baseindex, straight) {
 // "Play each bar": how many times each figure plays before the next one (up to 16),
 // and the rep counter's switch: which bar and rep is playing (Infinity Drumming,
 // 2026; not one of the figures' ticks, so the link's PermSet leaves it out)
-function playEachHTML(repeats, repCounter) {
+// `ids`: the groove page's own ids and handler (Infinity Drumming, 2026), the
+// alphabet's when absent
+var ALPHABET_IDS = { prefix: 'Permutation', each: 'permutationRepeatChange', trade: 'tradeChange' };
+
+function playEachHTML(repeats, repCounter, ids) {
+  ids = ids || ALPHABET_IDS;
   var html =
-    '<span id="PermutationRepeatOption"><label for="PermutationRepeat">Play each bar</label> ';
+    '<span id="' +
+    ids.prefix +
+    'RepeatOption"><label for="' +
+    ids.prefix +
+    'Repeat">Play each bar</label> ';
   html +=
-    '<select id="PermutationRepeat" onchange="myGrooveWriter.permutationRepeatChange(event)">';
+    '<select id="' + ids.prefix + 'Repeat" onchange="myGrooveWriter.' + ids.each + '(event)">';
   for (var times = 1; times <= 16; times++)
     html +=
       '<option value="' +
@@ -867,7 +876,11 @@ function playEachHTML(repeats, repCounter) {
   html += '</select></span>\n';
   return (
     html +
-    '<label id="PermutationRepCounterOption"><input type="checkbox" id="PermutationRepCounter"' +
+    '<label id="' +
+    ids.prefix +
+    'RepCounterOption"><input type="checkbox" id="' +
+    ids.prefix +
+    'RepCounter"' +
     (repCounter ? ' checked' : '') +
     ' onchange="myGrooveWriter.repCounterChange(event)"> Rep counter</label>\n'
   );
@@ -876,7 +889,12 @@ function playEachHTML(repeats, repCounter) {
 // "Trade" (Infinity Drumming, 2026): grooves or fills traded with the figures, the
 // grid's bars after the ostinato's, played so many times before (or after) each
 // bar of the run (not one of the figures' ticks: the link's Trade= has it)
-function tradeHTML(trade) {
+// (`most`: the most trade bars, 4 for the alphabet; `ids` as for playEachHTML)
+function tradeHTML(trade, most, ids) {
+  ids = ids || ALPHABET_IDS;
+  var handler = ' onchange="myGrooveWriter.' + ids.trade + '()">';
+  var counts = [];
+  for (var count = 0; count <= (most === undefined ? 4 : most); count++) counts.push(count);
   var options = function (values, chosen, label) {
     return values
       .map(function (value) {
@@ -893,25 +911,51 @@ function tradeHTML(trade) {
       .join('');
   };
   var html =
-    '<span id="PermutationTradeOption"><label for="PermutationTradeBars">Trade</label> ' +
-    '<select id="PermutationTradeBars" onchange="myGrooveWriter.tradeChange()">' +
-    options([0, 1, 2, 3, 4], trade.bars, function (bars) {
+    '<span id="' +
+    ids.prefix +
+    'TradeOption"><label for="' +
+    ids.prefix +
+    'TradeBars">Trade</label> ' +
+    '<select id="' +
+    ids.prefix +
+    'TradeBars"' +
+    handler +
+    options(counts, trade.bars, function (bars) {
       if (!bars) return 'off';
       return bars + (bars > 1 ? ' bars' : ' bar');
     }) +
     '</select>';
   if (trade.bars)
     html +=
-      ' <select id="PermutationTradeTimes" aria-label="Times through the trade bars" onchange="myGrooveWriter.tradeChange()">' +
+      ' <select id="' +
+      ids.prefix +
+      'TradeTimes" aria-label="Times through the trade bars"' +
+      handler +
       options([1, 2, 3, 4, 5, 6, 7, 8], trade.times, function (times) {
         return '\u00d7' + times;
       }) +
-      '</select> <select id="PermutationTradeWhere" aria-label="Before or after each bar" onchange="myGrooveWriter.tradeChange()">' +
+      '</select> <select id="' +
+      ids.prefix +
+      'TradeWhere" aria-label="Before or after each bar"' +
+      handler +
       options(['before', 'after'], trade.after ? 'after' : 'before', function (where) {
         return where + ' each bar';
       }) +
       '</select>';
   return html + '</span>\n';
+}
+
+/**
+ * The groove page's "Play each bar", rep counter switch and "Trade" (Infinity
+ * Drumming, 2026): the alphabet's, for a groove's own bars (its last bars traded).
+ * @param {number} repeats  "Play each bar" ×
+ * @param {boolean} repCounter  the device's rep counter switch
+ * @param {{bars: number, times: number, after: boolean}} trade
+ * @param {number} most  the most trade bars (a bar must be left to trade with)
+ */
+export function buildGrooveOptionsHTML(repeats, repCounter, trade, most) {
+  var ids = { prefix: 'Groove', each: 'grooveRepeatChange', trade: 'grooveTradeChange' };
+  return playEachHTML(repeats, repCounter, ids) + tradeHTML(trade, most, ids);
 }
 
 var escapeHTML = function (text) {
@@ -923,8 +967,10 @@ var escapeHTML = function (text) {
 // rhythms can be ticked off one by one, or a part at a time (a group or figure of
 // the alphabet). Not the figures' ticks: the link has its own PermChapter / PermPick.
 // `chosen`: 0 (off: the groups play), a chapter's number or 'all'; `picks`: the
-// chapter's rhythms to play (numbers from 1), null for all of them
-function chapterHTML(chapters, chosen, picks) {
+// chapter's rhythms to play (numbers from 1), null for all of them. `picker`: the
+// 1/8 triplet one's label and its groups' chapter (the last, value 0: no "off",
+// no "all"), absent for the 32nd chapters
+function chapterHTML(chapters, chosen, picks, picker) {
   var option = function (value, label) {
     return (
       '<option value="' +
@@ -938,13 +984,18 @@ function chapterHTML(chapters, chosen, picks) {
   };
   var html =
     '<div id="PermutationChapterOption"><span class="chapterPicker">' +
-    '<label for="PermutationChapter">32nd chapters</label> ' +
+    '<label for="PermutationChapter">' +
+    (picker ? picker.label : '32nd chapters') +
+    '</label> ' +
     '<select id="PermutationChapter" onchange="myGrooveWriter.permutationChapterChange(event)">' +
-    option('0', 'off');
+    (picker ? '' : option('0', 'off'));
   chapters.forEach(function (chapter, c) {
     html += option(String(c + 1), chapter.name.replace(/^Chapter /, ''));
   });
-  html += option('all', 'All ' + chapters.length + ' chapters') + '</select></span>';
+  html += picker
+    ? option('0', picker.groups.replace(/^Chapter /, ''))
+    : option('all', 'All ' + chapters.length + ' chapters');
+  html += '</select></span>';
   var chapter = chosen && chosen != 'all' ? chapters[Number(chosen) - 1] : null;
   if (chapter)
     chapter.parts.forEach(function (part) {
@@ -989,14 +1040,19 @@ function chapterHTML(chapters, chosen, picks) {
   return html + '</div>\n';
 }
 
-// the 32nd chapter picker ('' for other note settings) and whether a chapter
-// plays (the groups are off then)
+// the chapter picker (1/32 notes and 1/8 triplets; '' for other note settings)
+// and whether a chapter plays (the groups are off then)
 function chapterOptions(layout, chapter) {
   var on = !!(layout.chapters && chapter && chapter.chosen);
   if (!layout.chapters) return { on: false, html: '' };
   return {
     on: on,
-    html: chapterHTML(layout.chapters, on ? chapter.chosen : 0, on ? chapter.picks : null),
+    html: chapterHTML(
+      layout.chapters,
+      on ? chapter.chosen : 0,
+      on ? chapter.picks : null,
+      layout.chapterPicker
+    ),
   };
 }
 
@@ -1004,7 +1060,7 @@ function chapterOptions(layout, chapter) {
 // setting; `repeats` is the current "Play each ×" value.
 // fatBack: kick permutations leave out the kicks on the snare's backbeat
 // repCounter: the rep counter shows while it plays (a switch of this device's)
-// chapter: the 32nd chapter on, {chosen, picks} (see chapterHTML), for 1/32 notes
+// chapter: the chapter on, {chosen, picks} (see chapterHTML), for 1/32 notes and 1/8 triplets
 export function buildPermutationOptionsHTML(
   permutationType,
   layout,
