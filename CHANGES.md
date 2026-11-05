@@ -11,6 +11,17 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-11-05 — Play each bar and Trade on the groove page
+
+- A groove of two or more bars has the alphabet's "Play each bar" (×1 to ×16), rep
+  counter switch and "Trade" over its music: every bar plays so many times before
+  the next, and the groove's last bars (1 to 4, marked "Trade") play so many times
+  before or after each of the others (`js/groove_writer.js`, `js/viewHtml.js`,
+  `css/infinity_layout.css`, `css/infinity_theme.css`, `index.html`). The music is
+  written once, headed with how it plays; the rep counter shows the bar and its
+  time through. Links carry them as `PlayEach=` and `Trade=` without `Perm=`
+  (`js/practiceSettings.js`); grooves without them play as before.
+
 ## 2026-10-29 — Chapters in the triplet alphabet
 
 - The alphabet in 1/8 triplets (x/4 bars of an even number of beats, and 4/4 in the

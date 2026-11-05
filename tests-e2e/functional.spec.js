@@ -304,6 +304,38 @@ test.describe('practising some bars', () => {
     expect(abc).toContain('P:Bars 2-3');
     expect(abc.match(/%%setbarnb \d+/g)).toEqual(['%%setbarnb 3']);
   });
+
+  // Infinity Drumming, 2026: the alphabet's "Play each bar" and "Trade" on the groove page
+  test('each bar more than once, the last bar traded, plays as the bars written out would', async ({
+    page,
+  }) => {
+    await loadGroove(page, grooveUrl(groove([0, 0, 3, 1, 1, 3, 2, 2, 3])));
+    const writtenOut = await playing(page);
+
+    await loadGroove(page, grooveUrl(groove([0, 1, 2, 3])));
+    await page.selectOption('#GrooveRepeat', '2');
+    await page.selectOption('#GrooveTradeBars', '1');
+    await page.selectOption('#GrooveTradeWhere', 'after');
+    await expect.poll(() => page.evaluate(() => location.search)).toContain('&PlayEach=2&Trade=1a');
+    await expect(page.locator('.staff-container.tradeBar')).toHaveCount(1);
+    await expect(page.locator('#staff-container4')).toHaveClass(/tradeBar/);
+    expect(await playing(page)).toBe(writtenOut);
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('%%center Each bar ×2, then the trade bar\n');
+    expect(abc.match(/\[P:Trade\]/g)).toHaveLength(1);
+
+    // from a link: the trade bar twice before each bar, with the bars practised
+    await loadGroove(page, grooveUrl(groove([3, 3, 1, 3, 3, 2])));
+    const practised = await playing(page);
+    await loadGroove(page, grooveUrl(groove([0, 1, 2, 3]) + '&Trade=1x2&PlayBars=2-4'));
+    await expect(page.locator('#GrooveTradeTimes')).toHaveValue('2');
+    expect(await playing(page)).toBe(practised);
+
+    // off again: the link without them, a bar of its own no longer marked
+    await page.selectOption('#GrooveTradeBars', '0');
+    await expect.poll(() => page.evaluate(() => location.search)).not.toContain('Trade=');
+    await expect(page.locator('.staff-container.tradeBar')).toHaveCount(0);
+  });
 });
 
 // Infinity Drumming, 2026: a beat of 32nd notes in a groove of 16ths

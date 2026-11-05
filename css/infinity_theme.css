@@ -285,7 +285,8 @@ ul.list a:hover,
   background: var(--id-navy-900);
   color: var(--id-text-on-dark);
 }
-#PermutationOptions.displayed {
+#PermutationOptions.displayed,
+#GrooveOptions.displayed {
   background-color: var(--id-surface-2);
   color: var(--id-text);
 }

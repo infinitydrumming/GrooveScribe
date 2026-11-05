@@ -342,7 +342,8 @@ body,
 }
 #sheetMusicDiv,
 #musicalInput,
-#PermutationOptions.displayed {
+#PermutationOptions.displayed,
+#GrooveOptions.displayed {
   box-sizing: border-box;
   margin-bottom: 14px;
   background: #fff;
@@ -364,6 +365,10 @@ body,
 }
 #PermutationOptions.displayed {
   padding: 10px 14px;
+}
+/* a groove's "Play each bar" and "Trade", the alphabet's controls (Infinity Drumming, 2026) */
+#GrooveOptions.displayed {
+  padding: 6px 14px 6px 4px;
 }
 
 /* the tools under the grid */
@@ -1669,7 +1674,8 @@ body.selectingNotes #measureContainer .notes-row-container {
 }
 
 /* "Play each bar": large enough to read at a glance (Infinity Drumming, 2026) */
-#PermutationRepeatOption {
+#PermutationRepeatOption,
+#GrooveRepeatOption {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -1679,7 +1685,8 @@ body.selectingNotes #measureContainer .notes-row-container {
   color: var(--id-navy-900);
   white-space: nowrap;
 }
-#PermutationRepeat {
+#PermutationRepeat,
+#GrooveRepeat {
   min-height: 36px;
   padding: 4px 10px;
   border: 2px solid var(--id-navy-900);
@@ -1708,7 +1715,8 @@ body.selectingNotes #measureContainer .notes-row-container {
 }
 
 /* "Trade": grooves or fills between the figures (Infinity Drumming, 2026) */
-#PermutationTradeOption {
+#PermutationTradeOption,
+#GrooveTradeOption {
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
@@ -1718,7 +1726,8 @@ body.selectingNotes #measureContainer .notes-row-container {
   font-weight: 700;
   color: var(--id-navy-900);
 }
-#PermutationTradeOption select {
+#PermutationTradeOption select,
+#GrooveTradeOption select {
   min-height: 36px;
   padding: 4px 8px;
   border: 2px solid var(--id-navy-900);
@@ -1793,7 +1802,8 @@ body.selectingNotes #measureContainer .notes-row-container {
 }
 
 /* the rep counter's switch, by "Play each bar" (Infinity Drumming, 2026) */
-#PermutationRepCounterOption {
+#PermutationRepCounterOption,
+#GrooveRepCounterOption {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1801,7 +1811,8 @@ body.selectingNotes #measureContainer .notes-row-container {
   cursor: pointer;
   white-space: nowrap;
 }
-#PermutationRepCounter {
+#PermutationRepCounter,
+#GrooveRepCounter {
   width: 18px;
   height: 18px;
   margin: 0;
