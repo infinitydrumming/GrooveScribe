@@ -303,12 +303,16 @@ swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
   (the functional E2E checks the MIDI). The 32nds grid allows an alphabet only with alike ostinato beats.
 - **A groove's Play each bar and Trade** (`#GrooveOptions` over the music, a groove of 2+ bars, no
   permutation; `PlayEach=2&Trade=1x2a` without `Perm`): `grooveRun()` is the playing order as steps
-  (`{bar, rep, times}`, a trade bar's `{bar, trade, tradeTime}`): `plainPlayedBars()` (below) without the trade bars (the
-  groove's last `grooveTradeBars()`, at most bars − 1), each bar `grooveEach()` times, the trade bars around each;
-  `playedBars()` is its bars, so everything bar by bar follows. The music is written once, a `%%center` heading
-  (`grooveRunHeading`) and `[P:Trade]` over the first trade bar; `class_playing_step` (set where the cursor maps
-  the playing position) drives the rep counter. A groove written out in that order plays byte-identical MIDI
-  (the functional E2E checks it). The alphabet's own `class_trade` / repeats are separate.
+  (`{bar, rep, times, entry}`, a trade bar's `{bar, trade, tradeTime, entry}`): `plainPlayedBars()` (below) without
+  the trade bars (the groove's last `grooveTradeBars()`, at most bars − 1), each bar `grooveEach()` times, the trade
+  bars around each; `playedBars()` is its bars, so everything bar by bar follows. Choosing Trade adds bars
+  (`setGrooveTradeBarCount`: copies of bar 1, no section), fewer drops the last, untouched copies only (written-in
+  ones stay as bars of the groove). Without trade bars the music is written once (a `%%center` heading for Play
+  each); with them, written out as it plays like the alphabet's (`grooveWrittenBars`, `asPlayedGrooveBarABC`
+  with the alphabet's `withRepeatSigns` / `asPlayedLineEnd`, trade bars numbered from `UNNUMBERED_BARS`), the
+  cursor mapped by `grooveAsPlayedMusicPercent`. `class_playing_step` (set where the cursor maps the playing
+  position) drives both and the rep counter. A groove written out in that order plays byte-identical MIDI (the
+  functional E2E checks it). The alphabet's own `class_trade` / repeats are separate.
 - **Sections & the playing order**: `playedBars()` is the order the groove's bars play: the practised
   bars, else the typed form (`Form=ABCA-ABCA`, `#sectionForm` above the bars once there are sections:
   `formOrderBars`, each letter every section with it, its repeats; `%%center Form: A B A C` over the
