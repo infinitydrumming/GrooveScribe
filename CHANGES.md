@@ -11,6 +11,13 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-11-07 — A beat of six 16th-note triplets as a six
+
+- A beat whose two 8ths both need a group of three (a run of six, or notes inside
+  both) is written as one group of six again, as it is read; a three and an 8th note
+  stay as they are (`sextupletInThrees` in `js/abcNotation.js`). What plays is
+  unchanged.
+
 ## 2026-11-07 — Sections A to Z, and numbered (A1, A2...)
 
 - A groove's sections can have any letter from A to Z (A to F before), and a number

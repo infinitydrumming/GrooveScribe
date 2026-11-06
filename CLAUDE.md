@@ -178,7 +178,8 @@ swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
   belongs to its layout's mode (`class_chapter_mode`): a 32nd chapter is off in triplets and back in 32nds.
 - **16th-note triplets in threes** (`sextupletInThrees`): a beat of them (Div=24, or a Mixed / fine-grid `x`
   beat) is written an 8th at a time: `(3:3:3` with rests, an 8th note (`c4`) when only its first note plays,
-  or `z4`. Its two 8ths can then be written at different lengths (4 and 6 units), so the second gets a beat
+  or `z4`; both 8ths in threes make one `(6:6:6` (a run of six reads as a six: the golden master's sextuplet
+  grooves are all that). Its two 8ths can then be written at different lengths (4 and 6 units), so the second gets a beat
   mark of its own: `withCountsOver` (the click's count) lays a count over each 8th alone, as `countOver`
   assumes a beat's written units run evenly (it hung on a click count before). With every note counted
   (`everyNoteCounted`: `Count=1|bold|ghosts`) a sextuplet beat stays all six (`(6:6:6`, no quarter / 8th

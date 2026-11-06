@@ -500,8 +500,8 @@ function fineCounts(fine) {
 // Infinity Drumming, 2026: a beat of 16th-note triplets written as its two 8ths,
 // each a rest, an 8th note, or a group of three 16th-note triplets (rests where
 // nothing plays), so that runs read in threes ("1 a li" and an 8th on the &), not
-// as one group of six with rests. The feet, in a voice of their own, are written
-// along with the hands.
+// as one group of six with rests; both 8ths in threes make one group of six. The
+// feet, in a voice of their own, are written along with the hands.
 function sextupletInThrees(sticking_array, hands, kick_array, kick_stems_up, i, scaler) {
   var every = kick_stems_up ? hands : hands.concat([kick_array]);
   var out = { stickings: ['', ''], hands: '', feet: '' }; // (the stickings 8th by 8th)
@@ -511,14 +511,19 @@ function sextupletInThrees(sticking_array, hands, kick_array, kick_stems_up, i, 
     out.hands += getABCforNote(hands, at, units, scaler) || rest + units;
     if (!kick_stems_up) out.feet += getABCforNote([kick_array], at, units, scaler) || 'x' + units;
   };
+  var threes = [i, i + 6].map(function (half) {
+    return 0 < count_active_notes_in_arrays(every, half + 1, 5); // (notes after its first)
+  });
+  // both 8ths in threes: one group of six, as a beat of 16th-note triplets is read
+  if (threes[0] && threes[1]) out.hands += '(6:6:6';
   for (var half = i; half <= i + 6; half += 6) {
     var si;
-    if (0 == count_active_notes_in_arrays(every, half + 1, 5)) {
+    if (!threes[(half - i) / 6]) {
       for (si = half + 1; si < half + 6; si++) sticking_array[si] = false;
       write(half, 4, 'z'); // an 8th note, or rest
       continue;
     }
-    out.hands += '(3:3:3';
+    if (!(threes[0] && threes[1])) out.hands += '(3:3:3';
     for (var at = half; at < half + 6; at += 2) {
       sticking_array[at + 1] = false;
       write(at, 2, 'z');

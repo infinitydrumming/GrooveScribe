@@ -106,7 +106,7 @@ describe('the fine grid (32nd notes and triplets in one groove)', () => {
   it('writes 32nd notes next to triplets in one bar', () => {
     const hands = music(both).split('V:Hands')[1].split('\n')[2];
     expect(hands).toBe(
-      '[^g1F1]^g1^g1!accent![c1^g1]^g1^g1^g1^g1 (3:3:3^g2^g2^g2(3:3:3!accent![c2^g2]^g2^g2 (3:3:3[^g8F8]^g8^g8 ||'
+      '[^g1F1]^g1^g1!accent![c1^g1]^g1^g1^g1^g1 (6:6:6^g2^g2^g2!accent![c2^g2]^g2^g2 (3:3:3[^g8F8]^g8^g8 ||'
     );
   });
 
