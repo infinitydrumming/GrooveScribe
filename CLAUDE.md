@@ -17,7 +17,7 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1285 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm test`             | Vitest unit suite — **1288 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
 | `npm run test:e2e`     | Playwright golden-master — **140 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
@@ -174,6 +174,13 @@ swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
   (`SWUNG_SLOTS`), and `chapterPicker`: the picker reads "Chapters", its "2: the triplet alphabet" is value 0,
   the groups (so links without `PermChapter` play as before), and there is no "off" or "all". A chosen chapter
   belongs to its layout's mode (`class_chapter_mode`): a 32nd chapter is off in triplets and back in 32nds.
+- **16th-note triplets in threes** (`sextupletInThrees`): a beat of them (Div=24, or a Mixed / fine-grid `x`
+  beat) is written an 8th at a time: `(3:3:3` with rests, an 8th note (`c4`) when only its first note plays,
+  or `z4`. Its two 8ths can then be written at different lengths (4 and 6 units), so the second gets a beat
+  mark of its own: `withCountsOver` (the click's count) lays a count over each 8th alone, as `countOver`
+  assumes a beat's written units run evenly (it hung on a click count before). With every note counted
+  (`everyNoteCounted`: `Count=1|bold|ghosts`) a sextuplet beat stays all six (`(6:6:6`, no quarter / 8th
+  shortcuts) so every count has its note or rest, and `musicLayout` gives its notes 16 (a bar a line).
 - **Note lengths abc2svg can't draw** (5/32 came out as a triple-dotted quarter): the straight-bar
   writer cuts them at the next 8th (else 16th) of the bar, rests after (`drawnLengths`); hands and feet
   only, the stickings voice keeps its `x` spacers.

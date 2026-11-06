@@ -27,6 +27,8 @@ describe('the music layout', () => {
     expect(lineOf(24, desktop, { triplets: true })).toBe(2);
     expect(lineOf(24, desktop, { triplets: true, counted: true })).toBe(2);
     expect(lineOf(8, phone, { oneBar: true })).toBe(1);
+    // every note of 16th triplets counted ("1 a li & a la"): a bar a line
+    expect(lineOf(24, desktop, { triplets: true, counted: true, everyNoteCounted: true })).toBe(1);
   });
 
   it('draws a bar too wide even alone on a wider page, instead of letting it break', () => {

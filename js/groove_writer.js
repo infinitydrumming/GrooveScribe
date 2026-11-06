@@ -135,6 +135,7 @@ import {
   notesOnALine,
   layoutNotes,
   countRoom,
+  everyNoteCounted,
   defineGlyphsOnce,
   engravedMusic,
   UNNUMBERED_BARS,
@@ -4341,6 +4342,7 @@ function GrooveWriter() {
       renderWidth,
       {
         counted: root.myGrooveUtils.showCounts && !root.myGrooveUtils.countSmall,
+        everyNoteCounted: everyNoteCounted(root.myGrooveUtils, class_time_division),
         triplets: usingTriplets(),
         oneBar: class_permutation_type == 'none' && class_notes_per_measure >= 32,
         keepWidth: beatGrid() !== 0,

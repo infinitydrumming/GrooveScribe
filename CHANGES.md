@@ -11,6 +11,16 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-11-07 — 16th-note triplets written in threes
+
+- 16th-note triplets (and sextuplet beats on the Mixed and fine grids) are written an
+  8th note at a time: a group of three, an 8th note when only its first note plays,
+  or an 8th rest, so "1 a li &" reads as three and an 8th, and a run of six as two
+  threes, not one group of six with rests (`sextupletInThrees` in
+  `js/abcNotation.js`). With every note counted each beat keeps its six notes or
+  rests, so no count is crowded over a quarter or an 8th note, and such bars get a
+  line each (`everyNoteCounted`, `js/groove_writer.js`). What plays is unchanged.
+
 ## 2026-11-06 — 1st and 2nd time endings
 
 - In a section of a groove that plays more than once, each bar after its first can be

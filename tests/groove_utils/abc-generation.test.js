@@ -471,12 +471,54 @@ describe('GrooveUtils ABC notation generation', () => {
       expect(abc).toContain('V:Stickings\nx4x4x4 x4x4x4 x4x4x4 x4x4x4 ||\n');
     });
 
-    it('generates a 4/4 groove at Div=24 (16th-note triplets) using the "(6:6:6" grouping', () => {
+    // Infinity Drumming, 2026: each 8th of the beat in threes ("(3:3:3"), as read
+    it('generates a 4/4 groove at Div=24 (16th-note triplets) in groups of three', () => {
       const gd = gu.getGrooveDataFromUrlString(
         '?TimeSig=4/4&Div=24&Tempo=90&Measures=1&H=|xxxxxxxxxxxxxxxxxxxxxxxx|&S=|--------o---------------|&K=|o-----------------------|'
       );
       const abc = gu.createABCFromGrooveData(gd, 900);
-      expect(abc).toContain('(6:6:6[^g2F2]^g2^g2^g2^g2^g2');
+      expect(abc).toContain('(3:3:3[^g2F2]^g2^g2(3:3:3^g2^g2^g2');
+    });
+
+    // Infinity Drumming, 2026: an 8th of 16th-note triplets with only its first note
+    // is an 8th note, an empty one an 8th rest; every note counted keeps the six
+    describe('16th-note triplets, an 8th at a time', () => {
+      const hands = (snare, extra = '') =>
+        gu
+          .createABCFromGrooveData(
+            gu.getGrooveDataFromUrlString(
+              '?TimeSig=4/4&Div=24&Tempo=90&Measures=1&H=|------------------------|' +
+                `&S=|${snare}|&K=|------------------------|${extra}`
+            ),
+            900
+          )
+          .split('V:Hands stem=up\n%%voicemap drum\n')[1]
+          .split('\n')[0];
+
+      it('writes "1 a li &" as three and an 8th, a run of six as two threes', () => {
+        expect(hands('OOOO--' + 'O-----' + 'O--O--' + 'OOOOOO')).toBe(
+          '(3:3:3!accent!c2!accent!c2!accent!c2!accent!c4 !accent!c8 !accent!c4!accent!c4 ' +
+            '(3:3:3!accent!c2!accent!c2!accent!c2(3:3:3!accent!c2!accent!c2!accent!c2 ||'
+        );
+      });
+
+      it('rests in an 8th of three, an 8th rest for an empty 8th', () => {
+        expect(hands('O-O---' + '-OO-O-' + '---OOO' + 'O--OO-')).toBe(
+          '(3:3:3!accent!c2z2!accent!c2z4 (3:3:3z2!accent!c2!accent!c2(3:3:3z2!accent!c2z2 ' +
+            'z4(3:3:3!accent!c2!accent!c2!accent!c2 !accent!c4(3:3:3!accent!c2!accent!c2z2 ||'
+        );
+      });
+
+      it('with every note counted, writes all six, so each count has its note or rest', () => {
+        const counted = hands('OOOO--' + 'O-----' + 'O--O--' + 'OOOOOO', '&Count=1');
+        expect(counted.match(/\(6:6:6/g)).toHaveLength(4);
+        expect(counted).not.toContain('(3:3:3');
+        expect(counted).toContain('(6:6:6!accent!c2z2z2z2z2z2'); // (beat 2: not a quarter note)
+        // counting only the rhythm, it reads in threes
+        expect(hands('OOOO--' + 'O-----' + 'O--O--' + 'OOOOOO', '&Count=rhythm')).toContain(
+          '(3:3:3!accent!c2!accent!c2!accent!c2!accent!c4'
+        );
+      });
     });
 
     it('joins multiple measures with a single bar "|" and ends the voice with "||"', () => {

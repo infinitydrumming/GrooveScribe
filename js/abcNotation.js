@@ -497,6 +497,36 @@ function fineCounts(fine) {
   return counted;
 }
 
+// Infinity Drumming, 2026: a beat of 16th-note triplets written as its two 8ths,
+// each a rest, an 8th note, or a group of three 16th-note triplets (rests where
+// nothing plays), so that runs read in threes ("1 a li" and an 8th on the &), not
+// as one group of six with rests. The feet, in a voice of their own, are written
+// along with the hands.
+function sextupletInThrees(sticking_array, hands, kick_array, kick_stems_up, i, scaler) {
+  var every = kick_stems_up ? hands : hands.concat([kick_array]);
+  var out = { stickings: ['', ''], hands: '', feet: '' }; // (the stickings 8th by 8th)
+  var write = function (at, units, rest) {
+    out.stickings[at < i + 6 ? 0 : 1] +=
+      getABCforNote([sticking_array], at, units, scaler) || 'x' + units;
+    out.hands += getABCforNote(hands, at, units, scaler) || rest + units;
+    if (!kick_stems_up) out.feet += getABCforNote([kick_array], at, units, scaler) || 'x' + units;
+  };
+  for (var half = i; half <= i + 6; half += 6) {
+    var si;
+    if (0 == count_active_notes_in_arrays(every, half + 1, 5)) {
+      for (si = half + 1; si < half + 6; si++) sticking_array[si] = false;
+      write(half, 4, 'z'); // an 8th note, or rest
+      continue;
+    }
+    out.hands += '(3:3:3';
+    for (var at = half; at < half + 6; at += 2) {
+      sticking_array[at + 1] = false;
+      write(at, 2, 'z');
+    }
+  }
+  return out;
+}
+
 function snare_HH_kick_ABC_for_triplets(
   sticking_array,
   HH_array,
@@ -513,7 +543,8 @@ function snare_HH_kick_ABC_for_triplets(
   numberOfMeasuresPerLine,
   beatPlan,
   beatMarks,
-  fineBeats
+  fineBeats,
+  everyNoteCounted
 ) {
   var scaler = 1; // we are always in 48 notes here, and the ABC needs to think we are in 48 since the specified division is 1/32
   // Each beat is 12 slots (a quarter note), or in x/8 bars of 16th triplets and
@@ -617,6 +648,19 @@ function snare_HH_kick_ABC_for_triplets(
         if (kick_stems_up) kick_voice_string = '';
         skip_adding_more_notes = true;
         i += longTriplet.span - 1;
+      } else if (
+        everyNoteCounted &&
+        beat == 12 &&
+        (beatPlan
+          ? beatPlan.slotsPerNoteAt(i % notes_per_measure, Math.floor(i / notes_per_measure))
+          : 48 / sub_division) == 2
+      ) {
+        // 16th-note triplets with every note counted: the beat's six notes or rests,
+        // so each count has its own (an 8th or a quarter note would crowd them)
+        faker_sub_division = 24;
+        end_of_group = 2;
+        grouping_size_for_rests = 2;
+        hh_snare_voice_string += '(6:6:6';
       } else if (beat == 6) {
         // an x/8 bar's 8th note (Infinity Drumming, 2026): a rest, one 8th note,
         // two 16ths, or a 16th-note triplet (or 32nd-note sextuplet)
@@ -836,15 +880,37 @@ function snare_HH_kick_ABC_for_triplets(
           notes_in_triplet_group = faker_sub_division / 4; // 4 beats
         }
 
-        // creates the 3, 6 or 12 over the note grouping
-        // looks like (3:3:3 or (6:6:6 or (12:12:12
-        hh_snare_voice_string +=
-          '(' +
-          notes_in_triplet_group +
-          ':' +
-          notes_in_triplet_group +
-          ':' +
-          notes_in_triplet_group;
+        if (faker_sub_division == 24 && beat == 12) {
+          // 16th-note triplets: each 8th of the beat on its own, so they read in threes
+          var threes = sextupletInThrees(
+            sticking_array,
+            all_drum_array_of_array,
+            kick_array,
+            kick_stems_up,
+            i,
+            scaler
+          );
+          // (each 8th marked as a beat of its own: its two can be written at different
+          // lengths, and a count laid over them follows each, see withCountsOver)
+          stickings_voice_string += threes.stickings[0];
+          if (beatMarks) beatMarks.push({ slot: i + 6, at: stickings_voice_string.length });
+          stickings_voice_string += threes.stickings[1];
+          hh_snare_voice_string += threes.hands;
+          if (kick_stems_up) kick_voice_string = '';
+          else kick_voice_string += threes.feet;
+          skip_adding_more_notes = true;
+          i += 11; // skip past to the next beat
+        } else {
+          // creates the 3, 6 or 12 over the note grouping
+          // looks like (3:3:3 or (6:6:6 or (12:12:12
+          hh_snare_voice_string +=
+            '(' +
+            notes_in_triplet_group +
+            ':' +
+            notes_in_triplet_group +
+            ':' +
+            notes_in_triplet_group;
+        }
       }
     }
 
@@ -1381,6 +1447,12 @@ function musicPageWidth(renderWidth) {
   return Math.floor(Math.min(Math.max(renderWidth, 400), 3000) * 0.75);
 }
 
+// a note's page: a count over it needs more, every note of 16th triplets counted most
+function notePageWidth(how) {
+  if (how.everyNoteCounted) return 16;
+  return how.counted ? 10 : 8;
+}
+
 /**
  * Infinity Drumming, 2026: how many bars go on a line of music, and how wide to
  * draw the music. A note needs about 8px of the page (10 with a count of 16px
@@ -1392,15 +1464,16 @@ function musicPageWidth(renderWidth) {
  * of the page (see countRoom), so its two-letter counts keep apart on a phone.
  * @param {number} notesPerBar  the most notes a bar has at the note setting
  * @param {number} renderWidth
- * @param {{counted?: boolean, triplets?: boolean, oneBar?: boolean, keepWidth?: boolean, countRoom?: number}} how
- *   counted: a count over the notes (in 16px letters); oneBar: one bar a line
+ * @param {{counted?: boolean, triplets?: boolean, oneBar?: boolean, keepWidth?: boolean, countRoom?: number, everyNoteCounted?: boolean}} how
+ *   counted: a count over the notes (in 16px letters); everyNoteCounted: every note
+ *   of 16th-note triplets counted ("1 a li & a la", about 16px a note); oneBar: one bar a line
  *   anyway; keepWidth: never a wider page for the notes (bars beat by beat, whose
  *   notes vary)
  * @returns {{barsPerLine: number, renderWidth: number, bar: number}}  bar: the
  *   page a bar needs at least
  */
 export function musicLayout(notesPerBar, renderWidth, how) {
-  var perNote = (how.counted ? 10 : 8) * (how.triplets ? 1.1 : 1);
+  var perNote = notePageWidth(how) * (how.triplets ? 1.1 : 1);
   var bar = notesPerBar * perNote;
   var page = musicPageWidth(renderWidth);
   var barsPerLine = how.oneBar || 2 * bar > page ? 1 : 2;
@@ -1411,6 +1484,18 @@ export function musicLayout(notesPerBar, renderWidth, how) {
     renderWidth: needs > page ? Math.ceil(needs / 0.75) : renderWidth,
     bar: barsPerLine == 1 ? Math.max(bar, how.countRoom || 0) : bar,
   };
+}
+
+/**
+ * Infinity Drumming, 2026: every note of 16th-note triplets counted ("1 a li & a la"
+ * in 16px letters, every syllable over its own note or rest): they need about
+ * twice a note's usual room (see musicLayout).
+ * @param {Object} gu  its showCounts and countMode
+ * @param {number} division  the note setting
+ */
+export function everyNoteCounted(gu, division) {
+  if (!gu.showCounts || division != 24) return false;
+  return ['all', 'bold', 'ghosts'].indexOf(gu.countMode || 'all') >= 0;
 }
 
 // a quarter note of 32nd notes with a count over them ("1 a li bi & a la ba", in
@@ -1808,7 +1893,8 @@ export function create_ABC_from_snare_HH_kick_arrays(
       numberOfMeasuresPerLine,
       beatPlan,
       beatMarks,
-      fineBeats
+      fineBeats,
+      ['all', 'bold', 'ghosts'].indexOf(count.mode) >= 0
     );
   } else {
     abc = snare_HH_kick_ABC_for_quads(
@@ -2139,6 +2225,7 @@ function grooveDataABC(gu, myGrooveData, renderWidth) {
     renderWidth,
     {
       counted: gu.showCounts && !gu.countSmall,
+      everyNoteCounted: everyNoteCounted(gu, myGrooveData.timeDivision),
       triplets: is_triplet_division,
       oneBar: myGrooveData.notesPerMeasure >= 32,
       keepWidth: isBeatByBeat(myGrooveData),
@@ -2314,6 +2401,7 @@ function createMixedMeterABC(gu, myGrooveData, renderWidth) {
     renderWidth,
     {
       counted: gu.showCounts && !gu.countSmall,
+      everyNoteCounted: everyNoteCounted(gu, gd.timeDivision),
       triplets: triplets,
       oneBar: gd.timeDivision >= 32,
       keepWidth: isBeatByBeat(gd),

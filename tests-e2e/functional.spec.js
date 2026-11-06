@@ -170,6 +170,10 @@ test.describe('music lines on a phone', () => {
 
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.evaluate(() => window.myGrooveWriter.refresh_ABC());
+    // every note counted ("1 a li & a la"): a bar a line on a desktop too, for the
+    // counts' room (Infinity Drumming, 2026); without the count, both on one line
+    expect(await musicLines(page)).toBe(2);
+    await loadGroove(page, grooveUrl(SEXTUPLETS.replace('&Count=1', '')));
     expect(await musicLines(page)).toBe(1);
   });
 });
