@@ -11,6 +11,15 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-11-06 — The groove page's trade bars, as the alphabet's
+
+- Choosing "Trade" on the groove page now adds the trade bars after the groove's
+  bars (copies of its first bar), instead of making its last bars the trade bars;
+  fewer trade bars removes the last ones if still untouched copies, and keeps any
+  written in as bars of the groove. With trade bars the music is written out as it
+  plays, as the alphabet's: the trade bars before or after every bar, each bar
+  between repeat signs with how many times under it (`js/groove_writer.js`).
+
 ## 2026-11-05 — Play each bar and Trade on the groove page
 
 - A groove of two or more bars has the alphabet's "Play each bar" (×1 to ×16), rep

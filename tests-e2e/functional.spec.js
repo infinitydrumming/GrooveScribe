@@ -306,10 +306,13 @@ test.describe('practising some bars', () => {
   });
 
   // Infinity Drumming, 2026: the alphabet's "Play each bar" and "Trade" on the groove page
-  test('each bar more than once, the last bar traded, plays as the bars written out would', async ({
+  test('each bar more than once, a trade bar added after each, plays as the bars written out would', async ({
     page,
   }) => {
-    await loadGroove(page, grooveUrl(groove([0, 0, 3, 1, 1, 3, 2, 2, 3])));
+    const inLink = (name) =>
+      page.evaluate((param) => new URLSearchParams(location.search).get(param), name);
+    // a trade bar starts as a copy of bar 1 (bars[0])
+    await loadGroove(page, grooveUrl(groove([0, 0, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0])));
     const writtenOut = await playing(page);
 
     await loadGroove(page, grooveUrl(groove([0, 1, 2, 3])));
@@ -317,23 +320,36 @@ test.describe('practising some bars', () => {
     await page.selectOption('#GrooveTradeBars', '1');
     await page.selectOption('#GrooveTradeWhere', 'after');
     await expect.poll(() => page.evaluate(() => location.search)).toContain('&PlayEach=2&Trade=1a');
+    expect(await inLink('Measures')).toBe('5'); // (added: the groove's bars all kept)
     await expect(page.locator('.staff-container.tradeBar')).toHaveCount(1);
-    await expect(page.locator('#staff-container4')).toHaveClass(/tradeBar/);
+    await expect(page.locator('#staff-container5')).toHaveClass(/tradeBar/);
     expect(await playing(page)).toBe(writtenOut);
+    // the music written out as it plays: each bar ×2 between repeat signs, the trade bar after
     const abc = await page.locator('#ABCsource').inputValue();
-    expect(abc).toContain('%%center Each bar ×2, then the trade bar\n');
-    expect(abc.match(/\[P:Trade\]/g)).toHaveLength(1);
+    expect(abc.match(/\[P:Trade\]/g)).toHaveLength(4);
+    expect(abc.match(/"_×2"/g)).toHaveLength(4);
+    expect(abc).not.toContain('%%center');
+    // the cursor follows it: the 6th bar playing (bar 2's trade) is the music's 4th
+    const music = await page.evaluate(() =>
+      window.myGrooveWriter.myGrooveUtils.percentForSheetMusic(5.5 / 12)
+    );
+    expect(music * 8).toBeCloseTo(3.5, 5);
+    // off: the trade bar, still the copy it started as, goes
+    await page.selectOption('#GrooveTradeBars', '0');
+    await expect.poll(() => inLink('Measures')).toBe('4');
+    expect(await inLink('Trade')).toBeNull();
 
-    // from a link: the trade bar twice before each bar, with the bars practised
+    // from a link: the last bar traded twice before each bar, with the bars practised
     await loadGroove(page, grooveUrl(groove([3, 3, 1, 3, 3, 2])));
     const practised = await playing(page);
     await loadGroove(page, grooveUrl(groove([0, 1, 2, 3]) + '&Trade=1x2&PlayBars=2-4'));
     await expect(page.locator('#GrooveTradeTimes')).toHaveValue('2');
     expect(await playing(page)).toBe(practised);
 
-    // off again: the link without them, a bar of its own no longer marked
+    // off again: a trade bar with notes of its own stays, as a bar of the groove
     await page.selectOption('#GrooveTradeBars', '0');
-    await expect.poll(() => page.evaluate(() => location.search)).not.toContain('Trade=');
+    await expect.poll(() => inLink('Trade')).toBeNull();
+    expect(await inLink('Measures')).toBe('4');
     await expect(page.locator('.staff-container.tradeBar')).toHaveCount(0);
   });
 });
