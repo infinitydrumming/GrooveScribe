@@ -10,6 +10,9 @@ import {
   formToUrl,
   formFromUrl,
   MAX_FORM_LETTERS,
+  SECTION_LETTERS,
+  MAX_SECTION_NUMBER,
+  sectionName,
   sectionEndings,
   endingsToUrl,
   endingsFromUrl,
@@ -46,10 +49,29 @@ describe('sections', () => {
     expect(sectionsToUrl([], [], 4)).toBe('');
     expect(sectionsFromUrl('A1-2x4,B3-4x2', 5)).toEqual({ letters: letters, repeats: repeats });
     // out of range, unknown or too many repeats: kept inside what there is
-    expect(sectionsFromUrl('a2-9x99,Z1,B', 3)).toEqual({
-      letters: ['', 'A', 'A'],
+    expect(sectionsFromUrl('a2-9x99,Z1,B,!1', 3)).toEqual({
+      letters: ['Z', 'A', 'A'],
       repeats: [1, 16, 16],
     });
+  });
+
+  // Infinity Drumming, 2026: any letter, and a number for versions of a section
+  it('have names from A to Z, numbered for versions (A1, A2...)', () => {
+    expect(SECTION_LETTERS).toHaveLength(26);
+    expect(sectionName('a2')).toBe('A2');
+    expect(sectionName('Z')).toBe('Z');
+    expect(sectionName('A' + MAX_SECTION_NUMBER)).toBe('A12');
+    expect(sectionName('A13')).toBe('');
+    expect(sectionName('A0')).toBe('');
+    expect(sectionName('1')).toBe('');
+    // a numbered section's name ends with ":" in a link; a letter's links are as before
+    const names = ['A1', 'A1', 'M', 'A2'];
+    const times = [2, 2, 1, 1];
+    expect(sectionsToUrl(names, times, 4)).toBe('A1:1-2x2,M3,A2:4');
+    expect(sectionsFromUrl('A1:1-2x2,M3,A2:4', 4)).toEqual({ letters: names, repeats: times });
+    expect(formOrderBars('A1, M, A2, A1', names, times, 4).map((bar) => bar + 1)).toEqual([
+      1, 2, 1, 2, 3, 4, 1, 2, 1, 2,
+    ]);
   });
 });
 
@@ -108,8 +130,18 @@ describe('a form', () => {
 
   it('is tidied: its letters in capitals, a space between groups', () => {
     expect(tidyForm(' abca   abca! ')).toBe('ABCA ABCA');
-    expect(tidyForm('a-b x 2')).toBe('AB');
+    expect(tidyForm('a-b ! 2')).toBe('AB');
     expect(tidyForm('A'.repeat(40))).toHaveLength(MAX_FORM_LETTERS);
+  });
+
+  it('lists numbered sections one by one, a comma between them', () => {
+    expect(tidyForm('a1 a2 b a1')).toBe('A1, A2, B, A1');
+    expect(tidyForm('A1,A2,B')).toBe('A1, A2, B');
+    expect(tidyForm('AB2C')).toBe('A, B2, C');
+    expect(formToUrl('A1, A2, B')).toBe('A1-A2-B');
+    expect(formFromUrl('A1-A2-B')).toBe('A1, A2, B');
+    // letters as before
+    expect(formToUrl('ABCA ABCA')).toBe('ABCA-ABCA');
   });
 
   it('plays each letter its section, as many times as it says', () => {

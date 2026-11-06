@@ -13,7 +13,24 @@
 // play only then. Links: "Endings=8:1,9-10:2" (bars, the time), bars from 1.
 
 /** The letters a section can have. */
-export var SECTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
+export var SECTION_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+/**
+ * A section's name is its letter, and can have a number too, for versions of a
+ * section (A1, A2, A3...): from 1 to this.
+ */
+export var MAX_SECTION_NUMBER = 12;
+
+/**
+ * A section's name as typed, tidied ("a2" → "A2"), '' when it isn't one.
+ * @returns {string}
+ */
+export function sectionName(text) {
+  var name = /^([A-Za-z])(\d{0,2})$/.exec(String(text || '').trim());
+  if (!name) return '';
+  var number = name[2] ? parseInt(name[2], 10) : 0;
+  if (name[2] && !(number >= 1 && number <= MAX_SECTION_NUMBER)) return '';
+  return name[1].toUpperCase() + (number ? String(number) : '');
+}
 /** The most times a section plays before the next. */
 export var MAX_SECTION_REPEATS = 16;
 
@@ -137,12 +154,16 @@ export function endingsFromUrl(text, count) {
   return endings;
 }
 
-/** "Sections=" for a link ('' with none): "A1-2x4,B3-4x2". */
+/**
+ * "Sections=" for a link ('' with none): "A1-2x4,B3-4x2", a numbered section's
+ * name followed by ":" ("A2:5-6x2").
+ */
 export function sectionsToUrl(letters, repeats, count) {
   return sectionRuns(letters, repeats, count)
     .map(function (run) {
       var bars = run.from == run.to ? String(run.from + 1) : run.from + 1 + '-' + (run.to + 1);
-      return run.letter + bars + (run.repeats > 1 ? 'x' + run.repeats : '');
+      var name = run.letter.length > 1 ? run.letter + ':' : run.letter;
+      return name + bars + (run.repeats > 1 ? 'x' + run.repeats : '');
     })
     .join(',');
 }
@@ -161,36 +182,73 @@ export function sectionsFromUrl(text, count) {
   String(text || '')
     .split(',')
     .forEach(function (part) {
-      var run = /^([A-Fa-f])(\d+)(?:-(\d+))?(?:x(\d+))?$/.exec(part.trim());
-      if (!run) return;
+      var run =
+        /^([A-Za-z]\d{0,2}):(\d+)(?:-(\d+))?(?:x(\d+))?$/.exec(part.trim()) ||
+        /^([A-Za-z])(\d+)(?:-(\d+))?(?:x(\d+))?$/.exec(part.trim());
+      var name = run ? sectionName(run[1]) : '';
+      if (!name) return;
       var from = parseInt(run[2], 10) - 1;
       var to = run[3] ? parseInt(run[3], 10) - 1 : from;
       for (var bar = Math.max(from, 0); bar <= Math.min(to, count - 1); bar++) {
-        letters[bar] = run[1].toUpperCase();
+        letters[bar] = name;
         repeats[bar] = wholeRepeats(run[4] || 1);
       }
     });
   return { letters: letters, repeats: repeats };
 }
 
-/** The most letters a form has. */
+/** The most sections a form has. */
 export var MAX_FORM_LETTERS = 32;
 
+// A form as typed: its sections in groups, and whether it is a list (numbered
+// sections, or commas typed: every section on its own) or letters run together
+// with a space between groups ("ABCA ABCA"); MAX_FORM_LETTERS sections at most.
+function parsedForm(text) {
+  var typed = String(text || '').toUpperCase();
+  var groups = [];
+  var count = 0;
+  typed.split(/[\s,]+/).forEach(function (part) {
+    var names = (part.match(/[A-Z]\d*/g) || []).map(sectionName).filter(Boolean);
+    names = names.slice(0, Math.max(0, MAX_FORM_LETTERS - count));
+    count += names.length;
+    if (names.length) groups.push(names);
+  });
+  var names = [].concat.apply([], groups);
+  var listed =
+    typed.indexOf(',') >= 0 ||
+    names.some(function (name) {
+      return name.length > 1;
+    });
+  return { groups: listed ? names.map((name) => [name]) : groups, listed: listed };
+}
+
 /**
- * A form as typed, tidied: its section letters in capitals, a space between
- * groups ("abca abca" → "ABCA ABCA"), MAX_FORM_LETTERS at most.
+ * A form's sections in its groups ("ABCA ABCA": two groups; a list, "A1, A2, B":
+ * one each).
+ * @returns {string[][]}
+ */
+export function formGroups(text) {
+  return parsedForm(text).groups;
+}
+
+/**
+ * A form as typed, tidied: its sections in capitals, a space between groups
+ * ("abca abca" → "ABCA ABCA"), or with numbered sections a comma between them
+ * ("a1 a2 b" → "A1, A2, B").
  * @returns {string}
  */
 export function tidyForm(text) {
-  var count = 0;
-  return String(text || '')
-    .toUpperCase()
-    .replace(/[^A-F\s]/g, '')
-    .replace(/[A-F]/g, function (letter) {
-      return ++count > MAX_FORM_LETTERS ? '' : letter;
+  var form = parsedForm(text);
+  return form.groups
+    .map(function (group) {
+      return group.join('');
     })
-    .replace(/\s+/g, ' ')
-    .trim();
+    .join(form.listed ? ', ' : ' ');
+}
+
+// a form's sections in order
+function formNames(form) {
+  return [].concat.apply([], formGroups(form));
 }
 
 /**
@@ -203,22 +261,23 @@ export function formOrderBars(form, letters, repeats, count, endings) {
   var runs = sectionRuns(letters, repeats, count);
   var inEffect = sectionEndings(letters, repeats, endings, count);
   var bars = [];
-  tidyForm(form)
-    .replace(/ /g, '')
-    .split('')
-    .forEach(function (letter) {
-      runs.forEach(function (run) {
-        if (run.letter != letter) return;
-        for (var time = 0; time < run.repeats; time++)
-          bars = bars.concat(sectionTimeBars(run, time, inEffect));
-      });
+  formNames(form).forEach(function (letter) {
+    runs.forEach(function (run) {
+      if (run.letter != letter) return;
+      for (var time = 0; time < run.repeats; time++)
+        bars = bars.concat(sectionTimeBars(run, time, inEffect));
     });
+  });
   return bars;
 }
 
-/** "Form=" for a link: "ABCA-ABCA" ('' with none). */
+/** "Form=" for a link: "ABCA-ABCA", "A1-A2-B" ('' with none). */
 export function formToUrl(form) {
-  return tidyForm(form).replace(/ /g, '-');
+  return formGroups(form)
+    .map(function (group) {
+      return group.join('');
+    })
+    .join('-');
 }
 
 /** A link's "Form=" as a form. */

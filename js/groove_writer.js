@@ -118,6 +118,8 @@ import {
   tidyForm,
   formOrderBars,
   sectionEndings,
+  sectionName,
+  formGroups,
 } from './sections.js';
 import * as _blocks from './noteBlocks.js';
 import * as _view from './viewHtml.js';
@@ -385,7 +387,8 @@ function GrooveWriter() {
     // a section, or sections, by name ("Section B")
     var text = practiseBarsText();
     var which = (bars.length > 1 ? 'Bars ' : 'Bar ') + _perm.barListToText(bars);
-    if (/^[A-F](, [A-F])*$/.test(text)) which = (text.length > 1 ? 'Sections ' : 'Section ') + text;
+    if (/^[A-Z]\d*(, [A-Z]\d*)*$/.test(text))
+      which = (text.indexOf(',') > 0 ? 'Sections ' : 'Section ') + text;
     return '%%measurenb 1\nP:' + which + '\n';
   }
   function barSigLabel(bar) {
@@ -4981,10 +4984,18 @@ function GrooveWriter() {
   // the form over the music ("Form: A B A C"), '' with none
   function formHeading() {
     if (practisedBars().length || !formOrder().length) return '';
-    var groups = class_section_form.split(' ').map(function (group) {
-      return group.split('').join(' ');
+    var groups = formGroups(class_section_form);
+    var listed = groups.every(function (group) {
+      return group.length == 1;
     });
-    return '%%center Form: ' + groups.join('   |   ') + '\n';
+    var text = listed
+      ? groups.join(' ')
+      : groups
+          .map(function (group) {
+            return group.join(' ');
+          })
+          .join('   |   ');
+    return '%%center Form: ' + text + '\n';
   }
 
   // set every bar of a section to its repeats
@@ -4994,6 +5005,17 @@ function GrooveWriter() {
 
   // a bar's section letter chosen: it joins the section before it (or after it)
   // with that letter, taking its repeats, or starts one played once
+  // a bar's section letter chosen (keeping its number), or its number (A1, A2...)
+  root.barSectionLetterChange = function (measureNum, letter) {
+    var number = String(class_bar_sections[measureNum - 1] || '').slice(1);
+    root.barSectionChange(measureNum, letter ? letter + number : '');
+  };
+
+  root.barSectionNumberChange = function (measureNum, number) {
+    var letter = String(class_bar_sections[measureNum - 1] || '').charAt(0);
+    if (letter) root.barSectionChange(measureNum, letter + (number || ''));
+  };
+
   root.barSectionChange = function (measureNum, letter) {
     var bar = measureNum - 1;
     var before = currentSectionRuns().find(function (r) {
@@ -7204,19 +7226,40 @@ function GrooveWriter() {
     return _perm.parseBarList(withSectionBars(class_practise_bars), class_number_of_measures);
   }
 
-  // the box's sections ("B") as their bars ("3,4"), so "B" practises section B
+  // the box's sections ("B", "A2") as their bars ("3,4"), so "B" practises section
+  // B; a letter of numbered sections only ("A" with A1, A2) practises them all
   function withSectionBars(text) {
-    return String(text || '').replace(/[A-Fa-f]/g, function (letter) {
-      var bars = barsOfSection(class_bar_sections, letter.toUpperCase(), class_number_of_measures);
+    return String(text || '').replace(/[A-Za-z]\d*/g, function (typed) {
+      var name = boxSectionName(typed);
+      if (!name) return ' ' + typed.slice(1) + ' '; // (a letter with no section: its number a bar)
       return (
         ',' +
-        bars
+        barsOfName(name)
           .map(function (bar) {
             return bar + 1;
           })
           .join(',') +
-        ','
+        ',' +
+        typed.slice(name.length) // (a section's letter, then a bar: "B2" with no B2)
       );
+    });
+  }
+
+  // a section the box names: its name as typed when there is one ("A2"), else
+  // its letter's ("A"), '' for neither
+  function boxSectionName(typed) {
+    var name = sectionName(typed);
+    if (name && barsOfName(name).length) return name;
+    var letter = typed.charAt(0).toUpperCase();
+    return barsOfName(letter).length ? letter : '';
+  }
+
+  // a section's bars, or a letter's numbered sections' (A: A1, A2...) if no A
+  function barsOfName(name) {
+    var bars = barsOfSection(class_bar_sections, name, class_number_of_measures);
+    if (bars.length || name.length > 1) return bars;
+    return allBars().filter(function (bar) {
+      return String(class_bar_sections[bar] || '').charAt(0) == name;
     });
   }
 
@@ -7224,13 +7267,11 @@ function GrooveWriter() {
   // its bars ("B, 1-3, 6")
   function tidyPractiseBars(text) {
     var letters = [];
-    String(text || '').replace(/[A-Fa-f]/g, function (letter) {
-      letter = letter.toUpperCase();
-      if (letters.indexOf(letter) < 0 && class_bar_sections.indexOf(letter) >= 0)
-        letters.push(letter);
-      return '';
+    var numbers = String(text || '').replace(/[A-Za-z]\d*/g, function (typed) {
+      var name = boxSectionName(typed);
+      if (name && letters.indexOf(name) < 0) letters.push(name);
+      return ' ' + typed.slice(name ? name.length : 1) + ' ';
     });
-    var numbers = String(text || '').replace(/[A-Fa-f]/g, ' ');
     var bars = _perm.barListToText(_perm.parseBarList(numbers, class_number_of_measures));
     return letters.concat(bars ? [bars] : []).join(', ');
   }

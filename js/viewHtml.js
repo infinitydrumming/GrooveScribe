@@ -9,7 +9,7 @@
 
 import { groupAt } from './beatNotes.js';
 import { constant_MAX_MEASURES } from './constants.js';
-import { SECTION_LETTERS, MAX_SECTION_REPEATS } from './sections.js';
+import { SECTION_LETTERS, MAX_SECTION_REPEATS, MAX_SECTION_NUMBER } from './sections.js';
 
 // Whether the note at `slot` (from 0) ends a group on the grid: every
 // ctx.noteGrouping notes, or at ctx.groupEnds (the classic x/8 groups,
@@ -768,37 +768,40 @@ function barTimeSigButtonHTML(baseindex, timeSig) {
 }
 
 /**
- * A bar's section (Infinity Drumming, 2026): its letter, chosen from a list, and on
- * a section's first bar how many times the section plays (see sections.js); on its
- * other bars, when it repeats, which time through it the bar plays (an ending).
+ * A bar's section (Infinity Drumming, 2026): its letter, chosen from a list, and a
+ * number for versions of a section (A1, A2...); on a section's first bar how many
+ * times the section plays (see sections.js); on its other bars, when it repeats,
+ * which time through it the bar plays (an ending).
  *
  * @param {number} baseindex  The bar, starting at 1.
  * @param {{letter: string, repeats: number, first: boolean, ending?: number}} section
  * @returns {string}
  */
 export function barSectionHTML(baseindex, section) {
+  var letter = section.letter.charAt(0);
   var html =
     '<span class="barSection" id="barSection' +
     baseindex +
     '"><select class="barSectionSelect' +
-    (section.letter ? '' : ' none') +
-    '" title="The section this bar is in: bars in a row with the same letter are one section"' +
+    (letter ? '' : ' none') +
+    '" title="The section this bar is in: bars in a row with the same letter (and number) are one section"' +
     ' aria-label="Section of bar ' +
     baseindex +
-    '" onchange="myGrooveWriter.barSectionChange(' +
+    '" onchange="myGrooveWriter.barSectionLetterChange(' +
     baseindex +
     ', this.value)"><option value="">Section</option>';
-  SECTION_LETTERS.forEach(function (letter) {
+  SECTION_LETTERS.forEach(function (each) {
     html +=
       '<option value="' +
-      letter +
+      each +
       '"' +
-      (letter == section.letter ? ' selected' : '') +
+      (each == letter ? ' selected' : '') +
       '>' +
-      letter +
+      each +
       '</option>';
   });
   html += '</select>';
+  if (letter) html += sectionNumberHTML(baseindex, letter, section.letter.slice(1));
   if (section.letter && section.first) {
     html +=
       '<select class="sectionRepeatsSelect" title="How many times section ' +
@@ -822,6 +825,35 @@ export function barSectionHTML(baseindex, section) {
   if (section.letter && !section.first && section.repeats > 1)
     html += endingSelectHTML(baseindex, section);
   return html + '</span>';
+}
+
+// a section's number: none, or 1, 2... (A1, A2: versions of a section)
+function sectionNumberHTML(baseindex, letter, number) {
+  var html =
+    '<select class="sectionNumberSelect' +
+    (number ? '' : ' none') +
+    '" title="A number for versions of a section: ' +
+    letter +
+    '1, ' +
+    letter +
+    '2..." aria-label="Number of bar ' +
+    baseindex +
+    '\'s section" onchange="myGrooveWriter.barSectionNumberChange(' +
+    baseindex +
+    ', this.value)"><option value="">' +
+    letter +
+    ' \u2013</option>';
+  for (var n = 1; n <= MAX_SECTION_NUMBER; n++)
+    html +=
+      '<option value="' +
+      n +
+      '"' +
+      (String(n) == number ? ' selected' : '') +
+      '>' +
+      letter +
+      n +
+      '</option>';
+  return html + '</select>';
 }
 
 var ORDINALS = ['1st', '2nd', '3rd'];

@@ -236,8 +236,8 @@
 					<!-- the order the sections play (Infinity Drumming, 2026); shown once there are sections -->
 					<div id="sectionFormBox" style="display: none">
 						<label for="sectionForm">Form</label>
-						<input id="sectionForm" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="60" placeholder="e.g. ABAC" onchange="myGrooveWriter.sectionFormChange(this.value);" onkeydown="if (event.key === 'Enter') this.blur();">
-						<span class="sectionFormHint">the order the sections play, e.g. <b>ABAC</b> or <b>ABCA ABCA</b>; empty: in order</span>
+						<input id="sectionForm" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="160" placeholder="e.g. ABAC, or A1, A2, B" onchange="myGrooveWriter.sectionFormChange(this.value);" onkeydown="if (event.key === 'Enter') this.blur();">
+						<span class="sectionFormHint">the order the sections play, e.g. <b>ABAC</b>, <b>ABCA ABCA</b> or <b>A1, A2, B, A1</b>; empty: in order</span>
 					</div>
 					<!-- The clickable note grid is built by js/main.js (was document.write). -->
 					<div id="measureContainer"></div>

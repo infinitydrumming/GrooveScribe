@@ -11,6 +11,15 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-11-07 — Sections A to Z, and numbered (A1, A2...)
+
+- A groove's sections can have any letter from A to Z (A to F before), and a number
+  for versions of a section, A1 to A12, chosen with a chip beside the letter
+  (`js/sections.js`, `js/viewHtml.js`, `js/groove_writer.js`). The form takes them
+  ("A1, A2, B, A1"), and so does Practise bars ("A2"; "A" with numbered A sections
+  practises them all). Links keep a letter's sections as before ("A1-2x4") and write
+  a numbered one with a colon ("A2:5-6x2", `Form=A1-A2-B`); old links read the same.
+
 ## 2026-11-07 — 16th-note triplets written in threes
 
 - 16th-note triplets (and sextuplet beats on the Mixed and fine grids) are written an

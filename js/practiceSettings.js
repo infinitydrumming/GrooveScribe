@@ -173,7 +173,7 @@ function barsFromUrl(text, ordered) {
       .replace(/[_,]+/g, ' ')
       .trim();
   return String(text || '')
-    .replace(/[^0-9A-Fa-f,-]/g, '') // (a groove's sections by letter too)
+    .replace(/[^0-9A-Za-z,-]/g, '') // (a groove's sections by name too)
     .split(',')
     .filter(Boolean)
     .join(', ');
