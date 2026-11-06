@@ -503,6 +503,34 @@ test.describe('sections', () => {
     expect(await playing(page)).toBe(writtenOut);
     expect(await page.locator('#ABCsource').inputValue()).toContain('Form: A B A C   |   A B A C');
   });
+
+  // Infinity Drumming, 2026: a repeated section's 1st and 2nd time endings
+  test('with 1st and 2nd time endings play each ending its time, as written out', async ({
+    page,
+  }) => {
+    await loadGroove(page, grooveUrl(groove(['A', 'A', 'B', 'A', 'A', 'C'])));
+    const writtenOut = await playing(page);
+
+    await loadGroove(page, grooveUrl(groove(['A', 'A', 'B', 'C'], '&Sections=A1-4x2')));
+    await page.selectOption('#barSection3 .sectionEndingSelect', '1');
+    await page.selectOption('#barSection4 .sectionEndingSelect', '2');
+    await expect
+      .poll(() => page.evaluate(() => new URLSearchParams(location.search).get('Endings')))
+      .toBe('3:1,4:2');
+    expect(await playing(page)).toBe(writtenOut);
+    // the music: the 1st ending's bracket and back to the start, then the 2nd's, the
+    // bars numbered straight on through them (bar 4, not the 1st ending's 3 again)
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('%%contbarnb 1');
+    expect(abc.match(/\[1 /g)).toHaveLength(2); // (both voices)
+    expect(abc.match(/\[2 /g)).toHaveLength(2);
+    expect(abc.match(/ :\|/g)).toHaveLength(2);
+    expect(abc).not.toContain('"_×2"');
+    const numbers = await page
+      .locator('#svgTarget text')
+      .evaluateAll((texts) => texts.map((t) => t.textContent).filter((t) => /^\d+$/.test(t)));
+    expect(numbers).toContain('4');
+  });
 });
 
 // Infinity Drumming, 2026: changing the Notes keeps the notes in order (the phrase

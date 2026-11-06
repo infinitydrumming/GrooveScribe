@@ -15,7 +15,14 @@ import {
 import { parseTimeSigString, calc_notes_per_measure } from './musicMath.js';
 import { parsePracticeLimit, practiceLimitToText } from './practiceTimer.js';
 import { metronomeIsOn, parseMetronomeFrequency } from './metronome.js';
-import { sectionsFromUrl, sectionsToUrl, formFromUrl, formToUrl } from './sections.js';
+import {
+  sectionsFromUrl,
+  sectionsToUrl,
+  formFromUrl,
+  formToUrl,
+  endingsFromUrl,
+  endingsToUrl,
+} from './sections.js';
 import { practiceSettingsFromUrl, practiceSettingsToUrl } from './practiceSettings.js';
 import { countModeFromUrl, countModeToUrl } from './countModes.js';
 import {
@@ -366,6 +373,11 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
   );
   myGrooveData.barSections = sections.letters;
   myGrooveData.sectionRepeats = sections.repeats;
+  // Endings=8:1,9-10:2: a repeated section's 1st / 2nd time endings
+  myGrooveData.barEndings = endingsFromUrl(
+    getQueryVariableFromString('Endings', '', encodedURLData),
+    myGrooveData.numberOfMeasures
+  );
   // Form=ABCA-ABCA: the order they play
   myGrooveData.sectionForm = formFromUrl(getQueryVariableFromString('Form', '', encodedURLData));
 
@@ -534,6 +546,21 @@ export function getGrooveDataFromUrlString(encodedURLData, config = {}) {
   return myGrooveData;
 }
 
+// the sections, their 1st / 2nd time endings and their form ('' with no sections)
+function sectionsForUrl(myGrooveData) {
+  var letters = myGrooveData.barSections || [];
+  var repeats = myGrooveData.sectionRepeats || [];
+  var count = myGrooveData.numberOfMeasures;
+  var sections = sectionsToUrl(letters, repeats, count);
+  if (!sections) return '';
+  var url = '&Sections=' + sections;
+  var endings = endingsToUrl(letters, repeats, myGrooveData.barEndings || [], count);
+  if (endings) url += '&Endings=' + endings;
+  var form = formToUrl(myGrooveData.sectionForm);
+  if (form) url += '&Form=' + form;
+  return url;
+}
+
 // "Groove / click bars", when it is on (and Save & Share includes the practice
 // settings)
 function grooveClickForUrl(myGrooveData) {
@@ -616,14 +643,7 @@ export function getUrlStringFromGrooveData(myGrooveData, url_destination) {
   if (straightList) fullURL += '&StraightBars=' + straightList;
 
   // the sections, only when there are any
-  var sections = sectionsToUrl(
-    myGrooveData.barSections || [],
-    myGrooveData.sectionRepeats || [],
-    myGrooveData.numberOfMeasures
-  );
-  if (sections) fullURL += '&Sections=' + sections;
-  var form = sections ? formToUrl(myGrooveData.sectionForm) : '';
-  if (form) fullURL += '&Form=' + form;
+  fullURL += sectionsForUrl(myGrooveData);
 
   // "Groove / click bars" practice option, only when it is on
   fullURL += grooveClickForUrl(myGrooveData);

@@ -11,6 +11,16 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-11-06 — 1st and 2nd time endings
+
+- In a section of a groove that plays more than once, each bar after its first can be
+  marked to play every time, or only the 1st, 2nd... time through: the section's last
+  bars so marked are its endings, played only that time (`js/sections.js`,
+  `js/groove_writer.js`, `js/viewHtml.js`). The music writes them with the usual
+  brackets ("1.", "2."), a repeat sign after each ending but the last, and the bars
+  numbered straight on through them. Links carry them as `Endings=8:1,9-10:2`
+  (`js/urlSerialization.js`, `js/grooveData.js`); grooves without them are unchanged.
+
 ## 2026-11-06 — The groove page's trade bars, as the alphabet's
 
 - Choosing "Trade" on the groove page now adds the trade bars after the groove's

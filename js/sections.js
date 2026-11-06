@@ -7,6 +7,10 @@
 // B ×2, then round again from A). Bars without a letter play once, where they
 // are. Links carry them as "Sections=A1-2x4,B3-4x2" (a letter, its bars, its
 // repeats), bars numbered from 1.
+//
+// A repeated section can end differently each time through (1st and 2nd time
+// endings): its last bars, each marked for one time ("1st time", "2nd time"),
+// play only then. Links: "Endings=8:1,9-10:2" (bars, the time), bars from 1.
 
 /** The letters a section can have. */
 export var SECTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -39,12 +43,43 @@ function wholeRepeats(value) {
 }
 
 /**
- * The bars in the order they play: each section as many times as it says, the
- * other bars once.
+ * A repeated section's endings in effect: its last bars marked for a time
+ * through it (from 1, no more than its repeats), back from its end to the first
+ * bar played every time; never its first bar. Every other bar plays every time.
+ * @param {number[] | undefined} endings  each bar's mark: the time (from 1) it plays, 0 every time
+ * @returns {number[]}  each bar's ending in effect (0: every time)
+ */
+export function sectionEndings(letters, repeats, endings, count) {
+  var inEffect = [];
+  for (var bar = 0; bar < count; bar++) inEffect.push(0);
+  sectionRuns(letters, repeats, count).forEach(function (run) {
+    if (run.repeats < 2) return;
+    for (var b = run.to; b > run.from; b--) {
+      var time = parseInt(String((endings && endings[b]) || 0), 10);
+      if (!(time >= 1 && time <= run.repeats)) break;
+      inEffect[b] = time;
+    }
+  });
+  return inEffect;
+}
+
+// a section's bars, `time` (from 0) through it: its endings for other times left out
+function sectionTimeBars(run, time, inEffect) {
+  var bars = [];
+  for (var b = run.from; b <= run.to; b++)
+    if (!inEffect[b] || inEffect[b] == time + 1) bars.push(b);
+  return bars;
+}
+
+/**
+ * The bars in the order they play: each section as many times as it says (each
+ * time with its own ending), the other bars once.
+ * @param {number[]} [endings]  each bar's ending mark (see sectionEndings)
  * @returns {number[]}
  */
-export function formBars(letters, repeats, count) {
+export function formBars(letters, repeats, count, endings) {
   var runs = sectionRuns(letters, repeats, count);
+  var inEffect = sectionEndings(letters, repeats, endings, count);
   var bars = [];
   for (var bar = 0; bar < count; bar++) {
     var run = runs.find(function (r) {
@@ -55,7 +90,7 @@ export function formBars(letters, repeats, count) {
       continue;
     }
     for (var time = 0; time < run.repeats; time++)
-      for (var b = run.from; b <= run.to; b++) bars.push(b);
+      bars = bars.concat(sectionTimeBars(run, time, inEffect));
   }
   return bars;
 }
@@ -65,6 +100,41 @@ export function barsOfSection(letters, letter, count) {
   var bars = [];
   for (var bar = 0; bar < count; bar++) if (letters[bar] == letter) bars.push(bar);
   return bars;
+}
+
+/** "Endings=" for a link ('' with none in effect): "8:1,9-10:2". */
+export function endingsToUrl(letters, repeats, endings, count) {
+  var inEffect = sectionEndings(letters, repeats, endings, count);
+  var parts = [];
+  var bar = 0;
+  while (bar < count) {
+    var time = inEffect[bar];
+    var to = bar;
+    while (to + 1 < count && inEffect[to + 1] == time) to++;
+    if (time) parts.push((to > bar ? bar + 1 + '-' + (to + 1) : String(bar + 1)) + ':' + time);
+    bar = to + 1;
+  }
+  return parts.join(',');
+}
+
+/**
+ * A link's "Endings=" as each bar's ending mark (0: every time).
+ * @returns {number[]}
+ */
+export function endingsFromUrl(text, count) {
+  var endings = [];
+  for (var bar = 0; bar < count; bar++) endings.push(0);
+  String(text || '')
+    .split(',')
+    .forEach(function (part) {
+      var ending = /^(\d+)(?:-(\d+))?:(\d+)$/.exec(part.trim());
+      if (!ending) return;
+      var from = parseInt(ending[1], 10) - 1;
+      var to = ending[2] ? parseInt(ending[2], 10) - 1 : from;
+      var time = Math.min(parseInt(ending[3], 10), MAX_SECTION_REPEATS);
+      for (var b = Math.max(from, 0); b <= Math.min(to, count - 1); b++) endings[b] = time;
+    });
+  return endings;
 }
 
 /** "Sections=" for a link ('' with none): "A1-2x4,B3-4x2". */
@@ -129,8 +199,9 @@ export function tidyForm(text) {
  * left out, and so are bars with no letter.
  * @returns {number[]}
  */
-export function formOrderBars(form, letters, repeats, count) {
+export function formOrderBars(form, letters, repeats, count, endings) {
   var runs = sectionRuns(letters, repeats, count);
+  var inEffect = sectionEndings(letters, repeats, endings, count);
   var bars = [];
   tidyForm(form)
     .replace(/ /g, '')
@@ -139,7 +210,7 @@ export function formOrderBars(form, letters, repeats, count) {
       runs.forEach(function (run) {
         if (run.letter != letter) return;
         for (var time = 0; time < run.repeats; time++)
-          for (var b = run.from; b <= run.to; b++) bars.push(b);
+          bars = bars.concat(sectionTimeBars(run, time, inEffect));
       });
     });
   return bars;

@@ -769,10 +769,11 @@ function barTimeSigButtonHTML(baseindex, timeSig) {
 
 /**
  * A bar's section (Infinity Drumming, 2026): its letter, chosen from a list, and on
- * a section's first bar how many times the section plays (see sections.js).
+ * a section's first bar how many times the section plays (see sections.js); on its
+ * other bars, when it repeats, which time through it the bar plays (an ending).
  *
  * @param {number} baseindex  The bar, starting at 1.
- * @param {{letter: string, repeats: number, first: boolean}} section
+ * @param {{letter: string, repeats: number, first: boolean, ending?: number}} section
  * @returns {string}
  */
 export function barSectionHTML(baseindex, section) {
@@ -818,7 +819,36 @@ export function barSectionHTML(baseindex, section) {
         '</option>';
     html += '</select>';
   }
+  if (section.letter && !section.first && section.repeats > 1)
+    html += endingSelectHTML(baseindex, section);
   return html + '</span>';
+}
+
+var ORDINALS = ['1st', '2nd', '3rd'];
+
+// "every time", or which time through its section a bar plays: a 1st / 2nd time
+// ending (a section's last bars; see sections.js)
+function endingSelectHTML(baseindex, section) {
+  var html =
+    '<select class="sectionEndingSelect' +
+    (section.ending ? '' : ' none') +
+    '" title="Which time through section ' +
+    section.letter +
+    ' this bar plays: its last bars as 1st / 2nd time endings" aria-label="Ending of bar ' +
+    baseindex +
+    '" onchange="myGrooveWriter.barEndingChange(' +
+    baseindex +
+    ', this.value)"><option value="">every time</option>';
+  for (var time = 1; time <= section.repeats; time++)
+    html +=
+      '<option value="' +
+      time +
+      '"' +
+      (time == section.ending ? ' selected' : '') +
+      '>' +
+      (ORDINALS[time - 1] || time + 'th') +
+      ' time</option>';
+  return html + '</select>';
 }
 
 /**

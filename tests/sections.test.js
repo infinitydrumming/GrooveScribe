@@ -10,6 +10,9 @@ import {
   formToUrl,
   formFromUrl,
   MAX_FORM_LETTERS,
+  sectionEndings,
+  endingsToUrl,
+  endingsFromUrl,
 } from '../js/sections.js';
 
 // Infinity Drumming, 2026: a groove's sections (A for 2 bars, B for 2 bars), each
@@ -51,6 +54,54 @@ describe('sections', () => {
 });
 
 // Infinity Drumming, 2026: a form, the order the sections play ("ABAC")
+describe('1st and 2nd time endings', () => {
+  // an A section of 9 bars ×2: bars 1-7, then a fill the 1st time (bar 8), another
+  // the 2nd (bar 9); then bar 10, no section
+  const letters = ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', ''];
+  const repeats = [2, 2, 2, 2, 2, 2, 2, 2, 2, 1];
+  const endings = [0, 0, 0, 0, 0, 0, 0, 1, 2, 0];
+  const played = (marks, form) =>
+    (form
+      ? formOrderBars(form, letters, repeats, 10, marks)
+      : formBars(letters, repeats, 10, marks)
+    )
+      .map((bar) => bar + 1)
+      .join(' ');
+
+  it('play each ending only its time through the section', () => {
+    expect(played(endings)).toBe('1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 9 10');
+    expect(played(endings, 'AA')).toBe(
+      '1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 9 1 2 3 4 5 6 7 8 1 2 3 4 5 6 7 9'
+    );
+    // an ending of two bars
+    expect(played([0, 0, 0, 0, 0, 0, 1, 1, 2, 0])).toBe('1 2 3 4 5 6 7 8 1 2 3 4 5 6 9 10');
+    // without endings, every bar every time, as before
+    expect(played([])).toBe(played(undefined));
+    expect(played(undefined)).toBe('1 2 3 4 5 6 7 8 9 1 2 3 4 5 6 7 8 9 10');
+  });
+
+  it("are a repeated section's last bars, never its first, no later than its repeats", () => {
+    expect(sectionEndings(letters, repeats, endings, 10)).toEqual(endings);
+    // a bar played every time after it: no ending
+    expect(sectionEndings(letters, repeats, [0, 0, 0, 0, 0, 0, 1, 0, 2, 0], 10)).toEqual([
+      0, 0, 0, 0, 0, 0, 0, 0, 2, 0,
+    ]);
+    expect(sectionEndings(letters, repeats, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0], 10)[0]).toBe(0);
+    expect(sectionEndings(letters, repeats, [0, 0, 0, 0, 0, 0, 0, 1, 3, 0], 10)[8]).toBe(0);
+    // a section played once has none
+    const once = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+    expect(sectionEndings(letters, once, endings, 10).some(Boolean)).toBe(false);
+  });
+
+  it('travel in links, those in effect', () => {
+    expect(endingsToUrl(letters, repeats, endings, 10)).toBe('8:1,9:2');
+    expect(endingsToUrl(letters, repeats, [0, 0, 0, 0, 0, 0, 1, 1, 2, 0], 10)).toBe('7-8:1,9:2');
+    expect(endingsFromUrl('7-8:1,9:2', 10)).toEqual([0, 0, 0, 0, 0, 0, 1, 1, 2, 0]);
+    expect(endingsFromUrl('', 3)).toEqual([0, 0, 0]);
+    expect(endingsToUrl(letters, repeats, [], 10)).toBe('');
+  });
+});
+
 describe('a form', () => {
   const letters = ['A', 'A', 'B', 'C', ''];
   const repeats = [2, 2, 1, 1, 1];

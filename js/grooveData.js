@@ -101,6 +101,8 @@ const EMPTY_NOTE_ARRAY = [
  *   row with the same letter are one section (see sections.js). URL "Sections=A1-2x4,B3-4x2".
  * @property {number[]} sectionRepeats  Per bar: how many times its section plays (a section has
  *   its first bar's).
+ * @property {number[]} barEndings  Per bar: the time through its repeated section it plays (1st
+ *   / 2nd time endings), 0 for every time (see sections.js). URL "Endings=8:1,9-10:2".
  * @property {string} sectionForm  The order the sections play ("ABAC", "ABCA ABCA"), '' for in
  *   order (see sections.js). URL "Form=ABCA-ABCA".
  * @property {Array<{top: number, bottom: number}>} barTimeSigs  Each bar's time signature when
@@ -171,6 +173,7 @@ export function createGrooveData(config = {}) {
     straightBars: [],
     barSections: [], // each bar's section letter, see sections.js
     sectionRepeats: [],
+    barEndings: [], // each bar's ending: the time through its section it plays, 0 every time
     sectionForm: '', // the order the sections play ("ABAC"), '' for in order
     barTimeSigs: [],
     graceSpacingMs: DEFAULT_GRACE_SPACING_MS,
