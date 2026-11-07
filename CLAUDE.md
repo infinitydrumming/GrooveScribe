@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1282 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **139 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1290 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **141 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -88,9 +88,12 @@ Pure / low-coupling core (extracted from the two big files, imported back):
   stickings voice (its tuplets drawn without numbers).
 - `tempoSwitch.js` — the sums for a tempo change while playing: the next bar line whose last note
   before it is still to come, in the playing MIDI and in the round built again at the new tempo.
-- `sections.js` — a groove's sections (`Sections=A1-2x4,B3-4x2`): a letter per bar, runs of the same letter
-  are a section, its first bar's repeats; the playing order (`formBars`, or a typed form's `formOrderBars`,
-  `Form=ABAC`) and the link form.
+- `sections.js` — a groove's sections (`Sections=A1-2x4,B3-4x2`): a name per bar (a letter A–Z, or numbered
+  for versions, `A1`…`A12`: `sectionName`; a numbered one's link part has a colon, `A2:5-6x2`), runs of the same
+  name are a section (`run.letter` is the name), its first bar's repeats; 1st / 2nd time endings (`Endings=8:1,9-10:2`, `sectionEndings`: a
+  repeated section's marked last bars, never its first); the playing order (`formBars`, or a typed form's
+  `formOrderBars`, `Form=ABAC`, each time through with its own ending; a form with numbered names or commas is a
+  list, `A1, A2, B`, `Form=A1-A2-B`: `formGroups`) and the link form.
 - `noteBlocks.js` — a block of notes (any rows, any slots) copied from / pasted into the groove's tab
   lines, keeping its shape; the kick line holds two grid rows (kick, hi-hat foot), kept apart.
 - `audioSession.js` — while a groove plays, `navigator.audioSession.type = 'playback'` so iPhones
@@ -173,6 +176,14 @@ swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
   (`SWUNG_SLOTS`), and `chapterPicker`: the picker reads "Chapters", its "2: the triplet alphabet" is value 0,
   the groups (so links without `PermChapter` play as before), and there is no "off" or "all". A chosen chapter
   belongs to its layout's mode (`class_chapter_mode`): a 32nd chapter is off in triplets and back in 32nds.
+- **16th-note triplets in threes** (`sextupletInThrees`): a beat of them (Div=24, or a Mixed / fine-grid `x`
+  beat) is written an 8th at a time: `(3:3:3` with rests, an 8th note (`c4`) when only its first note plays,
+  or `z4`; both 8ths in threes make one `(6:6:6` (a run of six reads as a six: the golden master's sextuplet
+  grooves are all that). Its two 8ths can then be written at different lengths (4 and 6 units), so the second gets a beat
+  mark of its own: `withCountsOver` (the click's count) lays a count over each 8th alone, as `countOver`
+  assumes a beat's written units run evenly (it hung on a click count before). With every note counted
+  (`everyNoteCounted`: `Count=1|bold|ghosts`) a sextuplet beat stays all six (`(6:6:6`, no quarter / 8th
+  shortcuts) so every count has its note or rest, and `musicLayout` gives its notes 16 (a bar a line).
 - **Note lengths abc2svg can't draw** (5/32 came out as a triple-dotted quarter): the straight-bar
   writer cuts them at the next 8th (else 16th) of the bar, rests after (`drawnLengths`); hands and feet
   only, the stickings voice keeps its `x` spacers.
@@ -320,7 +331,10 @@ swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
   path). Everything that plays bar by bar (`sequenceBar`, the groove / click cycle, the practice timer,
   tempo switches, the cursor) goes through it. The music writes every bar once (`withSectionMarks`: an
   inline `[P:A ×4]` and `|:` / `:|` in each voice; the last bar's line end becomes `\n` so it isn't
-  `:||`), numbered (`%%measurenb 1`) from 2 bars up.
+  `:||`), numbered (`%%measurenb 1`) from 2 bars up. Endings (`class_bar_endings`, the bar's section chip
+  "every time / 1st time..."; `currentEndings()` in effect): `withEndingMarks` writes `[1 ` / `[2 ` at the ending's
+  start in each voice and ` :|` after each ending but the last (no `×N` then), and `%%contbarnb 1` keeps the
+  numbers running through them (abc2svg otherwise numbers a 2nd ending as the 1st).
 - **Three beat-by-beat grids**: Mixed (`Div=48`, 12 slots a quarter: 8ths, 16ths, every triplet),
   32nds with `Beats=` (`Div=32`, 8 a quarter: 8ths, 16ths, 32nds), and the fine grid (`Div=96`,
   `FINE_DIVISION`, 24 a quarter: every choice), only for a groove whose beats mix 32nds and triplets

@@ -170,6 +170,10 @@ test.describe('music lines on a phone', () => {
 
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.evaluate(() => window.myGrooveWriter.refresh_ABC());
+    // every note counted ("1 a li & a la"): a bar a line on a desktop too, for the
+    // counts' room (Infinity Drumming, 2026); without the count, both on one line
+    expect(await musicLines(page)).toBe(2);
+    await loadGroove(page, grooveUrl(SEXTUPLETS.replace('&Count=1', '')));
     expect(await musicLines(page)).toBe(1);
   });
 });
@@ -502,6 +506,62 @@ test.describe('sections', () => {
     expect(await page.locator('#sectionForm').inputValue()).toBe('ABAC ABAC');
     expect(await playing(page)).toBe(writtenOut);
     expect(await page.locator('#ABCsource').inputValue()).toContain('Form: A B A C   |   A B A C');
+  });
+
+  // Infinity Drumming, 2026: sections A to Z, numbered for versions (A1, A2), in a form
+  test('numbered sections in a form play in its order, as written out', async ({ page }) => {
+    await loadGroove(page, grooveUrl(groove(['A', 'A', 'B', 'C', 'A', 'A'])));
+    const writtenOut = await playing(page);
+
+    await loadGroove(page, grooveUrl(groove(['A', 'A', 'B', 'C'])));
+    for (const [bar, letter, number] of [
+      [1, 'A', '1'],
+      [2, 'A', '1'],
+      [3, 'M', ''],
+      [4, 'A', '2'],
+    ]) {
+      await page.selectOption(`#barSection${bar} .barSectionSelect`, letter);
+      if (number) await page.selectOption(`#barSection${bar} .sectionNumberSelect`, number);
+    }
+    await page.fill('#sectionForm', 'a1 m a2 a1');
+    await page.press('#sectionForm', 'Enter');
+    await expect(page.locator('#sectionForm')).toHaveValue('A1, M, A2, A1');
+    const inLink = (name) =>
+      page.evaluate((param) => new URLSearchParams(location.search).get(param), name);
+    await expect.poll(() => inLink('Form')).toBe('A1-M-A2-A1');
+    expect(await inLink('Sections')).toBe('A1:1-2,M3,A2:4');
+    expect(await playing(page)).toBe(writtenOut);
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('Form: A1 M A2 A1');
+    expect(abc.match(/\[P:(A1|M|A2)\]/g)).toEqual(['[P:A1]', '[P:M]', '[P:A2]']);
+  });
+
+  // Infinity Drumming, 2026: a repeated section's 1st and 2nd time endings
+  test('with 1st and 2nd time endings play each ending its time, as written out', async ({
+    page,
+  }) => {
+    await loadGroove(page, grooveUrl(groove(['A', 'A', 'B', 'A', 'A', 'C'])));
+    const writtenOut = await playing(page);
+
+    await loadGroove(page, grooveUrl(groove(['A', 'A', 'B', 'C'], '&Sections=A1-4x2')));
+    await page.selectOption('#barSection3 .sectionEndingSelect', '1');
+    await page.selectOption('#barSection4 .sectionEndingSelect', '2');
+    await expect
+      .poll(() => page.evaluate(() => new URLSearchParams(location.search).get('Endings')))
+      .toBe('3:1,4:2');
+    expect(await playing(page)).toBe(writtenOut);
+    // the music: the 1st ending's bracket and back to the start, then the 2nd's, the
+    // bars numbered straight on through them (bar 4, not the 1st ending's 3 again)
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc).toContain('%%contbarnb 1');
+    expect(abc.match(/\[1 /g)).toHaveLength(2); // (both voices)
+    expect(abc.match(/\[2 /g)).toHaveLength(2);
+    expect(abc.match(/ :\|/g)).toHaveLength(2);
+    expect(abc).not.toContain('"_×2"');
+    const numbers = await page
+      .locator('#svgTarget text')
+      .evaluateAll((texts) => texts.map((t) => t.textContent).filter((t) => /^\d+$/.test(t)));
+    expect(numbers).toContain('4');
   });
 });
 

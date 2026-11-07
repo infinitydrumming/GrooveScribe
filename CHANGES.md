@@ -11,6 +11,42 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-11-07 — A beat of six 16th-note triplets as a six
+
+- A beat whose two 8ths both need a group of three (a run of six, or notes inside
+  both) is written as one group of six again, as it is read; a three and an 8th note
+  stay as they are (`sextupletInThrees` in `js/abcNotation.js`). What plays is
+  unchanged.
+
+## 2026-11-07 — Sections A to Z, and numbered (A1, A2...)
+
+- A groove's sections can have any letter from A to Z (A to F before), and a number
+  for versions of a section, A1 to A12, chosen with a chip beside the letter
+  (`js/sections.js`, `js/viewHtml.js`, `js/groove_writer.js`). The form takes them
+  ("A1, A2, B, A1"), and so does Practise bars ("A2"; "A" with numbered A sections
+  practises them all). Links keep a letter's sections as before ("A1-2x4") and write
+  a numbered one with a colon ("A2:5-6x2", `Form=A1-A2-B`); old links read the same.
+
+## 2026-11-07 — 16th-note triplets written in threes
+
+- 16th-note triplets (and sextuplet beats on the Mixed and fine grids) are written an
+  8th note at a time: a group of three, an 8th note when only its first note plays,
+  or an 8th rest, so "1 a li &" reads as three and an 8th, and a run of six as two
+  threes, not one group of six with rests (`sextupletInThrees` in
+  `js/abcNotation.js`). With every note counted each beat keeps its six notes or
+  rests, so no count is crowded over a quarter or an 8th note, and such bars get a
+  line each (`everyNoteCounted`, `js/groove_writer.js`). What plays is unchanged.
+
+## 2026-11-06 — 1st and 2nd time endings
+
+- In a section of a groove that plays more than once, each bar after its first can be
+  marked to play every time, or only the 1st, 2nd... time through: the section's last
+  bars so marked are its endings, played only that time (`js/sections.js`,
+  `js/groove_writer.js`, `js/viewHtml.js`). The music writes them with the usual
+  brackets ("1.", "2."), a repeat sign after each ending but the last, and the bars
+  numbered straight on through them. Links carry them as `Endings=8:1,9-10:2`
+  (`js/urlSerialization.js`, `js/grooveData.js`); grooves without them are unchanged.
+
 ## 2026-11-06 — The groove page's trade bars, as the alphabet's
 
 - Choosing "Trade" on the groove page now adds the trade bars after the groove's

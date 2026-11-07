@@ -62,9 +62,11 @@ Drag the tempo slider in the play bar, or tap the <b>BPM</b> number and type a t
 slow the alphabet down for a hard section, or speed it up, without stopping. The cursor and the music keep their place.
 
 <h3>Sections (A, B...) and how many times each plays</h3>
-Next to each bar's number in the grid is a <b>Section</b> chip. Choose a letter for the bars of a section: bars in a row
-with the same letter are one section (for example A for 2 bars of paradiddles, B for 2 bars of doubles). On a section's
-first bar a second chip says how many times it plays (<b>×1</b> to <b>×16</b>).
+Next to each bar's number in the grid is a <b>Section</b> chip. Choose a letter (<b>A</b> to <b>Z</b>) for the bars of a
+section: bars in a row with the same letter are one section (for example A for 2 bars of paradiddles, B for 2 bars of
+doubles). Once a bar has a letter, a chip beside it can number it, for versions of a section: <b>A1</b>, <b>A2</b>,
+<b>A3</b>... up to 12 (A1 and A2 are different sections). On a section's first bar another chip says how many times it
+plays (<b>×1</b> to <b>×16</b>).
 <ul>
 <li>The groove plays each section that many times, then the next (A ×4, then B ×2), and round again. Bars without a
 letter play once, where they are. The practice timer, speed-up and click options count every bar that plays.
@@ -72,11 +74,19 @@ letter play once, where they are. The practice timer, speed-up and click options
 repeat signs round it and how many times (<b>×4</b>) under the end repeat sign, and numbers the bars: a number starting
 a line sits by the clef, just over the stave.
 <li><b>Form</b>: once there are sections, a <b>Form</b> box appears above the bars. Type the order the sections
-play, for example <b>ABAC</b>, or <b>ABCA ABCA</b> (a space between groups, to read it easily). Each letter plays its
+play, for example <b>ABAC</b>, or <b>ABCA ABCA</b> (a space between groups, to read it easily), or with numbered
+sections <b>A1, A2, B, A1</b> (a comma between them). Each section named plays its
 section as many times as its chip says; leave the box empty to play the sections in order. The music still writes each
 section once, with <b>Form: A B A C</b> under the title, like a chart.
-<li>Type a section's letter in <b>Practise bars</b> (<b>B</b>, or <b>A, B</b>) to drill just that section.
-<li>Sections and the form are saved in the groove's link, and stay with their bars when bars are added, copied or removed.
+<li><b>1st and 2nd time endings</b>: in a section that plays more than once, each bar after its first has a chip
+saying when it plays: <b>every time</b>, or <b>1st time</b>, <b>2nd time</b>... Mark the section's last bars as its
+endings: an 8-bar A section ×2 with 7 bars of groove, a fill marked <b>1st time</b> and another fill marked
+<b>2nd time</b> plays bars 1-7 and the first fill, then bars 1-7 and the second, and is still one A section (9 bars in
+the grid). An ending can be more than one bar. The music writes the section once, with a bracket over each ending
+("1." and "2."), a repeat sign after each ending but the last, and the bars numbered straight on through them.
+<li>Type a section's name in <b>Practise bars</b> (<b>B</b>, <b>A2</b>, or <b>A, B</b>) to drill just that section; a
+letter whose sections are numbered (<b>A</b> with A1 and A2) drills them all.
+<li>Sections, their endings and the form are saved in the groove's link, and stay with their bars when bars are added, copied or removed.
 </ul>
 
 <h3>Practising some bars</h3>
@@ -175,6 +185,10 @@ Each bar has a small time signature button (e.g. <b>4/4</b>) under its swing / s
 <li>Bars in x/8 are beamed the classic way, in 8th and 16th notes alike: 3/8 as one group of three, 5/8 as 3+2, 7/8 as 2+2+3 (6/8, 9/8 and 12/8 stay in threes). The grid is spaced in the same groups.
 <li>A note setting has to fit every bar, and the alphabet is only for grooves whose bars all have the same time signature (see <b>The Alphabet</b> for which).
 <li>Triplets work in x/4 and x/8 bars. In x/8, 16th-note triplets put three notes on every 8th note (like 8th-note triplets in 4/4), and 8th-note triplets put three over every two 8th notes (like quarter-note triplets), so they need bars of whole quarter notes such as 6/8 and 12/8, not 7/8.
+<li>16th-note triplets are written in threes, an 8th note at a time, as they are read: "1 a li &amp;" is a group of
+three and an 8th note on the &amp;, an 8th with only its first note is an 8th note (or an 8th rest), and a beat with
+notes inside both its 8ths (a run of six, say) is one group of six. With every note counted (<b>Count</b>: every note, bold or ghosts) each beat keeps all six
+notes or rests, so every syllable has its own, and a bar gets a line of its own.
 </ul>
 
 <h3>Notes beat by beat (quarter-note triplets, fills...)</h3>

@@ -54,7 +54,8 @@ describe('practice settings in a link', () => {
     const settings = { ...emptyPracticeSettings(), playBars: '1-3, 6' };
     expect(practiceSettingsToUrl(settings)).toBe('&PlayBars=1-3,6');
     expect(fromQuery('&PlayBars=1-3,6')).toEqual(settings);
-    expect(fromQuery('&PlayBars=1-2;x,4').playBars).toBe('1-2, 4'); // only digits, commas, dashes
+    expect(fromQuery('&PlayBars=1-2;!,4').playBars).toBe('1-2, 4'); // only digits, letters, commas, dashes
+    expect(fromQuery('&PlayBars=A2,b').playBars).toBe('A2, b'); // (sections by name)
     // an alphabet's bars in an order (Infinity Drumming, 2026)
     const perm = { type: 'kick_16ths', set: '', playEach: 1, bars: '1x4 2 1x4 3' };
     expect(practiceSettingsToUrl({ ...emptyPracticeSettings(), permutation: perm })).toContain(
