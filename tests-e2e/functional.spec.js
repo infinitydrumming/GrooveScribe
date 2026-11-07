@@ -1,6 +1,7 @@
+import fs from 'fs';
 import { test, expect, blockOutsideRequests } from './fixtures.js';
 import { grooveUrl } from './corpus.js';
-import { loadGroove, getSvg, grooveData } from './helpers.js';
+import { loadGroove, getSvg, grooveData, soundOf, cursorMarkers, getMidi } from './helpers.js';
 
 // Functional end-to-end flows: drive the real UI and assert observable results.
 // These cover the wiring the jsdom unit tests can only approximate — real clicks,
@@ -383,7 +384,8 @@ test.describe('32nds on one beat', () => {
     await expect.poll(() => inLink(page, 'S')).toBe('|--------O---------------Oo-o----|');
     const beatByBeat = await playing(page);
 
-    // the same notes in the 32nds note setting sound the same
+    // the same notes in the 32nds note setting sound the same (the cursor steps on its
+    // own grid's notes)
     await loadGroove(
       page,
       grooveUrl(
@@ -391,7 +393,7 @@ test.describe('32nds on one beat', () => {
           '&S=|--------O---------------Oo-o----|&K=|o---------------o---------------|'
       )
     );
-    expect(await playing(page)).toBe(beatByBeat);
+    expect(soundOf(await playing(page))).toBe(soundOf(beatByBeat));
   });
 
   test('triplets on another beat keep the 32nds: the fine grid, and Mixed again without them', async ({
@@ -737,7 +739,8 @@ test.describe('alphabet trade bars', () => {
     expect(await inLink('PermSet')).toBe(permSet);
     const abc = await page.locator('#ABCsource').inputValue();
     expect(abc).not.toMatch(/\(\d+:\d+:\d+/); // (no tuplets: 8ths and 16ths, as written)
-    expect(await firstRound()).toBe(plain); // (its notes still on 8ths: the same sound)
+    // (its notes still on 8ths: the same sound; the cursor steps on its 16ths)
+    expect(soundOf(await firstRound())).toBe(soundOf(plain));
 
     // the Notes buttons set the alphabet's notes; the trade bar keeps its own
     await page.evaluate(() => window.myGrooveWriter.changeDivision(16));
@@ -1152,5 +1155,65 @@ test.describe('play along with a song', () => {
     heard.offsets
       .slice(1)
       .forEach((offset) => expect(Math.abs(offset - heard.offsets[1])).toBeLessThan(0.0005));
+  });
+});
+
+// Infinity Drumming, 2026: the cursor follows rests while the editor plays
+test.describe('the cursor through rests', () => {
+  // 16ths: a hi-hat and kick on 1, a snare on 3, quarter-note rests on 2 and 4
+  const groove =
+    '?TimeSig=4/4&Div=16&Tempo=80&Measures=1&H=|x---------------|&S=|--------O-------|' +
+    '&K=|o---------------|';
+
+  test('playback steps through the grid notes with nothing on them; downloads stay as they were', async ({
+    page,
+  }) => {
+    await loadGroove(page, grooveUrl(groove));
+    expect(cursorMarkers(await playing(page))).toBe(14); // 16 grid notes, 2 with notes
+    // the groove data's MIDI (embeds) and a MIDI download have none
+    expect(cursorMarkers(await getMidi(page))).toBe(0);
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.evaluate(() => window.myGrooveWriter.MIDISaveAs()),
+    ]);
+    const bytes = fs.readFileSync(await download.path());
+    expect(cursorMarkers('data:audio/midi;base64,' + bytes.toString('base64'))).toBe(0);
+    // a muted line's notes are rests to the cursor
+    await loadGroove(page, grooveUrl(groove + '&Mute=snare:1'));
+    expect(cursorMarkers(await playing(page))).toBe(15);
+  });
+
+  test('the sheet music lights the rest written where the cursor is', async ({ page }) => {
+    await loadGroove(page, grooveUrl(groove));
+    const at = (percent) =>
+      page.evaluate((percent) => {
+        const gu = window.myGrooveWriter.myGrooveUtils;
+        gu.highlightNoteInABCSVGFromPercentComplete(percent);
+        const lit = [...document.querySelectorAll('#svgTarget rect.highlighted')];
+        return lit.map((box) => {
+          if (box.id) return box.id.replace(/^abcNoteNum_\d+_/, 'note ');
+          const rest = box.nextElementSibling;
+          const rests = [...document.querySelectorAll('#svgTarget use')].filter((use) =>
+            /^#r\d+$/.test(use.getAttribute('xlink:href'))
+          );
+          return 'rest ' + rests.indexOf(rest) + ' ' + rest.getAttribute('xlink:href');
+        });
+      }, percent);
+    expect(await at(0.01)).toEqual(['note 0']); // beat 1
+    expect(await at(0.1)).toEqual(['note 0']); // its 16th "e": still beat 1's note
+    expect(await at(0.26)).toEqual(['rest 0 #r4']); // beat 2
+    expect(await at(0.4)).toEqual(['rest 0 #r4']); // (all through it)
+    expect(await at(0.51)).toEqual(['note 1']); // beat 3
+    expect(await at(0.76)).toEqual(['rest 1 #r4']); // beat 4
+    expect(await at(0.01)).toEqual(['note 0']); // round again: the rest's box gone
+
+    // with the key to the drum symbols over the music: the music's notes and rests still
+    await page.evaluate(() => {
+      document.getElementById('showLegend').checked = true;
+      window.myGrooveWriter.refresh_ABC();
+    });
+    expect(await at(0.01)).toEqual(['note 0']);
+    expect(await at(0.26)).toEqual(['rest 0 #r4']);
+    expect(await at(0.51)).toEqual(['note 1']);
   });
 });

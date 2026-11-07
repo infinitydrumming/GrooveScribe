@@ -121,6 +121,7 @@ import {
   convert_sticking_counts_to_actual_counts as _convert_sticking_counts_to_actual_counts,
 } from './noteArrays.js';
 import { lineStartNumbers } from './lineStartNumbers.js';
+import { createRestNotes, restAt } from './restCursor.js';
 
 var global_num_GrooveUtilsCreated = 0;
 // This module's own URL, used by getGrooveUtilsBaseLocation() to locate sibling
@@ -830,8 +831,10 @@ function GrooveUtils() {
     // (Infinity Drumming, 2026: and the bar numbers starting lines, which the
     // editor writes in itself, see lineStartNumbers.js)
     this.numbering = null;
+    // (and the rests drawn, so the cursor can follow them, see restCursor.js)
     this.get_abcmodel = function (tsfirst, voice_tb, music_types) {
       if (this.numbering) this.numbering.take(tsfirst);
+      if (restNotes) restNotes.take(tsfirst);
     };
 
     // annotations
@@ -851,6 +854,7 @@ function GrooveUtils() {
         this.svg_highlight_y = y + 5;
         this.svg_highlight_h = h + 10;
       }
+      if (restNotes) restNotes.drawn(type, start, w);
       if (type == 'note' || type == 'grace') {
         y = this.svg_highlight_y;
         h = this.svg_highlight_h;
@@ -880,6 +884,11 @@ function GrooveUtils() {
     this.page_format = true; // define the non-page-breakable blocks
   }
   var abcToSVGCallback = new SVGLibCallback(); // singleton
+  // the rests being drawn, and those of the music last drawn (Infinity Drumming, 2026)
+  /** @type {ReturnType<typeof createRestNotes> | null} */
+  var restNotes = null;
+  /** @type {ReturnType<typeof createRestNotes>['written'] | null} */
+  var restsWritten = null;
 
   // converts incoming ABC notation source into an svg image.
   // returns an object with two items.   "svg" and "error_html"
@@ -906,18 +915,23 @@ function GrooveUtils() {
 
   function renderedABC(abc_source, numbering) {
     root.abc_obj = new Abc(abcToSVGCallback);
-    if ((root.myGrooveData && root.myGrooveData.showLegend) || root.isLegendVisable)
-      root.abcNoteNumIndex = -15; // subtract out the legend notes for a proper index.
-    else root.abcNoteNumIndex = 0;
+    // (subtract out the legend notes for a proper index: its 16 hands notes and 2 feet
+    // notes, abcNotation's get_top_ABC_BoilerPlate; Infinity Drumming, 2026: 18, no longer 15)
+    var firstNote =
+      (root.myGrooveData && root.myGrooveData.showLegend) || root.isLegendVisable ? -18 : 0;
+    root.abcNoteNumIndex = firstNote;
     abcToSVGCallback.abc_svg_output = ''; // clear
     abcToSVGCallback.abc_error_output = ''; // clear
     abcToSVGCallback.numbering = numbering;
     var chordTexts = (abcToSVGCallback.chordTexts = []);
+    restNotes = createRestNotes(firstNote);
     try {
       root.abc_obj.tosvg('SOURCE', abc_source);
+      restsWritten = restNotes.written;
     } finally {
       abcToSVGCallback.numbering = null;
       abcToSVGCallback.chordTexts = null;
+      restNotes = null;
     }
     var svg = centredChordTexts(abcToSVGCallback.abc_svg_output, chordTexts, abc_source);
     return {
@@ -941,6 +955,7 @@ function GrooveUtils() {
 
   root.abcNoteNumCurrentlyHighlighted = -1;
   root.clearHighlightNoteInABCSVG = function () {
+    clearRestHighlight();
     if (root.abcNoteNumCurrentlyHighlighted > -1) {
       var myElements = document.querySelectorAll(
         '#abcNoteNum_' + root.grooveUtilsUniqueIndex + '_' + root.abcNoteNumCurrentlyHighlighted
@@ -977,6 +992,42 @@ function GrooveUtils() {
     }
     if (root.autoScrollEnabled && myElements.length) scrollNoteIntoView(myElements[0]);
   };
+
+  // A rest the cursor is on (Infinity Drumming, 2026): a box like a note's over the
+  // rest abc2svg drew, as wide as it said, as tall as the line's notes' boxes.  False
+  // when the rests drawn aren't the page's (then the cursor stays on the note before).
+  var restHighlight = null; // {rest, box}
+  function highlightRest(rest) {
+    if (restHighlight && restHighlight.rest === rest && restHighlight.box.isConnected) return true;
+    var anyNote = document.querySelector('[id^="abcNoteNum_' + root.grooveUtilsUniqueIndex + '_"]');
+    var music = anyNote && sheetMusicOf(anyNote);
+    if (!music) return false;
+    var glyphs = Array.prototype.filter.call(music.querySelectorAll('use'), function (use) {
+      return /^#r\d+$/.test(use.getAttribute('xlink:href') || use.getAttribute('href') || '');
+    });
+    if (glyphs.length != restsWritten.glyphs) return false;
+    var glyph = glyphs[rest.glyph];
+    var line = glyph.closest('svg');
+    var noteBox = line && line.querySelector('rect.abcr');
+    var x = parseFloat(glyph.getAttribute('x'));
+    if (!noteBox || isNaN(x)) return false;
+    root.clearHighlightNoteInABCSVG();
+    var box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    box.setAttribute('class', 'abcr highlighted');
+    box.setAttribute('x', (x - rest.w / 2).toFixed(2));
+    box.setAttribute('y', noteBox.getAttribute('y'));
+    box.setAttribute('width', rest.w.toFixed(2));
+    box.setAttribute('height', noteBox.getAttribute('height'));
+    glyph.parentNode.insertBefore(box, glyph);
+    restHighlight = { rest: rest, box: box };
+    if (root.autoScrollEnabled) scrollNoteIntoView(box);
+    return true;
+  }
+  function clearRestHighlight() {
+    if (!restHighlight) return;
+    if (restHighlight.box.parentNode) restHighlight.box.parentNode.removeChild(restHighlight.box);
+    restHighlight = null;
+  }
 
   // Auto-scroll (Infinity Drumming): while playing, keep the highlighted note of
   // the sheet music in view. It only acts while some of the sheet music is on
@@ -1043,6 +1094,10 @@ function GrooveUtils() {
     if (root.note_mapping_array !== null) {
       // convert percentComplete to an index
       var curNoteIndex = percentComplete * root.note_mapping_array.length;
+
+      // in a rest: the rest written there (Infinity Drumming, 2026)
+      var rest = restsWritten && restAt(restsWritten, root.note_mapping_array, curNoteIndex);
+      if (rest && highlightRest(rest)) return;
 
       // now count through the array with the possible notes to find the note number as
       // it correlates to the ABC
@@ -1648,7 +1703,7 @@ function GrooveUtils() {
         note_type = 'tom';
       }
       if (note_type) {
-        global_total_midi_notes++;
+        if (note_type != 'cursor') global_total_midi_notes++; // (markers are silent)
         // the cursor (grid and sheet music) waits until the note is actually heard
         root.whenNoteIsHeard(function () {
           root.midiEventCallbacks.notePlaying(

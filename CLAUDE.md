@@ -17,10 +17,10 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1290 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **141 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1298 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **143 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
-| `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
+| `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~172 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
 | `npm run format:check` | Prettier clean (`npm run format` to fix)                                                                                                                                     |
 | `npm run check`        | lint + typecheck + format:check + test in one shot                                                                                                                           |
@@ -110,6 +110,9 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `gridState.js` — the DOM grid **read** layer: per-cell state (`is_*_on`/`get_*_state`)
   and whole-measure array readers (`get32NoteArrayFromClickableUI`, `muteArrayFromClickableUI`).
   Reads the ambient global `document`; caller state injected via ctx/callbacks.
+- `restCursor.js` — the sheet music's cursor through rests: the rests abc2svg draws (their times from its
+  model, `get_abcmodel`; noted in `anno_stop`, nothing added to the SVG) and which one a grid note in a
+  gap between notes falls on (`restAt`).
 - `lineStartNumbers.js` — the bar numbers starting lines, kept out of abc2svg's layout (through its
   `get_abcmodel` hook) and written in afterwards where abc2svg would have put them (see the engraving gotcha).
 
@@ -254,6 +257,14 @@ swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
   `loopEnd`, the stretcher cuts its windows at the join), so a rate change's `from` is the counted-on place, never
   the wrapped one; the join moves onto a hit within 6 ms (`loopSeam`). Without a song MIDI.js plays as always (golden master untouched); the
   functional E2E checks kicks against a generated song's beats.
+- **The cursor through rests** (`restMarkers` in groove_writer): the editor's playback MIDI (`'our_MIDI'`
+  only: downloads and embeds have none) puts a silent cursor marker (note 20, as click-only bars have) on
+  every grid note with nothing on it (muted notes included; beat by beat, the beat's own notes via
+  `slotIsUsed`), so the grid highlight moves on. The sheet music then lights the rest written there: a
+  box like a note's, made in the page beside the rest's glyph (the k-th `#r…` `<use>`; none if the
+  glyphs drawn don't match the page). The permutation playback snapshots carry the markers; tests that
+  compare sound across grids use `soundOf` (markers stripped, `tests-e2e/helpers.js`). The legend has
+  18 notes before the music's (`firstNote` in `renderedABC`).
 - **Changing the note setting: phrase or timing** (`changeKeepsThePhrase`): the "Keep" switch
   (`#notesKeepToggle`, the phone's `#notesSelect` foot; localStorage `grooveScribeNotesKeep`, 'phrase' to
   start) picks `changeDivisionKeepingThePhrase`, where the notes keep their slot order across the groove
