@@ -5108,7 +5108,10 @@ function GrooveWriter() {
     if (endings[bar - 1] != time)
       barABC = barABC.replace(/(V:Stickings\n|%%voicemap drum\n)/g, '$1[' + time + ' ');
     var endsIt = bar < run.to && endings[bar + 1] != time;
-    return endsIt ? barABC.split(' |' + addon).join(' :|' + addon) : barABC;
+    if (endsIt) return barABC.split(' |' + addon).join(' :|' + addon);
+    // the last ending's bracket stops at its end, open as a last ending's is (abc2svg
+    // would run it on over the next section, to a double bar)
+    return bar == run.to ? barABC.split(' |' + addon).join(' !rbstop!|' + addon) : barABC;
   }
 
   // how many times a section plays, under its last beat by the end repeat sign (in
@@ -6186,6 +6189,7 @@ function GrooveWriter() {
       showRepCounter('');
     };
 
+    root.myGrooveUtils.soundsBar = true; // (says when the drum sounds didn't load)
     root.myGrooveUtils.oneTimeInitializeMidi();
 
     // enable or disable swing (by the note setting, not the notes in a bar: a 6/4

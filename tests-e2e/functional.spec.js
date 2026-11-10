@@ -559,6 +559,8 @@ test.describe('sections', () => {
     expect(abc.match(/\[1 /g)).toHaveLength(2); // (both voices)
     expect(abc.match(/\[2 /g)).toHaveLength(2);
     expect(abc.match(/ :\|/g)).toHaveLength(2);
+    // (the last ending's bracket stops at its end, not running on over what follows)
+    expect(abc.match(/ !rbstop!\|/g)).toHaveLength(2);
     expect(abc).not.toContain('"_×2"');
     const numbers = await page
       .locator('#svgTarget text')
@@ -1215,5 +1217,38 @@ test.describe('the cursor through rests', () => {
     expect(await at(0.01)).toEqual(['note 0']);
     expect(await at(0.26)).toEqual(['rest 0 #r4']);
     expect(await at(0.51)).toEqual(['note 1']);
+  });
+});
+
+// Infinity Drumming, 2026: when the drum sounds don't come, the page tries again
+test.describe('loading the drum sounds', () => {
+  const playIcon = (page) => page.locator('[id^="midiPlayImage"]');
+
+  test('a failed download is tried again by itself', async ({ page }) => {
+    let failures = 1;
+    await page.route('**/soundfont/**', (route) =>
+      failures-- > 0 ? route.abort() : route.continue()
+    );
+    await loadGroove(page, grooveUrl(EMPTY_16));
+    await expect(playIcon(page)).toHaveClass(/Stopped/, { timeout: 15000 });
+    await expect(page.locator('#soundsBar')).toHaveCount(0);
+  });
+
+  test('after three failed tries the page says so, and Try again loads them', async ({ page }) => {
+    let blocked = true;
+    await page.route('**/soundfont/**', (route) => (blocked ? route.abort() : route.continue()));
+    await loadGroove(page, grooveUrl(EMPTY_16));
+    await expect(page.locator('#soundsBar')).toContainText("didn't load", { timeout: 15000 });
+    await expect(playIcon(page)).not.toHaveClass(/Stopped/);
+    blocked = false;
+    await page.click('#soundsBarButton');
+    await expect(playIcon(page)).toHaveClass(/Stopped/, { timeout: 15000 });
+    await expect(page.locator('#soundsBar')).toHaveCount(0);
+    await page.click('[id^="midiPlayImage"]');
+    await expect
+      .poll(() => page.evaluate(() => window.myGrooveWriter.myGrooveUtils.isPlaying()), {
+        timeout: 15000,
+      })
+      .toBe(true);
   });
 });

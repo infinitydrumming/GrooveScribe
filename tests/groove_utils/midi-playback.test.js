@@ -96,6 +96,32 @@ describe('GrooveUtils MIDI playback controls', () => {
       expect(typeof opts.callback).toBe('function');
     });
 
+    // Infinity Drumming, 2026: MIDI.js waits for ever when the sounds don't come
+    it('tries again when the sounds stall, says so after three tries, and a tap on play tries again', () => {
+      vi.useFakeTimers();
+      const icon = addElement('midiPlayImage' + gu.grooveUtilsUniqueIndex);
+      const callbacks = [];
+      globalThis.MIDI.loadPlugin = vi.fn((opts) => callbacks.push(opts.callback));
+      gu.soundsBar = true;
+
+      gu.oneTimeInitializeMidi();
+      expect(callbacks).toHaveLength(1);
+      icon.onclick(); // (still loading: says so, no extra try)
+      expect(document.getElementById('soundsBar').textContent).toContain('Loading');
+      expect(callbacks).toHaveLength(1);
+      vi.advanceTimersByTime(3 * 21000);
+      expect(callbacks).toHaveLength(3);
+      expect(document.getElementById('soundsBar').textContent).toContain("didn't load");
+
+      icon.onclick(); // a tap on play: one more try
+      expect(callbacks).toHaveLength(4);
+      callbacks[3]();
+      expect(icon.className).toBe('midiPlayImage Stopped');
+      expect(document.getElementById('soundsBar')).toBeNull();
+      callbacks[0](); // (a slower try coming in late changes nothing)
+      expect(globalThis.MIDI.programChange).toHaveBeenCalledTimes(1);
+    });
+
     it('is idempotent: a second call does not call MIDI.loadPlugin again (global_midiInitialized guard)', () => {
       addElement('midiPlayImage' + gu.grooveUtilsUniqueIndex);
 

@@ -114,6 +114,7 @@ export default [
       'js/abcNotation.js',
       'js/lineStartNumbers.js',
       'js/restCursor.js',
+      'js/soundLoading.js',
       'js/screenWakeLock.js',
       'js/audioSession.js',
       'js/practiceSettings.js',

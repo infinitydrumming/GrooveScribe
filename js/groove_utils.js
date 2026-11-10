@@ -122,6 +122,7 @@ import {
 } from './noteArrays.js';
 import { lineStartNumbers } from './lineStartNumbers.js';
 import { createRestNotes, restAt } from './restCursor.js';
+import { createSoundLoader, showSoundsBar, hideSoundsBar } from './soundLoading.js';
 
 var global_num_GrooveUtilsCreated = 0;
 // This module's own URL, used by getGrooveUtilsBaseLocation() to locate sibling
@@ -129,6 +130,10 @@ var global_num_GrooveUtilsCreated = 0;
 // so import.meta.url is the module-safe equivalent of the old currentScript.src.
 var global_grooveUtilsScriptSrc = import.meta.url;
 var global_midiInitialized = false;
+// the drum sounds, tried again when a try fails (Infinity Drumming, 2026, see soundLoading.js)
+/** @type {ReturnType<typeof createSoundLoader> | null} */
+var global_soundLoader = null;
+var global_soundTryFailed = function () {};
 
 // global constants
 
@@ -1527,15 +1532,75 @@ function GrooveUtils() {
     }
 
     global_midiInitialized = true;
-    MIDI.loadPlugin({
-      soundfontUrl: root.getMidiSoundFontLocation(),
-      instruments: ['gunshot'],
-      callback: function () {
-        MIDI.programChange(9, 127); // use "Gunshot" instrument because I don't know how to create new ones
-        root.midiEventCallbacks.midiInitialized(root.midiEventCallbacks.classRoot);
+    // (Infinity Drumming, 2026: again when a try fails, see soundLoading.js)
+    var loader = (global_soundLoader = createSoundLoader({
+      load: function (failed) {
+        global_soundTryFailed = failed;
+        MIDI.loadPlugin({
+          soundfontUrl: root.getMidiSoundFontLocation(),
+          instruments: ['gunshot'],
+          callback: function () {
+            if (loader.isReady()) return; // (a slower try, after another)
+            loader.ready();
+            hideSoundsBar(document);
+            MIDI.programChange(9, 127); // use "Gunshot" instrument because I don't know how to create new ones
+            root.midiEventCallbacks.midiInitialized(root.midiEventCallbacks.classRoot);
+          },
+        });
       },
-    });
+      gaveUp: function () {
+        if (root.soundsBar) showSoundsBar(document, "The drum sounds didn't load.", tryAgain);
+      },
+    }));
+    // until they're in, play says so (and after the tries gave up, tries again)
+    var tryAgain = function () {
+      if (loader.isReady()) return;
+      if (root.soundsBar) showSoundsBar(document, 'Loading the drum sounds…');
+      loader.retry();
+    };
+    var icon = document.getElementById('midiPlayImage' + root.grooveUtilsUniqueIndex);
+    if (icon) icon.onclick = tryAgain;
+    watchSoundLoading();
+    loader.start();
   };
+
+  // Whether the page says when the drum sounds didn't load (the editor does; embeds
+  // try again when their play button is tapped).
+  root.soundsBar = false;
+
+  // MIDI.js says nothing when a sound file fails, and a later try's sounds mustn't
+  // replace those in use: its sound files are watched, and it connects the sounds
+  // only until they're in (Infinity Drumming, 2026).
+  function watchSoundLoading() {
+    var domLoader = /** @type {any} */ (window).DOMLoader;
+    if (domLoader && domLoader.sendRequest && !domLoader.sendRequest.watched) {
+      var send = domLoader.sendRequest;
+      domLoader.sendRequest = function (conf) {
+        if (conf && /soundfont/.test(conf.url) && !conf.onerror) {
+          var failed = global_soundTryFailed;
+          var onload = conf.onload;
+          conf.onerror = function () {
+            failed();
+          };
+          conf.onload = function (request) {
+            if (MIDI.Soundfont) delete MIDI.Soundfont.gunshot; // (this try's, or none)
+            if (onload) onload(request);
+            if (!MIDI.Soundfont || !MIDI.Soundfont.gunshot) failed();
+          };
+        }
+        return send.call(this, conf);
+      };
+      domLoader.sendRequest.watched = true;
+    }
+    var webAudio = MIDI.WebAudio;
+    if (webAudio && webAudio.connect && !webAudio.connect.watched) {
+      var connect = webAudio.connect;
+      webAudio.connect = function (conf) {
+        if (!global_soundLoader || !global_soundLoader.isReady()) connect.call(webAudio, conf);
+      };
+      webAudio.connect.watched = true;
+    }
+  }
 
   root.getMidiStartTime = function () {
     return global_current_midi_start_time;
