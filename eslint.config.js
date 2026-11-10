@@ -113,6 +113,8 @@ export default [
       'js/midiFile.js',
       'js/abcNotation.js',
       'js/lineStartNumbers.js',
+      'js/restCursor.js',
+      'js/soundLoading.js',
       'js/screenWakeLock.js',
       'js/audioSession.js',
       'js/practiceSettings.js',

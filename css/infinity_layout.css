@@ -1453,8 +1453,10 @@ body,
   }
 }
 
-/* ---------- "A new version is ready" bar (js/updateCheck.js) ---------- */
-#updateBar {
+/* ---------- "A new version is ready" bar (js/updateCheck.js), and the drum
+   sounds that didn't load (js/soundLoading.js) ---------- */
+#updateBar,
+#soundsBar {
   position: fixed;
   top: calc(var(--layout-header-h) + var(--layout-toolbar-h) + 8px);
   left: 50%;
@@ -1475,7 +1477,8 @@ body,
   font-weight: 700;
   box-shadow: 0 6px 20px rgba(5, 17, 36, 0.3);
 }
-#updateBarButton {
+#updateBarButton,
+#soundsBarButton {
   flex: none;
   padding: 8px 16px;
   border: 0;

@@ -685,6 +685,27 @@ function GrooveWriter() {
     return spans;
   }
 
+  // While the editor plays (Infinity Drumming, 2026): a silent cursor marker on each of
+  // the bar's grid notes where nothing plays, so the cursor carries on through rests.
+  // Downloads (general MIDI) get none.  `notes`: the bar's arrays {HH, Snare, Kick, Toms}.
+  function restMarkers(bar, slots, notes, MIDI_type) {
+    if (MIDI_type != 'our_MIDI') return undefined;
+    var plan = beatPlanOfBar(bar);
+    var step = slots / barCountOf(bar);
+    var lines = [notes.HH, notes.Snare, notes.Kick].concat(notes.Toms);
+    var markers = [];
+    for (var slot = 0; slot < slots; slot++) {
+      var onGrid = plan ? slotIsUsed(plan.groups[0], slot) : slot % step === 0;
+      markers.push(
+        onGrid &&
+          !lines.some(function (line) {
+            return line[slot];
+          })
+      );
+    }
+    return markers;
+  }
+
   // A Mixed bar's beats from its notes as tab lines ({HH: 'x--x...', ...}, the
   // bar starting at `start`): the plainest that shows them all (on the grid the
   // beats are on)
@@ -3813,7 +3834,7 @@ function GrooveWriter() {
                 class_num_beats_per_measure,
                 class_note_value_per_measure,
                 undefined, // the player's swing style
-                undefined, // no cursor markers
+                restMarkers(get_ostinato_bars() + t, o.num_notes, o, MIDI_type),
                 slotSpansOfBar(get_ostinato_bars() + t, o.num_notes) // (beat by beat)
               );
             });
@@ -3837,7 +3858,12 @@ function GrooveWriter() {
                 class_num_beats_per_measure,
                 class_note_value_per_measure,
                 undefined, // the player's swing style
-                undefined, // no cursor markers
+                restMarkers(
+                  k,
+                  o.num_notes,
+                  { HH: o.HH, Snare: bars[k].snare, Kick: bars[k].kick, Toms: o.Toms },
+                  MIDI_type
+                ),
                 slotSpansOfBar(k, o.num_notes) // (beat by beat)
               );
             });
@@ -3864,7 +3890,12 @@ function GrooveWriter() {
           class_num_beats_per_measure,
           class_note_value_per_measure,
           undefined, // the player's swing style
-          undefined, // no cursor markers
+          restMarkers(
+            0,
+            num_notes,
+            { HH: HH_Array, Snare: Snare_Array, Kick: Kick_Array, Toms: Toms_Array },
+            MIDI_type
+          ),
           slotSpansOfBar(0, num_notes) // diddles beat by beat
         );
 
@@ -3908,7 +3939,12 @@ function GrooveWriter() {
             barSigOf(i).top,
             barSigOf(i).bottom,
             undefined, // the player's swing style
-            undefined, // no cursor markers
+            restMarkers(
+              i,
+              num_notes,
+              { HH: HH_Array, Snare: Snare_Array, Kick: Kick_Array, Toms: Toms_Array },
+              MIDI_type
+            ),
             slotSpansOfBar(i, num_notes) // diddles beat by beat
           );
         }
@@ -5072,7 +5108,10 @@ function GrooveWriter() {
     if (endings[bar - 1] != time)
       barABC = barABC.replace(/(V:Stickings\n|%%voicemap drum\n)/g, '$1[' + time + ' ');
     var endsIt = bar < run.to && endings[bar + 1] != time;
-    return endsIt ? barABC.split(' |' + addon).join(' :|' + addon) : barABC;
+    if (endsIt) return barABC.split(' |' + addon).join(' :|' + addon);
+    // the last ending's bracket stops at its end, open as a last ending's is (abc2svg
+    // would run it on over the next section, to a double bar)
+    return bar == run.to ? barABC.split(' |' + addon).join(' !rbstop!|' + addon) : barABC;
   }
 
   // how many times a section plays, under its last beat by the end repeat sign (in
@@ -6150,6 +6189,7 @@ function GrooveWriter() {
       showRepCounter('');
     };
 
+    root.myGrooveUtils.soundsBar = true; // (says when the drum sounds didn't load)
     root.myGrooveUtils.oneTimeInitializeMidi();
 
     // enable or disable swing (by the note setting, not the notes in a bar: a 6/4
@@ -7927,7 +7967,12 @@ function GrooveWriter() {
       barSigOf(bar).top,
       barSigOf(bar).bottom,
       undefined, // the player's swing style
-      undefined, // no cursor markers
+      restMarkers(
+        bar,
+        num_notes,
+        { HH: HH_Array, Snare: Snare_Array, Kick: Kick_Array, Toms: Toms_Array },
+        MIDI_type
+      ),
       slotSpansOfBar(bar, num_notes) // diddles beat by beat
     );
   }
@@ -7983,7 +8028,12 @@ function GrooveWriter() {
       class_num_beats_per_measure,
       class_note_value_per_measure,
       undefined, // the player's swing style
-      undefined, // no cursor markers
+      restMarkers(
+        at.gridBar,
+        o.num_notes,
+        { HH: o.HH, Snare: bar.snare, Kick: bar.kick, Toms: o.Toms },
+        'our_MIDI'
+      ),
       slotSpansOfBar(at.gridBar, o.num_notes) // (beat by beat)
     );
   }

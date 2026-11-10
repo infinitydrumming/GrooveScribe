@@ -17,10 +17,10 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1290 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **141 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1304 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **145 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
-| `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~173 known errors baseline; changes should be typecheck-**neutral**                                                                       |
+| `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~172 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
 | `npm run format:check` | Prettier clean (`npm run format` to fix)                                                                                                                                     |
 | `npm run check`        | lint + typecheck + format:check + test in one shot                                                                                                                           |
@@ -110,6 +110,12 @@ Pure / low-coupling core (extracted from the two big files, imported back):
 - `gridState.js` — the DOM grid **read** layer: per-cell state (`is_*_on`/`get_*_state`)
   and whole-measure array readers (`get32NoteArrayFromClickableUI`, `muteArrayFromClickableUI`).
   Reads the ambient global `document`; caller state injected via ctx/callbacks.
+- `restCursor.js` — the sheet music's cursor through rests: the rests abc2svg draws (their times from its
+  model, `get_abcmodel`; noted in `anno_stop`, nothing added to the SVG) and which one a grid note in a
+  gap between notes falls on (`restAt`).
+- `soundLoading.js` — loading the drum sounds again when a try fails or stalls (MIDI.js waits for ever), and
+  the "didn't load" bar (`#soundsBar`, the editor only: `gu.soundsBar`); groove_utils watches MIDI.js's
+  soundfont requests (`DOMLoader.sendRequest`) and lets `MIDI.WebAudio.connect` run only until the sounds are in.
 - `lineStartNumbers.js` — the bar numbers starting lines, kept out of abc2svg's layout (through its
   `get_abcmodel` hook) and written in afterwards where abc2svg would have put them (see the engraving gotcha).
 
@@ -254,6 +260,14 @@ swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
   `loopEnd`, the stretcher cuts its windows at the join), so a rate change's `from` is the counted-on place, never
   the wrapped one; the join moves onto a hit within 6 ms (`loopSeam`). Without a song MIDI.js plays as always (golden master untouched); the
   functional E2E checks kicks against a generated song's beats.
+- **The cursor through rests** (`restMarkers` in groove_writer): the editor's playback MIDI (`'our_MIDI'`
+  only: downloads and embeds have none) puts a silent cursor marker (note 20, as click-only bars have) on
+  every grid note with nothing on it (muted notes included; beat by beat, the beat's own notes via
+  `slotIsUsed`), so the grid highlight moves on. The sheet music then lights the rest written there: a
+  box like a note's, made in the page beside the rest's glyph (the k-th `#r…` `<use>`; none if the
+  glyphs drawn don't match the page). The permutation playback snapshots carry the markers; tests that
+  compare sound across grids use `soundOf` (markers stripped, `tests-e2e/helpers.js`). The legend has
+  18 notes before the music's (`firstNote` in `renderedABC`).
 - **Changing the note setting: phrase or timing** (`changeKeepsThePhrase`): the "Keep" switch
   (`#notesKeepToggle`, the phone's `#notesSelect` foot; localStorage `grooveScribeNotesKeep`, 'phrase' to
   start) picks `changeDivisionKeepingThePhrase`, where the notes keep their slot order across the groove
@@ -333,7 +347,8 @@ swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
   inline `[P:A ×4]` and `|:` / `:|` in each voice; the last bar's line end becomes `\n` so it isn't
   `:||`), numbered (`%%measurenb 1`) from 2 bars up. Endings (`class_bar_endings`, the bar's section chip
   "every time / 1st time..."; `currentEndings()` in effect): `withEndingMarks` writes `[1 ` / `[2 ` at the ending's
-  start in each voice and ` :|` after each ending but the last (no `×N` then), and `%%contbarnb 1` keeps the
+  start in each voice and ` :|` after each ending but the last (no `×N` then), ` !rbstop!|` after the last (else
+  abc2svg runs its bracket on to the next double bar, over the next section), and `%%contbarnb 1` keeps the
   numbers running through them (abc2svg otherwise numbers a 2nd ending as the 1st).
 - **Three beat-by-beat grids**: Mixed (`Div=48`, 12 slots a quarter: 8ths, 16ths, every triplet),
   32nds with `Beats=` (`Div=32`, 8 a quarter: 8ths, 16ths, 32nds), and the fine grid (`Div=96`,

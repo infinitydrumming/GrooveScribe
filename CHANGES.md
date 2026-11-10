@@ -11,6 +11,29 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-11-10 — The drum sounds tried again; a last ending's bracket
+
+- When the drum sounds don't load (a network blip, a download cut off, a sound that
+  won't decode), MIDI.js waited for ever and the play button stayed on its "not
+  ready" sign and did nothing. A failed or stalled try is now made again (three
+  tries), then a bar says the sounds didn't load, with a Try again button; tapping
+  play while they load says so (`js/soundLoading.js`, `oneTimeInitializeMidi` in
+  `js/groove_utils.js`).
+- A section's last ending (2nd time...) had its bracket run on over the next section,
+  up to the next double bar: it now stops at the ending's end, open as a last ending's
+  is (`!rbstop!` on its bar line, `withEndingMarks` in `js/groove_writer.js`).
+
+## 2026-11-07 — The cursor follows rests
+
+- While the editor plays, the cursor carries on through rests instead of waiting on
+  the last note: a silent cursor marker on every grid note with nothing on it
+  (`restMarkers` in `js/groove_writer.js`, the marker the click-only bars already
+  had), and the sheet music lights the rest written there (`js/restCursor.js`: the
+  rests abc2svg draws, noted as it draws them, nothing added to the music). Downloads
+  and embeds play exactly as before.
+- With the key to the drum symbols shown, the cursor lit the key instead of the
+  music: it now counts the key's 18 notes (it counted 15, `js/groove_utils.js`).
+
 ## 2026-11-07 — A beat of six 16th-note triplets as a six
 
 - A beat whose two 8ths both need a group of three (a run of six, or notes inside
