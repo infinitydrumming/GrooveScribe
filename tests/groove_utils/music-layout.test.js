@@ -183,6 +183,28 @@ describe('glyphs defined once on the page', () => {
       expect(spacedLayout(desktop16ths, 0).barsPerLine).toBe(1);
     });
 
+    // (a spacing between whole numbers of bars a line still shows: the lines as wide
+    // as their bars at it)
+    it('narrows or widens the lines between whole numbers of bars a line', () => {
+      const oneBar = musicLayout(16, 1400, { oneBar: true }); // a bar a line
+      expect(spacedLayout(oneBar, 0.75)).toEqual({
+        barsPerLine: 1,
+        renderWidth: 1400,
+        bar: 128,
+        share: 0.75,
+      });
+      expect(spacedLayout(desktop16ths, 0.75).share).toBe(0.75); // (2 bars a line still)
+      expect(spacedLayout(desktop16ths, 1.5)).toMatchObject({ barsPerLine: 1, share: 0.75 });
+      expect(spacedLayout(desktop16ths, 0.5).share).toBeUndefined(); // (4 bars fill the line)
+      // never narrower than the notes need
+      const wide = { barsPerLine: 1, renderWidth: 885, bar: 600 }; // (its page: 663px)
+      expect(spacedLayout(wide, 0.6).share).toBeCloseTo(600 / 663, 6);
+      // every line as wide (the last centred when short)
+      const lines = { barsPerLine: 2, renderWidth: 885, share: 0.75 }; // (its page: 663px)
+      expect(spacedLines(4, lines)).toEqual({ margin: 82, oneLine: false });
+      expect(spacedLines(1, lines)).toEqual({ margin: 207, oneLine: true });
+    });
+
     it('centres one line of fewer bars than a line holds, each as wide', () => {
       const four = { barsPerLine: 4, renderWidth: 885 }; // (its page: 663px)
       expect(spacedLines(3, four)).toEqual({ margin: 82, oneLine: true });

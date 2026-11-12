@@ -670,6 +670,26 @@ function GrooveWriter() {
     });
   }
 
+  // The notes a bar has for the music's layout: the bar stride, or beat by beat
+  // (Infinity Drumming, 2026) the most notes any bar's beats show (a Mixed bar of 8ths
+  // and 16ths is laid out as 16ths are, not as its grid's every slot)
+  function layoutBarNotes() {
+    var stride = layoutNotes(class_time_division, barStrideFor(class_time_division));
+    if (!beatGrid()) return stride;
+    var most = 0;
+    for (var bar = 0; bar < class_number_of_measures; bar++) {
+      var plan = beatPlanOfBar(bar);
+      if (plan)
+        most = Math.max(
+          most,
+          plan.groups[0].reduce(function (notes, group) {
+            return notes + group.span / group.step;
+          }, 0)
+        );
+    }
+    return most || stride;
+  }
+
   // the beat plan of one bar for the music writers (null outside Mixed)
   function beatPlanOfBar(bar) {
     var beats = beatsOfBar(bar);
@@ -3018,6 +3038,21 @@ function GrooveWriter() {
     };
   }
 
+  /**
+   * The alphabet's lines: practised bars as they're laid out, else margins narrowing
+   * every line for a Music spacing between whole numbers of bars a line (Infinity
+   * Drumming, 2026); '' for neither, or drawn wider (a line broken mid-bar).
+   * @param {{fit: Object} | undefined} practised
+   * @param {{barsPerLine: number, renderWidth: number, bar?: number, share?: number}} layout
+   * @param {boolean} widened
+   */
+  function alphabetLinesHeading(practised, layout, widened) {
+    if (practised) return linesHeading(practised.fit, widened);
+    if (!layout.share || widened) return '';
+    var margin = spacedLines(Infinity, layout).margin;
+    return '%%leftmargin ' + margin + 'px\n%%rightmargin ' + margin + 'px\n';
+  }
+
   // the margins centring the music's lines, and whether one line is stretched to
   // them (or the last of more takes the line before's spacing: abc2svg turns down
   // a stretchlast of 0); drawn wider for a line broken mid-bar, the music fills
@@ -4370,10 +4405,11 @@ function GrooveWriter() {
 
     // two bars a line, or one where they'd be too tight (a phone); a bar too wide
     // even alone is drawn smaller rather than broken (see abcNotation.musicLayout)
+    var barNotes = layoutBarNotes();
     var layout = musicLayout(
       notesOnALine(
         root.myGrooveUtils,
-        layoutNotes(class_time_division, barStrideFor(class_time_division)),
+        barNotes,
         class_num_beats_per_measure,
         class_note_value_per_measure,
         usingTriplets()
@@ -4383,7 +4419,9 @@ function GrooveWriter() {
         counted: root.myGrooveUtils.showCounts && !root.myGrooveUtils.countSmall,
         everyNoteCounted: everyNoteCounted(root.myGrooveUtils, class_time_division),
         triplets: usingTriplets(),
-        oneBar: class_permutation_type == 'none' && class_notes_per_measure >= 32,
+        oneBar:
+          class_permutation_type == 'none' &&
+          (beatGrid() ? barNotes : class_notes_per_measure) >= 32,
         keepWidth: beatGrid() !== 0,
         countRoom: countRoom(
           root.myGrooveUtils,
@@ -4433,8 +4471,7 @@ function GrooveWriter() {
           },
         ];
         for (i = 1; i < get_ostinato_bars(); i++) ostinato.push(readOstinatoBar(i, false));
-        if (practised)
-          fullABC = fullABC.replace(/^K:/m, linesHeading(practised.fit, widened) + 'K:');
+        fullABC = fullABC.replace(/^K:/m, alphabetLinesHeading(practised, layout, widened) + 'K:');
         fullABC += permutationOrderHeading();
         fullABC += permutationBarsABC(ostinato, shownSections, practised, spaced.lines);
         break;

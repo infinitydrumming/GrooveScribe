@@ -11,6 +11,18 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-11-12 — Music spacing on Mixed grooves, and every step of it
+
+- A Mixed (beat by beat) groove was laid out as if every bar used all of its grid's
+  slots (32nd-note triplets): always one bar a line, as wide as the page. Its bars
+  are now laid out by the notes their beats show, as the same notes in a plain note
+  setting are (a Mixed groove of 8ths and 16ths: two bars a line, as 16ths)
+  (`layoutBarNotes` in `js/groove_writer.js`).
+- The Music spacing slider changed only how many bars go on a line, so between whole
+  numbers of bars (with one bar a line: from 55% up) it did nothing. Now the lines are
+  as wide as their bars at the spacing ("Bars 95% as wide" draws them 95% as wide),
+  never narrower than their notes need (`spacedLayout`'s `share`, `js/abcNotation.js`).
+
 ## 2026-11-10 — The drum sounds tried again; a last ending's bracket
 
 - When the drum sounds don't load (a network blip, a download cut off, a sound that

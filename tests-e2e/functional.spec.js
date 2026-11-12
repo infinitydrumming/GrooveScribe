@@ -1252,3 +1252,35 @@ test.describe('loading the drum sounds', () => {
       .toBe(true);
   });
 });
+
+// Infinity Drumming, 2026: a Mixed groove laid out by its beats' notes, and every step
+// of the Music spacing showing
+test.describe('Music spacing on a Mixed groove', () => {
+  const sixteenths = 'x-----x-----'.repeat(4);
+  const mixed =
+    '?TimeSig=4/4&Div=48&Beats=ssss,ssss,ssss,ssss&Tempo=80&Measures=4' +
+    `&H=|${sixteenths}|${sixteenths}|${sixteenths}|${sixteenths}|`;
+  const lines = (page) => page.locator('#svgTarget svg').count();
+  const spacing = (page, percent) =>
+    page.evaluate((percent) => {
+      const slider = document.getElementById('musicSpacingAdjust');
+      slider.value = String(percent);
+      window.myGrooveWriter.musicSpacingChange({ target: slider });
+      return (document.getElementById('ABCsource').value.match(/%%leftmargin (\d+)px/) || [])[1];
+    }, percent);
+
+  test('bars of 16ths go two a line, as in 16ths, and 95% narrows them', async ({ page }) => {
+    await loadGroove(page, grooveUrl(mixed));
+    expect(await lines(page)).toBe(2);
+    try {
+      expect(Number(await spacing(page, 95))).toBeGreaterThan(0); // (still two a line)
+      expect(await lines(page)).toBe(2);
+      const at75 = Number(await spacing(page, 75));
+      expect(at75).toBeGreaterThan(Number(await spacing(page, 95)));
+      expect(Number(await spacing(page, 150))).toBeGreaterThan(0); // (one a line, 75% wide)
+      expect(await lines(page)).toBe(4);
+    } finally {
+      await spacing(page, 100); // (this device's setting, back as it was)
+    }
+  });
+});
