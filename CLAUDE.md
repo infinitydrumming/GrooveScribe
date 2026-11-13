@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1304 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **145 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1305 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **146 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~172 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -300,9 +300,14 @@ swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
   no margins.
 - **Music spacing for all music** (`spacedMusic` in `generate_ABC`): other than practised alphabet bars,
   `spacedLayout` makes `musicLayout`'s bars a line `1 / spacing` times as many (at most 8; a wider page,
-  drawn smaller, when `bar` × that won't fit), and a groove's `spacedLines` heading centres one short line
-  and keeps a last line's spacing. 100% returns the layout untouched (golden master unchanged). Alphabet
-  groups break their lines every `barsPerLine` (`getPermutationSectionABC`).
+  drawn smaller, when `bar` × that won't fit), and between whole numbers of bars a line its `share` (the
+  page a full line takes, below 1 only, never under its notes' need) narrows every line by margins, so
+  every step shows; a groove's `spacedLines` heading centres one short line and keeps a last line's
+  spacing, the alphabet gets just the margins (`sideMargins`). 100% returns the layout untouched (golden
+  master unchanged). Alphabet groups break their lines every `barsPerLine` (`getPermutationSectionABC`).
+- **Beat-by-beat bars are laid out by their beats' notes** (`layoutBarNotes`): the most notes any bar's
+  beats show, not the grid's slots (48 / 32 / 96), for `musicLayout` and its one-bar-a-line test (32 notes),
+  so a Mixed groove of 16ths lays out as 16ths do.
 - **The alphabet's run, in order and with trade bars**: `permutationRun()` is the run as it plays, each
   entry a written figure (`index` among the shown ones, `number`) and its `times`: the shown figures each
   "Play each" times, or a `PermBars` order (`parseBarOrder`; `isPlainOrder` lists play as before). Trade

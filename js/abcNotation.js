@@ -1528,15 +1528,24 @@ var MAX_BARS_PER_LINE = 8;
 /**
  * Infinity Drumming, 2026: musicLayout's layout with the device's "Music spacing":
  * narrower bars, more on a line (`1 / spacing` times as many, drawn smaller when
- * their notes need it), or wider ones, fewer (one at least).
+ * their notes need it), or wider ones, fewer (one at least).  Between whole numbers
+ * of bars a line, the lines are as wide as their bars at that spacing (`share`: the
+ * part of the page a full line takes, when less than all of it; never less than its
+ * notes need), so every step of the spacing shows.
  * @param {{barsPerLine: number, renderWidth: number, bar: number}} layout  musicLayout's
  * @param {number} spacing  1 leaves the layout as it is; 0: a bar a line
- * @returns {{barsPerLine: number, renderWidth: number, bar: number}}
+ * @returns {{barsPerLine: number, renderWidth: number, bar: number, share?: number}}
  */
 export function spacedLayout(layout, spacing) {
   if (spacing == 1) return layout;
   var barsPerLine = spacing ? Math.floor(layout.barsPerLine / spacing + 1e-9) : 1;
-  return withRoomFor(Math.min(MAX_BARS_PER_LINE, Math.max(1, barsPerLine)), layout);
+  /** @type {{barsPerLine: number, renderWidth: number, bar: number, share?: number}} */
+  var spaced = withRoomFor(Math.min(MAX_BARS_PER_LINE, Math.max(1, barsPerLine)), layout);
+  var share = (spaced.barsPerLine * spacing) / layout.barsPerLine;
+  var needs = (spaced.barsPerLine * layout.bar) / musicPageWidth(spaced.renderWidth);
+  if (spacing && share < 1) spaced.share = Math.min(1, Math.max(share, needs));
+  if (spaced.share == 1) delete spaced.share;
+  return spaced;
 }
 
 // so many bars a line, on a page wide enough for their notes (drawn smaller)
@@ -1554,14 +1563,15 @@ function withRoomFor(barsPerLine, layout) {
  * Infinity Drumming, 2026: the lines of `count` bars laid out so, every bar as wide
  * as on a full line: one line of fewer bars is centred between margins.
  * @param {number} count
- * @param {{barsPerLine: number, renderWidth: number}} layout
+ * @param {{barsPerLine: number, renderWidth: number, share?: number}} layout
  * @returns {{margin: number, oneLine: boolean}}
  */
 export function spacedLines(count, layout) {
   var page = musicPageWidth(layout.renderWidth);
   var onALine = Math.min(count, layout.barsPerLine);
+  var bar = (page * (layout.share || 1)) / layout.barsPerLine; // (a bar's part of a line)
   return {
-    margin: Math.floor((page - (onALine * page) / layout.barsPerLine) / 2),
+    margin: Math.floor((page - onALine * bar) / 2),
     oneLine: count <= layout.barsPerLine,
   };
 }
