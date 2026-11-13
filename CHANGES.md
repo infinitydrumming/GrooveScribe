@@ -11,6 +11,14 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-11-13 — A bigger play button
+
+- The play button is larger, easier to see and to tap: 68px on a computer (was 54),
+  64px on a phone (was 46; 58px on the smallest phones), 54px on a phone held
+  sideways (was 44), the play bar a little taller to fit it. On a phone the practice
+  timer's "Timer: 5 min" goes on two lines and the tempo and swing rows sit closer,
+  so the sliders keep more room than before (`css/infinity_layout.css`).
+
 ## 2026-11-12 — Music spacing on Mixed grooves, and every step of it
 
 - A Mixed (beat by beat) groove was laid out as if every bar used all of its grid's

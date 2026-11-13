@@ -15,7 +15,7 @@
 :root {
   --layout-header-h: 60px;
   --layout-toolbar-h: 56px;
-  --layout-player-h: 72px;
+  --layout-player-h: 84px;
   --layout-credits-h: 24px;
   --layout-page-bg: #f4f6fa;
   --layout-radius: 14px;
@@ -443,12 +443,14 @@ body,
   height: 100%;
   padding: 0 18px;
 }
+/* the play button: big, easy to see and to tap (Infinity Drumming, 2026) */
 #midiPlayer .midiPlayImage {
-  width: 54px;
-  height: 54px;
+  flex: none;
+  width: 68px;
+  height: 68px;
   margin: 0;
-  line-height: 54px;
-  font-size: 24px;
+  line-height: 68px;
+  font-size: 30px;
   background: var(--id-amber);
 }
 #midiPlayer .midiPlayImage:hover {
@@ -748,9 +750,10 @@ body,
     padding: 0 10px;
   }
   #midiPlayer .midiPlayImage {
-    width: 46px;
-    height: 46px;
-    line-height: 46px;
+    width: 64px;
+    height: 64px;
+    line-height: 64px;
+    font-size: 30px;
   }
   #midiPlayer .MIDIPlayTime {
     font-size: 20px;
@@ -764,6 +767,17 @@ body,
   }
   #midiPlayer .practiceTimerStatus {
     font-size: 13px;
+    /* ("Timer: / 5 min" on two lines: room for the tempo slider) */
+    max-width: 3.6em;
+    white-space: normal;
+    line-height: 1.15;
+  }
+  #midiPlayer .tempoRow,
+  #midiPlayer .swingRow {
+    gap: 6px;
+  }
+  #midiPlayer .tempoTextField {
+    width: 50px;
   }
   #creditsFooter {
     font-size: 10px;
@@ -1347,7 +1361,7 @@ body,
  * credits come at the end of the page. */
 @media (max-height: 520px) {
   :root {
-    --layout-player-h: 56px;
+    --layout-player-h: 64px;
   }
   body {
     height: auto;
@@ -1373,9 +1387,10 @@ body,
     height: auto;
   }
   #midiPlayer .midiPlayImage {
-    width: 44px;
-    height: 44px;
-    line-height: 44px;
+    width: 54px;
+    height: 54px;
+    line-height: 54px;
+    font-size: 26px;
   }
   /* the menus fit the height of the screen and scroll */
   #grooveListWrapper,
@@ -1924,6 +1939,12 @@ body.selectingNotes #measureContainer .notes-row-container {
   /* a small phone: room for the timer, the box and the tempo */
   #midiPlayer .playerControlsRow {
     gap: 6px;
+  }
+  #midiPlayer .midiPlayImage {
+    width: 58px;
+    height: 58px;
+    line-height: 58px;
+    font-size: 26px;
   }
 }
 
