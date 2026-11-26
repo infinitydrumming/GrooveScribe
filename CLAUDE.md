@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1311 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **147 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1312 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **148 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~172 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -374,6 +374,10 @@ swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
   through the Mixed writer with each `d` beat written from the fine slots (`fineBeatABC`, its counts
   and diddle stops from the fine beat plan). Its layout counts its notes as Mixed (`layoutNotes`).
   Beats of 8ths and 16ths swing on every grid (`beatSlotDuration`, by slots a quarter note).
+- **Short links** (Save & Share, `functions/api/shorten.js`, Cloudflare KV `SHORT_LINKS`, a code from the groove's
+  SHA-256): `/s/<code>` (`functions/s/[code].js`) redirects to the full groove up to `LONGEST_ADDRESS` (8,000);
+  a longer groove (up to 100,000) opens as `/?s=<code>`, and `js/main.js` fetches `/api/link/<code>` and
+  `replaceState`s its groove into the address (a top-level await) before `new GrooveWriter()` reads it.
 - **Bar copies** go to localStorage and the device clipboard (`Infinity Scribe bar {json}`, with an
   `at` time; paste takes the newer): each origin, home-screen app and private tab has its own
   storage. Anything that lays the grid out again (add / remove / paste / "Add a copy") goes through

@@ -18,6 +18,23 @@ window.GrooveWriter = GrooveWriter;
 window.GrooveUtils = GrooveUtils;
 window.grooves = grooves;
 
+// A short link to a groove too long to send in an address opens as /?s=<code>
+// (Infinity Drumming, 2026; functions/s/[code].js): its groove is fetched and put
+// in the page's address before the editor reads it.
+async function grooveOfLongLink() {
+  const code = new URLSearchParams(window.location.search).get('s');
+  if (!code || !/^[0-9A-Za-z]{8,16}$/.test(code)) return;
+  try {
+    const response = await fetch('/api/link/' + code);
+    const link = response.ok ? await response.json() : null;
+    if (link && typeof link.search == 'string' && link.search.charAt(0) == '?')
+      window.history.replaceState(null, '', window.location.pathname + link.search);
+  } catch (error) {
+    console.warn('This groove link could not be opened:', error); // offline, most likely
+  }
+}
+await grooveOfLongLink();
+
 const myGrooveWriter = new GrooveWriter();
 window.myGrooveWriter = myGrooveWriter;
 const utils = myGrooveWriter.myGrooveUtils;
@@ -102,10 +119,13 @@ fillContainer(
 );
 
 // Initialize the notes/player once the page has fully loaded (matches the
-// original window.onload handler).
-window.addEventListener('load', function () {
-  myGrooveWriter.runsOnPageLoad();
-});
+// original window.onload handler; or now, when it loaded while a long link's
+// groove was fetched).
+if (document.readyState == 'complete') myGrooveWriter.runsOnPageLoad();
+else
+  window.addEventListener('load', function () {
+    myGrooveWriter.runsOnPageLoad();
+  });
 
 // Offer to update when a newer version has gone live (Infinity Drumming, 2026).
 startUpdateChecks();

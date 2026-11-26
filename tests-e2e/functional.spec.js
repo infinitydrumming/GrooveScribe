@@ -1327,3 +1327,23 @@ test.describe('Music spacing on a Mixed groove', () => {
     }
   });
 });
+
+// Infinity Drumming, 2026: a short link to a groove too long for an address opens as
+// /?s=<code>, the page fetching its groove (functions/s/[code].js, functions/api/link)
+test.describe('a short link to a very long groove', () => {
+  test('opens as /?s=<code>: the page fetches its groove and puts it in its address', async ({
+    page,
+  }) => {
+    const groove =
+      '?TimeSig=4/4&Div=16&Title=Long%20Link&Tempo=95&Measures=2' +
+      '&H=|x-x-x-x-x-x-x-x-|xxxxxxxxxxxxxxxx|&S=|----O-------O---|----O-------O---|';
+    await page.route('**/api/link/AbCdEfGh', (route) =>
+      route.fulfill({ contentType: 'application/json', body: JSON.stringify({ search: groove }) })
+    );
+    await loadGroove(page, grooveUrl('?s=AbCdEfGh'));
+    expect(await page.evaluate(() => location.search)).toContain('Title=Long%20Link');
+    expect((await grooveData(page)).numberOfMeasures).toBe(2);
+    expect((await grooveData(page)).tempo).toBe(95);
+    await expect(page.locator('#tuneTitle')).toHaveValue('Long Link');
+  });
+});

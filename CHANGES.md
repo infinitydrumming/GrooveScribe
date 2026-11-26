@@ -11,6 +11,16 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-11-26 — Short links for very long grooves
+
+- Save & Share's short link turned down a groove whose link was over 8,000
+  characters (a 32-bar groove of toms, flams and triplets is about 15,000), giving
+  the long link instead. It now takes links up to 100,000 (`functions/api/shorten.js`).
+  Short links of up to 8,000 open the full groove as before; a longer one opens as
+  `/?s=<code>` and the page fetches its groove (`functions/api/link/[code].js`,
+  `js/main.js`) before the editor reads it, so the long link never has to be sent as
+  an address, past what browsers and Cloudflare take.
+
 ## 2026-11-26 — Loops come round on time; a groove's bars some at a time
 
 - A loop could come back round a little late now and then (10 ms and more when the
