@@ -571,3 +571,101 @@ describe('the steady clock', () => {
     expect(midi.setVolume).toHaveBeenLastCalledWith(0, 127);
   });
 });
+
+// Infinity Drumming, 2026: the same clock plays every groove, without a song (MIDI.js
+// started each round again from a timer, late when the page was busy)
+describe('the steady clock without a song', () => {
+  let audio, midi, onTell, loaded, engine;
+
+  beforeEach(() => {
+    vi.useFakeTimers({
+      toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date'],
+    });
+    vi.setSystemTime(1000 * 1000);
+    audio = fakeAudio();
+    midi = fakeMidi();
+    onTell = null;
+    loaded = { data: kickRound(1), bpm: 100 };
+    engine = createPlayAlong({
+      ctx: () => audio.ctx,
+      midi: () => midi,
+      round: () => loaded,
+      leadsIn: () => false,
+      tell: (data) => {
+        if (onTell) onTell(data);
+      },
+      songEnded: vi.fn(),
+    });
+    engine.loop(true);
+  });
+
+  afterEach(() => {
+    engine.stop();
+    vi.useRealTimers();
+  });
+
+  const kicks = () =>
+    midi.played.filter((n) => n.note == 35 && !n.stop.mock.calls.length).map((n) => n.at);
+
+  it('plays round after round, every kick on its beat, the loop never late', () => {
+    expect(engine.isOn()).toBe(false); // (no song)
+    engine.start();
+    expect(engine.playing).toBe(true);
+    vi.advanceTimersByTime(10000); // four rounds and a bit
+    const first = kicks()[0];
+    expect(first).toBeCloseTo(1000 + 0.15, 9); // (a moment after pressing play)
+    kicks().forEach((at, k) => expect(at - first).toBeCloseTo(k * 0.6, 9));
+    expect(kicks().length).toBeGreaterThan(16);
+    expect(audio.started).toHaveLength(0); // (nothing but the drums)
+  });
+
+  it('starts the round Scribe builds exactly where the last one ends', () => {
+    engine.start();
+    let built = 0;
+    onTell = (data) => {
+      if (data.now != data.end) return;
+      built++;
+      engine.stop();
+      loaded = { data: kickRound(built % 2 ? 2 : 1), bpm: 100 };
+      engine.start();
+    };
+    vi.advanceTimersByTime(9000);
+    expect(built).toBeGreaterThan(1);
+    const first = kicks()[0];
+    kicks().forEach((at, k) => expect(at - first).toBeCloseTo(k * 0.6, 9));
+  });
+
+  it('starts a round built too late for its start a moment late, whole', () => {
+    engine.start();
+    onTell = (data) => {
+      if (data.now != data.end || onTell.done) return;
+      onTell.done = true;
+      engine.stop();
+      vi.setSystemTime(Date.now() + 400); // (building it took longer than the handover)
+      engine.start();
+    };
+    vi.advanceTimersByTime(4000);
+    const at = kicks();
+    expect(at.length).toBeGreaterThan(5);
+    // the second round's four kicks all play, from a moment after it was built
+    const gap = at[4] - at[3];
+    expect(gap).toBeGreaterThan(0.6);
+    for (let k = 5; k < 8; k++) expect(at[k] - at[k - 1]).toBeCloseTo(0.6, 9);
+  });
+
+  it('pauses and resumes from the same place, and stops', () => {
+    engine.start();
+    vi.advanceTimersByTime(1000);
+    engine.pause();
+    expect(engine.playing).toBe(false);
+    const before = kicks().length;
+    vi.advanceTimersByTime(5000);
+    expect(kicks()).toHaveLength(before);
+    engine.resume();
+    expect(engine.playing).toBe(true);
+    vi.advanceTimersByTime(2000);
+    expect(kicks().length).toBeGreaterThan(before);
+    engine.stop();
+    expect(engine.playing).toBe(false);
+  });
+});

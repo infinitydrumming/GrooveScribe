@@ -17,8 +17,8 @@ build step). A groove is encoded in the URL, rendered to sheet music as SVG
 
 | Command                | Expectation                                                                                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`             | Vitest unit suite — **1305 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
-| `npm run test:e2e`     | Playwright golden-master — **146 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
+| `npm test`             | Vitest unit suite — **1311 pass** (8 "unhandled errors" from a tempo timer outliving its test's DOM are a known, pre-existing quirk)                                         |
+| `npm run test:e2e`     | Playwright golden-master — **147 pass**. Byte-identical SVG+MIDI snapshots; this is the real proof that a refactor changed nothing functional. Finishes in <5 min by design. |
 | `npm run lint`         | ESLint — **0 errors** (~75 SonarJS _warnings_ are an accepted refactor backlog, not failures)                                                                                |
 | `npm run typecheck`    | `tsc --noEmit` checkJs via JSDoc — ~172 known errors baseline; changes should be typecheck-**neutral**                                                                       |
 | `npm run knip`         | no unused exports/files                                                                                                                                                      |
@@ -100,7 +100,8 @@ Pure / low-coupling core (extracted from the two big files, imported back):
   play it through the silent switch; `'auto'` again on pause/stop.
 - `playAlong.js` — playing along with a song: the sums (tap tempo, where song and drums start, the song's
   position through speed changes and round a loop, the hit nearest a tap, wave peaks) and the steady clock (`createPlayAlong`)
-  that plays the rounds in place of MIDI.Player while a song is on, with the song (`createSongPlayer`).
+  that plays the rounds in place of MIDI.Player while a song is on, with the song (`createSongPlayer`), and without
+  one wherever the sounds play on the audio clock (loops come round on time).
 - `timeStretch.js` — a slower or faster song keeping its pitch: a phase vocoder (phase locking, a phase reset placing
   each drum hit exactly on time) whose windows come from a time map (`positionOfFrame`), and the song's hits
   (`findHits`). Snapshots let the stretch be made again after a speed change.
@@ -250,7 +251,10 @@ swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
   still fills MIDI.Player.data, which the clock reads). It places notes `LOOKAHEAD` ahead on the audio clock
   (`MIDI.noteOn` with absolute times) and tells `ourMIDICallback` each note as MIDI.js would; a round's end is
   told `HANDOVER` early, and a `start()` during that call queues Scribe's next round exactly at the old one's
-  end (a `stop()` then is deferred: no `start()` means the groove ends). Every round's first bar is played a
+  end (a `stop()` then is deferred: no `start()` means the groove ends). Without a song it plays every groove
+  too, wherever `MIDI.Player.ctx` is a real audio context (`player()` / `onTheAudioClock`, `gu.steadyPlayback`):
+  MIDI.js restarted each round from a timer, late when the page was busy; a round built too late for its start
+  (no song) starts a moment late, whole. One `GrooveUtils` plays at a time (`global_playing_root`). Every round's first bar is played a
   blank tick early (`firstBarOnTime`), a count-in ends a tick sooner, so all bars sit on the song's beats. The
   song's speed is the groove's tempo / the song's, changed at round starts and tempo switches
   (`switchTempoAtNextBar`); it keeps its pitch (`createStretchedSongPlayer`, made `STRETCH_AHEAD` ahead in
@@ -335,7 +339,10 @@ swung-8ths chapter in Scribe, 2026-10-29: his call each time, not a precedent.)
   permutation; `PlayEach=2&Trade=1x2a` without `Perm`): `grooveRun()` is the playing order as steps
   (`{bar, rep, times, entry}`, a trade bar's `{bar, trade, tradeTime, entry}`): `plainPlayedBars()` (below) without
   the trade bars (the groove's last `grooveTradeBars()`, at most bars − 1), each bar `grooveEach()` times, the trade
-  bars around each; `playedBars()` is its bars, so everything bar by bar follows. Choosing Trade adds bars
+  bars around each; `playedBars()` is its bars, so everything bar by bar follows. Or some bars at a time
+  (`grooveBlock()`, "Play 4 bars at a time", `EachBars=4`): each `entry` is a block of the order (its steps
+  carry `inBlock`), played `grooveEach()` times through, the trade bars around each block; written out, a
+  block sits between one pair of repeat signs (`first` / `last`). Choosing Trade adds bars
   (`setGrooveTradeBarCount`: copies of bar 1, no section), fewer drops the last, untouched copies only (written-in
   ones stay as bars of the groove). Without trade bars the music is written once (a `%%center` heading for Play
   each); with them, written out as it plays like the alphabet's (`grooveWrittenBars`, `asPlayedGrooveBarABC`

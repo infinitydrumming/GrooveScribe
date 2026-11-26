@@ -75,6 +75,13 @@ describe('practice settings in a link', () => {
       trade: { bars: 2, times: 1, after: false },
     });
     expect(fromQuery('&PlayEach=1').eachBar).toBeUndefined();
+    // some bars at a time (Infinity Drumming, 2026)
+    const blocks = { ...settings, eachBar: { times: 2, trade: eachBar.trade, block: 4 } };
+    expect(practiceSettingsToUrl(blocks)).toBe('&PlayEach=2&EachBars=4&Trade=1x2a');
+    expect(fromQuery('&PlayEach=2&EachBars=4&Trade=1x2a')).toEqual(blocks);
+    expect(fromQuery('&PlayEach=2&EachBars=1').eachBar).toEqual({ times: 2, trade: null });
+    expect(fromQuery('&EachBars=4').eachBar).toBeUndefined(); // (alone it changes nothing)
+    expect(fromQuery('&Perm=kick_16ths&PlayEach=2&EachBars=4').eachBar).toBeUndefined();
     // with the alphabet on, they are the alphabet's (and a groove's are left out)
     const perm = fromQuery('&Perm=kick_16ths&PlayEach=3&Trade=1x2a');
     expect(perm.eachBar).toBeUndefined();

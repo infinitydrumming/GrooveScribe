@@ -11,6 +11,20 @@ As GPL v2 section 2(a) asks, this file records what was changed and when. Every
 modified source file also carries a short "Modified by Infinity Drumming" notice.
 The original copyright notices and credits are unchanged.
 
+## 2026-11-26 — Loops come round on time; a groove's bars some at a time
+
+- A loop could come back round a little late now and then (10 ms and more when the
+  page was busy just then): MIDI.js's player started each time round again from a
+  timer, and built the next round in that moment. The play-along's steady clock now
+  plays every groove where the sounds play on the audio clock (Web Audio, every
+  current browser), with a song or without: each round goes on the clock exactly
+  where the one before ends, built a moment ahead (`player()` in
+  `js/groove_utils.js`, `js/playAlong.js`). One groove plays at a time on a page.
+- The groove page's "Play each bar" can play the bars some at a time: "Play 4 bars
+  at a time ×2" plays bars 1-4 twice, then 5-8 twice..., the trade bars before or
+  after each block, the music written out as it plays (`grooveBlock`, `grooveRun` in
+  `js/groove_writer.js`; links: `EachBars=4`, `js/practiceSettings.js`).
+
 ## 2026-11-13 — A bigger play button
 
 - The play button is larger, easier to see and to tap: 68px on a computer (was 54),

@@ -130,6 +130,7 @@ var global_num_GrooveUtilsCreated = 0;
 // so import.meta.url is the module-safe equivalent of the old currentScript.src.
 var global_grooveUtilsScriptSrc = import.meta.url;
 var global_midiInitialized = false;
+var global_playing_root = null; // the GrooveUtils last started (Infinity Drumming, 2026)
 // the drum sounds, tried again when a try fails (Infinity Drumming, 2026, see soundLoading.js)
 /** @type {ReturnType<typeof createSoundLoader> | null} */
 var global_soundLoader = null;
@@ -1292,7 +1293,8 @@ function GrooveUtils() {
   // --- Playing along with a song (Infinity Drumming, 2026) ---------------------
   // While a song is loaded, the play-along's steady clock plays the rounds in
   // place of MIDI.js's player (with the same calls), and the song with them
-  // (playAlong.js). Without a song, MIDI.js plays them as always.
+  // (playAlong.js). Without a song it plays them too, wherever the sounds play on
+  // the audio clock (see player()).
   root.playAlong = createPlayAlong({
     ctx: function () {
       return MIDI.Player.ctx;
@@ -1314,9 +1316,18 @@ function GrooveUtils() {
     },
   });
 
-  // the player playing the rounds
+  // The player playing the rounds: the steady clock with a song, and (Infinity
+  // Drumming, 2026) wherever the sounds play on the audio clock (Web Audio), so each
+  // round starts exactly where the one before ends: MIDI.js's player started each
+  // time round again from a timer, late whenever the page was busy just then.
+  // MIDI.js's player where there's no audio clock (very old browsers).
   function player() {
-    return root.playAlong.isOn() ? root.playAlong : MIDI.Player;
+    return root.playAlong.isOn() || onTheAudioClock() ? root.playAlong : MIDI.Player;
+  }
+  root.steadyPlayback = true; // (false: MIDI.js's player, as before)
+  function onTheAudioClock() {
+    var ctx = root.steadyPlayback && typeof MIDI != 'undefined' && MIDI.Player && MIDI.Player.ctx;
+    return !!ctx && typeof ctx.createGain == 'function';
   }
 
   root.loadMIDIFromURL = function (midiURL) {
@@ -1451,6 +1462,10 @@ function GrooveUtils() {
   // play button or keypress
   root.startMIDI_playback = function () {
     if (player().playing) return;
+    // one groove plays at a time (each has its own clock; MIDI.js's player was one)
+    if (global_playing_root && global_playing_root !== root && global_playing_root.isPlaying())
+      global_playing_root.stopMIDI_playback();
+    global_playing_root = root;
     audioSession.playing(true); // before any sound, so it plays on silent too
     if (
       root.isMIDIPaused &&

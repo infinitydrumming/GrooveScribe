@@ -916,14 +916,15 @@ export function straightBarButtonHTML(baseindex, straight) {
 // alphabet's when absent
 var ALPHABET_IDS = { prefix: 'Permutation', each: 'permutationRepeatChange', trade: 'tradeChange' };
 
-function playEachHTML(repeats, repCounter, ids) {
+function playEachHTML(repeats, repCounter, ids, block) {
   ids = ids || ALPHABET_IDS;
   var html =
     '<span id="' +
     ids.prefix +
-    'RepeatOption"><label for="' +
-    ids.prefix +
-    'Repeat">Play each bar</label> ';
+    'RepeatOption">' +
+    (block && block.most > 1
+      ? blockHTML(block, ids)
+      : '<label for="' + ids.prefix + 'Repeat">Play each bar</label> ');
   html +=
     '<select id="' + ids.prefix + 'Repeat" onchange="myGrooveWriter.' + ids.each + '(event)">';
   for (var times = 1; times <= 16; times++)
@@ -952,8 +953,9 @@ function playEachHTML(repeats, repCounter, ids) {
 // grid's bars after the ostinato's, played so many times before (or after) each
 // bar of the run (not one of the figures' ticks: the link's Trade= has it)
 // (`most`: the most trade bars, 4 for the alphabet; `ids` as for playEachHTML)
-function tradeHTML(trade, most, ids) {
+function tradeHTML(trade, most, ids, inBlocks) {
   ids = ids || ALPHABET_IDS;
+  var each = inBlocks ? ' each block' : ' each bar'; // (a groove's bars some at a time)
   var handler = ' onchange="myGrooveWriter.' + ids.trade + '()">';
   var counts = [];
   for (var count = 0; count <= (most === undefined ? 4 : most); count++) counts.push(count);
@@ -998,13 +1000,36 @@ function tradeHTML(trade, most, ids) {
       }) +
       '</select> <select id="' +
       ids.prefix +
-      'TradeWhere" aria-label="Before or after each bar"' +
+      'TradeWhere" aria-label="Before or after' +
+      each +
+      '"' +
       handler +
       options(['before', 'after'], trade.after ? 'after' : 'before', function (where) {
-        return where + ' each bar';
+        return where + each;
       }) +
       '</select>';
   return html + '</span>\n';
+}
+
+// "Play [4 bars at a time]": the groove's bars a block at a time (Infinity Drumming,
+// 2026), `block` {bars, most}
+function blockHTML(block, ids) {
+  var html =
+    '<label for="' +
+    ids.prefix +
+    'Block">Play</label> <select id="' +
+    ids.prefix +
+    'Block" onchange="myGrooveWriter.grooveBlockChange(event)">';
+  for (var bars = 1; bars <= block.most; bars++)
+    html +=
+      '<option value="' +
+      bars +
+      '"' +
+      (bars == block.bars ? ' selected' : '') +
+      '>' +
+      (bars == 1 ? 'each bar' : bars + ' bars at a time') +
+      '</option>';
+  return html + '</select> ';
 }
 
 /**
@@ -1014,10 +1039,13 @@ function tradeHTML(trade, most, ids) {
  * @param {boolean} repCounter  the device's rep counter switch
  * @param {{bars: number, times: number, after: boolean}} trade
  * @param {number} most  the most trade bars (a bar must be left to trade with)
+ * @param {{bars: number, most: number}} [block]  the bars played at a time, and the
+ *   most there can be ("Play 4 bars at a time")
  */
-export function buildGrooveOptionsHTML(repeats, repCounter, trade, most) {
+export function buildGrooveOptionsHTML(repeats, repCounter, trade, most, block) {
   var ids = { prefix: 'Groove', each: 'grooveRepeatChange', trade: 'grooveTradeChange' };
-  return playEachHTML(repeats, repCounter, ids) + tradeHTML(trade, most, ids);
+  var inBlocks = !!block && block.bars > 1;
+  return playEachHTML(repeats, repCounter, ids, block) + tradeHTML(trade, most, ids, inBlocks);
 }
 
 var escapeHTML = function (text) {

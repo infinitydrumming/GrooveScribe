@@ -6,7 +6,7 @@
 // probes run through `npx vitest run`) before being written -- nothing is
 // asserted from reading the source alone.
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { buildStaffContainerHTML } from '../../js/viewHtml.js';
+import { buildStaffContainerHTML, buildGrooveOptionsHTML } from '../../js/viewHtml.js';
 import { newGrooveWriter, buildGridDOM } from '../helpers/loadGrooveWriter.js';
 
 // class_time_division is seeded from window.location.search ("Div" query
@@ -518,5 +518,38 @@ describe('HTMLforPermutationOptions', () => {
     scaffoldForStateMutatingCalls(gw);
     swallowingKnownHarnessGap(() => gw.permutationPopupClick('snare_accent_16ths'));
     expect(gw.HTMLforPermutationOptions()).toBe('');
+  });
+});
+
+// Infinity Drumming, 2026: the groove page's Play each bar / Trade, some bars at a time
+describe('buildGrooveOptionsHTML', () => {
+  const trade = { bars: 1, times: 2, after: false };
+  it('offers so many bars at a time, saying "each block" for the trade bars then', () => {
+    const html = buildGrooveOptionsHTML(2, false, trade, 4, { bars: 3, most: 6 });
+    const doc = new DOMParser().parseFromString('<div>' + html + '</div>', 'text/html');
+    const block = doc.getElementById('GrooveBlock');
+    expect([...block.options].map((o) => o.textContent)).toEqual([
+      'each bar',
+      '2 bars at a time',
+      '3 bars at a time',
+      '4 bars at a time',
+      '5 bars at a time',
+      '6 bars at a time',
+    ]);
+    expect(block.value).toBe('3');
+    expect(doc.getElementById('GrooveRepeat').value).toBe('2');
+    expect(doc.getElementById('GrooveTradeWhere').options[0].textContent).toBe('before each block');
+  });
+
+  it('is "Play each bar" as before with a bar at a time, or a single bar of its own', () => {
+    for (const block of [undefined, { bars: 1, most: 4 }, { bars: 1, most: 1 }]) {
+      const html = buildGrooveOptionsHTML(1, false, trade, 4, block);
+      const doc = new DOMParser().parseFromString('<div>' + html + '</div>', 'text/html');
+      expect(doc.getElementById('GrooveTradeWhere').options[0].textContent).toBe('before each bar');
+      if (!block || block.most < 2) {
+        expect(doc.getElementById('GrooveBlock')).toBeNull();
+        expect(html).toContain('>Play each bar</label>');
+      }
+    }
   });
 });

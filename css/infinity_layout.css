@@ -1704,7 +1704,8 @@ body.selectingNotes #measureContainer .notes-row-container {
   white-space: nowrap;
 }
 #PermutationRepeat,
-#GrooveRepeat {
+#GrooveRepeat,
+#GrooveBlock {
   min-height: 36px;
   padding: 4px 10px;
   border: 2px solid var(--id-navy-900);
