@@ -7386,8 +7386,12 @@ function GrooveWriter() {
   // The alphabet's "Play each bar" and "Trade" for a groove of more than one bar:
   // each bar of the playing order plays so many times, and the groove's last bars
   // (its trade bars, marked so in the grid) so many times before (or after) each.
-  // In the link as PlayEach= and Trade= (without Perm=).
+  // Or some bars at a time ("Play 4 bars at a time": bars 1-4, the trade bars, bars
+  // 5-8...), each block so many times. In the link as PlayEach=, EachBars= and
+  // Trade= (without Perm=).
   var class_groove_each = 1;
+  var class_groove_block = 1; // the bars played at a time (a block)
+  var MAX_GROOVE_BLOCK = 16;
   var class_groove_trade = { bars: 0, times: 1, after: false };
   var class_groove_options_html = '';
   var class_playing_step = -1; // the step of grooveRun() playing (for the rep counter)
@@ -7408,9 +7412,18 @@ function GrooveWriter() {
     return grooveEach() > 1 || grooveTradeBars() > 0;
   }
 
-  // The groove's bars as they play, each a step: { bar (0-based), rep, times }, or
-  // for a trade bar { bar, trade (which of them), tradeTime }, and its `entry` (the
-  // bar of the order it plays with); [] when that's every bar once, in order
+  // the bars played at a time: 1 with a permutation, never more than the groove's
+  // own (untraded) bars
+  function grooveBlock() {
+    if (class_permutation_type != 'none') return 1;
+    var own = class_number_of_measures - grooveTradeBars();
+    return Math.max(1, Math.min(class_groove_block, own, MAX_GROOVE_BLOCK));
+  }
+
+  // The groove's bars as they play, each a step: { bar (0-based), rep, times,
+  // inBlock (which bar of its block) }, or for a trade bar { bar, trade (which of
+  // them), tradeTime }, and its `entry` (the block of the order it plays with: a bar,
+  // or so many bars at a time); [] when that's every bar once, in order
   function grooveRun() {
     var order = plainPlayedBars();
     var each = grooveEach();
@@ -7432,17 +7445,26 @@ function GrooveWriter() {
     for (var time = 0; trade && time < class_groove_trade.times; time++)
       for (var k = 0; k < trade; k++)
         traded.push({ bar: firstTrade + k, trade: k, tradeTime: time });
+    var block = grooveBlock();
     var run = [];
-    bars.forEach(function (bar, entry) {
-      var trades = traded.map(function (step) {
-        return Object.assign({ entry: entry }, step);
-      });
+    for (var entry = 0; entry * block < bars.length; entry++) {
+      var blockBars = bars.slice(entry * block, (entry + 1) * block);
+      var trades = traded.map(withEntry(entry));
       if (!class_groove_trade.after) run = run.concat(trades);
       for (var rep = 0; rep < each; rep++)
-        run.push({ bar: bar, rep: rep, times: each, entry: entry });
+        blockBars.forEach(function (bar, inBlock) {
+          run.push({ bar: bar, rep: rep, times: each, entry: entry, inBlock: inBlock });
+        });
       if (class_groove_trade.after) run = run.concat(trades);
-    });
+    }
     return run;
+  }
+
+  // a trade step as it plays with block `entry`
+  function withEntry(entry) {
+    return function (step) {
+      return Object.assign({ entry: entry }, step);
+    };
   }
 
   // with trade bars the music is written out as it plays, as the alphabet's is
@@ -7450,27 +7472,31 @@ function GrooveWriter() {
     return grooveTradeBars() > 0;
   }
 
-  // The bars the music writes then: every bar of the order once (between repeat
-  // signs, how many times under the end one, when it repeats), its trade bars
-  // before or after it the same way; each { bar, times, first, last, label,
-  // number, entry, trade }. The bars keep their numbers, the trade bars show none.
+  // The bars the music writes then: every bar of the order once, a block of them
+  // between repeat signs (how many times under the end one) when it repeats, its
+  // trade bars before or after it the same way; each { bar, times, first, last,
+  // label, number, entry, inBlock, trade }. The bars keep their numbers, the trade
+  // bars show none.
   function grooveWrittenBars() {
     var trade = grooveTradeBars();
+    var run = grooveRun();
     var written = [];
-    grooveRun().forEach(function (step) {
+    run.forEach(function (step, at) {
       if (step.trade === undefined) {
         if (step.rep) return;
-        var section = currentSectionRuns().find(function (run) {
-          return run.from == step.bar;
+        var section = currentSectionRuns().find(function (sectionRun) {
+          return sectionRun.from == step.bar;
         });
+        var next = run[at + 1];
         written.push({
           bar: step.bar,
           times: step.times,
-          first: true,
-          last: true,
+          first: step.inBlock === 0,
+          last: !next || next.entry != step.entry || next.trade !== undefined || next.rep > 0,
           label: section ? section.letter : '',
           number: step.bar + 1,
           entry: step.entry,
+          inBlock: step.inBlock,
         });
         return;
       }
@@ -7531,7 +7557,11 @@ function GrooveWriter() {
     if (!step) return groovePercent;
     var written = grooveWrittenBars();
     var index = written.findIndex(function (bar) {
-      return bar.entry == step.entry && bar.trade === step.trade;
+      return (
+        bar.entry == step.entry &&
+        bar.trade === step.trade &&
+        (step.trade !== undefined || bar.inBlock === step.inBlock)
+      );
     });
     if (index < 0) return groovePercent;
     var lengths = written.map(function (bar) {
@@ -7586,7 +7616,9 @@ function GrooveWriter() {
     var trade = grooveTradeBars();
     if (each < 2 && !trade) return '';
     if (grooveWrittenAsPlayed()) return ''; // (the music shows it)
-    var bars = 'each bar' + (each > 1 ? ' \u00d7' + each : '');
+    var block = grooveBlock();
+    var bars =
+      (block > 1 ? block + ' bars at a time' : 'each bar') + (each > 1 ? ' \u00d7' + each : '');
     if (!trade) return '%%center Play ' + bars + '\n';
     var traded =
       'the trade bar' +
@@ -7614,7 +7646,11 @@ function GrooveWriter() {
           Math.min(
             MAX_TRADE_BARS,
             constant_MAX_MEASURES - class_number_of_measures + grooveTradeBars()
-          )
+          ),
+          {
+            bars: grooveBlock(),
+            most: Math.min(MAX_GROOVE_BLOCK, class_number_of_measures - grooveTradeBars()),
+          }
         )
       : '';
     if (html != class_groove_options_html) {
@@ -7628,6 +7664,13 @@ function GrooveWriter() {
     class_groove_each = Math.min(Math.max(parseInt(event.target.value, 10) || 1, 1), 16);
     resetGrooveClickPhase();
     updateSheetMusic(); // the music's heading, the next time round, the link
+  };
+
+  root.grooveBlockChange = function (event) {
+    var most = MAX_GROOVE_BLOCK;
+    class_groove_block = Math.min(Math.max(parseInt(event.target.value, 10) || 1, 1), most);
+    resetGrooveClickPhase();
+    updateSheetMusic(); // the music, the next time round, the link
   };
 
   root.grooveTradeChange = function () {
@@ -7668,9 +7711,23 @@ function GrooveWriter() {
       );
       return;
     }
-    var text = 'Bar ' + (step.bar + 1);
+    var text = grooveBlock() > 1 ? blockCounterText(step) : 'Bar ' + (step.bar + 1);
     if (step.times > 1) text += ' \u00b7 Rep ' + (step.rep + 1) + ' of ' + step.times;
     showRepCounter(text);
+  }
+
+  // a block of bars playing: "Bars 5-8" (its bars in the order they play)
+  function blockCounterText(step) {
+    var bars = [];
+    grooveRun().forEach(function (other) {
+      if (other.entry == step.entry && other.trade === undefined && !other.rep)
+        bars.push(other.bar + 1);
+    });
+    var inOrder = bars.every(function (bar, k) {
+      return !k || bar == bars[k - 1] + 1;
+    });
+    if (bars.length < 2) return 'Bar ' + bars[0];
+    return 'Bars ' + (inOrder ? bars[0] + '\u2013' + bars[bars.length - 1] : bars.join(', '));
   }
 
   // the groove's bars that are practised (0-based), [] for all of them
@@ -8851,12 +8908,15 @@ function GrooveWriter() {
   function currentEachBar() {
     if (!grooveRepeatsOrTrades()) return null;
     var trade = grooveTradeBars();
-    return {
+    /** @type {{times: number, trade: Object|null, block?: number}} */
+    var eachBar = {
       times: grooveEach(),
       trade: trade
         ? { bars: trade, times: class_groove_trade.times, after: class_groove_trade.after }
         : null,
     };
+    if (grooveBlock() > 1) eachBar.block = grooveBlock();
+    return eachBar;
   }
 
   function setPermutationFromLink(perm) {
@@ -8952,6 +9012,7 @@ function GrooveWriter() {
       class_practise_bars = settings.playBars || '';
       var eachBar = settings.eachBar || null;
       class_groove_each = eachBar ? eachBar.times : 1;
+      class_groove_block = (eachBar && eachBar.block) || 1;
       class_groove_trade =
         eachBar && eachBar.trade
           ? Object.assign({}, eachBar.trade)

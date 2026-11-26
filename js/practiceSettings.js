@@ -68,9 +68,11 @@ var PERMUTATION_TYPES = [
  *   'intro': from the song's start, the drums in on bar 1); loop: bars of the
  *   song played round and round (from bar 1 = its bar 1), the groove starting on
  *   the first
- * @typedef {{times: number, trade: (TradeSetting|null)}} EachBarSetting
+ * @typedef {{times: number, trade: (TradeSetting|null), block?: number}} EachBarSetting
  *   a groove's bars each played `times` times, its last `trade.bars` bars traded
- *   with them (Infinity Drumming, 2026; the alphabet's own are in its setting)
+ *   with them (Infinity Drumming, 2026; the alphabet's own are in its setting);
+ *   block: so many bars at a time (a block each `times` times, the trade bars
+ *   between the blocks), only when more than 1; links: "EachBars=4"
  * @typedef {{permutation: (PermutationSetting|null), speedUp: (SpeedUpSetting|null),
  *   countIn: boolean, clickSolo: boolean, clickStart: string,
  *   mutes: Object<string, number[]>, playBars?: string, song?: (SongSetting|null),
@@ -241,6 +243,7 @@ function chapterFromText(text) {
  */
 function eachBarToUrl(eachBar) {
   var url = eachBar.times > 1 ? '&PlayEach=' + eachBar.times : '';
+  if (eachBar.block > 1) url += '&EachBars=' + eachBar.block;
   if (eachBar.trade && eachBar.trade.bars) url += '&Trade=' + tradeToText(eachBar.trade);
   return url;
 }
@@ -337,6 +340,23 @@ export function practiceSettingsToUrl(settings) {
 }
 
 /**
+ * A groove's "Play each bar" (some bars at a time) and trade bars in a link, or
+ * undefined for neither.
+ * @param {(name: string, fallback: any) => any} get
+ * @param {TradeSetting|null} trade
+ * @returns {EachBarSetting|undefined}
+ */
+function eachBarFromUrl(get, trade) {
+  var times = whole(get('PlayEach', '1'), 1, 16, 1);
+  if (times < 2 && !trade) return undefined;
+  /** @type {EachBarSetting} */
+  var eachBar = { times: times, trade: trade || null };
+  var block = whole(get('EachBars', '1'), 1, 16, 1);
+  if (block > 1) eachBar.block = block;
+  return eachBar;
+}
+
+/**
  * The practice settings in a link.
  * @param {(name: string, fallback: any) => any} get  a link parameter (any case), or fallback
  * @returns {PracticeSettings}
@@ -363,9 +383,7 @@ export function practiceSettingsFromUrl(get) {
   }
   var trade = tradeFromText(get('Trade', ''));
   if (trade && settings.permutation) settings.permutation.trade = trade;
-  var times = whole(get('PlayEach', '1'), 1, 16, 1);
-  if (!settings.permutation && (times > 1 || trade))
-    settings.eachBar = { times: times, trade: trade || null };
+  if (!settings.permutation) settings.eachBar = eachBarFromUrl(get, trade);
   settings.speedUp = speedUpFromText(get('SpeedUp', ''));
   settings.countIn = get('CountIn', '0') == '1';
   settings.clickSolo = get('ClickSolo', '0') == '1';

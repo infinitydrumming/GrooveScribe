@@ -15,7 +15,9 @@ var OUR_HOSTS = [
   'infinitydrumming.github.io',
   'localhost',
 ];
-var MAX_LINK_LENGTH = 8000;
+// (a 32-bar groove of toms, flams and triplets is about 15,000; one too long for an
+// address opens by way of /?s=<code>, see functions/s/[code].js)
+var MAX_LINK_LENGTH = 100000;
 var CODE_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
 function json(body, status) {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { onRequestPost, grooveSearch, storeGroove } from '../functions/api/shorten.js';
-import { onRequestGet } from '../functions/s/[code].js';
+import { onRequestGet, LONGEST_ADDRESS } from '../functions/s/[code].js';
+import { onRequestGet as fetchGroove } from '../functions/api/link/[code].js';
 
 // Infinity Drumming, 2026: short groove links on Cloudflare Pages.
 
@@ -66,6 +67,33 @@ describe('short groove links', () => {
     const env = { SHORT_LINKS: memoryKV() };
     expect((await open(env, 'AbCdEfGh')).status).toBe(404);
     expect((await open(env, '../etc')).status).toBe(404);
+  });
+
+  // Infinity Drumming, 2026: a 32-bar groove's link was too long to shorten
+  it('shortens a very long groove, which opens by way of /?s= (the page fetches it)', async () => {
+    const env = { SHORT_LINKS: memoryKV() };
+    // (six lines of a 32-bar groove of Mixed bars: about 9,500 characters)
+    const line =
+      '|' +
+      'o-----------'
+        .repeat(4)
+        .repeat(32)
+        .replace(/(.{48})/g, '$1|');
+    const long =
+      GROOVE + ['H', 'S', 'K', 'T1', 'T2', 'T4'].map((n) => '&' + n + '=' + line).join('');
+    expect(long.length).toBeGreaterThan(LONGEST_ADDRESS);
+    const { shortLink } = await (await shorten(env, { url: long })).json();
+    const code = shortLink.split('/s/')[1];
+    const response = await open(env, code);
+    expect(response.status).toBe(302);
+    expect(response.headers.get('Location')).toBe('https://scribe.infinitydrumming.com/?s=' + code);
+    const fetched = await fetchGroove({ env, params: { code } });
+    expect(fetched.headers.get('Cache-Control')).toContain('immutable');
+    expect((await fetched.json()).search).toBe(long.slice(long.indexOf('?')));
+    expect((await fetchGroove({ env, params: { code: 'AbCdEfGh' } })).status).toBe(404);
+    expect((await fetchGroove({ env, params: { code: '../etc' } })).status).toBe(404);
+    // (and one longer than any groove can be is still turned down)
+    expect((await shorten(env, { url: GROOVE + '&x=' + 'a'.repeat(100000) })).status).toBe(400);
   });
 
   it('never gives two grooves the same code', async () => {

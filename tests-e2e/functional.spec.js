@@ -357,6 +357,49 @@ test.describe('practising some bars', () => {
     expect(await inLink('Measures')).toBe('4');
     await expect(page.locator('.staff-container.tradeBar')).toHaveCount(0);
   });
+
+  // Infinity Drumming, 2026: some bars at a time before each trade
+  test('bars a block at a time, each block twice, the trade bar before each: as written out', async ({
+    page,
+  }) => {
+    const inLink = (name) =>
+      page.evaluate((param) => new URLSearchParams(location.search).get(param), name);
+    // the trade bar (a copy of bar 1), bars 1-2 twice; the trade bar, bars 3-4 twice
+    await loadGroove(page, grooveUrl(groove([0, 0, 1, 0, 1, 0, 2, 3, 2, 3])));
+    const writtenOut = await playing(page);
+
+    await loadGroove(page, grooveUrl(groove([0, 1, 2, 3])));
+    await page.selectOption('#GrooveBlock', '2');
+    await page.selectOption('#GrooveRepeat', '2');
+    await page.selectOption('#GrooveTradeBars', '1');
+    await expect(page.locator('#GrooveTradeWhere option[value="before"]')).toHaveText(
+      'before each block'
+    );
+    await expect
+      .poll(() => page.evaluate(() => location.search))
+      .toContain('&PlayEach=2&EachBars=2&Trade=1');
+    expect(await playing(page)).toBe(writtenOut);
+    // the music written out as it plays: each block between repeat signs, ×2 under its end
+    const abc = await page.locator('#ABCsource').inputValue();
+    expect(abc.match(/\[P:Trade\]/g)).toHaveLength(2);
+    expect(abc.match(/"_×2"/g)).toHaveLength(2);
+    // the cursor follows it: bar 4 playing its 2nd time (the run's 10th bar) is the music's 6th
+    const music = await page.evaluate(() =>
+      window.myGrooveWriter.myGrooveUtils.percentForSheetMusic(9.5 / 10)
+    );
+    expect(music * 6).toBeCloseTo(5.5, 5);
+
+    // from a link, without trade bars: the blocks played as they say, the heading saying so
+    await loadGroove(page, grooveUrl(groove([0, 1, 0, 1, 2, 3, 2, 3])));
+    const blocks = await playing(page);
+    await loadGroove(page, grooveUrl(groove([0, 1, 2, 3]) + '&PlayEach=2&EachBars=2'));
+    await expect(page.locator('#GrooveBlock')).toHaveValue('2');
+    expect(await playing(page)).toBe(blocks);
+    expect(await page.locator('#ABCsource').inputValue()).toContain(
+      '%%center Play 2 bars at a time ×2'
+    );
+    expect(await inLink('EachBars')).toBe('2');
+  });
 });
 
 // Infinity Drumming, 2026: a beat of 32nd notes in a groove of 16ths
@@ -1282,5 +1325,25 @@ test.describe('Music spacing on a Mixed groove', () => {
     } finally {
       await spacing(page, 100); // (this device's setting, back as it was)
     }
+  });
+});
+
+// Infinity Drumming, 2026: a short link to a groove too long for an address opens as
+// /?s=<code>, the page fetching its groove (functions/s/[code].js, functions/api/link)
+test.describe('a short link to a very long groove', () => {
+  test('opens as /?s=<code>: the page fetches its groove and puts it in its address', async ({
+    page,
+  }) => {
+    const groove =
+      '?TimeSig=4/4&Div=16&Title=Long%20Link&Tempo=95&Measures=2' +
+      '&H=|x-x-x-x-x-x-x-x-|xxxxxxxxxxxxxxxx|&S=|----O-------O---|----O-------O---|';
+    await page.route('**/api/link/AbCdEfGh', (route) =>
+      route.fulfill({ contentType: 'application/json', body: JSON.stringify({ search: groove }) })
+    );
+    await loadGroove(page, grooveUrl('?s=AbCdEfGh'));
+    expect(await page.evaluate(() => location.search)).toContain('Title=Long%20Link');
+    expect((await grooveData(page)).numberOfMeasures).toBe(2);
+    expect((await grooveData(page)).tempo).toBe(95);
+    await expect(page.locator('#tuneTitle')).toHaveValue('Long Link');
   });
 });

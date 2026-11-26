@@ -21,6 +21,12 @@
 // it up at the same bar line as the drums. Its pitch stays as it is (a phase
 // vocoder, timeStretch.js), or goes down and up with its speed, like a record.
 //
+// Without a song the same clock plays every groove too (Infinity Drumming, 2026,
+// wherever the sounds play on the audio clock: groove_utils' player()): MIDI.js
+// started each time round again from a timer, so a loop came back late whenever the
+// page was busy as a round ended (10 ms and more, now and then). On the clock every
+// round starts exactly where the one before ends.
+//
 // Loop mode plays some bars of the song round and round, the groove starting on
 // the loop's first bar. The song's place is counted on as if it played straight
 // through and comes round to the loop's start at its end (loopedPosition), so
@@ -578,7 +584,7 @@ export function createPlayAlong(env) {
   }
 
   function startDelay() {
-    return song.keepPitch ? STRETCHED_START_DELAY : START_DELAY;
+    return song && song.keepPitch ? STRETCHED_START_DELAY : START_DELAY;
   }
   function rateFor(bpm) {
     return bpm / song.setting.bpm;
@@ -668,12 +674,17 @@ export function createPlayAlong(env) {
   // --- rounds ---
   // the song changes speed as each round from `after` on starts at another tempo
   function applyRates(after) {
+    if (!player) return; // (no song)
     for (var i = 1; i < rounds.length; i++)
       if (rounds[i].start > after && rounds[i].bpm != rounds[i - 1].bpm)
         player.setRate(rounds[i].start, rateFor(rounds[i].bpm));
   }
 
   function queueRound(data, bpm, start) {
+    // without a song, a round built too late for its start (a very slow device)
+    // starts a moment late, whole; with one it keeps to the song, its first notes
+    // left out (Infinity Drumming, 2026)
+    if (!song) start = Math.max(start, clock() + MARGIN);
     var round = newRound(data, bpm, start);
     var last = rounds[rounds.length - 1];
     rounds.push(round);
@@ -770,24 +781,30 @@ export function createPlayAlong(env) {
     engine.onStart();
     var now = clock();
     var loaded = env.round();
-    var rate = rateFor(loaded.bpm);
     var first = newRound(loaded.data, loaded.bpm, 0);
     // a count-in lasts its blank tick longer than its bar: the groove starts
     // as its last tick does
     if (env.leadsIn()) first.length -= first.lead / 1000;
+    first.start = now + START_DELAY; // (without a song)
+    rounds = [first];
+    engine.playing = true;
+    paused = null;
+    if (song) startSong(first, now, loaded);
+    placeNotes(first, now);
+    startTicking();
+  }
+
+  // the song, and the first round on its bar 1
+  function startSong(first, now, loaded) {
+    var rate = rateFor(loaded.bpm);
     // (looping, the groove starts on the loop's first bar)
     var from = song.loop ? { bar1: song.loop.start, start: 'bar1' } : song.setting;
     var plan = playAlongStart(from, rate, env.leadsIn() ? first.length : 0);
     var bar1At = now + startDelay() - Math.min(plan.songAt, plan.drumsAt);
     first.start = bar1At + plan.drumsAt;
-    rounds = [first];
-    engine.playing = true;
-    paused = null;
     setDrumVolume(song.drums);
     player = newPlayer();
     player.play(bar1At + plan.songAt, plan.songFrom, rate, seam());
-    placeNotes(first, now);
-    startTicking();
   }
 
   engine.resume = function () {
@@ -800,6 +817,15 @@ export function createPlayAlong(env) {
     rounds.forEach(function (round) {
       round.start += shift;
     });
+    if (song) resumeSong(at);
+    paused = null;
+    engine.playing = true;
+    tick();
+    startTicking();
+  };
+
+  // the song again from where it was paused
+  function resumeSong(at) {
     player = newPlayer();
     var position = paused.position;
     player.play(
@@ -809,11 +835,7 @@ export function createPlayAlong(env) {
       seam()
     );
     applyRates(at); // (a round built before the pause at another tempo)
-    paused = null;
-    engine.playing = true;
-    tick();
-    startTicking();
-  };
+  }
 
   engine.pause = function () {
     if (!engine.playing) return;
@@ -823,7 +845,7 @@ export function createPlayAlong(env) {
     paused = {
       at: now,
       position: player ? player.positionAt(now) : 0,
-      rate: round ? rateFor(round.bpm) : 1,
+      rate: round && song ? rateFor(round.bpm) : 1,
       bpm: round ? round.bpm : 0,
     };
     unplaceAll(now);
@@ -936,7 +958,7 @@ export function createPlayAlong(env) {
    * away (to nudge them into place while playing along).
    */
   engine.moveBar1 = function (delta) {
-    if (!engine.playing || !delta || !rounds.length) return;
+    if (!song || !engine.playing || !delta || !rounds.length) return;
     var now = clock();
     undoSwitch(now);
     var round = playingRoundAt(now) || rounds[0];
@@ -1014,7 +1036,7 @@ export function createPlayAlong(env) {
   /** Called as play starts (the song's own Listen stops). */
   engine.onStart = function () {};
 
-  /** Whether a song is on (the clock plays the rounds). */
+  /** Whether a song is on (the clock plays the rounds, and the song). */
   engine.isOn = function () {
     return !!song;
   };
